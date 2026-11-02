@@ -1,0 +1,13 @@
+name = "map132-digitals"
+main = "worker/index.ts"
+compatibility_date = "2026-10-31"
+
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+run_worker_first = ["/api/*", "/media/*"]
+
+# Configure these bindings in the Cloudflare Worker dashboard before deployment:
+# KV namespace binding: MAP132_KV
+# R2 bucket binding: MAP132_MEDIA
+# Secrets: ADMIN_PASSWORD and SESSION_SECRET
