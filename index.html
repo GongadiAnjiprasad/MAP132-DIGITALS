@@ -42,6 +42,26 @@ nav{border-bottom-color:#e5bd7826;box-shadow:0 12px 45px #0005}
 @keyframes metalSweep{to{background-position:220% center}}
 @keyframes ambient{from{opacity:.45;transform:scale(.96)}to{opacity:1;transform:scale(1.06)}}
 @media(max-width:760px){.hero{background-size:42px 42px}.hero h1{font-size:clamp(58px,17vw,105px)}.orb{opacity:.62}}
+
+/* FINAL MAP132 BRAND COLOURS */
+:root{--bg:#0E1014;--panel:#15171C;--line:#22252C;--gold:#E8C77A;--gold-light:#F3D68F;--copper:#C8642A;--ink:#F3E9D2;--muted:#B9B2A0;--dim:#6B6759;--cyan:#C8642A}
+body{background:var(--bg);color:var(--ink);font-family:'DM Sans',sans-serif}
+h1,h2,h3,.brand{font-family:'Manrope',sans-serif}
+nav{background:#0E1014ed;border-color:var(--line)}
+.hero:before{background:radial-gradient(circle,#E8C77A20,transparent 65%)}
+.hero h1 span{-webkit-text-stroke-color:var(--gold)}
+.hero p,.sectionhead p,.project p,.service p,.aboutcopy p,.contact p{color:var(--muted)}
+.eyebrow,.kicker,.service span{color:var(--gold)}
+.cta{background:linear-gradient(110deg,var(--gold-light),var(--gold));color:#0E1014}
+.orb,.orb:before,.orb:after{border-color:#E8C77A66}.orb strong{color:var(--gold-light)}
+.work,.about{background:#111318}
+.project{background:linear-gradient(135deg,#1B1D22,#15171C);border-color:var(--line)}
+.project:nth-child(2){background:linear-gradient(135deg,#211b17,#15171C)}.project:nth-child(3){background:linear-gradient(135deg,#1a1d1c,#15171C)}.project:nth-child(4){background:linear-gradient(135deg,#241912,#15171C)}
+.project:hover,.service:hover{border-color:var(--gold)}
+.contactbox{background:var(--panel);border-color:var(--line)}
+.contactbox input,.contactbox textarea{background:var(--bg);border-color:var(--line);color:var(--ink)}
+.contactbox label{color:var(--muted)}.socials{color:var(--gold)}footer{border-color:var(--line);color:var(--dim)}
+::selection{background:var(--gold);color:var(--bg)}
 </style>
 </head>
 <body><div class="grain"></div>
