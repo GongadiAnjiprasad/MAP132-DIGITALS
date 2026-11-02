@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 420" role="img" aria-labelledby="title desc">
+<title id="title">MAP132 DIGITALS — Video Editing</title><desc id="desc">Gold metallic MAP132 lettering with Video Editing beneath.</desc>
+<defs>
+ <linearGradient id="gold" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff0bf"/><stop offset=".22" stop-color="#e9c77f"/><stop offset=".48" stop-color="#a87935"/><stop offset=".68" stop-color="#f5d995"/><stop offset="1" stop-color="#8c5d24"/></linearGradient>
+ <filter id="shadow" x="-20%" y="-30%" width="140%" height="170%"><feGaussianBlur in="SourceAlpha" stdDeviation="8"/><feOffset dy="8"/><feComponentTransfer><feFuncA type="linear" slope=".55"/></feComponentTransfer><feMerge><feMergeNode/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+</defs>
+<rect width="1200" height="420" fill="none"/>
+<path d="M95 75H1105M95 345H1105" stroke="#c79a54" stroke-opacity=".65" stroke-width="3"/>
+<path d="M125 58l22 17-22 17M1075 58l-22 17 22 17M125 328l22 17-22 17M1075 328l-22 17 22 17" fill="none" stroke="#e3bd78" stroke-width="3"/>
+<text x="600" y="254" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="214" font-weight="900" letter-spacing="-13" fill="url(#gold)" stroke="#5b3b18" stroke-width="3" paint-order="stroke fill" filter="url(#shadow)">MAP132</text>
+<text x="600" y="310" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="43" font-weight="700" letter-spacing="17" fill="#e6c17e">DIGITALS</text>
+<text x="600" y="382" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-size="24" font-weight="600" letter-spacing="12" fill="#f0dfbd">VIDEO EDITING</text>
+</svg>
