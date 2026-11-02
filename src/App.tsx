@@ -58,12 +58,12 @@ function PortfolioMedia({ item }: { item: Item }) {
 }
 function BrandLogo({ compact = false }: { compact?: boolean }) {
   return <span className={compact ? 'brand-logo compact' : 'brand-logo'} aria-label='MAP132 Video Editing'>
-    <img src='/resources/map132-emblem.png' alt='MAP132 Video Editing 3D gold logo' />
+    <img src='/resources/map132-emblem.svg' alt='MAP132 Video Editing 3D gold logo' />
   </span>;
 }
 function downloadBrandLogo() {
   const link = document.createElement('a');
-  link.href = '/resources/map132-emblem.png';
+  link.href = '/resources/map132-emblem.svg';
   link.download = 'MAP132-VIDEO-EDITING-logo.png';
   link.click();
 }
@@ -76,7 +76,7 @@ function TitleMotionStudio(){
   try{
    const h=quality==='720p'?720:quality==='1080p'?1080:2160,dims:Record<string,[number,number]>={'16:9':[Math.round(h*16/9),h],'9:16':[h,Math.round(h*16/9)],'1:1':[h,h]},[w,hh]=dims[ratio];
    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=hh;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas unavailable.');
-   const logo=new Image();logo.src='/resources/map132-emblem.png';await new Promise<void>((ok,no)=>{logo.onload=()=>ok();logo.onerror=()=>no(new Error('Transparent logo upload is still pending.'));});
+   const logo=new Image();logo.src='/resources/map132-emblem.svg';await new Promise<void>((ok,no)=>{logo.onload=()=>ok();logo.onerror=()=>no(new Error('Transparent logo upload is still pending.'));});
    audio=new AudioContext();await audio.resume();const out=audio.createMediaStreamDestination(),stream=new MediaStream([...canvas.captureStream(30).getVideoTracks(),...out.stream.getAudioTracks()]);
    const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')?'video/webm;codecs=vp9,opus':'video/webm',rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:quality==='4K'?18000000:9000000}),chunks:BlobPart[]=[];rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
    const palettes=[['#D7A45F','#FFE8B7','#17100A'],['#D45A39','#FFD18C','#090D16'],['#66517E','#D7C5F2','#08070D'],['#397DB0','#C7ECFF','#071522'],['#B78090','#FFE3D5','#21161D'],['#A7A7A7','#FFFFFF','#111318']],pal=palettes[styles.indexOf(style)],start=performance.now(),duration=5500;
@@ -90,7 +90,7 @@ function TitleMotionStudio(){
   }catch(e){setMessage(e instanceof Error?e.message:'Could not render intro.')}finally{cancelAnimationFrame(raf);if(audio)await audio.close().catch(()=>{});setBusy(false)}
  }
  return <section className="motion-lab logo-intro-builder"><div className="motion-lab-head"><div><p className="kicker">PRIVATE STUDIO TOOL · 5.5 SECOND EXPORT</p><h2>Logo <em>intro builder.</em></h2><p>Choose a visual treatment and export the original MAP132 logo with original synthesized sound. Rendering happens on this device.</p></div><span className="lab-stamp">MAP132<br/>INTRO / 01</span></div>
- <div className="motion-lab-grid"><div className="title-preview"><small>LIVE LOGO PREVIEW</small><img src="/resources/map132-emblem.png" alt="MAP132 logo preview"/><i>MAP132 / VIDEO EDITING</i><span className="preview-time">00:00:05:15</span></div>
+ <div className="motion-lab-grid"><div className="title-preview"><small>LIVE LOGO PREVIEW</small><img src="/resources/map132-emblem.svg" alt="MAP132 logo preview"/><i>MAP132 / VIDEO EDITING</i><span className="preview-time">00:00:05:15</span></div>
  <div className="motion-controls"><span className="control-label">INTRO STYLE</span><div className="style-choices intro-style-choices">{styles.map((x,i)=><button type="button" key={x} className={style===x?'chosen':''} onClick={()=>setStyle(x)}><b>0{i+1}</b><span>{x}</span></button>)}</div>
  <div className="intro-export-options"><label>ASPECT RATIO<select value={ratio} onChange={e=>setRatio(e.target.value)}><option>16:9</option><option>9:16</option><option>1:1</option></select></label><label>RESOLUTION<select value={quality} onChange={e=>setQuality(e.target.value)}><option>720p</option><option>1080p</option><option>4K</option></select></label></div>
  <button className="gold-button render-title" onClick={render} disabled={busy}><Film size={17}/>{busy?'Rendering…':'Render & download logo intro'} <ArrowDownRight size={17}/></button><p className="render-note">{message||'5.5 seconds · 16:9 / 9:16 / 1:1 · 720p / 1080p / 4K · WebM + original sound'}</p></div></div></section>;
@@ -100,7 +100,7 @@ function WebsiteIntro(){
  useEffect(()=>{const replay=()=>{try{sessionStorage.removeItem('map132-intro-seen')}catch{};setVisible(true)};window.addEventListener('map132:replay-intro',replay);return()=>window.removeEventListener('map132:replay-intro',replay)},[]);
  useEffect(()=>{if(!visible)return;let ms=17000;try{if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)ms=1400}catch{};const timer=window.setTimeout(()=>{setVisible(false);try{sessionStorage.setItem('map132-intro-seen','1')}catch{}},ms);return()=>window.clearTimeout(timer)},[visible]);
  if(!visible)return null;const skip=()=>{try{sessionStorage.setItem('map132-intro-seen','1')}catch{};setVisible(false)};
- return <div className="website-intro" role="dialog" aria-label="MAP132 DIGITALS studio introduction"><div className="website-intro-frame"><p className="website-intro-kicker">A CREATIVE STUDIO · INDIA</p><img src="/resources/map132-emblem.png" alt="MAP132 VIDEO EDITING official logo"/><h2>Every frame has a story.</h2><div className="website-intro-services">{items.map((x,i)=><span key={x} style={{animationDelay:(.8+i*.55)+'s'}}><b>0{i+1}</b>{x}</span>)}</div><div className="website-intro-footer"><span>17 SEC BRAND INTRO · SOUND OFF</span><button type="button" onClick={skip}>Skip intro <ArrowRight size={14}/></button></div><div className="website-intro-progress"><i/></div></div></div>;
+ return <div className="website-intro" role="dialog" aria-label="MAP132 DIGITALS studio introduction"><div className="website-intro-frame"><p className="website-intro-kicker">A CREATIVE STUDIO · INDIA</p><img src="/resources/map132-emblem.svg" alt="MAP132 VIDEO EDITING official logo"/><h2>Every frame has a story.</h2><div className="website-intro-services">{items.map((x,i)=><span key={x} style={{animationDelay:(.8+i*.55)+'s'}}><b>0{i+1}</b>{x}</span>)}</div><div className="website-intro-footer"><span>17 SEC BRAND INTRO · SOUND OFF</span><button type="button" onClick={skip}>Skip intro <ArrowRight size={14}/></button></div><div className="website-intro-progress"><i/></div></div></div>;
 }
 const INDIAN_FESTIVALS: Record<string, { name: string; greeting: string; symbol: string; effect: string }> = {
   '2026-11-08': { name: 'Diwali', greeting: 'Wishing you a bright and joyful Diwali!', symbol: '✦', effect: 'diwali' },
@@ -149,7 +149,7 @@ function PublicSite({ content }: { content: Content }) {
         </div>
         <div className="hero-visual" aria-label="Cinematic video editing visual">
           <div className="visual-orbit orbit-a"></div><div className="visual-orbit orbit-b"></div>
-          <div className="monitor"><div className="monitor-bar"><span>MAP DIGITALS / POST PRODUCTION</span><span className="rec">● CREATIVE STUDIO</span></div><div className="monitor-screen emblem-screen"><div className="emblem-light"></div><div className="hero-emblem" role="img" aria-label="MAP132 Video Editing official three-dimensional gold logo"><img src="/resources/map132-emblem.png" alt="MAP132 Video Editing official gold emblem" /></div><span className="screen-timecode">EST. CREATIVE / FRAME BY FRAME</span></div><div className="timeline-editor"><div className="timeline-ruler"><span>00:00</span><span>00:08</span><span>00:16</span><span>00:24</span><span>00:32</span></div><div className="timeline-lane"><i/><i/><i/><i/></div><div className="timeline-lane audio"><i/></div></div><div className="monitor-foot"><span>4K · 24 FPS</span><span>STORY / CUT / SOUND</span></div></div>
+          <div className="monitor"><div className="monitor-bar"><span>MAP DIGITALS / POST PRODUCTION</span><span className="rec">● CREATIVE STUDIO</span></div><div className="monitor-screen emblem-screen"><div className="emblem-light"></div><div className="hero-emblem" role="img" aria-label="MAP132 Video Editing official three-dimensional gold logo"><img src="/resources/map132-emblem.svg" alt="MAP132 Video Editing official gold emblem" /></div><span className="screen-timecode">EST. CREATIVE / FRAME BY FRAME</span></div><div className="timeline-editor"><div className="timeline-ruler"><span>00:00</span><span>00:08</span><span>00:16</span><span>00:24</span><span>00:32</span></div><div className="timeline-lane"><i/><i/><i/><i/></div><div className="timeline-lane audio"><i/></div></div><div className="monitor-foot"><span>4K · 24 FPS</span><span>STORY / CUT / SOUND</span></div></div>
           <span className="float-note note-one">STORY FIRST</span><span className="float-note note-two"><Sparkles size={13}/> DETAIL MATTERS</span>
         </div>
         <div className="hero-index">01 <span>—</span> 04</div>
@@ -184,7 +184,7 @@ function PublicSite({ content }: { content: Content }) {
   </div>;
 }
 const workspaceResources = [
-{section:'Brand Kit',title:'MAP132 logo assets',description:'The official MAP132 VIDEO EDITING identity. Use the transparent PNG on dark or light backgrounds; keep its proportions intact.',cards:[{id:'logo-transparent',title:'Official transparent logo',detail:'PNG · Transparent background · High resolution',tags:['Brand','Logo','PNG'],href:'/resources/map132-emblem.png',action:'Download PNG',download:true}]},
+{section:'Brand Kit',title:'MAP132 logo assets',description:'The official MAP132 VIDEO EDITING identity. Use the transparent PNG on dark or light backgrounds; keep its proportions intact.',cards:[{id:'logo-transparent',title:'Official transparent logo',detail:'PNG · Transparent background · High resolution',tags:['Brand','Logo','PNG'],href:'/resources/map132-emblem.svg',action:'Download PNG',download:true}]},
 {section:'Intro Library',title:'MAP132 logo intro videos',description:'Six agreed intro directions. Final exports are planned in 16:9, 9:16 and 1:1, at 720p, 1080p and 4K where supported. Only uploaded files will show a download action.',cards:[
 {id:'intro-golden',title:'Premium Golden',detail:'Commercials · Brand identity · Luxury reveal',tags:['Commercial','Logo intro','Golden'],status:'Intro export not uploaded yet'},
 {id:'intro-epic',title:'Epic Cinematic',detail:'Trailers · Teasers · Action edits',tags:['Trailer','Teaser','Cinematic'],status:'Intro export not uploaded yet'},
