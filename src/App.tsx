@@ -64,7 +64,7 @@ function BrandLogo({ compact = false }: { compact?: boolean }) {
 function downloadBrandLogo() {
   const link = document.createElement('a');
   link.href = '/resources/map132-emblem.svg';
-  link.download = 'MAP132-VIDEO-EDITING-logo.png';
+  link.download = 'MAP132-VIDEO-EDITING-logo.svg';
   link.click();
 }
 function TitleMotionStudio(){
@@ -184,7 +184,7 @@ function PublicSite({ content }: { content: Content }) {
   </div>;
 }
 const workspaceResources = [
-{section:'Brand Kit',title:'MAP132 logo assets',description:'The official MAP132 VIDEO EDITING identity. Use the transparent PNG on dark or light backgrounds; keep its proportions intact.',cards:[{id:'logo-transparent',title:'Official transparent logo',detail:'PNG · Transparent background · High resolution',tags:['Brand','Logo','PNG'],href:'/resources/map132-emblem.svg',action:'Download PNG',download:true}]},
+{section:'Brand Kit',title:'MAP132 logo assets',description:'The official MAP132 VIDEO EDITING identity in scalable SVG format. Use it on dark or light backgrounds; keep its proportions intact.',cards:[{id:'logo-transparent',title:'Official transparent logo',detail:'SVG · Scalable vector · Transparent background',tags:['Brand','Logo','SVG'],href:'/resources/map132-emblem.svg',action:'Download PNG',download:true}]},
 {section:'Intro Library',title:'MAP132 logo intro videos',description:'Six agreed intro directions. Final exports are planned in 16:9, 9:16 and 1:1, at 720p, 1080p and 4K where supported. Only uploaded files will show a download action.',cards:[
 {id:'intro-golden',title:'Premium Golden',detail:'Commercials · Brand identity · Luxury reveal',tags:['Commercial','Logo intro','Golden'],status:'Intro export not uploaded yet'},
 {id:'intro-epic',title:'Epic Cinematic',detail:'Trailers · Teasers · Action edits',tags:['Trailer','Teaser','Cinematic'],status:'Intro export not uploaded yet'},
