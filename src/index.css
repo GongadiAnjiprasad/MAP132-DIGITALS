@@ -62,3 +62,19 @@ footer{padding:26px 7.2%;display:flex;align-items:center;justify-content:space-b
   .monitor{width:94%;padding:11px}
   .monitor-bar,.monitor-foot{font-size:6px}
 }
+
+/* Responsive repair pass: prevent clipped text and narrow-screen overflow */
+html,body,#root{width:100%;min-height:100%;margin:0}html{overflow-x:hidden;scroll-behavior:smooth}body{overflow-x:hidden}.site{width:100%;max-width:100%;overflow:hidden}.site *{box-sizing:border-box}.site img,.site video,.site iframe{max-width:100%}.site p,.site h1,.site h2,.site h3,.site a,.site span{overflow-wrap:break-word}
+@media(max-width:700px){
+.nav{height:auto;min-height:68px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 5%;flex-wrap:nowrap}
+.nav nav{display:flex;align-items:center;justify-content:flex-end;gap:8px;min-width:0;overflow-x:auto;white-space:nowrap;scrollbar-width:none}.nav nav::-webkit-scrollbar{display:none}
+.nav nav>a:not(.nav-hire){display:inline-flex;flex:none;font-size:9px}.nav nav .nav-workspace{display:none}.nav-hire{flex:none;font-size:9px;padding:10px}.wordmark{flex:0 0 auto;min-width:0}.brand-logo{width:112px;height:40px}
+.hero{display:grid;grid-template-columns:minmax(0,1fr);width:100%;padding:54px 6% 62px;gap:14px}.hero-copy,.hero-visual{min-width:0;width:100%}
+.hero h1{max-width:100%;font-size:clamp(38px,10.5vw,58px);line-height:1.06;letter-spacing:-1.8px;word-break:normal}.hero-intro{max-width:38ch;font-size:14px;line-height:1.75}.hero-actions{display:flex;flex-wrap:wrap;align-items:center;gap:12px}
+.hero-visual{height:260px;overflow:hidden}.monitor{width:min(94%,390px);height:225px;max-width:100%;margin:auto}.monitor-screen{min-width:0}.hero-emblem{width:82%;height:135px}.hero-index{right:6%;bottom:20px}
+.statement,.work-section,.services-section,.skills-section,.about-section,.contact-section{width:100%;padding:54px 6%}.section-head{display:flex;flex-direction:column;align-items:flex-start;gap:12px}.section-head h2,.statement h2,.about-section h2{font-size:clamp(30px,8.5vw,42px);line-height:1.12;letter-spacing:-1.2px}
+.section-head>p,.statement-grid>p,.about-section>div:last-child>p{font-size:13px;line-height:1.8;max-width:100%}.work-grid,.visual-concepts{display:grid;grid-template-columns:minmax(0,1fr);gap:16px}.concept-card{min-width:0;width:100%}.media-frame{width:100%;height:auto;aspect-ratio:16/9}.skills-grid{grid-template-columns:minmax(0,1fr)}.skill{min-width:0}
+.contact-section{display:grid;grid-template-columns:minmax(0,1fr);gap:22px}.contact-copy h2{font-size:clamp(38px,10vw,52px);line-height:1.08;letter-spacing:-1.7px}.contact-panel{width:100%;min-width:0;padding:20px}.contact-panel input,.contact-panel textarea,.contact-panel select{width:100%;max-width:100%;min-width:0}
+footer{display:flex;flex-wrap:wrap;gap:14px;padding:22px 6%;font-size:10px}
+}
+@media(max-width:390px){.nav{padding-inline:4%}.brand-logo{width:98px;height:36px}.nav nav{gap:6px}.nav-hire{padding:9px 8px}.hero{padding-inline:5%}.hero h1{font-size:clamp(35px,10vw,43px);letter-spacing:-1.4px}.hero-visual{height:230px}.monitor{height:205px;width:98%;padding:10px}.monitor-bar,.monitor-foot{font-size:6px;letter-spacing:.4px}.statement,.work-section,.services-section,.skills-section,.about-section,.contact-section{padding-inline:5%}}
