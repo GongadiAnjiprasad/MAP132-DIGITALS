@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&family=Playfair+Display:ital,wght@1,500;1,600&display=swap');
 :root{font-family:'DM Sans',sans-serif;color:#f3f0e9;background:#101113;font-synthesis:none;text-rendering:optimizeLegibility;scroll-behavior:smooth}
 *{box-sizing:border-box}body{margin:0;min-width:320px}a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit}button{cursor:pointer}
 .site{overflow:hidden;background:#101113}.nav{height:78px;padding:0 7.2%;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid #ffffff18;position:relative;z-index:5;background:#101113}
@@ -181,3 +181,70 @@ html,body{overflow-x:hidden}
 .workspace-library-panel{padding:17px}
 }
 @media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}
+
+
+/* MAP132 visual refinement — typography, spacing, responsive hierarchy */
+:root{
+  --map-gold:#d9b477;
+  --map-cream:#f4efe6;
+  --map-ink:#101114;
+  font-family:'DM Sans',sans-serif;
+  font-synthesis:none;
+  text-rendering:optimizeLegibility;
+}
+body{font-family:'DM Sans',sans-serif;letter-spacing:.005em}
+h1,h2,h3,h4,.wordmark,.brand-logo{font-family:'Space Grotesk','Manrope',sans-serif}
+.nav{min-height:82px;height:auto;padding-top:12px;padding-bottom:12px}
+.wordmark{letter-spacing:.08em}
+.nav nav{gap:clamp(14px,2.2vw,32px);flex-wrap:wrap}
+.nav nav a{white-space:nowrap}
+.hero{min-height:clamp(590px,76vh,790px);padding-top:clamp(72px,9vw,120px);padding-bottom:clamp(65px,8vw,105px)}
+.hero h1{max-width:720px;font-size:clamp(50px,6.6vw,88px);line-height:1.02;letter-spacing:-.065em;text-wrap:balance}
+.hero h1 em,.statement h2 em,.section-head h2 em,.about-section h2 em,.contact-copy h2 em{font-family:'Playfair Display',serif;font-weight:500;letter-spacing:-.045em}
+.hero-intro{font-size:clamp(14px,1.15vw,16px);max-width:460px;line-height:1.9}
+.hero-visual{min-width:0}
+.monitor{max-width:100%;transform:rotate(-2.5deg);border-radius:3px}
+.monitor-screen{min-height:180px}
+.screen-title{font-family:'Space Grotesk',sans-serif;letter-spacing:-.07em}
+.section-head h2,.statement h2,.about-section h2{letter-spacing:-.055em;line-height:1.08;text-wrap:balance}
+.section-head{align-items:flex-end}
+.work-card{transition:transform .35s ease}
+.work-card:hover{transform:translateY(-5px)}
+.media-frame{border-radius:2px;isolation:isolate}
+.media-frame:before{content:'';position:absolute;inset:0;z-index:0;background:linear-gradient(135deg,#d5aa6618,transparent 55%);pointer-events:none}
+.work-caption h3{font-family:'Space Grotesk',sans-serif;letter-spacing:-.025em}
+.skill b,.service-card h3,.process-step h3{font-family:'Space Grotesk',sans-serif}
+.contact-copy h2{line-height:1.02;text-wrap:balance}
+.gold-button,.nav-hire,.quiet-link{transition:transform .25s ease,background .25s ease,border-color .25s ease}
+.gold-button:focus-visible,.nav a:focus-visible,button:focus-visible,a:focus-visible{outline:2px solid var(--map-gold);outline-offset:4px}
+.brand-logo{display:inline-flex;align-items:center;justify-content:center;background:transparent!important;border:0!important;box-shadow:none!important}
+.brand-logo img{display:block;max-width:100%;height:auto;object-fit:contain;background:transparent!important;box-shadow:none!important}
+@media(max-width:950px){
+ .hero{grid-template-columns:minmax(0,1fr) minmax(0,.9fr);gap:3%}
+ .hero h1{font-size:clamp(48px,6vw,68px)}
+ .nav{padding-left:5%;padding-right:5%}
+}
+@media(max-width:700px){
+ .nav{min-height:unset;align-items:flex-start;gap:12px;padding:14px 6%;flex-wrap:wrap}
+ .nav nav{width:100%;gap:10px 18px;justify-content:flex-start;font-size:11px}
+ .nav-hire{padding:8px 11px}
+ .hero{min-height:unset;grid-template-columns:minmax(0,1fr);padding:66px 7% 58px;gap:34px}
+ .hero h1{font-size:clamp(43px,11vw,64px);letter-spacing:-.065em;line-height:1.02}
+ .hero-visual{height:auto;min-height:290px;padding:12px 0}
+ .monitor{width:min(100%,390px);height:275px;transform:none}
+ .orbit-a{width:95%;height:190px}.orbit-b{width:110%;height:230px}
+ .float-note{font-size:7px;padding:8px 10px}
+ .note-one{right:0;top:4px}.note-two{left:0;bottom:0}
+ .hero-meta{margin-top:38px;gap:16px;flex-wrap:wrap}
+ .statement,.work-section,.skills-section,.about-section,.contact-section{padding:68px 7%}
+ .statement-grid,.about-section,.contact-section{grid-template-columns:minmax(0,1fr);gap:24px}
+ .section-head{align-items:flex-start;flex-direction:column;gap:12px}
+ .work-grid{grid-template-columns:minmax(0,1fr);gap:18px}
+ .media-frame{height:clamp(205px,60vw,310px)}
+ .skills-grid{grid-template-columns:minmax(0,1fr)}
+ .contact-copy h2{font-size:clamp(43px,11vw,62px)}
+ footer{padding:24px 7%;flex-wrap:wrap}
+}
+@media(prefers-reduced-motion:reduce){
+ .work-card,.gold-button,.nav-hire,.quiet-link{transition:none}
+}
