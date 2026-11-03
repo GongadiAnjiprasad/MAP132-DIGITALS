@@ -206,6 +206,7 @@ function PublicSite({ content }: { content: Content }) {
           <p className="kicker"><i/> MAP132 DIGITALS · VIDEO EDITING STUDIO</p>
           <h1>{p.headline.split(' ').slice(0,-2).join(' ')} <em>{p.headline.split(' ').slice(-2).join(' ')}</em></h1>
           <p className="hero-intro">{p.intro}</p><p className="hero-positioning">Independent creative studio · Video editing · Motion · Sound</p>
+          <div className="hero-manifesto"><span className="manifesto-mark">M / 132</span><p>We don’t edit just to make footage look different.<br/><b>We shape what the viewer should feel.</b></p><div className="manifesto-pillars"><span>01 STORY</span><span>02 VISUAL RHYTHM</span><span>03 SOUND</span></div></div>
           <div className="hero-actions"><a className="gold-button" href="#work">View selected work <ArrowRight size={16}/></a><a className="quiet-link" href="#contact">Start a project <ArrowDownRight size={16}/></a></div>
           <div className="hero-meta"><span>EDIT WITH PURPOSE</span><span>CRAFTED FRAME BY FRAME</span></div><div className="home-discover"><a href="#work">Explore the work <ArrowRight size={14}/></a><span>SCROLL LESS · DISCOVER MORE</span></div>
         </div>
