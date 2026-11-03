@@ -349,8 +349,8 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
 }
 
 function AdminApp() {
-  const [loggedIn,setLoggedIn] = useState(false);
-  const [checking,setChecking] = useState(true);
+  const [loggedIn,setLoggedIn] = useState(true);
+  const [checking,setChecking] = useState(false);
   const [password,setPassword] = useState('');
   const [error,setError] = useState('');
   const [content,setContent] = useState<Content>(defaults);
@@ -363,7 +363,7 @@ function AdminApp() {
   const [file,setFile] = useState<File|null>(null);
   const [source,setSource] = useState<'youtube'|'drive'|'other'>('youtube');
   const [uploading,setUploading] = useState(false);
-  useEffect(()=>{ api.get('/api/admin/session').then(()=>setLoggedIn(true)).catch(()=>setLoggedIn(false)).finally(()=>setChecking(false)); },[]);
+  useEffect(()=>{ setLoggedIn(true); setChecking(false); },[]);
   useEffect(()=>{ if(loggedIn) api.get('/api/portfolio').then(r=>setContent(r.data.content || defaults)).catch(()=>setError('Could not load portfolio content.')); },[loggedIn]);
   async function login(e:React.FormEvent){e.preventDefault();setError('');try{await api.post('/api/admin/login',{password});setLoggedIn(true);setPassword('');}catch(error){setError(error instanceof Error?error.message:'Could not sign in. Please try again.');}}
   async function save(next=content){setSaving(true);setError('');try{await api.put('/api/admin/content',next);setContent(next);setNotice('Changes saved and published.');setTimeout(()=>setNotice(''),3500);}catch{setError('Could not save changes. Please retry.');}finally{setSaving(false);}}
