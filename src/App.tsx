@@ -299,12 +299,15 @@ function SoundResultCard({sound}:{sound:any}){
   const [playing,setPlaying]=useState(false);
   const [downloading,setDownloading]=useState(false);
   const [downloadError,setDownloadError]=useState('');
+  const [playError,setPlayError]=useState('');
   async function toggle(){
     const audio=audioRef.current;
     if(!audio)return;
     if(playing){audio.pause();setPlaying(false);return;}
     document.querySelectorAll('audio').forEach((other)=>{if(other!==audio)(other as HTMLAudioElement).pause();});
-    try{await audio.play();setPlaying(true);}catch{setPlaying(false);}
+    setPlayError('');
+    try{if(audio.error)audio.load();await audio.play();setPlaying(true);}
+    catch(error){setPlaying(false);setPlayError(error instanceof Error&&error.name==='NotAllowedError'?'Browser blocked playback. Tap Play again.':'Preview could not start. This source preview may be unavailable; try another sound.');}
   }
   async function downloadPreview(){
     if(downloading)return;
@@ -326,7 +329,7 @@ function SoundResultCard({sound}:{sound:any}){
   const duration=Number.isFinite(Number(sound.duration))?Math.floor(Number(sound.duration)):0;
   const time=duration?Math.floor(duration/60)+':'+String(duration%60).padStart(2,'0'):'';
   return <article className="workspace-resource-card" style={{display:'flex',flexDirection:'column',alignItems:'stretch',gap:10,padding:'14px 16px',minWidth:0,overflow:'hidden'}}>
-    <audio ref={audioRef} preload="none" src={sound.previewUrl||undefined} onEnded={()=>setPlaying(false)} onPause={()=>setPlaying(false)} onPlay={()=>setPlaying(true)} />
+    <audio ref={audioRef} preload="none" src={sound.id?'/api/resources/sounds/'+encodeURIComponent(String(sound.id))+'/preview':undefined} onEnded={()=>setPlaying(false)} onPause={()=>setPlaying(false)} onPlay={()=>{setPlaying(true);setPlayError('');}} onError={()=>{setPlaying(false);setPlayError('Preview unavailable from the source. Try another sound.');}} />
     <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:12,minWidth:0}}>
       <div style={{minWidth:0,flex:'1 1 auto'}}>
         <strong title={sound.title} style={{display:'block',fontSize:15,lineHeight:1.35,overflowWrap:'anywhere'}}>{sound.title}</strong>
@@ -338,6 +341,7 @@ function SoundResultCard({sound}:{sound:any}){
       <button type="button" className="gold-button" aria-label={playing?'Pause preview':'Play preview'} onClick={toggle} disabled={!sound.previewUrl} style={{minWidth:132,padding:'9px 14px',justifyContent:'center'}}>{playing?'Ⅱ Pause Preview':'▶ Play Preview'}</button>
       <button type="button" className="gold-button" onClick={downloadPreview} disabled={!downloadAllowed||downloading} style={{minWidth:140,padding:'9px 14px',justifyContent:'center',opacity:downloadAllowed?1:.45}}>{downloading?'Downloading…':'↓ Download Preview'}</button>
     </div>
+    {playError&&<span className="error-text" role="status">{playError}</span>}
     {downloadError&&<span className="error-text">{downloadError}</span>}
   </article>;
 }
@@ -404,6 +408,9 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
       <p className="workspace-form-note">Do not paste a catalogue/search URL as a preview or download. Those fields must point to the actual media file. Third-party stock files stay on their provider unless the licence expressly permits hosting.</p>
       <button className="gold-button" type="submit" disabled={saving}><Save size={15}/>{saving?'Saving…':'Save to library'}</button>{message&&<p className="error-text">{message}</p>}
     </form>}
+    <nav className="workspace-library-nav" aria-label="Editing resource libraries">
+      {sections.map(name=><button type="button" key={name} className={section===name?'selected':''} aria-current={section===name?'page':undefined} onClick={()=>{setSection(name);setQuery('');setKind('All types')}}>{name}</button>)}
+    </nav>
     {(section==='Sound Effects'||section==='Music & BGM')&&<section className="workspace-live-search">
       <div className="workspace-section-title"><div><p className="kicker">AUDIO LIBRARY</p><h3>Find sounds</h3></div><span>{soundCount.toLocaleString()} MATCHES</span></div>
       <div className="workspace-filterbar"><input value={soundQuery} onChange={e=>setSoundQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')searchSounds()}} placeholder="Search sounds…"/><select value={soundGenre} onChange={e=>setSoundGenre(e.target.value)}>{soundGenres.map(g=><option key={g}>{g}</option>)}</select><button type="button" className="gold-button" onClick={()=>searchSounds(1,false)} disabled={soundBusy}>{soundBusy?'Searching…':'Search'}</button></div>
@@ -428,9 +435,6 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
       {!soundBusy&&!soundError&&soundResults.length===0&&<div className="workspace-empty"><b>No eligible previews on this page yet</b><p>Try another quick search or load the next provider page. Some results are excluded because of their licence.</p></div>}
       {soundResults.length===0&&soundNextPage!==null&&<div style={{display:'flex',justifyContent:'center',padding:'10px 0 18px'}}><button type="button" className="gold-button" onClick={()=>searchSounds(soundNextPage,false)} disabled={soundBusy}>{soundBusy?'Loading…':'Load more eligible sounds'}</button></div>}
     </section>}
-    <nav className="workspace-library-nav" aria-label="Editing resource libraries">
-      {sections.map(name=><button type="button" key={name} className={section===name?'selected':''} aria-current={section===name?'page':undefined} onClick={()=>{setSection(name);setQuery('');setKind('All types')}}>{name}</button>)}
-    </nav>
     <div className="workspace-results workspace-page">
       <div className="workspace-filterbar"><input aria-label="Search resources" value={query} onChange={e=>setQuery(e.target.value)} placeholder={section==='Music & BGM'?'Search music…':section==='Sound Effects'?'Search sound effects…':'Search resources…'}/><select aria-label="Filter by resource type" value={kind} onChange={e=>setKind(e.target.value)}><option>All types</option><option value="audio">Music / SFX</option><option value="video">Video / footage</option><option value="image">Images</option><option value="template">Templates</option><option value="font">Cinematic fonts</option><option value="other">Tools / other</option></select></div>
       <div className="workspace-section-title"><div><h3>{section}</h3></div><span>{visible.length} ITEMS</span></div>
