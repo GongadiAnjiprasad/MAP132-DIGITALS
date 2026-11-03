@@ -25,7 +25,7 @@ if(path.startsWith('/api/resources/sounds/')&&path.endsWith('/download')&&method
   const allowed=licence.includes('creativecommons.org/publicdomain/zero/')||(licence.includes('creativecommons.org/licenses/by/')&&!licence.includes('/by-nc/'));
   if(!allowed)return json({error:'This sound is not eligible for download.'},403);
   const preview=sound.previews?.['preview-hq-mp3']||sound.previews?.['preview-lq-mp3'];
-  if(!preview||!String(preview).startsWith('https://freesound.org/'))return json({error:'Preview download unavailable.'},404);
+  let previewUrl:URL;try{previewUrl=new URL(String(preview||''));}catch{return json({error:'Preview download unavailable.'},404);}if(previewUrl.protocol!=='https:'||!['freesound.org','cdn.freesound.org'].includes(previewUrl.hostname))return json({error:'Preview download unavailable.'},404);
   const fileResponse=await fetch(preview);
   if(!fileResponse.ok)return json({error:'Could not download preview.'},502);
   const safeName=String(sound.name||'sound-preview').replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,80)||'sound-preview';
