@@ -299,7 +299,8 @@ const curatedFavoriteIds=['mixkit-cinematic-picks','mixkit-impact-picks','mixkit
 const [favorites,setFavorites]=useState<string[]>(()=>{try{const saved=JSON.parse(localStorage.getItem('map132-workspace-favorites-v2')||'null');return Array.isArray(saved)?saved:curatedFavoriteIds}catch{return curatedFavoriteIds}});
 useEffect(()=>{try{localStorage.setItem('map132-workspace-favorites-v2',JSON.stringify(favorites))}catch{}},[favorites]);
 const selected=workspaceResources.find(item=>item.section===section)||workspaceResources[0];
-const sourceCards=section==='My Collections'?workspaceResources.flatMap(item=>item.cards).filter(card=>favorites.includes(card.id)):selected.cards;
+const allResourceCards=workspaceResources.filter(item=>item.section!=='Workspace Home'&&item.section!=='My Collections').flatMap(item=>item.cards.map(card=>({...card,category:item.section})));
+const sourceCards=section==='Workspace Home'?allResourceCards:section==='My Collections'?allResourceCards.filter(card=>favorites.includes(card.id)):selected.cards;
 const filters=section==='Audio Library'?['All','Trailer','Teaser','Action','Mass','Thriller','Horror','Cinematic','Epic','Wedding','Birthday','News','YouTube','Reels','Podcast','Sports','Commercial','Travel','Romance','Sci-Fi','Comedy','Festival','Telugu / Regional','SFX']:section==='Stock Footage'?['All','B-roll','Cinematic','Wedding','Commercial','Reels','Nature','Aerial']:section==='Editing Assets'||section==='Creative Tools'?['All','Premiere Pro','After Effects','Templates','Motion','LUTs','Fonts','Typography','3D']:['All'];
 const visible=sourceCards.filter(card=>(card.title+' '+(card.detail||'')+' '+(card.tags||[]).join(' ')+' '+(card.provider||'')).toLowerCase().includes(query.toLowerCase())&&(filter==='All'||(card.tags||[]).includes(filter)));
 const toggleFavorite=(id:string)=>setFavorites(current=>current.includes(id)?current.filter(x=>x!==id):[...current,id]);
