@@ -307,8 +307,8 @@ function SoundResultCard({sound}:{sound:any}){
   return <article className="workspace-resource-card" style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',minWidth:0,overflow:'hidden'}}>
     <audio ref={audioRef} preload="none" src={sound.previewUrl||undefined} onEnded={()=>setPlaying(false)} onPause={()=>setPlaying(false)} onPlay={()=>setPlaying(true)} />
     <button type="button" className="gold-button" aria-label={playing?'Pause':'Play'} onClick={toggle} disabled={!sound.previewUrl} style={{minWidth:42,padding:'10px',justifyContent:'center'}}>{playing?'Ⅱ':'▶'}</button>
-    <strong title={sound.title} style={{flex:'1 1 auto',minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{sound.title}</strong>
-    <a className="gold-button" href={sound.sourceUrl} target="_blank" rel="noreferrer" style={{whiteSpace:'nowrap',padding:'10px 14px',flexShrink:0}}>Source + licence ↗</a>
+    <strong title={sound.title} style={{flex:'1 1 auto',minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontSize:14}}>{sound.title}</strong>
+    <a className="gold-button" href={sound.sourceUrl} target="_blank" rel="noreferrer" aria-label="Open source and licence" style={{whiteSpace:'nowrap',padding:'8px 10px',flexShrink:0,fontSize:12}}>Source ↗</a>
   </article>;
 }
 function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?:WorkspaceEntry[];onAdd:(item:WorkspaceEntry)=>void;onDelete:(id:string)=>void;saving?:boolean}){
