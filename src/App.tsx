@@ -96,35 +96,10 @@ function TitleMotionStudio(){
  <button className="gold-button render-title" onClick={render} disabled={busy}><Film size={17}/>{busy?'Rendering…':'Render & download logo intro'} <ArrowDownRight size={17}/></button><p className="render-note">{message||'5.5 seconds · 16:9 / 9:16 / 1:1 · 720p / 1080p / 4K · WebM + original sound'}</p></div></div></section>;
 }
 function WebsiteIntro(){
- const [visible,setVisible]=useState(()=>{try{return !sessionStorage.getItem('map132-intro-seen')}catch{return true}}),items=['Social Media Content','AI Video Production','Cinematic Video Editing','Wedding & Event Films','Commercial & Brand Videos','Music & Graphic Design'];
- useEffect(()=>{const replay=()=>{try{sessionStorage.removeItem('map132-intro-seen')}catch{};setVisible(true)};window.addEventListener('map132:replay-intro',replay);return()=>window.removeEventListener('map132:replay-intro',replay)},[]);
- useEffect(()=>{if(!visible)return;let ms=17000;try{if(window.matchMedia('(prefers-reduced-motion: reduce)').matches)ms=1400}catch{};const timer=window.setTimeout(()=>{setVisible(false);try{sessionStorage.setItem('map132-intro-seen','1')}catch{}},ms);return()=>window.clearTimeout(timer)},[visible]);
- if(!visible)return null;const skip=()=>{try{sessionStorage.setItem('map132-intro-seen','1')}catch{};setVisible(false)};
- return <div className="website-intro" role="dialog" aria-label="MAP132 DIGITALS studio introduction"><div className="website-intro-frame"><p className="website-intro-kicker">A CREATIVE STUDIO · INDIA</p><img src="/resources/map132-emblem.png" alt="MAP132 VIDEO EDITING official logo"/><h2>Every frame has a story.</h2><div className="website-intro-services">{items.map((x,i)=><span key={x} style={{animationDelay:(.8+i*.55)+'s'}}><b>0{i+1}</b>{x}</span>)}</div><div className="website-intro-footer"><span>17 SEC BRAND INTRO · SOUND OFF</span><button type="button" onClick={skip}>Skip intro <ArrowRight size={14}/></button></div><div className="website-intro-progress"><i/></div></div></div>;
+  return null;
 }
-const INDIAN_FESTIVALS: Record<string, { name: string; greeting: string; symbol: string; effect: string }> = {
-  '2026-11-08': { name: 'Diwali', greeting: 'Wishing you a bright and joyful Diwali!', symbol: '✦', effect: 'diwali' },
-  '2026-11-15': { name: 'Chhath Puja', greeting: 'Warm wishes on Chhath Puja!', symbol: '☀', effect: 'sun' },
-  '2026-11-24': { name: 'Guru Nanak Jayanti', greeting: 'Wishing you peace and happiness on Guru Nanak Jayanti.', symbol: '✧', effect: 'gold' },
-  '2026-12-25': { name: 'Christmas', greeting: 'Merry Christmas from MAP132 DIGITALS!', symbol: '❄', effect: 'snow' },
-  '2027-01-01': { name: 'New Year', greeting: 'Happy New Year! Here’s to creative new beginnings.', symbol: '✦', effect: 'gold' },
-  '2027-01-14': { name: 'Sankranti & Pongal', greeting: 'Wishing you a joyful Sankranti and Pongal!', symbol: '☀', effect: 'sun' },
-  '2027-01-26': { name: 'Republic Day', greeting: 'Happy Republic Day, India!', symbol: '✦', effect: 'tricolour' },
-  '2027-03-22': { name: 'Holi', greeting: 'May your life be filled with colour. Happy Holi!', symbol: '✿', effect: 'holi' },
-  '2027-08-15': { name: 'Independence Day', greeting: 'Happy Independence Day, India!', symbol: '✦', effect: 'tricolour' },
-  '2027-08-17': { name: 'Raksha Bandhan', greeting: 'Wishing you a lovely Raksha Bandhan!', symbol: '✿', effect: 'petals' },
-  '2027-08-25': { name: 'Janmashtami', greeting: 'Happy Janmashtami!', symbol: '✧', effect: 'peacock' },
-  '2027-09-04': { name: 'Ganesh Chaturthi', greeting: 'Wishing you happiness and prosperity. Happy Ganesh Chaturthi!', symbol: '✦', effect: 'diya' },
-  '2027-10-09': { name: 'Dussehra', greeting: 'May good always triumph. Happy Dussehra!', symbol: '✦', effect: 'gold' },
-  '2027-10-29': { name: 'Diwali', greeting: 'Wishing you a bright and joyful Diwali!', symbol: '✦', effect: 'diwali' },
-  '2027-12-25': { name: 'Christmas', greeting: 'Merry Christmas from MAP132 DIGITALS!', symbol: '❄', effect: 'snow' }
-};
-
-function IndianFestivalAtmosphere() {
- const today=new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Kolkata',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),p=today.split('-').map(Number),utc=Date.UTC(p[0],p[1]-1,p[2]);
- const upcoming=Object.entries(INDIAN_FESTIVALS).map(([date,f])=>{const q=date.split('-').map(Number);return {...f,daysUntil:Math.round((Date.UTC(q[0],q[1]-1,q[2])-utc)/86400000)}}).filter(x=>x.daysUntil>=0&&x.daysUntil<=7).sort((a,b)=>a.daysUntil-b.daysUntil)[0],todayIsFestival=upcoming?.daysUntil===0;
- const particles=Array.from({length:14},(_,i)=>({left:(i*43+9)%100,duration:14+(i%5)*2.8,delay:-((i*3)%13),size:9+(i%4)*3}));
- return <div className={'festival-atmosphere festival-'+(upcoming?upcoming.effect:'quiet')}>{upcoming&&particles.map((x,i)=><span key={i} style={{left:x.left+'%',animationDuration:x.duration+'s',animationDelay:x.delay+'s',fontSize:x.size+'px'}}>{upcoming.symbol}</span>)}{upcoming&&<div className={'festival-greeting '+(todayIsFestival?'festival-today':'festival-advance')} role="status"><span className="festival-kicker">{todayIsFestival?'TODAY · MAP132 DIGITALS':'ADVANCE WISHES · MAP132 DIGITALS'}</span><strong>{upcoming.name}</strong><p>{todayIsFestival?upcoming.greeting:upcoming.daysUntil+' day'+(upcoming.daysUntil===1?'':'s')+' to go · '+upcoming.greeting}</p></div>}</div>;
+function IndianFestivalAtmosphere(){
+  return null;
 }
 function PublicSite({ content }: { content: Content }) {
   const [activeSkill,setActiveSkill] = useState(0);
@@ -136,7 +111,7 @@ function PublicSite({ content }: { content: Content }) {
     <WebsiteIntro />
     <header className="nav">
       <a className="wordmark" href="#top"><BrandLogo/></a>
-      <nav><a href="#work">Work</a><a href="#services">Services</a><a href="#skills">Toolkit</a><a href="#about">About</a><a className="nav-workspace" href="#workspace"><Film size={14}/> Editor Workspace</a><a className="nav-hire" href="#contact">Let’s talk <ArrowRight size={15}/></a></nav>
+      <nav><a href="#work">Work</a><a href="#services">Services</a><a href="#skills">Toolkit</a><a href="#about">About</a><a className="nav-workspace" href="#workspace"><Film size={14}/> Private Editor Workspace</a><a className="nav-hire" href="#contact">Let’s talk <ArrowRight size={15}/></a></nav>
     </header>
     <main>
       <section className="hero" id="top">
@@ -180,7 +155,7 @@ function PublicSite({ content }: { content: Content }) {
       <section className="about-section" id="about"><div className="about-label"><p className="kicker">BEHIND THE FRAMES</p><span>MAP / 2026</span></div><div><h2>Made with intent.<br/><em>Finished with feeling.</em></h2><p>{p.about}</p><span className="location-tag"><Camera size={15}/> {p.location}</span></div></section>
       <section className="contact-section" id="contact"><div className="contact-copy"><p className="kicker">MAP DIGITALS / LET'S WORK TOGETHER</p><h2>Let’s create<br/><em>something memorable.</em></h2><p>Share your video idea and project details. I’ll get back to you through the contact details you provide.</p><div className="contact-links">{whatsappUrl && <a href={whatsappUrl} target="_blank" rel="noreferrer"><MessageCircle size={17}/> WhatsApp</a>}{safeLink(p.instagram) && <a href={safeLink(p.instagram)} target="_blank" rel="noreferrer"><Instagram size={17}/> Instagram</a>}{safeLink(p.facebook) && <a href={safeLink(p.facebook)} target="_blank" rel="noreferrer">Facebook</a>}{safeLink(p.telegram) && <a href={safeLink(p.telegram)} target="_blank" rel="noreferrer">Telegram</a>}{safeLink(p.linkedin) && <a href={safeLink(p.linkedin)} target="_blank" rel="noreferrer">LinkedIn</a>}{safeLink(p.youtube) && <a href={safeLink(p.youtube)} target="_blank" rel="noreferrer"><Youtube size={17}/> YouTube</a>}{p.email && <a href={'mailto:'+p.email}>Email</a>}</div></div><div className="contact-panel"><span>PROJECT ENQUIRY FORM</span><form className="lead-form" onSubmit={e=>{e.preventDefault();const d=new FormData(e.currentTarget);const msg='MAP132 DIGITALS — PROJECT ENQUIRY\nName: '+d.get('name')+'\nEmail: '+d.get('email')+'\nPhone: '+d.get('phone')+'\nService: '+d.get('service')+'\nProject: '+d.get('details');if(whatsappUrl)window.open(whatsappUrl+'?text='+encodeURIComponent(msg),'_blank','noopener,noreferrer');else if(p.email)window.location.href='mailto:'+p.email+'?subject=MAP132%20DIGITALS%20Enquiry&body='+encodeURIComponent(msg);else alert('Add WhatsApp or business email in Admin → Social & contact first.')}}><label>Your name<input name="name" required placeholder="Your name"/></label><div className="lead-row"><label>Email<input name="email" type="email" required placeholder="you@example.com"/></label><label>Phone<input name="phone" required placeholder="+91…"/></label></div><label>Service needed<select name="service"><option>YouTube video editing</option><option>Reels & Shorts</option><option>Trailer / Teaser</option><option>Wedding / Event film</option><option>Brand / Promo video</option><option>AI Video Creation</option><option>Motion graphics / Logo reveal</option><option>Other Project</option></select></label><label>Project details<textarea name="details" rows={3} placeholder="Video length, deadline, preferred style…"/></label><button className="gold-button" type="submit">Send project enquiry <ArrowRight size={16}/></button></form><small>Opens WhatsApp or email with your details prefilled. The website does not store form submissions.</small></div></section>
     </main>
-<footer className="site-footer"><a className="wordmark" href="#top"><BrandLogo/></a><p>Stories crafted frame by frame.</p><div><a href="#services">Services</a><a href="#work">Selected work</a><a href="#contact">Contact</a><button type="button" className="footer-replay" onClick={()=>window.dispatchEvent(new Event("map132:replay-intro"))}>Replay intro</button><a href="#workspace">Editor Workspace <ExternalLink size={12}/></a><span>© {new Date().getFullYear()} MAP132 DIGITALS</span></div></footer>
+<footer className="site-footer"><a className="wordmark" href="#top"><BrandLogo/></a><p>Stories crafted frame by frame.</p><div><a href="#services">Services</a><a href="#work">Selected work</a><a href="#contact">Contact</a><a href="#workspace">Editor Workspace <ExternalLink size={12}/></a><span>© {new Date().getFullYear()} MAP132 DIGITALS</span></div></footer>
   </div>;
 }
 const workspaceResources = [
