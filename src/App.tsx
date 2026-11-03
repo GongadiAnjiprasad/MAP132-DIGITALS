@@ -177,8 +177,7 @@ function IndianFestivalAtmosphere(){
       if(share && navigator.share && (!navigator.canShare || navigator.canShare({files:[file]}))) {
         await navigator.share({title:`MAP132 DIGITALS - ${festival.name}`,text:`Warm wishes from MAP132 DIGITALS!`,files:[file]});
       } else {
-        const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=file.name;link.click();window.setTimeout(()=>URL.revokeObjectURL(url),3000);
-      }
+        const url=URL.createObjectURL(blob);const link=document.createElement('a');link.href=url;link.download=file.name;link.click();window.setTimeout(()=>URL.revokeObjectURL(url),3000);      }
       setStatus('Your MAP132 greeting poster is ready.');
     } catch(error) { setStatus(error instanceof Error?error.message:'Could not create the poster.'); }
   }
@@ -341,11 +340,11 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
       <div className="workspace-card-meta"><span>{card.kind||'resource'}</span><span>{card.compatibility||'Check formats on source'}</span></div>
       <div className="workspace-card-tags">{(card.tags||[]).slice(0,5).map((tag:string)=><span key={tag}>{tag}</span>)}</div>
       <details><summary>Licence & usage notes</summary><p>{card.licence||'Check the provider terms before use.'}</p></details>
-      <div className="workspace-card-actions">{card.previewUrl&&<button type="button" onClick={()=>setActivePreview(card)}>Open preview</button>}{card.downloadUrl&&<a href={safeLink(card.downloadUrl)} download>Download file</a>}<a href={safeLink(card.href||'')} target="_blank" rel="noreferrer">Official source / download ↗</a>{resources.some(x=>x.id===card.id)&&<button type="button" onClick={()=>onDelete(card.id)}>Remove</button>}</div>
+      <div className="workspace-card-actions">{card.previewUrl&&<button type="button" onClick={()=>setActivePreview(card)}>Open preview</button>}{card.downloadUrl&&<a href={safeLink(card.downloadUrl)} download>Download file</a>}<a href={safeLink(card.href||'')} target="_blank" rel="noreferrer">Browse official library ↗</a>{resources.some(x=>x.id===card.id)&&<button type="button" onClick={()=>onDelete(card.id)}>Remove</button>}</div>
     </article>)}</div>
     {visible.length===0&&<div className="workspace-empty"><Film size={26}/><b>{section==='My Collections'?'No saved resources yet':'No matching resources'}</b><p>Try another genre or save a resource with the ☆ button.</p></div>}</div></div>
     <p className="workspace-footnote"><ShieldCheck size={15}/> Preview plays only when a direct media URL is provided. Download appears only for a verified file URL; otherwise use the official provider page. Third-party stock is not copied or re-hosted without permission.</p>
-    {activePreview&&<div className="workspace-preview-modal" role="dialog" aria-modal="true" aria-label={activePreview.title} onClick={()=>setActivePreview(null)}><div className="workspace-preview-dialog" onClick={e=>e.stopPropagation()}><button type="button" className="workspace-preview-close" onClick={()=>setActivePreview(null)}>Close ✕</button><p className="kicker">{activePreview.provider||'MAP132 RESOURCE PREVIEW'}</p><h3>{activePreview.title}</h3>{activePreview.kind==='audio'?<audio controls autoPlay src={safeLink(activePreview.previewUrl||'')}/>:activePreview.kind==='video'?<video controls autoPlay playsInline src={safeLink(activePreview.previewUrl||'')}/>:<img src={safeLink(activePreview.previewUrl||'')} alt={activePreview.title}/>}<p>{activePreview.detail}</p><div className="workspace-card-actions">{activePreview.downloadUrl&&<a href={safeLink(activePreview.downloadUrl)} download>Download file</a>}<a href={safeLink(activePreview.href)} target="_blank" rel="noreferrer">Official source ↗</a></div></div></div>}
+    {activePreview&&<div className="workspace-preview-modal" role="dialog" aria-modal="true" aria-label={activePreview.title} onClick={()=>setActivePreview(null)}><div className="workspace-preview-dialog" onClick={e=>e.stopPropagation()}><button type="button" className="workspace-preview-close" onClick={()=>setActivePreview(null)}>Close ✕</button><p className="kicker">{activePreview.provider||'MAP132 RESOURCE PREVIEW'}</p><h3>{activePreview.title}</h3>{activePreview.kind==='audio'?<audio controls autoPlay src={safeLink(activePreview.previewUrl||'')}/>:activePreview.kind==='video'?<video controls autoPlay playsInline src={safeLink(activePreview.previewUrl||'')}/>:<img src={safeLink(activePreview.previewUrl||'')} alt={activePreview.title}/>}<p>{activePreview.detail}</p><div className="workspace-card-actions">{activePreview.downloadUrl&&<a href={safeLink(activePreview.downloadUrl)} download>Download file</a>}<a href={safeLink(activePreview.href)} target="_blank" rel="noreferrer">Open original resource page ↗</a></div></div></div>}
   </section>;
 }
 
@@ -357,8 +356,7 @@ function AdminApp() {
   const [content,setContent] = useState<Content>(defaults);
   const [tab,setTab] = useState<'profile'|'skills'|'portfolio'|'social'|'workspace'>(window.location.hash === '#workspace' ? 'workspace' : 'portfolio');
   const [saving,setSaving] = useState(false);
-  const [notice,setNotice] = useState('');
-  const [title,setTitle] = useState('');
+  const [notice,setNotice] = useState('');  const [title,setTitle] = useState('');
   const [category,setCategory] = useState(categories[0]);
   const [description,setDescription] = useState('');
   const [mediaUrl,setMediaUrl] = useState('');
