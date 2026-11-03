@@ -185,7 +185,6 @@ function IndianFestivalAtmosphere(){
     <div className={`festival-atmosphere festival-${festival.theme} ${todayFestival?'festival-live':'festival-build-up'}`} aria-hidden="true">
       {Array.from({length:14},(_,i)=><span key={i} style={{left:`${4+i*7}%`,animationDuration:`${15+(i%5)*4}s`,animationDelay:`${-i*2.4}s`}}>{festival.theme==='snow'?['❄','✧','❅'][i%3]:festival.theme==='sun'?['☀','✦','✨'][i%3]:festival.theme==='diwali'?['🪔','✧','✨','🌟'][i%4]:festival.theme==='gold'?['✨','✦','🙏'][i%3]:['✦','✨','🎉'][i%3]}</span>)}
     </div>
-    </aside>
   </>;
 }
 function PublicSite({ content }: { content: Content }) {
