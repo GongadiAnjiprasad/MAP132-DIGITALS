@@ -344,19 +344,30 @@ function SoundResultCard({sound}:{sound:any}){
 function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?:WorkspaceEntry[];onAdd:(item:WorkspaceEntry)=>void;onDelete:(id:string)=>void;saving?:boolean}){
   const [section,setSection]=useState('Music & BGM'),[query,setQuery]=useState(''),[kind,setKind]=useState('All types'),[draft,setDraft]=useState({title:'',category:'Music & BGM',detail:'',href:'',provider:'',licence:'',compatibility:'',kind:'audio' as WorkspaceEntry['kind'],previewUrl:'',downloadUrl:''}),[formOpen,setFormOpen]=useState(false),[message,setMessage]=useState('');
   const [activePreview,setActivePreview]=useState<WorkspaceEntry|null>(null);
-  const [soundGenre,setSoundGenre]=useState('Cinematic');
+  const [soundGenre,setSoundGenre]=useState('All genres');
   const [soundQuery,setSoundQuery]=useState('');
   const [soundResults,setSoundResults]=useState<any[]>([]);
   const [soundBusy,setSoundBusy]=useState(false);
   const [soundError,setSoundError]=useState('');
   const [soundCount,setSoundCount]=useState(0);
+  const [soundPage,setSoundPage]=useState(1);
+  const [soundNextPage,setSoundNextPage]=useState<number|null>(null);
   useEffect(()=>{const stopOthers=(event:Event)=>{const target=event.target;if(!(target instanceof HTMLAudioElement))return;document.querySelectorAll('audio').forEach(node=>{if(node!==target&&!node.paused)node.pause();});};document.addEventListener('play',stopOthers,true);return()=>document.removeEventListener('play',stopOthers,true);},[]);
-  const soundGenres=['Cinematic','Whoosh','Impact','Riser','Boom','Ambience','Action','Horror','Romantic','Emotional','Suspense','Trailer'];
-  async function searchSounds(){
-    const terms=[soundQuery.trim(),soundGenre,section==='Music & BGM'?'music background score':'sound effect'].filter(Boolean).join(' ');
+  const musicGenres=['All genres','Cinematic','Emotional','Romantic','Action','Horror','Thriller','Corporate','Ambient','Orchestral','Piano','Vlog','Wedding','Documentary','Hip Hop','Electronic','Telugu instrumental'];
+  const effectGenres=['All genres','Whoosh','Impact','Riser','Boom','Ambience','Action','Horror','Suspense','Trailer','Transition','Foley','Nature','Vehicles','Crowd','UI sounds','Footsteps','Weapons','Fire','Water'];
+  const soundGenres=section==='Music & BGM'?musicGenres:effectGenres;
+  async function searchSounds(page=1,append=false){
+    const base=soundQuery.trim();
+    const genre=soundGenre==='All genres'?'':soundGenre;
+    const terms=[base,genre].filter(Boolean).join(' ').trim()||(section==='Music & BGM'?'music background score':'sound effect');
     setSoundBusy(true);setSoundError('');
-    try{const response=await fetch('/api/resources/sounds?query='+encodeURIComponent(terms));const data=await response.json();if(!response.ok)throw new Error(data.error||'Could not load sounds.');setSoundResults(data.results||[]);setSoundCount(data.count||0);}
-    catch(error){setSoundError(error instanceof Error?error.message:'Sound search failed.');setSoundResults([]);setSoundCount(0);}
+    try{
+      const response=await fetch('/api/resources/sounds?query='+encodeURIComponent(terms)+'&page='+page);
+      const data=await response.json();
+      if(!response.ok)throw new Error(data.error||'Could not load sounds.');
+      setSoundResults(current=>append?[...current,...(data.results||[]).filter((item:any)=>!current.some((existing:any)=>existing.id===item.id))]:(data.results||[]));
+      setSoundCount(data.count||0);setSoundPage(page);setSoundNextPage(data.nextPage||null);
+    }catch(error){setSoundError(error instanceof Error?error.message:'Sound search failed.');if(!append){setSoundResults([]);setSoundCount(0);setSoundNextPage(null);}}
     finally{setSoundBusy(false);}
   }
   const sections=['Music & BGM','Sound Effects','Stock Footage','Editing Templates','Cinematic Fonts'];
@@ -395,9 +406,10 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
     </form>}
     {(section==='Sound Effects'||section==='Music & BGM')&&<section className="workspace-live-search">
       <div className="workspace-section-title"><div><p className="kicker">AUDIO LIBRARY</p><h3>Find sounds</h3></div><span>{soundCount.toLocaleString()} MATCHES</span></div>
-      <div className="workspace-filterbar"><input value={soundQuery} onChange={e=>setSoundQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')searchSounds()}} placeholder="Search sounds…"/><select value={soundGenre} onChange={e=>setSoundGenre(e.target.value)}>{soundGenres.map(g=><option key={g}>{g}</option>)}</select><button type="button" className="gold-button" onClick={searchSounds} disabled={soundBusy}>{soundBusy?'Searching…':'Search'}</button></div>
+      <div className="workspace-filterbar"><input value={soundQuery} onChange={e=>setSoundQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')searchSounds()}} placeholder="Search sounds…"/><select value={soundGenre} onChange={e=>setSoundGenre(e.target.value)}>{soundGenres.map(g=><option key={g}>{g}</option>)}</select><button type="button" className="gold-button" onClick={()=>searchSounds(1,false)} disabled={soundBusy}>{soundBusy?'Searching…':'Search'}</button></div>
+      <p className="workspace-form-note">Showing licence-filtered Freesound previews. Search across genres, then load more results. Always check attribution and usage terms on the source page.</p>
       {soundError&&<p className="error-text">{soundError}</p>}
-      {soundResults.length>0&&<div className="workspace-resource-grid" style={{gridTemplateColumns:'1fr',gap:8}}>{soundResults.map(sound=><SoundResultCard key={sound.id} sound={sound}/>)}</div>}
+      {soundResults.length>0&&<><div className="workspace-resource-grid" style={{gridTemplateColumns:'1fr',gap:8}}>{soundResults.map(sound=><SoundResultCard key={sound.id} sound={sound}/>)}</div><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap',padding:'12px 0'}}><span>{soundResults.length.toLocaleString()} loaded · {soundCount.toLocaleString()} provider matches</span>{soundNextPage&&<button type="button" className="gold-button" onClick={()=>searchSounds(soundNextPage!,true)} disabled={soundBusy}>{soundBusy?'Loading…':'Load more sounds'}</button>}</div></>}
       {!soundBusy&&!soundError&&soundResults.length===0&&<div className="workspace-empty"><b>Search sounds</b></div>}
     </section>}
     <nav className="workspace-library-nav" aria-label="Editing resource libraries">
