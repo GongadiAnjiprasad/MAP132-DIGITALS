@@ -295,8 +295,8 @@ const workspaceResources = [
 function WorkspaceLibrary(){
 const [section,setSection]=useState('Brand Kit'),[query,setQuery]=useState(''),[filter,setFilter]=useState('All');
 const curatedFavoriteIds=['mixkit-cinematic-picks','mixkit-impact-picks','mixkit-movie-picks','pixabay-cinematic-riser-boom','pixabay-cinematic-impact','pixabay-whoosh-riser','pixabay-heavy-whoosh'];
-const [favorites,setFavorites]=useState<string[]>(()=>{try{const saved=JSON.parse(localStorage.getItem('map132-workspace-favorites')||'null');return Array.isArray(saved)?Array.from(new Set([...curatedFavoriteIds,...saved])):curatedFavoriteIds}catch{return curatedFavoriteIds}});
-useEffect(()=>{try{localStorage.setItem('map132-workspace-favorites',JSON.stringify(favorites))}catch{}},[favorites]);
+const [favorites,setFavorites]=useState<string[]>(()=>{try{const saved=JSON.parse(localStorage.getItem('map132-workspace-favorites-v2')||'null');return Array.isArray(saved)?saved:curatedFavoriteIds}catch{return curatedFavoriteIds}});
+useEffect(()=>{try{localStorage.setItem('map132-workspace-favorites-v2',JSON.stringify(favorites))}catch{}},[favorites]);
 const selected=workspaceResources.find(item=>item.section===section)||workspaceResources[0];
 const sourceCards=section==='My Collections'?workspaceResources.flatMap(item=>item.cards).filter(card=>favorites.includes(card.id)):selected.cards;
 const filters=section==='Audio Library'?['All','Trailer','Teaser','Horror','Sci-Fi','Wedding','Commercial','Telugu / Regional','SFX']:['All'];
