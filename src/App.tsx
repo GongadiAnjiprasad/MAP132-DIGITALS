@@ -349,8 +349,8 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
 }
 
 function AdminApp() {
-  const [loggedIn,setLoggedIn] = useState(true);
-  const [checking,setChecking] = useState(false);
+  const [loggedIn,setLoggedIn] = useState(false);
+  const [checking,setChecking] = useState(true);
   const [password,setPassword] = useState('');
   const [error,setError] = useState('');
   const [content,setContent] = useState<Content>(defaults);
@@ -374,7 +374,7 @@ function AdminApp() {
     await save({...content,items:[item,...content.items]});setTitle('');setDescription('');setMediaUrl('');setFile(null);
   }
   async function removeItem(item:Item){if(!confirm('Delete this portfolio item?'))return;const next={...content,items:content.items.filter(x=>x.id!==item.id)};await save(next);if(item.path)api.post('/api/admin/delete-media',{path:item.path}).catch(()=>{});}
-  async function logout(){window.location.hash='#top';}
+  async function logout(){try{await api.post('/api/admin/logout',{});}finally{setLoggedIn(false);window.location.hash='#top';}}
   if(checking)return <div className="admin-loading">Checking secure admin session…</div>;
   if(!loggedIn)return <div className="login-screen"><div className="login-card"><a className="wordmark" href="#top"><BrandLogo/></a><div className="login-icon"><ShieldCheck size={25}/></div><p className="kicker">PRIVATE STUDIO ACCESS</p><h1>Admin <em>Dashboard.</em></h1><p>Sign in to manage your portfolio, skills and contact links.</p><form onSubmit={login}><label>Admin password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} required autoComplete="current-password" placeholder="Enter your password"/></label><button className="gold-button" type="submit">Secure sign in <ArrowRight size={16}/></button></form>{error&&<p className="error-text">{error}</p>}<a className="back-link" href="#top">← Back to website</a></div></div>;
   const updateProfile=(key:keyof Content['profile'],value:string)=>setContent(c=>({...c,profile:{...c.profile,[key]:value}}));
