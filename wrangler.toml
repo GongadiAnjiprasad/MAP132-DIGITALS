@@ -12,4 +12,6 @@ run_worker_first = ["/api/*", "/media/*"]
 # Configure these bindings in the Cloudflare Worker dashboard before deployment:
 # KV namespace binding: MAP132_KV
 # R2 bucket binding: MAP132_MEDIA
-# No admin password is required; the workspace is open.
+# Worker secret required for live audio catalogue search: FREESOUND_API_KEY
+# Add it with: npx wrangler secret put FREESOUND_API_KEY
+# Keep the key server-side; never place it in frontend code.
