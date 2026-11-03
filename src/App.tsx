@@ -348,6 +348,15 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
   </section>;
 }
 
+function WorkspaceStandalone(){
+  const [resources,setResources]=useState<WorkspaceEntry[]>(()=>{try{return JSON.parse(localStorage.getItem('map132-private-workspace-resources')||'[]')}catch{return[]}});
+  useEffect(()=>{localStorage.setItem('map132-private-workspace-resources',JSON.stringify(resources));},[resources]);
+  return <main className="admin-main" style={{minHeight:'100vh',maxWidth:1500,margin:'0 auto'}}>
+    <div className="admin-top"><div><p className="kicker">MAP132 DIGITALS / PRIVATE EDITING AREA</p><h1>Editor Workspace</h1><p>Personal editing resources. Admin dashboard remains separately protected.</p></div><a className="back-link" href="#top">← Public website</a></div>
+    <WorkspaceLibrary resources={resources} onAdd={item=>setResources(v=>[item,...v])} onDelete={id=>setResources(v=>v.filter(x=>x.id!==id))}/>
+  </main>;
+}
+
 function AdminApp() {
   const [loggedIn,setLoggedIn] = useState(true);
   const [checking,setChecking] = useState(false);
@@ -363,7 +372,7 @@ function AdminApp() {
   const [file,setFile] = useState<File|null>(null);
   const [source,setSource] = useState<'youtube'|'drive'|'other'>('youtube');
   const [uploading,setUploading] = useState(false);
-  useEffect(()=>{ setLoggedIn(true); setChecking(false); },[]);
+  useEffect(()=>{ api.get('/api/admin/session').then(()=>setLoggedIn(true)).catch(()=>setLoggedIn(false)).finally(()=>setChecking(false)); },[]);
   useEffect(()=>{ if(loggedIn) api.get('/api/portfolio').then(r=>setContent(r.data.content || defaults)).catch(()=>setError('Could not load portfolio content.')); },[loggedIn]);
   async function login(e:React.FormEvent){e.preventDefault();setError('');try{await api.post('/api/admin/login',{password});setLoggedIn(true);setPassword('');}catch(error){setError(error instanceof Error?error.message:'Could not sign in. Please try again.');}}
   async function save(next=content){setSaving(true);setError('');try{await api.put('/api/admin/content',next);setContent(next);setNotice('Changes saved and published.');setTimeout(()=>setNotice(''),3500);}catch{setError('Could not save changes. Please retry.');}finally{setSaving(false);}}
@@ -392,15 +401,17 @@ function AdminApp() {
     </main></div>;
 }
 export default function App() {
-  const [isAdmin,setIsAdmin] = useState(window.location.hash === '#admin' || window.location.hash === '#workspace');
+  const [isAdmin,setIsAdmin] = useState(window.location.hash === '#admin');
+  const [isWorkspace,setIsWorkspace] = useState(window.location.hash === '#workspace');
   const [content,setContent] = useState<Content>(defaults);
   const [loading,setLoading] = useState(true);
   useEffect(()=>{
-    const syncRoute = () => setIsAdmin(window.location.hash === '#admin' || window.location.hash === '#workspace');
+    const syncRoute = () => {setIsAdmin(window.location.hash === '#admin');setIsWorkspace(window.location.hash === '#workspace');};
     window.addEventListener('hashchange', syncRoute);
     return () => window.removeEventListener('hashchange', syncRoute);
   },[]);
-  useEffect(()=>{if(!isAdmin)api.get('/api/portfolio').then(r=>setContent(r.data.content||defaults)).catch(()=>{}).finally(()=>setLoading(false));},[isAdmin]);
+  useEffect(()=>{if(!isAdmin&&!isWorkspace)api.get('/api/portfolio').then(r=>setContent(r.data.content||defaults)).catch(()=>{}).finally(()=>setLoading(false));},[isAdmin,isWorkspace]);
+  if(isWorkspace)return <WorkspaceStandalone/>;
   if(isAdmin)return <AdminApp/>;
   return loading?<div className="site-loading">Preparing the next frame…</div>:<PublicSite content={content}/>;
 }
