@@ -905,3 +905,32 @@ main:not(:has(> section:target))>section:not(#top):not(#approach):not(#work){dis
  main:has(> section:target)>section:target{min-height:auto}
 }
 @media(prefers-reduced-motion:reduce){.approach-grid article{transition:none}}
+
+
+/* MAP132 mobile navigation: keep real page links visible below the logo */
+@media(max-width:700px){
+  .nav{position:sticky;top:0;z-index:90;display:flex;flex-direction:column;align-items:stretch;justify-content:center;gap:5px;min-height:0;padding:6px 0 9px;background:rgba(8,11,18,.98)}
+  .nav>.wordmark{justify-content:center;height:43px}
+  .nav>.wordmark img{width:74px;height:43px;object-fit:contain}
+  .nav>nav{display:flex!important;flex-wrap:nowrap;justify-content:flex-start;gap:18px;width:100%;max-width:100%;padding:0 16px 3px;overflow-x:auto;overflow-y:hidden;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .nav>nav::-webkit-scrollbar{display:none}
+  .nav>nav>a{display:inline-flex!important;flex:0 0 auto;padding:8px 0!important;font-size:10px!important}
+  .nav>nav>a.nav-hire{padding:8px 11px!important;border:1px solid rgba(232,199,122,.55)}
+  .mobile-dock{display:none!important}
+  .site{padding-bottom:0}
+  .hero{padding-top:48px}
+  .hero-manifesto{margin:22px 0 4px;padding:15px 14px;border-left:2px solid #E8C77A;background:linear-gradient(100deg,rgba(232,199,122,.09),rgba(232,199,122,.015));}
+  .manifesto-mark{display:block;margin-bottom:8px;color:#E8C77A;font-size:8px;font-weight:800;letter-spacing:2px}
+  .hero-manifesto p{margin:0;color:#B9C1CE;font-size:11px;line-height:1.7}
+  .hero-manifesto p b{color:#F4E9D2;font-weight:700}
+  .manifesto-pillars{display:flex;flex-wrap:wrap;gap:7px 12px;margin-top:12px}
+  .manifesto-pillars span{color:#D9BC87;font-size:7px;letter-spacing:1.1px}
+}
+@media(min-width:701px){
+  .hero-manifesto{max-width:530px;margin:24px 0 0;padding:16px 18px;border-left:2px solid #E8C77A;background:linear-gradient(100deg,rgba(232,199,122,.09),rgba(232,199,122,.015))}
+  .manifesto-mark{display:block;margin-bottom:8px;color:#E8C77A;font-size:8px;font-weight:800;letter-spacing:2px}
+  .hero-manifesto p{margin:0;color:#B9C1CE;font-size:12px;line-height:1.8}
+  .hero-manifesto p b{color:#F4E9D2}
+  .manifesto-pillars{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}
+  .manifesto-pillars span{color:#D9BC87;font-size:8px;letter-spacing:1.2px}
+}
