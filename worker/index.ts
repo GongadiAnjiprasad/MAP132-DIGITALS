@@ -11,6 +11,26 @@ function sessionCookie(value:string,maxAge:number){return COOKIE+'='+value+'; Ht
 
 async function read(env:Env){if(!env.MAP132_KV)return DEFAULTS;try{return {...DEFAULTS,...JSON.parse(await env.MAP132_KV.get('portfolio/content')||'{}')};}catch{return DEFAULTS;}}
 async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;
+if(path.startsWith('/api/resources/sounds/')&&path.endsWith('/download')&&method==='GET'){
+  if(!env.FREESOUND_API_KEY)return json({error:'Sound download is not connected.'},503);
+  const id=path.split('/')[4];
+  if(!/^\\d+$/.test(id))return json({error:'Invalid sound id.'},400);
+  const detailUrl=new URL('https://freesound.org/apiv2/sounds/'+id+'/');
+  detailUrl.searchParams.set('fields','id,name,license,previews');
+  detailUrl.searchParams.set('token',env.FREESOUND_API_KEY);
+  const detailResponse=await fetch(detailUrl.toString(),{headers:{'Accept':'application/json'}});
+  if(!detailResponse.ok)return json({error:'Could not retrieve sound details.'},502);
+  const sound:any=await detailResponse.json();
+  const licence=String(sound.license||'').toLowerCase();
+  const allowed=licence.includes('creativecommons.org/publicdomain/zero/')||(licence.includes('creativecommons.org/licenses/by/')&&!licence.includes('/by-nc/'));
+  if(!allowed)return json({error:'This sound is not eligible for download.'},403);
+  const preview=sound.previews?.['preview-hq-mp3']||sound.previews?.['preview-lq-mp3'];
+  if(!preview||!String(preview).startsWith('https://freesound.org/'))return json({error:'Preview download unavailable.'},404);
+  const fileResponse=await fetch(preview);
+  if(!fileResponse.ok)return json({error:'Could not download preview.'},502);
+  const safeName=String(sound.name||'sound-preview').replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,80)||'sound-preview';
+  return new Response(fileResponse.body,{headers:{'Content-Type':'audio/mpeg','Content-Disposition':'attachment; filename="'+safeName+'.mp3"','Cache-Control':'no-store'}});
+}
 if(path==='/api/resources/sounds'&&method==='GET'){
   if(!env.FREESOUND_API_KEY)return json({error:'Sound search is not connected yet. Add the FREESOUND_API_KEY secret in Cloudflare.'},503);
   const query=(url.searchParams.get('query')||'').trim().slice(0,100);
