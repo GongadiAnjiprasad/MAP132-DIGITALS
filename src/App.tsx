@@ -307,7 +307,7 @@ function SoundResultCard({sound}:{sound:any}){
   return <article className="workspace-resource-card" style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',minWidth:0,overflow:'hidden'}}>
     <audio ref={audioRef} preload="none" src={sound.previewUrl||undefined} onEnded={()=>setPlaying(false)} onPause={()=>setPlaying(false)} onPlay={()=>setPlaying(true)} />
     <button type="button" className="gold-button" aria-label={playing?'Pause':'Play'} onClick={toggle} disabled={!sound.previewUrl} style={{minWidth:42,padding:'10px',justifyContent:'center'}}>{playing?'Ⅱ':'▶'}</button>
-    <strong title={sound.title} style={{flex:'1 1 auto',minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontSize:14}}>{sound.title}</strong>
+    <strong title={sound.title} style={{display:'block',flex:'1 1 0',width:0,minWidth:0,maxWidth:'min(42vw, 210px)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontSize:13,lineHeight:1.3}}>{sound.title}</strong>
     <a className="gold-button" href={sound.sourceUrl} target="_blank" rel="noreferrer" aria-label="Open source and licence" style={{whiteSpace:'nowrap',padding:'8px 10px',flexShrink:0,fontSize:12}}>Source ↗</a>
   </article>;
 }
