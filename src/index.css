@@ -991,3 +991,29 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .workspace-preview-dialog>p:last-of-type{color:#ADB4C0;font-size:11px;line-height:1.7}
 .workspace-preview-close{float:right;border:1px solid #E8C77A66;background:transparent;color:#F0D7A8;padding:8px 11px}
 @media(max-width:700px){.workspace-filterbar{grid-template-columns:1fr}.workspace-add-form{padding:14px}.workspace-add-form .form-row{grid-template-columns:1fr}.workspace-preview-dialog{padding:16px}.workspace-resource-grid{grid-template-columns:1fr}}
+
+
+/* Clean page-style navigation for the private resource workspace */
+.workspace-library-nav{
+  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
+  margin:22px 0 18px;padding:8px;
+  border:1px solid rgba(210,170,112,.2);border-radius:16px;
+  background:rgba(18,18,20,.72);
+}
+.workspace-library-nav button{
+  appearance:none;border:1px solid transparent;border-radius:10px;
+  padding:11px 16px;background:transparent;color:inherit;
+  font:inherit;font-size:13px;font-weight:600;cursor:pointer;
+  transition:background .18s ease,border-color .18s ease,color .18s ease;
+}
+.workspace-library-nav button:hover{background:rgba(255,255,255,.06);border-color:rgba(210,170,112,.25)}
+.workspace-library-nav button.selected{
+  color:#f4d6a4;background:rgba(191,143,78,.16);
+  border-color:rgba(210,170,112,.55);
+}
+.workspace-page{width:100%;min-width:0}
+.workspace-page .workspace-section-title{margin:18px 0 16px}
+@media(max-width:700px){
+  .workspace-library-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:7px}
+  .workspace-library-nav button{padding:12px 8px;font-size:12px;text-align:center}
+}
