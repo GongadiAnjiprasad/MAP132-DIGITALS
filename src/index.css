@@ -802,3 +802,54 @@ body,.site{background:#0A0B0E;color:#F5F0E7}.nav{height:82px;background:rgba(9,1
 .festival-atmosphere.festival-live>span{opacity:.34;font-size:clamp(15px,2vw,25px);filter:drop-shadow(0 0 12px #e8c77a77)}
 .festival-greeting{display:none!important}
 @media(prefers-reduced-motion:reduce){.festival-atmosphere>span{animation:none!important;opacity:.12}}
+
+
+/* MAP132 premium studio navigation + page-like section routing */
+.site{--studio-gold:#E8C77A;--studio-ink:#080B12}
+.nav{position:sticky;top:0;z-index:30;backdrop-filter:blur(18px);-webkit-backdrop-filter:blur(18px);background:rgba(8,11,18,.86);border-bottom:1px solid rgba(232,199,122,.16);box-shadow:0 12px 40px rgba(0,0,0,.18)}
+.nav nav{gap:clamp(12px,1.8vw,27px);font-size:10px;letter-spacing:.5px}
+.nav nav>a{transition:color .2s ease,opacity .2s ease}
+.nav nav>a:hover,.nav nav>a:focus-visible{color:var(--studio-gold)}
+.nav-hire{border:1px solid rgba(232,199,122,.55);background:linear-gradient(120deg,rgba(232,199,122,.13),rgba(232,199,122,.025));padding:11px 15px;border-radius:2px}
+.nav-workspace{opacity:.78}
+.hero{min-height:min(790px,calc(100svh - 72px));padding-top:clamp(75px,9vw,130px);padding-bottom:clamp(70px,8vw,110px);background:radial-gradient(ellipse at 76% 38%,rgba(232,199,122,.14),transparent 34%),radial-gradient(ellipse at 14% 85%,rgba(72,104,160,.12),transparent 36%),linear-gradient(120deg,#080B12,#111827 58%,#090D18)}
+.hero h1{max-width:760px;font-size:clamp(58px,7.4vw,104px);line-height:.96;letter-spacing:-.065em}
+.hero h1 em,.section-head h2 em,.about-section h2 em,.contact-copy h2 em{color:#E8C77A}
+.hero-intro{font-size:clamp(14px,1.2vw,17px);max-width:460px;color:#C1C6D0}
+.hero-positioning{margin:0;color:#8F98A9;font-size:9px;letter-spacing:1.7px;text-transform:uppercase}
+.hero-visual .monitor{border-color:rgba(232,199,122,.48);box-shadow:0 35px 100px #000b,0 0 65px rgba(232,199,122,.08)}
+.home-discover{display:flex;align-items:center;gap:24px;margin-top:34px}
+.home-discover a{display:inline-flex;align-items:center;gap:9px;color:#E8C77A;font-size:11px;letter-spacing:.5px}
+.home-discover span{color:#737D8E;font-size:8px;letter-spacing:1.8px}
+.hero-meta{margin-top:40px}
+.section-head{margin-bottom:50px}
+.work-section,.services-section,.skills-section,.about-section,.contact-section{scroll-margin-top:86px;min-height:calc(100svh - 72px)}
+.work-section{padding-top:clamp(65px,8vw,105px)}
+.work-card{transition:transform .35s ease}
+.work-card:hover{transform:translateY(-5px)}
+.media-frame{border:1px solid rgba(232,199,122,.13);background:linear-gradient(145deg,#252B38,#121722)}
+.service-card{transition:transform .25s ease,border-color .25s ease,background .25s ease}
+.service-card:hover{transform:translateY(-4px);border-color:rgba(232,199,122,.5)}
+.toolkit-detail{box-shadow:0 25px 65px rgba(14,20,34,.12)}
+.contact-panel{box-shadow:0 24px 70px rgba(0,0,0,.24)}
+main:has(> section:target)>section:not(:target){display:none}
+main:not(:has(> section:target))>section:not(#top):not(#work){display:none}
+main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
+main>section:target{animation:studio-page-in .45s ease both}
+@keyframes studio-page-in{from{opacity:.35;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
+@media(max-width:950px){.nav nav{gap:12px}.nav-workspace{display:none!important}}
+@media(max-width:700px){
+ .nav{height:auto;min-height:66px;padding:10px 5%;align-items:center}
+ .nav nav{display:flex;overflow-x:auto;max-width:72vw;gap:15px;white-space:nowrap;scrollbar-width:none}
+ .nav nav::-webkit-scrollbar{display:none}
+ .nav nav>a:not(.nav-hire){display:inline-flex;font-size:9px}
+ .nav nav .nav-workspace{display:none!important}
+ .nav nav .nav-hire{padding:9px 11px;font-size:9px}
+ .hero{min-height:auto;padding:66px 7% 70px}
+ .hero h1{font-size:clamp(51px,13vw,72px);letter-spacing:-.06em}
+ .hero-positioning{font-size:8px;line-height:1.7}
+ .home-discover{flex-wrap:wrap;gap:14px}
+ .hero-meta{margin-top:30px}
+ main:has(> section:target)>section:target{min-height:calc(100svh - 66px)}
+}
+@media(prefers-reduced-motion:reduce){main>section:target{animation:none}.work-card,.service-card{transition:none}}
