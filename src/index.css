@@ -782,3 +782,13 @@ body,.site{background:#0A0B0E;color:#F5F0E7}.nav{height:82px;background:rgba(9,1
 .festival-actions button:focus-visible{outline:2px solid #fff;outline-offset:3px}
 @media(max-width:600px){.festival-greeting{right:12px;bottom:12px;width:calc(100vw - 24px);padding:14px}.festival-greeting strong{font-size:19px}.festival-actions button{flex:1}}
 @media(prefers-reduced-motion:reduce){.festival-atmosphere>span{animation:none}}
+
+/* Festival countdown phases: gentle atmosphere first, advance wishes in final 48h */
+.festival-atmosphere.festival-build-up>span{opacity:.32;filter:drop-shadow(0 0 8px #e8c77a55);font-size:18px}
+.festival-atmosphere.festival-live>span{opacity:.72;filter:drop-shadow(0 0 12px #e8c77a99);font-size:22px}
+.festival-build-card{border-color:#e8c77a35;background:linear-gradient(135deg,#11151beF,#211d19ed);box-shadow:0 12px 34px #0006}
+.festival-build-card .festival-kicker{color:#c9ae7b}
+.festival-advance-wish{border-color:#e8c77a;background:linear-gradient(135deg,#18130ff7,#392718f5);box-shadow:0 18px 48px #0009}
+.festival-advance-wish .festival-kicker{color:#f2cf91}
+.festival-advance-wish strong{color:#ffe0a7}
+@media(prefers-reduced-motion:reduce){.festival-atmosphere>span{animation:none!important}}
