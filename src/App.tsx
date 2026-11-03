@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { api } from './api';
 import {
   ArrowDownRight, ArrowRight, Check, ChevronRight, Film,
@@ -294,6 +294,22 @@ const workspaceResources = [
 {id:'google-fonts-live',title:'Google Fonts',provider:'Google',detail:'Open-source typefaces for posters, titles, captions and brand graphics',tags:['Fonts','Typography','Design'],licence:'Check the licence attached to the individual font family before embedding or redistributing font files.',href:'https://fonts.google.com/'},
 {id:'createthat-free',title:'CreateThat Free Assets',provider:'CreateThat',detail:'Free b-roll, music, sound effects, LUTs and images in one library',tags:['B-roll','Music','SFX','LUTs'],licence:'The provider states its listed free assets can be used commercially, but do not redistribute assets as standalone files. Verify the current terms on the asset page.',href:'https://www.createthat.ai/free-assets'}]},
 {section:'My Collections',title:'Saved resources',description:'MAP132 editor-curated picks are preloaded here. Add your own favourites too; the starter picks are selected from established free SFX catalogues and asset-page engagement signals, not a claimed worldwide ranking.',cards:[]}];
+function SoundResultCard({sound}:{sound:any}){
+  const audioRef=useRef<HTMLAudioElement|null>(null);
+  const [playing,setPlaying]=useState(false);
+  async function toggle(){
+    const audio=audioRef.current;
+    if(!audio)return;
+    if(playing){audio.pause();setPlaying(false);return;}
+    try{await audio.play();setPlaying(true);}catch{setPlaying(false);}
+  }
+  return <article className="workspace-resource-card" style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px'}}>
+    <audio ref={audioRef} preload="none" src={sound.previewUrl||undefined} onEnded={()=>setPlaying(false)} onPause={()=>setPlaying(false)} onPlay={()=>setPlaying(true)} />
+    <button type="button" className="gold-button" aria-label={playing?'Pause':'Play'} onClick={toggle} disabled={!sound.previewUrl} style={{minWidth:42,padding:'10px',justifyContent:'center'}}>{playing?'Ⅱ':'▶'}</button>
+    <strong style={{flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{sound.title}</strong>
+    <a className="gold-button" href={sound.sourceUrl} target="_blank" rel="noreferrer" style={{whiteSpace:'nowrap',padding:'10px 14px'}}>Download ↗</a>
+  </article>;
+}
 function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?:WorkspaceEntry[];onAdd:(item:WorkspaceEntry)=>void;onDelete:(id:string)=>void;saving?:boolean}){
   const [section,setSection]=useState('Workspace Home'),[query,setQuery]=useState(''),[kind,setKind]=useState('All types'),[draft,setDraft]=useState({title:'',category:'Music & BGM',detail:'',href:'',provider:'',licence:'',compatibility:'',kind:'audio' as WorkspaceEntry['kind'],previewUrl:'',downloadUrl:''}),[formOpen,setFormOpen]=useState(false),[message,setMessage]=useState('');
   const [activePreview,setActivePreview]=useState<WorkspaceEntry|null>(null);
@@ -343,17 +359,11 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
       <button className="gold-button" type="submit" disabled={saving}><Save size={15}/>{saving?'Saving…':'Save to library'}</button>{message&&<p className="error-text">{message}</p>}
     </form>}
     {(section==='Sound Effects'||section==='Music & BGM')&&<section className="workspace-live-search">
-      <div className="workspace-section-title"><div><p className="kicker">LIVE AUDIO CATALOGUE</p><h3>Find sounds for your edit</h3><p>Search previews from Freesound without leaving MAP132 Workspace.</p></div><span>{soundCount.toLocaleString()} MATCHES</span></div>
-      <div className="workspace-filterbar"><input value={soundQuery} onChange={e=>setSoundQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')searchSounds()}} placeholder="Search a sound: cinematic hit, Telugu wedding, rain…"/><select value={soundGenre} onChange={e=>setSoundGenre(e.target.value)}>{soundGenres.map(g=><option key={g}>{g}</option>)}</select><button type="button" className="gold-button" onClick={searchSounds} disabled={soundBusy}>{soundBusy?'Searching…':'Search sounds'}</button></div>
+      <div className="workspace-section-title"><div><p className="kicker">AUDIO LIBRARY</p><h3>Find sounds</h3></div><span>{soundCount.toLocaleString()} MATCHES</span></div>
+      <div className="workspace-filterbar"><input value={soundQuery} onChange={e=>setSoundQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')searchSounds()}} placeholder="Search sounds…"/><select value={soundGenre} onChange={e=>setSoundGenre(e.target.value)}>{soundGenres.map(g=><option key={g}>{g}</option>)}</select><button type="button" className="gold-button" onClick={searchSounds} disabled={soundBusy}>{soundBusy?'Searching…':'Search'}</button></div>
       {soundError&&<p className="error-text">{soundError}</p>}
-      {soundResults.length>0&&<div className="workspace-resource-grid">{soundResults.map(sound=><article className="workspace-resource-card" key={sound.id}>
-        <div className="workspace-card-top"><span>FREESOUND · {sound.creator||'Community creator'}</span><span>{Number(sound.duration||0).toFixed(1)} sec</span></div>
-        {sound.previewUrl?<audio controls preload="none" src={sound.previewUrl} style={{width:'100%',margin:'12px 0'}}/>:<p>Preview unavailable for this item.</p>}
-        <h4>{sound.title}</h4><p>{(sound.tags||[]).slice(0,7).join(' · ')||sound.description?.slice(0,140)}</p>
-        <div className="workspace-card-meta"><span>Licence: {sound.license||'Check source'}</span><span>Preview audio</span></div>
-        <div className="workspace-card-actions"><a href={sound.sourceUrl} target="_blank" rel="noreferrer">Download / full file ↗</a><a href={sound.sourceUrl} target="_blank" rel="noreferrer">Source & licence ↗</a></div>
-      </article>)}</div>}
-      {!soundBusy&&!soundError&&soundResults.length===0&&<div className="workspace-empty"><b>Search the audio catalogue</b><p>Select a genre and search to load matching sounds here.</p></div>}
+      {soundResults.length>0&&<div className="workspace-resource-grid" style={{gridTemplateColumns:'1fr',gap:8}}>{soundResults.map(sound=><SoundResultCard key={sound.id} sound={sound}/>)}</div>}
+      {!soundBusy&&!soundError&&soundResults.length===0&&<div className="workspace-empty"><b>Search sounds</b></div>}
     </section>}
     <div className="workspace-layout"><aside className="workspace-categories"><p className="kicker">BROWSE LIBRARIES</p>{sections.map(name=><button type="button" key={name} className={section===name?'selected':''} onClick={()=>{setSection(name);setQuery('')}}><span>{name}</span><ChevronRight size={15}/></button>)}</aside>
     <div className="workspace-results"><div className="workspace-filterbar"><input aria-label="Search resources" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search Telugu BGM, Hollywood, action, SFX…"/><select aria-label="Filter by resource type" value={kind} onChange={e=>setKind(e.target.value)}><option>All types</option><option value="audio">Music / SFX</option><option value="video">Video / footage</option><option value="image">Images</option><option value="template">Templates</option><option value="font">Cinematic fonts</option><option value="other">Tools / other</option></select></div>
