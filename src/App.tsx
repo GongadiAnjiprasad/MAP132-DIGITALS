@@ -297,6 +297,20 @@ const workspaceResources = [
 function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?:WorkspaceEntry[];onAdd:(item:WorkspaceEntry)=>void;onDelete:(id:string)=>void;saving?:boolean}){
   const [section,setSection]=useState('Workspace Home'),[query,setQuery]=useState(''),[kind,setKind]=useState('All types'),[draft,setDraft]=useState({title:'',category:'Music & BGM',detail:'',href:'',provider:'',licence:'',compatibility:'',kind:'audio' as WorkspaceEntry['kind'],previewUrl:'',downloadUrl:''}),[formOpen,setFormOpen]=useState(false),[message,setMessage]=useState('');
   const [activePreview,setActivePreview]=useState<WorkspaceEntry|null>(null);
+  const [soundGenre,setSoundGenre]=useState('Cinematic');
+  const [soundQuery,setSoundQuery]=useState('');
+  const [soundResults,setSoundResults]=useState<any[]>([]);
+  const [soundBusy,setSoundBusy]=useState(false);
+  const [soundError,setSoundError]=useState('');
+  const [soundCount,setSoundCount]=useState(0);
+  const soundGenres=['Cinematic','Whoosh','Impact','Riser','Boom','Ambience','Action','Horror','Romantic','Emotional','Suspense','Trailer'];
+  async function searchSounds(){
+    const terms=[soundQuery.trim(),soundGenre,section==='Music & BGM'?'music background score':'sound effect'].filter(Boolean).join(' ');
+    setSoundBusy(true);setSoundError('');
+    try{const response=await fetch('/api/resources/sounds?query='+encodeURIComponent(terms));const data=await response.json();if(!response.ok)throw new Error(data.error||'Could not load sounds.');setSoundResults(data.results||[]);setSoundCount(data.count||0);}
+    catch(error){setSoundError(error instanceof Error?error.message:'Sound search failed.');setSoundResults([]);setSoundCount(0);}
+    finally{setSoundBusy(false);}
+  }
   const sections=['Workspace Home','Music & BGM','Sound Effects','Stock Footage','Editing Templates','Cinematic Fonts'];
   const seeded=workspaceResources.filter(x=>['Audio Library','Stock Footage','Editing Assets'].includes(x.section)).flatMap(x=>x.cards.filter((c:any)=>!['google-fonts','google-fonts-live'].includes(c.id)).map((c:any)=>({...c,category:x.section==='Audio Library'?(c.id.includes('sfx')||c.id.includes('cinematic')||c.id.includes('impact')||c.id.includes('whoosh')||c.id.includes('movie')?'Sound Effects':'Music & BGM'):x.section==='Stock Footage'?'Stock Footage':'Editing Templates',kind:(x.section==='Audio Library'?'audio':x.section==='Stock Footage'?'video':'template') as WorkspaceEntry['kind'],licence:c.licence||'Check the provider’s current licence on the original asset page before client or commercial use.',compatibility:c.compatibility||'Check the asset page for supported software and formats.'})));
   const cinematicFonts=[
@@ -328,6 +342,19 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
       <p className="workspace-form-note">Do not paste a catalogue/search URL as a preview or download. Those fields must point to the actual media file. Third-party stock files stay on their provider unless the licence expressly permits hosting.</p>
       <button className="gold-button" type="submit" disabled={saving}><Save size={15}/>{saving?'Saving…':'Save to library'}</button>{message&&<p className="error-text">{message}</p>}
     </form>}
+    {(section==='Sound Effects'||section==='Music & BGM')&&<section className="workspace-live-search">
+      <div className="workspace-section-title"><div><p className="kicker">LIVE AUDIO CATALOGUE</p><h3>Find sounds for your edit</h3><p>Search previews from Freesound without leaving MAP132 Workspace.</p></div><span>{soundCount.toLocaleString()} MATCHES</span></div>
+      <div className="workspace-filterbar"><input value={soundQuery} onChange={e=>setSoundQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')searchSounds()}} placeholder="Search a sound: cinematic hit, Telugu wedding, rain…"/><select value={soundGenre} onChange={e=>setSoundGenre(e.target.value)}>{soundGenres.map(g=><option key={g}>{g}</option>)}</select><button type="button" className="gold-button" onClick={searchSounds} disabled={soundBusy}>{soundBusy?'Searching…':'Search sounds'}</button></div>
+      {soundError&&<p className="error-text">{soundError}</p>}
+      {soundResults.length>0&&<div className="workspace-resource-grid">{soundResults.map(sound=><article className="workspace-resource-card" key={sound.id}>
+        <div className="workspace-card-top"><span>FREESOUND · {sound.creator||'Community creator'}</span><span>{Number(sound.duration||0).toFixed(1)} sec</span></div>
+        {sound.previewUrl?<audio controls preload="none" src={sound.previewUrl} style={{width:'100%',margin:'12px 0'}}/>:<p>Preview unavailable for this item.</p>}
+        <h4>{sound.title}</h4><p>{(sound.tags||[]).slice(0,7).join(' · ')||sound.description?.slice(0,140)}</p>
+        <div className="workspace-card-meta"><span>Licence: {sound.license||'Check source'}</span><span>Preview audio</span></div>
+        <div className="workspace-card-actions"><a href={sound.sourceUrl} target="_blank" rel="noreferrer">Download / full file ↗</a><a href={sound.sourceUrl} target="_blank" rel="noreferrer">Source & licence ↗</a></div>
+      </article>)}</div>}
+      {!soundBusy&&!soundError&&soundResults.length===0&&<div className="workspace-empty"><b>Search the audio catalogue</b><p>Select a genre and search to load matching sounds here.</p></div>}
+    </section>}
     <div className="workspace-layout"><aside className="workspace-categories"><p className="kicker">BROWSE LIBRARIES</p>{sections.map(name=><button type="button" key={name} className={section===name?'selected':''} onClick={()=>{setSection(name);setQuery('')}}><span>{name}</span><ChevronRight size={15}/></button>)}</aside>
     <div className="workspace-results"><div className="workspace-filterbar"><input aria-label="Search resources" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search Telugu BGM, Hollywood, action, SFX…"/><select aria-label="Filter by resource type" value={kind} onChange={e=>setKind(e.target.value)}><option>All types</option><option value="audio">Music / SFX</option><option value="video">Video / footage</option><option value="image">Images</option><option value="template">Templates</option><option value="font">Cinematic fonts</option><option value="other">Tools / other</option></select></div>
     <div className="workspace-section-title"><div><p className="kicker">CURATED EDITING RESOURCES</p><h3>{section==='Workspace Home'?'Essential editing resources':section}</h3></div><span>{visible.length} ITEMS</span></div>
