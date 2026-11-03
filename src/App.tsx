@@ -404,7 +404,7 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
     document.getElementById(id)?.remove();
     if(section!=='Cinematic Fonts')return;
     const params=new URLSearchParams();
-    cinematicFonts.forEach(font=>params.append('family',font.googleFamily.replace(/\\+/g,' ')));
+    cinematicFonts.forEach(font=>params.append('family',font.googleFamily.replace(/\+/g,' ')));
     const link=document.createElement('link');link.id=id;link.rel='stylesheet';link.href='https://fonts.googleapis.com/css2?'+params.toString()+'&display=swap';
     document.head.appendChild(link);
     return()=>{document.getElementById(id)?.remove()};
