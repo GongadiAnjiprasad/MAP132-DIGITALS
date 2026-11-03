@@ -771,3 +771,14 @@ body,.site{background:#0A0B0E;color:#F5F0E7}.nav{height:82px;background:rgba(9,1
 @media(prefers-reduced-motion:reduce){.website-intro:before,.website-intro:after,.website-intro-frame>img,.website-intro-services span,.website-intro-progress i{animation:none;opacity:1;transform:none;filter:none}}
 
 
+
+/* MAP132 festival greeting and locally-rendered share poster */
+.festival-greeting{z-index:8;position:fixed;right:22px;bottom:22px;width:min(410px,calc(100vw - 32px));padding:18px 20px;border:1px solid #e7bd7660;border-radius:5px;background:linear-gradient(135deg,#111827f5,#251b18f5);color:#f7f0e4;box-shadow:0 16px 44px #0008;backdrop-filter:blur(14px)}
+.festival-greeting strong{font-size:22px}
+.festival-date,.festival-status{display:block;margin-top:10px;color:#e8c77a;font-size:11px}
+.festival-actions{display:flex;gap:9px;flex-wrap:wrap;margin-top:15px}
+.festival-actions button{border:1px solid #e8c77a88;background:#e8c77a;color:#17130e;padding:10px 13px;border-radius:3px;font-size:11px;font-weight:800;cursor:pointer}
+.festival-actions button+button{background:transparent;color:#f3e9d2}
+.festival-actions button:focus-visible{outline:2px solid #fff;outline-offset:3px}
+@media(max-width:600px){.festival-greeting{right:12px;bottom:12px;width:calc(100vw - 24px);padding:14px}.festival-greeting strong{font-size:19px}.festival-actions button{flex:1}}
+@media(prefers-reduced-motion:reduce){.festival-atmosphere>span{animation:none}}
