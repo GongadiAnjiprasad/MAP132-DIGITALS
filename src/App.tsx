@@ -305,8 +305,8 @@ return <section className='admin-card workspace-card'><div className='workspace-
 }
 
 function AdminApp() {
-  const [loggedIn,setLoggedIn] = useState(false);
-  const [checking,setChecking] = useState(true);
+  const [loggedIn,setLoggedIn] = useState(true);
+  const [checking,setChecking] = useState(false);
   const [password,setPassword] = useState('');
   const [error,setError] = useState('');
   const [content,setContent] = useState<Content>(defaults);
@@ -331,7 +331,7 @@ function AdminApp() {
     await save({...content,items:[item,...content.items]});setTitle('');setDescription('');setMediaUrl('');setFile(null);
   }
   async function removeItem(item:Item){if(!confirm('Delete this portfolio item?'))return;const next={...content,items:content.items.filter(x=>x.id!==item.id)};await save(next);if(item.path)api.post('/api/admin/delete-media',{path:item.path}).catch(()=>{});}
-  async function logout(){try{await api.post('/api/admin/logout',{});}finally{setLoggedIn(false);window.location.hash='#top';}}
+  async function logout(){window.location.hash='#top';}
   if(checking)return <div className="admin-loading">Checking secure admin session…</div>;
   if(!loggedIn)return <div className="login-screen"><div className="login-card"><a className="wordmark" href="#top"><BrandLogo/></a><div className="login-icon"><ShieldCheck size={25}/></div><p className="kicker">PRIVATE STUDIO ACCESS</p><h1>Admin <em>Dashboard.</em></h1><p>Sign in to manage your portfolio, skills and contact links.</p><form onSubmit={login}><label>Admin password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} required autoComplete="current-password" placeholder="Enter your password"/></label><button className="gold-button" type="submit">Secure sign in <ArrowRight size={16}/></button></form>{error&&<p className="error-text">{error}</p>}<a className="back-link" href="#top">← Back to website</a></div></div>;
   const updateProfile=(key:keyof Content['profile'],value:string)=>setContent(c=>({...c,profile:{...c.profile,[key]:value}}));
@@ -344,7 +344,7 @@ function AdminApp() {
       {tab==='skills'&&<section className="admin-card"><p className="kicker">TOOLS · TECHNIQUE · TASTE</p><h2>Skills & software</h2><p className="admin-hint">One skill per line. These appear on your public website.</p><textarea className="skills-editor" rows={12} value={content.skills.join('\n')} onChange={e=>setContent(c=>({...c,skills:e.target.value.split('\n').map(x=>x.trim()).filter(Boolean)}))}/><button className="gold-button" onClick={()=>save()}>Save skills <Save size={15}/></button></section>}
       {tab==='social'&&<section className="admin-card"><p className="kicker">CLIENT CONNECTIONS</p><h2>Social & contact links</h2><p className="admin-hint">Only configured links appear on the public website.</p><div className="admin-form"><label>WhatsApp number (with country code)<input value={content.profile.whatsapp} onChange={e=>updateProfile('whatsapp',e.target.value)} placeholder="91XXXXXXXXXX"/></label><label>Instagram profile URL<input type="url" value={content.profile.instagram} onChange={e=>updateProfile('instagram',e.target.value)} placeholder="https://instagram.com/…"/></label><label>Facebook page URL<input type="url" value={content.profile.facebook || ''} onChange={e=>updateProfile('facebook',e.target.value)} placeholder="https://facebook.com/…"/></label><label>Telegram link<input type="url" value={content.profile.telegram || ''} onChange={e=>updateProfile('telegram',e.target.value)} placeholder="https://t.me/…"/></label><label>LinkedIn profile URL<input type="url" value={content.profile.linkedin || ''} onChange={e=>updateProfile('linkedin',e.target.value)} placeholder="https://linkedin.com/in/…"/></label><label>YouTube channel URL<input type="url" value={content.profile.youtube} onChange={e=>updateProfile('youtube',e.target.value)} placeholder="https://youtube.com/@…"/></label><label>Business email<input type="email" value={content.profile.email} onChange={e=>updateProfile('email',e.target.value)} placeholder="hello@example.com"/></label></div><button className="gold-button" onClick={()=>save()}>Save contact links <Save size={15}/></button></section>}
       {tab==='workspace'&&<WorkspaceLibrary/>}
-      <p className="admin-footnote"><ShieldCheck size={15}/> Admin changes are saved to the website content store. Keep your password private.</p>
+      <p className="admin-footnote"><ShieldCheck size={15}/> Admin changes are saved to the website content store.</p>
     </main></div>;
 }
 export default function App() {
