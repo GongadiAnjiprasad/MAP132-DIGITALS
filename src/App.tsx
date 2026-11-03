@@ -346,7 +346,7 @@ function SoundResultCard({sound}:{sound:any}){
   </article>;
 }
 function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?:WorkspaceEntry[];onAdd:(item:WorkspaceEntry)=>void;onDelete:(id:string)=>void;saving?:boolean}){
-  const [section,setSection]=useState('Music & BGM'),[query,setQuery]=useState(''),[kind,setKind]=useState('All types'),[draft,setDraft]=useState({title:'',category:'Music & BGM',detail:'',href:'',provider:'',licence:'',compatibility:'',kind:'audio' as WorkspaceEntry['kind'],previewUrl:'',downloadUrl:''}),[formOpen,setFormOpen]=useState(false),[message,setMessage]=useState('');
+  const [section,setSection]=useState('Music & BGM'),[query,setQuery]=useState(''),[kind,setKind]=useState('All types'),[fontStyleFilter,setFontStyleFilter]=useState('All styles'),[draft,setDraft]=useState({title:'',category:'Music & BGM',detail:'',href:'',provider:'',licence:'',compatibility:'',kind:'audio' as WorkspaceEntry['kind'],previewUrl:'',downloadUrl:''}),[formOpen,setFormOpen]=useState(false),[message,setMessage]=useState('');
   const [activePreview,setActivePreview]=useState<WorkspaceEntry|null>(null);
   const [soundGenre,setSoundGenre]=useState('All genres');
   const [soundQuery,setSoundQuery]=useState('');
@@ -387,12 +387,33 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
     {id:'font-blackops',fontFamily:'Black Ops One',googleFamily:'Black+Ops+One',downloadUrl:'https://fonts.google.com/download?family=Black%20Ops%20One',title:'Black Ops One — Sci-Fi / Gaming',provider:'Google Fonts',detail:'Angular display style for sci-fi, military, gaming and futuristic title treatments.',href:'https://fonts.google.com/specimen/Black+Ops+One',tags:['Hollywood','Sci-Fi','Futuristic','Gaming'],licence:'SIL Open Font License. Verify the current family licence on its specimen page.',compatibility:'Premiere Pro · After Effects · Photoshop · DaVinci Resolve',kind:'font'},
 
   ].map((font:any)=>({...font,category:'Cinematic Fonts',kind:'font' as WorkspaceEntry['kind']}));
+  useEffect(()=>{
+    const id='map132-cinematic-fonts';
+    document.getElementById(id)?.remove();
+    if(section!=='Cinematic Fonts')return;
+    const params=new URLSearchParams();
+    cinematicFonts.forEach(font=>params.append('family',font.googleFamily.replace(/\\+/g,' ')));
+    const link=document.createElement('link');link.id=id;link.rel='stylesheet';link.href='https://fonts.googleapis.com/css2?'+params.toString()+'&display=swap';
+    document.head.appendChild(link);
+    return()=>{document.getElementById(id)?.remove()};
+  },[section]);
+  const fontStyleOptions=['All styles','Epic / Historical','Action / Trailer','Tollywood / Mass','Thriller / Crime','Romance / Period','Sci-Fi / Gaming','Condensed / Bold','Serif / Elegant'];
+  const fontMatchesStyle=(card:any)=>{
+    if(fontStyleFilter==='All styles')return true;
+    const tags=(card.tags||[]).map((tag:string)=>tag.toLowerCase());
+    const family=String(card.fontFamily||'').toLowerCase();
+    const groups:Record<string,string[]>={'Epic / Historical':['epic','historical'],'Action / Trailer':['action','trailer'],'Tollywood / Mass':['tollywood','mass','commercial'],'Thriller / Crime':['thriller','crime'],'Romance / Period':['romance','period'],'Sci-Fi / Gaming':['sci-fi','futuristic','gaming']};
+    if(groups[fontStyleFilter])return groups[fontStyleFilter].some(tag=>tags.includes(tag));
+    if(fontStyleFilter==='Condensed / Bold')return ['bebas neue','anton','teko','oswald','black ops one'].includes(family);
+    if(fontStyleFilter==='Serif / Elegant')return ['cinzel','cormorant garamond'].includes(family);
+    return true;
+  };
   const all=[...seeded,...cinematicFonts,...resources.filter(x=>['Music & BGM','Sound Effects','Stock Footage','Editing Templates','Cinematic Fonts'].includes(x.category))];
   // Audio libraries use live Freesound search only; hide the old static provider/resource cards.
   const cards=(section==='Music & BGM'||section==='Sound Effects')
     ? resources.filter(c=>c.category===section)
     : all.filter(c=>c.category===section);
-  const visible=cards.filter(c=>(c.title+' '+(c.detail||'')+' '+(c.provider||'')+' '+(c.tags||[]).join(' ')).toLowerCase().includes(query.toLowerCase())&&(kind==='All types'||c.kind===kind));
+  const visible=cards.filter(c=>(c.title+' '+(c.detail||'')+' '+(c.provider||'')+' '+(c.tags||[]).join(' ')).toLowerCase().includes(query.toLowerCase())&&(section==='Cinematic Fonts'?fontMatchesStyle(c):(kind==='All types'||c.kind===kind)));
   function submit(e:React.FormEvent){e.preventDefault();const href=safeLink(draft.href);if(!href){setMessage('Enter a valid https:// resource URL.');return}if(!draft.title.trim()||!draft.licence.trim()){setMessage('Title and licence notes are required.');return}const previewUrl=draft.previewUrl?safeLink(draft.previewUrl):'';const downloadUrl=draft.downloadUrl?safeLink(draft.downloadUrl):'';if((draft.previewUrl&&!previewUrl)||(draft.downloadUrl&&!downloadUrl)){setMessage('Preview / download URL must be a valid https:// URL.');return}onAdd({...draft,id:crypto.randomUUID(),href,previewUrl,downloadUrl,tags:draft.category.split(' ')});setDraft({title:'',category:'Audio Library',detail:'',href:'',provider:'',licence:'',compatibility:'',kind:'audio',previewUrl:'',downloadUrl:''});setMessage('');setFormOpen(false)}
   return <section className="workspace-library">
     <div className="workspace-heading"><div><p className="kicker">MAP132 / PRIVATE PRODUCTION LIBRARY</p><h2>Editor Workspace</h2><p>Only the resources used in MAP132 client edits. Search, preview, play/pause and download without extra clutter.</p></div><button className="gold-button" type="button" onClick={()=>setFormOpen(v=>!v)}><Plus size={16}/>{formOpen?'Close':'Add resource'}</button></div>
@@ -409,7 +430,7 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
       <button className="gold-button" type="submit" disabled={saving}><Save size={15}/>{saving?'Saving…':'Save to library'}</button>{message&&<p className="error-text">{message}</p>}
     </form>}
     <nav className="workspace-library-nav" aria-label="Editing resource libraries">
-      {sections.map(name=><button type="button" key={name} className={section===name?'selected':''} aria-current={section===name?'page':undefined} onClick={()=>{setSection(name);setQuery('');setKind('All types')}}>{name}</button>)}
+      {sections.map(name=><button type="button" key={name} className={section===name?'selected':''} aria-current={section===name?'page':undefined} onClick={()=>{setSection(name);setQuery('');setKind('All types');setFontStyleFilter('All styles')}}>{name}</button>)}
     </nav>
     {(section==='Sound Effects'||section==='Music & BGM')&&<section className="workspace-live-search">
       <div className="workspace-section-title"><div><p className="kicker">AUDIO LIBRARY</p><h3>Find sounds</h3></div><span>{soundCount.toLocaleString()} MATCHES</span></div>
@@ -436,11 +457,11 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
       {soundResults.length===0&&soundNextPage!==null&&<div style={{display:'flex',justifyContent:'center',padding:'10px 0 18px'}}><button type="button" className="gold-button" onClick={()=>searchSounds(soundNextPage,false)} disabled={soundBusy}>{soundBusy?'Loading…':'Load more eligible sounds'}</button></div>}
     </section>}
     <div className="workspace-results workspace-page">
-      <div className="workspace-filterbar"><input aria-label="Search resources" value={query} onChange={e=>setQuery(e.target.value)} placeholder={section==='Music & BGM'?'Search music…':section==='Sound Effects'?'Search sound effects…':'Search resources…'}/><select aria-label="Filter by resource type" value={kind} onChange={e=>setKind(e.target.value)}><option>All types</option><option value="audio">Music / SFX</option><option value="video">Video / footage</option><option value="image">Images</option><option value="template">Templates</option><option value="font">Cinematic fonts</option><option value="other">Tools / other</option></select></div>
+      <div className="workspace-filterbar"><input aria-label={section==='Cinematic Fonts'?'Search fonts':'Search resources'} value={query} onChange={e=>setQuery(e.target.value)} placeholder={section==='Music & BGM'?'Search music…':section==='Sound Effects'?'Search sound effects…':section==='Cinematic Fonts'?'Search fonts by name, style or movie mood…':section==='Stock Footage'?'Search footage by subject or format…':section==='Editing Templates'?'Search templates by title or software…':'Search resources…'}/>{section==='Cinematic Fonts'?<select aria-label="Filter fonts by cinematic style" value={fontStyleFilter} onChange={e=>setFontStyleFilter(e.target.value)}>{fontStyleOptions.map(style=><option key={style}>{style}</option>)}</select>:<select aria-label="Filter by resource type" value={kind} onChange={e=>setKind(e.target.value)}><option>All types</option><option value="audio">Music / SFX</option><option value="video">Video / footage</option><option value="image">Images</option><option value="template">Templates</option><option value="font">Cinematic fonts</option><option value="other">Tools / other</option></select>}</div>
       <div className="workspace-section-title"><div><h3>{section}</h3></div><span>{visible.length} ITEMS</span></div>
       <div className="workspace-resource-grid">{visible.map((card:any)=><article className="workspace-resource-card" key={card.id}>
         <div className="workspace-card-top"><span>{card.provider||card.category}</span></div>
-        {card.kind==='font'&&<link rel="stylesheet" href={`https://fonts.googleapis.com/css2?family=${card.googleFamily}&display=swap`}/>}
+        
         {card.kind==='font'&&<div className="workspace-font-preview" style={{border:'1px solid rgba(214,174,99,.24)',borderRadius:14,padding:'18px 14px',margin:'12px 0',background:'linear-gradient(135deg,rgba(214,174,99,.10),rgba(10,12,18,.55))',textAlign:'center',overflow:'hidden'}}><span style={{display:'block',fontSize:10,letterSpacing:2,color:'#c8a76b',marginBottom:12}}>LIVE FONT PREVIEW</span><strong style={{display:'block',fontFamily:`"${card.fontFamily}",sans-serif`,fontSize:'clamp(25px,4vw,42px)',lineHeight:1.12,overflowWrap:'anywhere',color:'#f6ead4'}}>THE FINAL CHAPTER</strong><span style={{display:'block',fontFamily:`"${card.fontFamily}",sans-serif`,fontSize:18,marginTop:10,color:'#d6c5a6'}}>MAP132 DIGITALS</span></div>}
         {card.previewUrl&&<div className="workspace-media-preview">{card.kind==='audio'?<><audio controls preload="none" src={safeLink(card.previewUrl)}/></>:card.kind==='video'?<video controls preload="metadata" playsInline src={safeLink(card.previewUrl)}/>:<img src={safeLink(card.previewUrl)} alt={card.title}/>}</div>}
         <h4>{card.title}</h4><p>{card.detail||'Open the provider page to explore this resource.'}</p>
@@ -449,7 +470,7 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
         <details><summary>Licence & usage notes</summary><p>{card.licence||'Check the provider terms before use.'}</p></details>
         <div className="workspace-card-actions">{card.previewUrl&&<button type="button" onClick={()=>setActivePreview(card)}>Open preview</button>}{card.kind==='font'&&card.downloadUrl&&<a href={card.downloadUrl} target="_blank" rel="noreferrer" className="gold-button">Download font (.zip) ↓</a>}{card.kind!=='font'&&card.downloadUrl&&<a href={safeLink(card.downloadUrl)} download>Download file</a>}{card.kind!=='font'&&<a href={safeLink(card.href||'')} target="_blank" rel="noreferrer">Browse official library ↗</a>}{resources.some(x=>x.id===card.id)&&<button type="button" onClick={()=>onDelete(card.id)}>Remove</button>}</div>
       </article>)}</div>
-      {visible.length===0&&<div className="workspace-empty"><Film size={26}/><b>No resources in this library yet</b><p>Try another library.</p></div>}
+      {visible.length===0&&<div className="workspace-empty"><Film size={26}/><b>{section==='Cinematic Fonts'?'No fonts match these filters':'No resources in this library yet'}</b><p>{section==='Cinematic Fonts'?'Try a different style or clear the search text.':'Try another library.'}</p></div>}
     </div>
     <p className="workspace-footnote"><ShieldCheck size={15}/> Audio search currently shows Freesound CC0 and CC BY results only. CC BY requires creator attribution; CC BY-NC and other non-commercial licences are excluded. Preview is streamed from the source; use the source page for its permitted download.</p>
     {activePreview&&<div className="workspace-preview-modal" role="dialog" aria-modal="true" aria-label={activePreview.title} onClick={()=>setActivePreview(null)}><div className="workspace-preview-dialog" onClick={e=>e.stopPropagation()}><button type="button" className="workspace-preview-close" onClick={()=>setActivePreview(null)}>Close ✕</button><p className="kicker">{activePreview.provider||'MAP132 RESOURCE PREVIEW'}</p><h3>{activePreview.title}</h3>{activePreview.kind==='audio'?<audio controls autoPlay src={safeLink(activePreview.previewUrl||'')}/>:activePreview.kind==='video'?<video controls autoPlay playsInline src={safeLink(activePreview.previewUrl||'')}/>:<img src={safeLink(activePreview.previewUrl||'')} alt={activePreview.title}/>}<p>{activePreview.detail}</p><div className="workspace-card-actions">{activePreview.downloadUrl&&<a href={safeLink(activePreview.downloadUrl)} download>Download file</a>}<a href={safeLink(activePreview.href)} target="_blank" rel="noreferrer">Open original resource page ↗</a></div></div></div>}
