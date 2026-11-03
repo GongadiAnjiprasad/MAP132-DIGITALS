@@ -122,6 +122,10 @@ function IndianFestivalAtmosphere(){
   const festival = todayFestival || nextFestival;
   const [status,setStatus] = useState('');
   if (!festival) return null;
+  const daysUntil = Math.round((new Date(festival.date+'T12:00:00').getTime()-new Date(today+'T12:00:00').getTime())/86400000);
+  const inFestivalWindow = daysUntil >= 0 && daysUntil <= 10;
+  const advanceWishWindow = daysUntil >= 0 && daysUntil <= 2;
+  if (!inFestivalWindow) return null;
 
   async function createPoster(share: boolean) {
     if (!festival) return;
@@ -178,17 +182,17 @@ function IndianFestivalAtmosphere(){
   }
 
   return <>
-    {todayFestival && <div className={`festival-atmosphere festival-${todayFestival.theme}`} aria-hidden="true">
-      {Array.from({length:10},(_,i)=><span key={i} style={{left:`${8+i*9}%`,animationDuration:`${12+(i%5)*3}s`,animationDelay:`${-i*2}s`}}>{todayFestival.theme==='snow'?'❄':todayFestival.theme==='sun'?'✦':todayFestival.theme==='diwali'?'✧':'✦'}</span>)}
-    </div>}
-    <aside className={`festival-greeting ${todayFestival?'festival-today':'festival-advance'}`} aria-live="polite">
-      <span className="festival-kicker">{todayFestival?'TODAY · A SPECIAL WISH FROM MAP132':'UPCOMING CELEBRATION · MAP132 DIGITALS'}</span>
-      <strong>{todayFestival?todayFestival.name+' wishes':festival.name+' is coming'}</strong>
-      <p>{todayFestival?festival.message:`Get ready for ${festival.name} on ${festivalDateLabel(festival.date)}. We’ll share a warm MAP132 greeting on the day.`}</p>
-      {todayFestival ? <div className="festival-actions">
+    <div className={`festival-atmosphere festival-${festival.theme} ${todayFestival?'festival-live':'festival-build-up'}`} aria-hidden="true">
+      {Array.from({length:14},(_,i)=><span key={i} style={{left:`${4+i*7}%`,animationDuration:`${15+(i%5)*4}s`,animationDelay:`${-i*2.4}s`}}>{festival.theme==='snow'?['❄','✧','❅'][i%3]:festival.theme==='sun'?['☀','✦','✨'][i%3]:festival.theme==='diwali'?['🪔','✧','✨','🌟'][i%4]:festival.theme==='gold'?['✨','✦','🙏'][i%3]:['✦','✨','🎉'][i%3]}</span>)}
+    </div>
+    <aside className={`festival-greeting ${todayFestival?'festival-today':advanceWishWindow?'festival-advance festival-advance-wish':'festival-build-card'}`} aria-live="polite">
+      <span className="festival-kicker">{todayFestival?'✦ TODAY · A SPECIAL WISH FROM MAP132 ✦':advanceWishWindow?'✧ ADVANCE WISHES · MAP132 DIGITALS ✧':'THE FESTIVE SEASON IS APPROACHING · MAP132'}</span>
+      <strong>{todayFestival?festival.name+' wishes':advanceWishWindow?`Advance ${festival.name} wishes`:`${festival.emoji} ${festival.name} season is near`}</strong>
+      <p>{todayFestival?festival.message:advanceWishWindow?`Sending warm advance wishes! ${festival.message}`:`A little festive magic is on its way. ${festival.name} arrives on ${festivalDateLabel(festival.date)} — stay tuned for our special greeting.`}</p>
+      {(todayFestival || advanceWishWindow) ? <div className="festival-actions">
         <button type="button" onClick={()=>createPoster(false)}>Download poster</button>
         <button type="button" onClick={()=>createPoster(true)}>Share wishes</button>
-      </div> : <span className="festival-date">{festivalDateLabel(festival.date)}</span>}
+      </div> : <span className="festival-date">{daysUntil} days to go · {festivalDateLabel(festival.date)}</span>}
       {status && <small className="festival-status" role="status">{status}</small>}
     </aside>
   </>;
