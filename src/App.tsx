@@ -304,11 +304,23 @@ function SoundResultCard({sound}:{sound:any}){
     document.querySelectorAll('audio').forEach((other)=>{if(other!==audio)(other as HTMLAudioElement).pause();});
     try{await audio.play();setPlaying(true);}catch{setPlaying(false);}
   }
-  return <article className="workspace-resource-card" style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',minWidth:0,overflow:'hidden'}}>
+  const licence=String(sound.license||'').toLowerCase();
+  const downloadAllowed=licence.includes('creativecommons.org/publicdomain/zero/')||(licence.includes('creativecommons.org/licenses/by/')&&!licence.includes('/by-nc/'));
+  const duration=Number.isFinite(Number(sound.duration))?Math.floor(Number(sound.duration)):0;
+  const time=duration?Math.floor(duration/60)+':'+String(duration%60).padStart(2,'0'):'';
+  return <article className="workspace-resource-card" style={{display:'flex',flexDirection:'column',alignItems:'stretch',gap:10,padding:'14px 16px',minWidth:0,overflow:'hidden'}}>
     <audio ref={audioRef} preload="none" src={sound.previewUrl||undefined} onEnded={()=>setPlaying(false)} onPause={()=>setPlaying(false)} onPlay={()=>setPlaying(true)} />
-    <button type="button" className="gold-button" aria-label={playing?'Pause':'Play'} onClick={toggle} disabled={!sound.previewUrl} style={{minWidth:42,padding:'10px',justifyContent:'center'}}>{playing?'Ⅱ':'▶'}</button>
-    <strong title={sound.title} style={{display:'block',flex:'1 1 0',width:0,minWidth:0,maxWidth:'min(42vw, 210px)',overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap',fontSize:13,lineHeight:1.3}}>{sound.title}</strong>
-    <a className="gold-button" href={sound.sourceUrl} target="_blank" rel="noreferrer" aria-label="Open source and licence" style={{whiteSpace:'nowrap',padding:'8px 10px',flexShrink:0,fontSize:12}}>Source ↗</a>
+    <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:12,minWidth:0}}>
+      <div style={{minWidth:0,flex:'1 1 auto'}}>
+        <strong title={sound.title} style={{display:'block',fontSize:15,lineHeight:1.35,overflowWrap:'anywhere'}}>{sound.title}</strong>
+        <span style={{display:'block',fontSize:12,opacity:.72,marginTop:5}}>Preview available{sound.creator?' · '+sound.creator:''}{time?' · '+time:''}</span>
+      </div>
+      <span style={{fontSize:11,opacity:.7,whiteSpace:'nowrap',flexShrink:0}}>{downloadAllowed?'CC licence':'Licence check'}</span>
+    </div>
+    <div style={{display:'flex',alignItems:'center',gap:9,flexWrap:'wrap'}}>
+      <button type="button" className="gold-button" aria-label={playing?'Pause preview':'Play preview'} onClick={toggle} disabled={!sound.previewUrl} style={{minWidth:132,padding:'9px 14px',justifyContent:'center'}}>{playing?'Ⅱ Pause Preview':'▶ Play Preview'}</button>
+      <a className="gold-button" href={downloadAllowed?sound.sourceUrl:undefined} target={downloadAllowed?'_blank':undefined} rel={downloadAllowed?'noreferrer':undefined} aria-disabled={!downloadAllowed} onClick={e=>{if(!downloadAllowed)e.preventDefault();}} style={{minWidth:118,padding:'9px 14px',justifyContent:'center',opacity:downloadAllowed?1:.45,pointerEvents:downloadAllowed?'auto':'none'}}>↓ Download</a>
+    </div>
   </article>;
 }
 function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?:WorkspaceEntry[];onAdd:(item:WorkspaceEntry)=>void;onDelete:(id:string)=>void;saving?:boolean}){
