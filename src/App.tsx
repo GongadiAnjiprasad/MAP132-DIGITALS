@@ -197,16 +197,16 @@ function PublicSite({ content }: { content: Content }) {
     <WebsiteIntro />
     <header className="nav">
       <a className="wordmark" href="#top"><BrandLogo/></a>
-      <nav><a href="#work">Work</a><a href="#services">Services</a><a href="#skills">Toolkit</a><a href="#about">About</a><a className="nav-workspace" href="#workspace"><Film size={14}/> Private Editor Workspace</a><a className="nav-hire" href="#contact">Let’s talk <ArrowRight size={15}/></a></nav>
+      <nav aria-label="Main navigation"><a href="#top">Home</a><a href="#work">Portfolio</a><a href="#services">Services</a><a href="#skills">Creative Lab</a><a href="#about">About</a><a className="nav-workspace" href="#workspace"><Film size={14}/> Editor Workspace</a><a className="nav-hire" href="#contact">Start a project <ArrowRight size={15}/></a></nav>
     </header>
     <main>
       <section className="hero" id="top">
         <div className="hero-noise"></div><div className="hero-copy">
           <p className="kicker"><i/> MAP132 DIGITALS · VIDEO EDITING STUDIO</p>
           <h1>{p.headline.split(' ').slice(0,-2).join(' ')} <em>{p.headline.split(' ').slice(-2).join(' ')}</em></h1>
-          <p className="hero-intro">{p.intro}</p>
+          <p className="hero-intro">{p.intro}</p><p className="hero-positioning">Independent creative studio · Video editing · Motion · Sound</p>
           <div className="hero-actions"><a className="gold-button" href="#work">View selected work <ArrowRight size={16}/></a><a className="quiet-link" href="#contact">Start a project <ArrowDownRight size={16}/></a></div>
-          <div className="hero-meta"><span>EDIT WITH PURPOSE</span><span>CRAFTED FRAME BY FRAME</span></div>
+          <div className="hero-meta"><span>EDIT WITH PURPOSE</span><span>CRAFTED FRAME BY FRAME</span></div><div className="home-discover"><a href="#work">Explore the work <ArrowRight size={14}/></a><span>SCROLL LESS · DISCOVER MORE</span></div>
         </div>
         <div className="hero-visual" aria-label="Cinematic video editing visual">
           <div className="visual-orbit orbit-a"></div><div className="visual-orbit orbit-b"></div>
