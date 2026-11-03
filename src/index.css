@@ -934,3 +934,18 @@ main:not(:has(> section:target))>section:not(#top):not(#approach):not(#work){dis
   .manifesto-pillars{display:flex;flex-wrap:wrap;gap:14px;margin-top:12px}
   .manifesto-pillars span{color:#D9BC87;font-size:8px;letter-spacing:1.2px}
 }
+
+
+/* MAP132 workspace controls: compact, functional quick navigation */
+.workspace-quick-actions{display:flex;align-items:center;flex-wrap:wrap;gap:8px;margin:18px 0 22px;padding:13px;border:1px solid rgba(232,199,122,.18);background:rgba(255,255,255,.025)}
+.workspace-quick-actions>span{width:100%;color:#D8B77B;font-size:8px;font-weight:800;letter-spacing:1.7px}
+.workspace-quick-actions button{padding:10px 12px;border:1px solid rgba(232,199,122,.3);background:#111925;color:#EAE5DC;font-size:10px;cursor:pointer}
+.workspace-quick-actions button:hover,.workspace-quick-actions button:focus-visible{border-color:#E8C77A;background:rgba(232,199,122,.12);color:#F6D99C}
+.workspace-tools{margin-top:18px}
+.workspace-resource-card{min-width:0}
+@media(max-width:700px){
+  .nav>.wordmark{justify-content:flex-start!important;padding-left:16px;height:43px}
+  .nav>.wordmark img{width:76px;height:43px;object-fit:contain}
+  .workspace-quick-actions{gap:7px;padding:11px}
+  .workspace-quick-actions button{flex:1 1 calc(50% - 7px);min-height:40px;text-align:left}
+}
