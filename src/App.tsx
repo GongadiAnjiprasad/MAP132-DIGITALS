@@ -297,12 +297,29 @@ const workspaceResources = [
 function SoundResultCard({sound}:{sound:any}){
   const audioRef=useRef<HTMLAudioElement|null>(null);
   const [playing,setPlaying]=useState(false);
+  const [downloading,setDownloading]=useState(false);
+  const [downloadError,setDownloadError]=useState('');
   async function toggle(){
     const audio=audioRef.current;
     if(!audio)return;
     if(playing){audio.pause();setPlaying(false);return;}
     document.querySelectorAll('audio').forEach((other)=>{if(other!==audio)(other as HTMLAudioElement).pause();});
     try{await audio.play();setPlaying(true);}catch{setPlaying(false);}
+  }
+  async function downloadPreview(){
+    if(downloading)return;
+    setDownloading(true);setDownloadError('');
+    try{
+      const response=await fetch('/api/resources/sounds/'+encodeURIComponent(String(sound.id))+'/download');
+      if(!response.ok){const data=await response.json().catch(()=>({}));throw new Error(data.error||'Download failed.');}
+      const blob=await response.blob();
+      const objectUrl=URL.createObjectURL(blob);
+      const anchor=document.createElement('a');
+      anchor.href=objectUrl;anchor.download=(String(sound.title||'sound-preview').replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,80)||'sound-preview')+'.mp3';
+      document.body.appendChild(anchor);anchor.click();anchor.remove();
+      window.setTimeout(()=>URL.revokeObjectURL(objectUrl),1500);
+    }catch(error){setDownloadError(error instanceof Error?error.message:'Download failed.');}
+    finally{setDownloading(false);}
   }
   const licence=String(sound.license||'').toLowerCase();
   const downloadAllowed=licence.includes('creativecommons.org/publicdomain/zero/')||(licence.includes('creativecommons.org/licenses/by/')&&!licence.includes('/by-nc/'));
@@ -319,8 +336,9 @@ function SoundResultCard({sound}:{sound:any}){
     </div>
     <div style={{display:'flex',alignItems:'center',gap:9,flexWrap:'wrap'}}>
       <button type="button" className="gold-button" aria-label={playing?'Pause preview':'Play preview'} onClick={toggle} disabled={!sound.previewUrl} style={{minWidth:132,padding:'9px 14px',justifyContent:'center'}}>{playing?'Ⅱ Pause Preview':'▶ Play Preview'}</button>
-      <a className="gold-button" href={downloadAllowed?sound.sourceUrl:undefined} target={downloadAllowed?'_blank':undefined} rel={downloadAllowed?'noreferrer':undefined} aria-disabled={!downloadAllowed} onClick={e=>{if(!downloadAllowed)e.preventDefault();}} style={{minWidth:118,padding:'9px 14px',justifyContent:'center',opacity:downloadAllowed?1:.45,pointerEvents:downloadAllowed?'auto':'none'}}>↓ Download</a>
+      <button type="button" className="gold-button" onClick={downloadPreview} disabled={!downloadAllowed||downloading} style={{minWidth:140,padding:'9px 14px',justifyContent:'center',opacity:downloadAllowed?1:.45}}>{downloading?'Downloading…':'↓ Download Preview'}</button>
     </div>
+    {downloadError&&<span className="error-text">{downloadError}</span>}
   </article>;
 }
 function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?:WorkspaceEntry[];onAdd:(item:WorkspaceEntry)=>void;onDelete:(id:string)=>void;saving?:boolean}){
