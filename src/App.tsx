@@ -311,7 +311,7 @@ function SoundResultCard({sound}:{sound:any}){
   </article>;
 }
 function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?:WorkspaceEntry[];onAdd:(item:WorkspaceEntry)=>void;onDelete:(id:string)=>void;saving?:boolean}){
-  const [section,setSection]=useState('Workspace Home'),[query,setQuery]=useState(''),[kind,setKind]=useState('All types'),[draft,setDraft]=useState({title:'',category:'Music & BGM',detail:'',href:'',provider:'',licence:'',compatibility:'',kind:'audio' as WorkspaceEntry['kind'],previewUrl:'',downloadUrl:''}),[formOpen,setFormOpen]=useState(false),[message,setMessage]=useState('');
+  const [section,setSection]=useState('Music & BGM'),[query,setQuery]=useState(''),[kind,setKind]=useState('All types'),[draft,setDraft]=useState({title:'',category:'Music & BGM',detail:'',href:'',provider:'',licence:'',compatibility:'',kind:'audio' as WorkspaceEntry['kind'],previewUrl:'',downloadUrl:''}),[formOpen,setFormOpen]=useState(false),[message,setMessage]=useState('');
   const [activePreview,setActivePreview]=useState<WorkspaceEntry|null>(null);
   const [soundGenre,setSoundGenre]=useState('Cinematic');
   const [soundQuery,setSoundQuery]=useState('');
@@ -327,7 +327,7 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
     catch(error){setSoundError(error instanceof Error?error.message:'Sound search failed.');setSoundResults([]);setSoundCount(0);}
     finally{setSoundBusy(false);}
   }
-  const sections=['Workspace Home','Music & BGM','Sound Effects','Stock Footage','Editing Templates','Cinematic Fonts'];
+  const sections=['Music & BGM','Sound Effects','Stock Footage','Editing Templates','Cinematic Fonts'];
   const seeded=workspaceResources.filter(x=>['Audio Library','Stock Footage','Editing Assets'].includes(x.section)).flatMap(x=>x.cards.filter((c:any)=>!['google-fonts','google-fonts-live'].includes(c.id)).map((c:any)=>({...c,category:x.section==='Audio Library'?(c.id.includes('sfx')||c.id.includes('cinematic')||c.id.includes('impact')||c.id.includes('whoosh')||c.id.includes('movie')?'Sound Effects':'Music & BGM'):x.section==='Stock Footage'?'Stock Footage':'Editing Templates',kind:(x.section==='Audio Library'?'audio':x.section==='Stock Footage'?'video':'template') as WorkspaceEntry['kind'],licence:c.licence||'Check the provider’s current licence on the original asset page before client or commercial use.',compatibility:c.compatibility||'Check the asset page for supported software and formats.'})));
   const cinematicFonts=[
     {id:'font-cinzel',title:'Cinzel — Epic / Historical',provider:'Google Fonts',detail:'Roman inscription-inspired display face for epic titles, period dramas and premium cinematic posters.',href:'https://fonts.google.com/specimen/Cinzel',tags:['Hollywood','Epic','Historical','Title'],licence:'SIL Open Font License. Verify the current family licence on its specimen page.',compatibility:'Premiere Pro · After Effects · Photoshop · DaVinci Resolve',kind:'font'},
@@ -340,7 +340,7 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
 
   ].map((font:any)=>({...font,category:'Cinematic Fonts',kind:'font' as WorkspaceEntry['kind']}));
   const all=[...seeded,...cinematicFonts,...resources.filter(x=>['Music & BGM','Sound Effects','Stock Footage','Editing Templates','Cinematic Fonts'].includes(x.category))];
-  const cards=(section==='Workspace Home'?all:all.filter(c=>c.category===section));
+  const cards=all.filter(c=>c.category===section);
   
   const visible=cards.filter(c=>(c.title+' '+(c.detail||'')+' '+(c.provider||'')+' '+(c.tags||[]).join(' ')).toLowerCase().includes(query.toLowerCase())&&(kind==='All types'||c.kind===kind));
   function submit(e:React.FormEvent){e.preventDefault();const href=safeLink(draft.href);if(!href){setMessage('Enter a valid https:// resource URL.');return}if(!draft.title.trim()||!draft.licence.trim()){setMessage('Title and licence notes are required.');return}const previewUrl=draft.previewUrl?safeLink(draft.previewUrl):'';const downloadUrl=draft.downloadUrl?safeLink(draft.downloadUrl):'';if((draft.previewUrl&&!previewUrl)||(draft.downloadUrl&&!downloadUrl)){setMessage('Preview / download URL must be a valid https:// URL.');return}onAdd({...draft,id:crypto.randomUUID(),href,previewUrl,downloadUrl,tags:draft.category.split(' ')});setDraft({title:'',category:'Audio Library',detail:'',href:'',provider:'',licence:'',compatibility:'',kind:'audio',previewUrl:'',downloadUrl:''});setMessage('');setFormOpen(false)}
@@ -365,19 +365,23 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
       {soundResults.length>0&&<div className="workspace-resource-grid" style={{gridTemplateColumns:'1fr',gap:8}}>{soundResults.map(sound=><SoundResultCard key={sound.id} sound={sound}/>)}</div>}
       {!soundBusy&&!soundError&&soundResults.length===0&&<div className="workspace-empty"><b>Search sounds</b></div>}
     </section>}
-    <div className="workspace-layout"><aside className="workspace-categories"><p className="kicker">BROWSE LIBRARIES</p>{sections.map(name=><button type="button" key={name} className={section===name?'selected':''} onClick={()=>{setSection(name);setQuery('')}}><span>{name}</span><ChevronRight size={15}/></button>)}</aside>
-    <div className="workspace-results"><div className="workspace-filterbar"><input aria-label="Search resources" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search Telugu BGM, Hollywood, action, SFX…"/><select aria-label="Filter by resource type" value={kind} onChange={e=>setKind(e.target.value)}><option>All types</option><option value="audio">Music / SFX</option><option value="video">Video / footage</option><option value="image">Images</option><option value="template">Templates</option><option value="font">Cinematic fonts</option><option value="other">Tools / other</option></select></div>
-    <div className="workspace-section-title"><div><p className="kicker">CURATED EDITING RESOURCES</p><h3>{section==='Workspace Home'?'Essential editing resources':section}</h3></div><span>{visible.length} ITEMS</span></div>
-    <div className="workspace-resource-grid">{visible.map((card:any)=><article className="workspace-resource-card" key={card.id}>
-      <div className="workspace-card-top"><span>{card.provider||card.category}</span></div>
-      {card.previewUrl&&<div className="workspace-media-preview">{card.kind==='audio'?<><audio controls preload="none" src={safeLink(card.previewUrl)}/></>:card.kind==='video'?<video controls preload="metadata" playsInline src={safeLink(card.previewUrl)}/>:<img src={safeLink(card.previewUrl)} alt={card.title}/>}</div>}
-      <h4>{card.title}</h4><p>{card.detail||'Open the provider page to explore this resource.'}</p>
-      <div className="workspace-card-meta"><span>{card.kind||'resource'}</span><span>{card.compatibility||'Check formats on source'}</span></div>
-      <div className="workspace-card-tags">{(card.tags||[]).slice(0,5).map((tag:string)=><span key={tag}>{tag}</span>)}</div>
-      <details><summary>Licence & usage notes</summary><p>{card.licence||'Check the provider terms before use.'}</p></details>
-      <div className="workspace-card-actions">{card.previewUrl&&<button type="button" onClick={()=>setActivePreview(card)}>Open preview</button>}{card.downloadUrl&&<a href={safeLink(card.downloadUrl)} download>Download file</a>}<a href={safeLink(card.href||'')} target="_blank" rel="noreferrer">Browse official library ↗</a>{resources.some(x=>x.id===card.id)&&<button type="button" onClick={()=>onDelete(card.id)}>Remove</button>}</div>
-    </article>)}</div>
-    {visible.length===0&&<div className="workspace-empty"><Film size={26}/><b>No matching resources</b><p>Try a shorter search or another library.</p></div>}</div></div>
+    <nav className="workspace-library-nav" aria-label="Editing resource libraries">
+      {sections.map(name=><button type="button" key={name} className={section===name?'selected':''} aria-current={section===name?'page':undefined} onClick={()=>{setSection(name);setQuery('');setKind('All types')}}>{name}</button>)}
+    </nav>
+    <div className="workspace-results workspace-page">
+      <div className="workspace-filterbar"><input aria-label="Search resources" value={query} onChange={e=>setQuery(e.target.value)} placeholder={section==='Music & BGM'?'Search music…':section==='Sound Effects'?'Search sound effects…':'Search resources…'}/><select aria-label="Filter by resource type" value={kind} onChange={e=>setKind(e.target.value)}><option>All types</option><option value="audio">Music / SFX</option><option value="video">Video / footage</option><option value="image">Images</option><option value="template">Templates</option><option value="font">Cinematic fonts</option><option value="other">Tools / other</option></select></div>
+      <div className="workspace-section-title"><div><h3>{section}</h3></div><span>{visible.length} ITEMS</span></div>
+      <div className="workspace-resource-grid">{visible.map((card:any)=><article className="workspace-resource-card" key={card.id}>
+        <div className="workspace-card-top"><span>{card.provider||card.category}</span></div>
+        {card.previewUrl&&<div className="workspace-media-preview">{card.kind==='audio'?<><audio controls preload="none" src={safeLink(card.previewUrl)}/></>:card.kind==='video'?<video controls preload="metadata" playsInline src={safeLink(card.previewUrl)}/>:<img src={safeLink(card.previewUrl)} alt={card.title}/>}</div>}
+        <h4>{card.title}</h4><p>{card.detail||'Open the provider page to explore this resource.'}</p>
+        <div className="workspace-card-meta"><span>{card.kind||'resource'}</span><span>{card.compatibility||'Check formats on source'}</span></div>
+        <div className="workspace-card-tags">{(card.tags||[]).slice(0,5).map((tag:string)=><span key={tag}>{tag}</span>)}</div>
+        <details><summary>Licence & usage notes</summary><p>{card.licence||'Check the provider terms before use.'}</p></details>
+        <div className="workspace-card-actions">{card.previewUrl&&<button type="button" onClick={()=>setActivePreview(card)}>Open preview</button>}{card.downloadUrl&&<a href={safeLink(card.downloadUrl)} download>Download file</a>}<a href={safeLink(card.href||'')} target="_blank" rel="noreferrer">Browse official library ↗</a>{resources.some(x=>x.id===card.id)&&<button type="button" onClick={()=>onDelete(card.id)}>Remove</button>}</div>
+      </article>)}</div>
+      {visible.length===0&&<div className="workspace-empty"><Film size={26}/><b>No resources in this library yet</b><p>Try another library.</p></div>}
+    </div>
     <p className="workspace-footnote"><ShieldCheck size={15}/> Preview plays only when a direct media URL is provided. Download appears only for a verified file URL; otherwise use the official provider page. Third-party stock is not copied or re-hosted without permission.</p>
     {activePreview&&<div className="workspace-preview-modal" role="dialog" aria-modal="true" aria-label={activePreview.title} onClick={()=>setActivePreview(null)}><div className="workspace-preview-dialog" onClick={e=>e.stopPropagation()}><button type="button" className="workspace-preview-close" onClick={()=>setActivePreview(null)}>Close ✕</button><p className="kicker">{activePreview.provider||'MAP132 RESOURCE PREVIEW'}</p><h3>{activePreview.title}</h3>{activePreview.kind==='audio'?<audio controls autoPlay src={safeLink(activePreview.previewUrl||'')}/>:activePreview.kind==='video'?<video controls autoPlay playsInline src={safeLink(activePreview.previewUrl||'')}/>:<img src={safeLink(activePreview.previewUrl||'')} alt={activePreview.title}/>}<p>{activePreview.detail}</p><div className="workspace-card-actions">{activePreview.downloadUrl&&<a href={safeLink(activePreview.downloadUrl)} download>Download file</a>}<a href={safeLink(activePreview.href)} target="_blank" rel="noreferrer">Open original resource page ↗</a></div></div></div>}
   </section>;
