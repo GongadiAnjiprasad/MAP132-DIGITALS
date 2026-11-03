@@ -34,19 +34,19 @@ if(path.startsWith('/api/resources/sounds/')&&path.endsWith('/download')&&method
 if(path==='/api/resources/sounds'&&method==='GET'){
   if(!env.FREESOUND_API_KEY)return json({error:'Sound search is not connected yet. Add the FREESOUND_API_KEY secret in Cloudflare.'},503);
   const query=(url.searchParams.get('query')||'').trim().slice(0,100);
-  const page=Math.max(1,Math.min(50,Number(url.searchParams.get('page')||1)));
+  const page=Math.max(1,Math.min(1000,Number(url.searchParams.get('page')||1)));
   if(!query)return json({results:[],count:0});
   const upstream=new URL('https://freesound.org/apiv2/search/');
   upstream.searchParams.set('query',query);
   upstream.searchParams.set('page',String(page));
-  upstream.searchParams.set('page_size','18');
+  upstream.searchParams.set('page_size','100');
   upstream.searchParams.set('fields','id,name,username,license,previews,duration,tags,url,description');
   upstream.searchParams.set('token',env.FREESOUND_API_KEY);
   const response=await fetch(upstream.toString(),{headers:{'Accept':'application/json'}});
   if(!response.ok)return json({error:response.status===401?'Freesound API key was rejected. Check the Cloudflare secret.':'Sound provider request failed. Please try again.'},502);
   const data:any=await response.json();
   const allowed=(data.results||[]).filter((sound:any)=>{const licence=String(sound.license||'').toLowerCase();return licence.includes('creativecommons.org/publicdomain/zero/')||(licence.includes('creativecommons.org/licenses/by/')&&!licence.includes('/by-nc/'));});
-  return json({count:allowed.length,providerCount:data.count||0,next:data.next||null,previous:data.previous||null,results:allowed.map((sound:any)=>({id:sound.id,title:sound.name,creator:sound.username,license:sound.license,duration:sound.duration,previewUrl:sound.previews?.['preview-hq-mp3']||sound.previews?.['preview-lq-mp3']||'',sourceUrl:sound.url||('https://freesound.org/s/'+sound.id+'/'),tags:sound.tags||[],description:sound.description||''}))});
+  return json({count:data.count||0,providerCount:data.count||0,allowedCount:allowed.length,page,nextPage:data.next?page+1:null,previousPage:data.previous?page-1:null,results:allowed.map((sound:any)=>({id:sound.id,title:sound.name,creator:sound.username,license:sound.license,duration:sound.duration,previewUrl:sound.previews?.['preview-hq-mp3']||sound.previews?.['preview-lq-mp3']||'',sourceUrl:sound.url||('https://freesound.org/s/'+sound.id+'/'),tags:sound.tags||[],description:sound.description||''}))});
 }
 if(path==='/api/_healthcheck')return json({message:'Success'});
 if(path==='/api/portfolio'&&method==='GET'){const content=await read(env);for(const item of content.items||[])if(item.path&&env.MAP132_MEDIA){item.mediaUrl='/media/'+encodeURIComponent(item.path);}return json({content});}
