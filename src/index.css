@@ -792,3 +792,13 @@ body,.site{background:#0A0B0E;color:#F5F0E7}.nav{height:82px;background:rgba(9,1
 .festival-advance-wish .festival-kicker{color:#f2cf91}
 .festival-advance-wish strong{color:#ffe0a7}
 @media(prefers-reduced-motion:reduce){.festival-atmosphere>span{animation:none!important}}
+
+
+/* MAP132 festival ambience: background-only, never a floating banner */
+.site{position:relative;isolation:isolate}
+.festival-atmosphere{position:fixed;inset:0;z-index:4;overflow:hidden;pointer-events:none;background:radial-gradient(ellipse at 12% 18%,rgba(232,199,122,.075),transparent 34%),radial-gradient(ellipse at 88% 72%,rgba(200,100,42,.055),transparent 38%);mix-blend-mode:screen}
+.festival-atmosphere>span{display:block;position:absolute;top:-8vh;animation:festival-drift linear infinite;pointer-events:none;user-select:none;text-shadow:0 0 18px rgba(232,199,122,.55)}
+.festival-atmosphere.festival-build-up>span{opacity:.18;font-size:clamp(12px,1.5vw,20px);filter:drop-shadow(0 0 8px #e8c77a44)}
+.festival-atmosphere.festival-live>span{opacity:.34;font-size:clamp(15px,2vw,25px);filter:drop-shadow(0 0 12px #e8c77a77)}
+.festival-greeting{display:none!important}
+@media(prefers-reduced-motion:reduce){.festival-atmosphere>span{animation:none!important;opacity:.12}}
