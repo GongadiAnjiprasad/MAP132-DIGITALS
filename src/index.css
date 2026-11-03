@@ -833,7 +833,7 @@ body,.site{background:#0A0B0E;color:#F5F0E7}.nav{height:82px;background:rgba(9,1
 .toolkit-detail{box-shadow:0 25px 65px rgba(14,20,34,.12)}
 .contact-panel{box-shadow:0 24px 70px rgba(0,0,0,.24)}
 .site main:has(> section:target)>section:not(:target){display:none}
-main:not(:has(> section:target))>section:not(#top):not(#work){display:none}
+.site main:not(:has(> section:target))>section:not(#top):not(#work){display:none}
 main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .site main>section:target{animation:studio-page-in .45s ease both}
 @keyframes studio-page-in{from{opacity:.35;transform:translateY(9px)}to{opacity:1;transform:translateY(0)}}
@@ -850,7 +850,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
  .hero-positioning{font-size:8px;line-height:1.7}
  .home-discover{flex-wrap:wrap;gap:14px}
  .hero-meta{margin-top:30px}
- main:has(> section:target)>section:target{min-height:calc(100svh - 66px)}
+ .site main:has(> section:target)>section:target{min-height:calc(100svh - 66px)}
 }
 @media(prefers-reduced-motion:reduce){.site main>section:target{animation:none}.work-card,.service-card{transition:none}}
 
@@ -902,7 +902,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
  .approach-footer{flex-wrap:wrap;gap:9px}
  .approach-footer>i{flex-basis:12px}
  .approach-footer>a{width:100%;margin:12px 0 0}
- main:has(> section:target)>section:target{min-height:auto}
+ .site main:has(> section:target)>section:target{min-height:auto}
 }
 @media(prefers-reduced-motion:reduce){.approach-grid article{transition:none}}
 
