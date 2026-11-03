@@ -1,4 +1,4 @@
-interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; }
+interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
 const json=(body:unknown,status=200,headers:HeadersInit={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...Object.fromEntries(new Headers(headers))}});
 const COOKIE='map132_admin';
@@ -11,6 +11,22 @@ function sessionCookie(value:string,maxAge:number){return COOKIE+'='+value+'; Ht
 
 async function read(env:Env){if(!env.MAP132_KV)return DEFAULTS;try{return {...DEFAULTS,...JSON.parse(await env.MAP132_KV.get('portfolio/content')||'{}')};}catch{return DEFAULTS;}}
 async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;
+if(path==='/api/resources/sounds'&&method==='GET'){
+  if(!env.FREESOUND_API_KEY)return json({error:'Sound search is not connected yet. Add the FREESOUND_API_KEY secret in Cloudflare.'},503);
+  const query=(url.searchParams.get('query')||'').trim().slice(0,100);
+  const page=Math.max(1,Math.min(50,Number(url.searchParams.get('page')||1)));
+  if(!query)return json({results:[],count:0});
+  const upstream=new URL('https://freesound.org/apiv2/search/');
+  upstream.searchParams.set('query',query);
+  upstream.searchParams.set('page',String(page));
+  upstream.searchParams.set('page_size','18');
+  upstream.searchParams.set('fields','id,name,username,license,previews,duration,tags,url,description');
+  upstream.searchParams.set('token',env.FREESOUND_API_KEY);
+  const response=await fetch(upstream.toString(),{headers:{'Accept':'application/json'}});
+  if(!response.ok)return json({error:response.status===401?'Freesound API key was rejected. Check the Cloudflare secret.':'Sound provider request failed. Please try again.'},502);
+  const data:any=await response.json();
+  return json({count:data.count||0,next:data.next||null,previous:data.previous||null,results:(data.results||[]).map((sound:any)=>({id:sound.id,title:sound.name,creator:sound.username,license:sound.license,duration:sound.duration,previewUrl:sound.previews?.['preview-hq-mp3']||sound.previews?.['preview-lq-mp3']||'',sourceUrl:sound.url||('https://freesound.org/s/'+sound.id+'/'),tags:sound.tags||[],description:sound.description||''}))});
+}
 if(path==='/api/_healthcheck')return json({message:'Success'});
 if(path==='/api/portfolio'&&method==='GET'){const content=await read(env);for(const item of content.items||[])if(item.path&&env.MAP132_MEDIA){item.mediaUrl='/media/'+encodeURIComponent(item.path);}return json({content});}
 if(path==='/api/admin/session'&&method==='GET'){const authenticated=await validSession(req,env);return json({authenticated},authenticated?200:401);}
