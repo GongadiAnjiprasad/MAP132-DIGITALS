@@ -25,7 +25,8 @@ if(path==='/api/resources/sounds'&&method==='GET'){
   const response=await fetch(upstream.toString(),{headers:{'Accept':'application/json'}});
   if(!response.ok)return json({error:response.status===401?'Freesound API key was rejected. Check the Cloudflare secret.':'Sound provider request failed. Please try again.'},502);
   const data:any=await response.json();
-  return json({count:data.count||0,next:data.next||null,previous:data.previous||null,results:(data.results||[]).map((sound:any)=>({id:sound.id,title:sound.name,creator:sound.username,license:sound.license,duration:sound.duration,previewUrl:sound.previews?.['preview-hq-mp3']||sound.previews?.['preview-lq-mp3']||'',sourceUrl:sound.url||('https://freesound.org/s/'+sound.id+'/'),tags:sound.tags||[],description:sound.description||''}))});
+  const allowed=(data.results||[]).filter((sound:any)=>{const licence=String(sound.license||'').toLowerCase();return licence.includes('creativecommons.org/publicdomain/zero/')||(/creativecommons.org/licenses/by\//.test(licence)&&!licence.includes('/by-nc/'));});
+  return json({count:allowed.length,providerCount:data.count||0,next:data.next||null,previous:data.previous||null,results:allowed.map((sound:any)=>({id:sound.id,title:sound.name,creator:sound.username,license:sound.license,duration:sound.duration,previewUrl:sound.previews?.['preview-hq-mp3']||sound.previews?.['preview-lq-mp3']||'',sourceUrl:sound.url||('https://freesound.org/s/'+sound.id+'/'),tags:sound.tags||[],description:sound.description||''}))});
 }
 if(path==='/api/_healthcheck')return json({message:'Success'});
 if(path==='/api/portfolio'&&method==='GET'){const content=await read(env);for(const item of content.items||[])if(item.path&&env.MAP132_MEDIA){item.mediaUrl='/media/'+encodeURIComponent(item.path);}return json({content});}
