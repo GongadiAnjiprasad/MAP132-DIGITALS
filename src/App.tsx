@@ -197,8 +197,9 @@ function PublicSite({ content }: { content: Content }) {
     <WebsiteIntro />
     <header className="nav">
       <a className="wordmark" href="#top"><BrandLogo/></a>
-      <nav aria-label="Main navigation"><a href="#top">Home</a><a href="#work">Portfolio</a><a href="#services">Services</a><a href="#skills">Creative Lab</a><a href="#about">About</a><a className="nav-workspace" href="#workspace"><Film size={14}/> Editor Workspace</a><a className="nav-hire" href="#contact">Start a project <ArrowRight size={15}/></a></nav>
+      <nav aria-label="Main navigation"><a href="#top">Home</a><a href="#work">Portfolio</a><a href="#services">Services</a><a href="#approach">Our Approach</a><a href="#skills">Creative Lab</a><a href="#about">About</a><a className="nav-workspace" href="#workspace"><Film size={14}/> Editor Workspace</a><a className="nav-hire" href="#contact">Start a project <ArrowRight size={15}/></a></nav>
     </header>
+    <nav className="mobile-dock" aria-label="Quick navigation"><a href="#top"><span>⌂</span>Home</a><a href="#work"><span>▧</span>Work</a><a href="#services"><span>✳</span>Services</a><a href="#approach"><span>◈</span>Approach</a><a href="#contact"><span>↗</span>Contact</a></nav>
     <main>
       <section className="hero" id="top">
         <div className="hero-noise"></div><div className="hero-copy">
@@ -215,7 +216,16 @@ function PublicSite({ content }: { content: Content }) {
         </div>
         <div className="hero-index">01 <span>—</span> 04</div>
       </section>
-      
+      <section className="approach-section" id="approach">
+        <div className="approach-top"><p className="kicker">THE THINKING BEHIND THE EDIT</p><span>MAP132 / CREATIVE METHOD</span></div>
+        <div className="approach-heading"><h2>Not just an edit.<br/><em>A point of view.</em></h2><p>Every frame has a job. Every sound has a reason. We shape the feeling first — then build the visuals around it.</p></div>
+        <div className="approach-grid">
+          <article><span>01 / STORY</span><h3>Find the feeling.</h3><p>We look for the moment, message or emotion that should stay with the viewer — and build the cut around it.</p><b>INTENT BEFORE EFFECT</b></article>
+          <article><span>02 / VISUAL RHYTHM</span><h3>Make every frame count.</h3><p>Composition, typography, motion and colour work together. Nothing is added just because it looks flashy.</p><b>DESIGN WITH PURPOSE</b></article>
+          <article><span>03 / SOUND</span><h3>Let them feel it.</h3><p>Music, ambience, silence and precise sound details give each transition its weight and each story its pulse.</p><b>DETAIL YOU CAN FEEL</b></article>
+        </div>
+        <div className="approach-footer"><span>01 — DISCOVER</span><i></i><span>02 — DESIGN</span><i></i><span>03 — EDIT</span><i></i><span>04 — REFINE</span><a href="#contact">BUILD SOMETHING WITH US <ArrowRight size={14}/></a></div>
+      </section>
       <section className="work-section" id="work"><div className="section-head"><div><p className="kicker">SELECTED PROJECTS</p><h2>Work that <em>speaks.</em></h2></div><p>A selection of edits, experiments and visual stories.</p></div>
         {content.items.length ? <div className="work-grid">{content.items.map((item) => <article className="work-card" key={item.id}><div className="media-frame"><PortfolioMedia item={item}/><span className="media-category">{item.category}</span></div><div className="work-caption"><div><h3>{item.title}</h3><p>{item.description}</p></div><ArrowDownRight size={20}/></div></article>)}</div> : <div className="visual-concepts"><div className="concept-intro"><span className="concept-kicker">VISUAL DIRECTION / 01</span><h3>Stories deserve<br/><em>to be seen.</em></h3><p>These are visual style concepts, not completed client projects. Your own edits will replace them as you add work to the portfolio.</p></div><article className="concept-card concept-trailer"><div className="concept-art"><span className="concept-orbit"></span><span className="concept-number">01</span><strong>THE<br/>FINAL<br/><em>FRAME</em></strong><small>CINEMATIC TRAILER / STYLE STUDY</small></div><div className="concept-caption"><b>Trailer & teaser</b><span>DRAMA · RHYTHM · SOUND</span></div></article><article className="concept-card concept-reel"><div className="concept-art"><span className="concept-number">02</span><div className="reel-sun"></div><strong>MAKE<br/>IT <em>MOVE.</em></strong><small>SHORT-FORM / STYLE STUDY</small></div><div className="concept-caption"><b>Reels & Shorts</b><span>PACE · ENERGY · IMPACT</span></div></article><article className="concept-card concept-wedding"><div className="concept-art"><span className="concept-number">03</span><div className="wedding-glow"></div><strong>FOREVER<br/><em>IN FRAME.</em></strong><small>CELEBRATION FILM / STYLE STUDY</small></div><div className="concept-caption"><b>Wedding & event film</b><span>EMOTION · LIGHT · STORY</span></div></article></div>}
       </section>
