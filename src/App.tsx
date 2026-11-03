@@ -301,13 +301,14 @@ function SoundResultCard({sound}:{sound:any}){
     const audio=audioRef.current;
     if(!audio)return;
     if(playing){audio.pause();setPlaying(false);return;}
+    document.querySelectorAll('audio').forEach((other)=>{if(other!==audio)(other as HTMLAudioElement).pause();});
     try{await audio.play();setPlaying(true);}catch{setPlaying(false);}
   }
-  return <article className="workspace-resource-card" style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px'}}>
+  return <article className="workspace-resource-card" style={{display:'flex',alignItems:'center',gap:12,padding:'12px 16px',minWidth:0,overflow:'hidden'}}>
     <audio ref={audioRef} preload="none" src={sound.previewUrl||undefined} onEnded={()=>setPlaying(false)} onPause={()=>setPlaying(false)} onPlay={()=>setPlaying(true)} />
     <button type="button" className="gold-button" aria-label={playing?'Pause':'Play'} onClick={toggle} disabled={!sound.previewUrl} style={{minWidth:42,padding:'10px',justifyContent:'center'}}>{playing?'Ⅱ':'▶'}</button>
-    <strong style={{flex:1,minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{sound.title}</strong>
-    <a className="gold-button" href={sound.sourceUrl} target="_blank" rel="noreferrer" style={{whiteSpace:'nowrap',padding:'10px 14px'}}>Download ↗</a>
+    <strong title={sound.title} style={{flex:'1 1 auto',minWidth:0,overflow:'hidden',textOverflow:'ellipsis',whiteSpace:'nowrap'}}>{sound.title}</strong>
+    <a className="gold-button" href={sound.sourceUrl} target="_blank" rel="noreferrer" style={{whiteSpace:'nowrap',padding:'10px 14px',flexShrink:0}}>Source + licence ↗</a>
   </article>;
 }
 function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?:WorkspaceEntry[];onAdd:(item:WorkspaceEntry)=>void;onDelete:(id:string)=>void;saving?:boolean}){
@@ -319,6 +320,7 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
   const [soundBusy,setSoundBusy]=useState(false);
   const [soundError,setSoundError]=useState('');
   const [soundCount,setSoundCount]=useState(0);
+  useEffect(()=>{const stopOthers=(event:Event)=>{const target=event.target;if(!(target instanceof HTMLAudioElement))return;document.querySelectorAll('audio').forEach(node=>{if(node!==target&&!node.paused)node.pause();});};document.addEventListener('play',stopOthers,true);return()=>document.removeEventListener('play',stopOthers,true);},[]);
   const soundGenres=['Cinematic','Whoosh','Impact','Riser','Boom','Ambience','Action','Horror','Romantic','Emotional','Suspense','Trailer'];
   async function searchSounds(){
     const terms=[soundQuery.trim(),soundGenre,section==='Music & BGM'?'music background score':'sound effect'].filter(Boolean).join(' ');
@@ -382,7 +384,7 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
       </article>)}</div>
       {visible.length===0&&<div className="workspace-empty"><Film size={26}/><b>No resources in this library yet</b><p>Try another library.</p></div>}
     </div>
-    <p className="workspace-footnote"><ShieldCheck size={15}/> Preview plays only when a direct media URL is provided. Download appears only for a verified file URL; otherwise use the official provider page. Third-party stock is not copied or re-hosted without permission.</p>
+    <p className="workspace-footnote"><ShieldCheck size={15}/> Audio search currently shows Freesound CC0 and CC BY results only. CC BY requires creator attribution; CC BY-NC and other non-commercial licences are excluded. Preview is streamed from the source; use the source page for its permitted download.</p>
     {activePreview&&<div className="workspace-preview-modal" role="dialog" aria-modal="true" aria-label={activePreview.title} onClick={()=>setActivePreview(null)}><div className="workspace-preview-dialog" onClick={e=>e.stopPropagation()}><button type="button" className="workspace-preview-close" onClick={()=>setActivePreview(null)}>Close ✕</button><p className="kicker">{activePreview.provider||'MAP132 RESOURCE PREVIEW'}</p><h3>{activePreview.title}</h3>{activePreview.kind==='audio'?<audio controls autoPlay src={safeLink(activePreview.previewUrl||'')}/>:activePreview.kind==='video'?<video controls autoPlay playsInline src={safeLink(activePreview.previewUrl||'')}/>:<img src={safeLink(activePreview.previewUrl||'')} alt={activePreview.title}/>}<p>{activePreview.detail}</p><div className="workspace-card-actions">{activePreview.downloadUrl&&<a href={safeLink(activePreview.downloadUrl)} download>Download file</a>}<a href={safeLink(activePreview.href)} target="_blank" rel="noreferrer">Open original resource page ↗</a></div></div></div>}
   </section>;
 }
