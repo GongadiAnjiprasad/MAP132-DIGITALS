@@ -11,6 +11,23 @@ function sessionCookie(value:string,maxAge:number){return COOKIE+'='+value+'; Ht
 
 async function read(env:Env){if(!env.MAP132_KV)return DEFAULTS;try{return {...DEFAULTS,...JSON.parse(await env.MAP132_KV.get('portfolio/content')||'{}')};}catch{return DEFAULTS;}}
 async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;
+if(path.startsWith('/api/resources/sounds/')&&path.endsWith('/preview')&&method==='GET'){
+  if(!env.FREESOUND_API_KEY)return json({error:'Sound preview is not connected.'},503);
+  const id=path.split('/')[4];
+  if(!/^\\d+$/.test(id))return json({error:'Invalid sound id.'},400);
+  const detailUrl=new URL('https://freesound.org/apiv2/sounds/'+id+'/');
+  detailUrl.searchParams.set('fields','id,previews');
+  detailUrl.searchParams.set('token',env.FREESOUND_API_KEY);
+  const detailResponse=await fetch(detailUrl.toString(),{headers:{'Accept':'application/json'}});
+  if(!detailResponse.ok)return json({error:'Could not retrieve this sound preview.'},502);
+  const sound:any=await detailResponse.json();
+  const preview=sound.previews?.['preview-hq-mp3']||sound.previews?.['preview-lq-mp3'];
+  let previewUrl:URL;try{previewUrl=new URL(String(preview||''));}catch{return json({error:'This sound has no playable MP3 preview.'},404);}
+  if(previewUrl.protocol!=='https:'||!['freesound.org','cdn.freesound.org'].includes(previewUrl.hostname))return json({error:'Preview source is not supported.'},404);
+  const audioResponse=await fetch(previewUrl.toString(),{headers:{'Accept':'audio/mpeg'}});
+  if(!audioResponse.ok||!audioResponse.body)return json({error:'The source could not stream this preview.'},502);
+  return new Response(audioResponse.body,{headers:{'Content-Type':'audio/mpeg','Accept-Ranges':'bytes','Cache-Control':'public, max-age=3600','X-Content-Type-Options':'nosniff'}});
+}
 if(path.startsWith('/api/resources/sounds/')&&path.endsWith('/download')&&method==='GET'){
   if(!env.FREESOUND_API_KEY)return json({error:'Sound download is not connected.'},503);
   const id=path.split('/')[4];
