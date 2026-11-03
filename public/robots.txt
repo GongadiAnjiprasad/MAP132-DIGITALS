@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://map132-digitals.anji-gongadi.workers.dev/sitemap.xml
