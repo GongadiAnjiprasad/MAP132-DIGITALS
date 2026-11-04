@@ -1017,3 +1017,10 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   .workspace-library-nav{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;padding:7px}
   .workspace-library-nav button{padding:12px 8px;font-size:12px;text-align:center}
 }
+
+
+/* MAP132 admin login password visibility control */
+.login-password-field{position:relative;display:block;width:100%}
+.login-password-field input{box-sizing:border-box;width:100%;padding-right:48px!important}
+.login-password-field .password-visibility{position:absolute;right:5px;top:50%;transform:translateY(-50%);display:grid;place-items:center;width:38px;height:38px;border:0;background:transparent;color:#d5aa66;cursor:pointer}
+.login-password-field .password-visibility:focus-visible{outline:1px solid #d5aa66;outline-offset:1px}
