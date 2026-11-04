@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from './api';
+import { DEMO_SHOWCASE } from './demoShowcase';
 import {
   ArrowDownRight, ArrowRight, Check, ChevronRight, Film, LayoutDashboard,
   Instagram, MessageCircle, Play, Plus, Save, ShieldCheck, Sparkles,
