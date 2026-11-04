@@ -43,6 +43,16 @@ const serviceCards = [
   { title: 'News & Podcasts', note: 'Interviews · Studio edits · Clips', image: DEMO_SHOWCASE[7].image, number: '08' }
 ];
 
+const sampleProjects: PortfolioItem[] = DEMO_SHOWCASE.map((item, index) => ({
+  id: 'sample-' + item.id,
+  title: item.title,
+  category: item.category,
+  description: item.description + ' Sample visual direction only; replace with an original MAP132 edit.',
+  kind: 'image',
+  url: item.image,
+  source: 'other'
+}));
+
 function safeLink(value: string) {
   if (!value) return '';
   try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) ? url.href : ''; }
@@ -193,7 +203,8 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
 
         <section className="ms-page ms-work-page" aria-label="Selected work">
           <div className="ms-page-heading"><div><p className="ms-kicker">PORTFOLIO / VISUAL STUDIES</p><h2>Selected <em>work.</em></h2></div><p>Explore sample edits and original projects published through the Admin Dashboard.</p></div>
-          {content.items.length > 0 && <div className="ms-project-grid">{content.items.map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>}
+          <div className="ms-project-grid">{(content.items.length > 0 ? content.items : sampleProjects).map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>
+          {content.items.length === 0 && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>Sample portfolio content</b><span>These are reference concepts and moodboard images—not completed client projects. Upload your own edited videos or photos in the Admin Dashboard to replace these examples.</span></p></div>}
           <DemoShowcase/>
         </section>
 
@@ -203,6 +214,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
             {serviceCards.map((card, index) => <article className="ms-service-detail" key={card.title}><span>{card.number} / SERVICE</span><div className="ms-service-detail-image" style={{backgroundImage:`linear-gradient(180deg,transparent,#080a0de8),url("${card.image}")`}}/><h3>{card.title}</h3><p>{['Story-led teaser cuts, cinematic trailers and mood-driven short films.','Wedding highlights, event recaps, couple entries and emotional memory films.','Birthday invitations, surprise edits, photo-to-film montages and celebration reels.','Fast hooks, captions, beat cuts and vertical edits for Instagram and YouTube Shorts.','Creator intros, explainers, vlogs, tutorials and polished long-form storytelling.','Product showcases, launch promos, service ads and social campaign videos.','AI-assisted concepts, generated visual sequences and creative motion treatments.','Interview edits, podcast episodes, news packages and short highlight clips.'][index]}</p></article>)}
           </div>
           <div className="ms-services-note"><Sparkles size={17}/> Also available: motion titles, logo reveals, lyric videos and custom editing support.</div>
+          <div className="ms-service-includes"><div><span>EDITING DETAILS</span><b>Story-led cuts</b><p>Structure, pacing and a clear beginning-to-end flow.</p></div><div><span>VISUAL FINISH</span><b>Titles & colour</b><p>Readable typography, colour treatment and clean transitions.</p></div><div><span>SOUND FINISH</span><b>Music & audio</b><p>Dialogue balance, music placement and sound effects where suitable.</p></div><div><span>FINAL FILES</span><b>Platform formats</b><p>Export format and resolution agreed for your intended platform.</p></div></div>
           <div className="ms-service-bottom"><div><b>Have a specific brief?</b><span>Share your footage, reference style and delivery format.</span></div><button type="button" className="ms-primary" onClick={() => goTo(4)}>Discuss your project <ArrowRight size={16}/></button></div>
         </section>
 
@@ -217,12 +229,17 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
             <article><span>CRAFT / 02</span><h3>More than transitions.</h3><p>Clean cuts, typography, motion accents, colour finishing, captions and sound design chosen to serve the story.</p></article>
             <article><span>COLLABORATION / 03</span><h3>Clear review rounds.</h3><p>Start with a brief and references, review a draft, share focused feedback and approve the final export.</p></article>
           </div>
+          <div className="ms-studio-brief">
+            <div><p className="ms-kicker">A GOOD PROJECT STARTS WITH A CLEAR BRIEF</p><h3>What to share with the editor.</h3></div>
+            <div className="ms-brief-points"><span><b>01</b> Your raw footage, photos or script</span><span><b>02</b> One or two style references</span><span><b>03</b> Platform, aspect ratio and deadline</span><span><b>04</b> Any names, logos or text to include</span></div>
+          </div>
           <div className="ms-studio-foot"><span><Camera size={15}/> {p.location || 'India'}</span><span>MAP132 DIGITALS · VIDEO EDITING</span></div>
         </section>
 
         <section className="ms-page ms-contact-page" aria-label="Contact">
           <div className="ms-contact-copy"><p className="ms-kicker">LET'S CREATE SOMETHING MEMORABLE</p><h2>Your idea.<br/><em>Our next frame.</em></h2><p>Tell us what you want to create. Share a few details and continue through WhatsApp or email.</p>
-            <div className="ms-contact-links">{contactLinks.map(link => <a key={link.label} href={link.href} target={link.label === 'Email' ? undefined : '_blank'} rel="noreferrer">{link.icon}{link.label}</a>)}</div>
+            <div className="ms-contact-links">{contactLinks.length > 0 ? contactLinks.map(link => <a key={link.label} href={link.href} target={link.label === 'Email' ? undefined : '_blank'} rel="noreferrer">{link.icon}{link.label}</a>) : <p className="ms-contact-empty">Social and business contact links will appear here after you add them in Admin Dashboard.</p>}</div>
+            <div className="ms-contact-steps"><span><b>01</b> Tell us your idea</span><span><b>02</b> Share footage and references</span><span><b>03</b> Confirm scope and timeline</span></div>
           </div>
           <div className="ms-contact-panel"><span>PROJECT ENQUIRY</span>
             <form onSubmit={event => {event.preventDefault();const data=new FormData(event.currentTarget);const message='MAP132 DIGITALS — PROJECT ENQUIRY\nName: '+data.get('name')+'\nEmail: '+data.get('email')+'\nPhone: '+data.get('phone')+'\nService: '+data.get('service')+'\nProject: '+data.get('details');if(whatsappUrl)window.open(whatsappUrl+'?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');else if(p.email)window.location.href='mailto:'+p.email+'?subject=MAP132%20DIGITALS%20Enquiry&body='+encodeURIComponent(message);else window.alert('Please add WhatsApp or business email in Admin → Social & contact first.');}}>
