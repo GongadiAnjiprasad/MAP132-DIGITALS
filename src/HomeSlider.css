@@ -170,3 +170,13 @@
  .ms-arrow:first-child{left:9px}
  .ms-arrow.ms-next{right:9px}
 }
+
+
+/* Gesture navigation: keep vertical scrolling native while capturing horizontal swipes. */
+.ms-stage{touch-action:pan-y pinch-zoom;overscroll-behavior-x:contain}
+.ms-track{user-select:none;-webkit-user-select:none}
+.ms-page{user-select:text;-webkit-user-select:text}
+@media(hover:hover) and (pointer:fine){
+ .ms-stage{cursor:grab}
+ .ms-stage:active{cursor:grabbing}
+}
