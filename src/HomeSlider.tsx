@@ -101,6 +101,8 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 export default function HomeSlider({ content }: { content: HomeContent }) {
   const [active, setActive] = useState(0);
   const [activePreview, setActivePreview] = useState<number | null>(null);
+  const previewGesture = useRef<{ x: number; y: number; pointerId?: number } | null>(null);
+  const changePreview = (direction: number) => setActivePreview(current => current === null ? null : (current + direction + previewVideos.length) % previewVideos.length);
   const pointerStart = useRef<{ x: number; y: number; pointerId: number } | null>(null);
   const touchStart = useRef<{ x: number; y: number; atHomeTop: boolean } | null>(null);
   const suppressSwipeClick = useRef(false);
@@ -113,12 +115,18 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   const goTo = (index: number) => setActive(Math.max(0, Math.min(pages.length - 1, index)));
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
+      if (activePreview !== null) {
+        if (event.key === 'ArrowRight') { event.preventDefault(); changePreview(1); }
+        if (event.key === 'ArrowLeft') { event.preventDefault(); changePreview(-1); }
+        if (event.key === 'Escape') setActivePreview(null);
+        return;
+      }
       if (event.key === 'ArrowRight') goTo(active + 1);
       if (event.key === 'ArrowLeft') goTo(active - 1);
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [active]);
+  }, [active, activePreview]);
 
   // Touch gestures work across cards, text and empty space; native vertical scrolling stays enabled.
   const onTouchStart = (event: TouchEvent<HTMLElement>) => {
@@ -293,10 +301,10 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     </main>
 
     {activePreview !== null && <div className="ms-preview-modal" role="dialog" aria-modal="true" aria-label={serviceCards[activePreview].title + ' video preview'} onClick={() => setActivePreview(null)}>
-      <div className="ms-preview-dialog" onClick={event => event.stopPropagation()}>
+      <div className="ms-preview-dialog" onClick={event => event.stopPropagation()} onTouchStart={event => { const touch = event.touches[0]; if (touch) previewGesture.current = { x: touch.clientX, y: touch.clientY }; }} onTouchEnd={event => { const start = previewGesture.current; previewGesture.current = null; const touch = event.changedTouches[0]; if (!start || !touch) return; const dx = touch.clientX - start.x; const dy = touch.clientY - start.y; if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy) * 1.25) changePreview(dx < 0 ? 1 : -1); }} onPointerDown={event => { if (event.pointerType !== 'mouse' || (event.target as HTMLElement).closest('button, video, input')) return; previewGesture.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId }; }} onPointerUp={event => { const start = previewGesture.current; previewGesture.current = null; if (!start || start.pointerId !== event.pointerId) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; if (Math.abs(dx) > 70 && Math.abs(dx) > Math.abs(dy) * 1.25) changePreview(dx < 0 ? 1 : -1); }}>
         <div className="ms-preview-dialog-head"><div><span>MAP132 DIGITALS / SHOWCASE PREVIEW</span><h2>{serviceCards[activePreview].title}</h2></div><button type="button" className="ms-preview-close" aria-label="Close video" onClick={() => setActivePreview(null)}><X size={22}/></button></div>
         <video key={activePreview} className="ms-preview-player" src={previewVideos[activePreview].src} controls autoPlay playsInline preload="metadata">Your browser does not support video playback.</video>
-        <p className="ms-preview-disclaimer">{previewVideos[activePreview].note}. Reference footage only — not a commissioned MAP132 client project.</p>
+        <p className="ms-preview-disclaimer">{previewVideos[activePreview].note}. Swipe left/right for more videos · Reference footage only — not a commissioned MAP132 client project.</p>
       </div>
     </div>}
     <div className="ms-controls">
