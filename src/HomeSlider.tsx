@@ -209,10 +209,10 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
               <button type="button" className="ms-text-button" onClick={() => goTo(4)}>Start a project <ArrowRight size={15}/></button>
             </div>
             <div className="ms-home-proof"><span>01 / STORY</span><span>02 / VISUAL RHYTHM</span><span>03 / SOUND DESIGN</span></div>
-            <section className="ms-home-review-invite" aria-label="Client feedback invitation">
+            <section className="ms-home-review-invite" aria-label="Client review feed">
               <div className="ms-review-invite-mark" aria-hidden="true">“</div>
-              <div><span>THE CLIENT FEEDBACK FEED</span><b>Good work deserves a voice.</b><p>When a project is complete, clients can share their experience here. Only genuine, approved feedback will appear.</p></div>
-              <button type="button" onClick={() => goTo(4)}>Share feedback <ArrowRight size={15}/></button>
+              <div><span>CLIENT FEEDBACK / REVIEW FEED</span><b>Real stories from our clients.</b><p>Only genuine client feedback will be shown here, with permission. Reviews will be checked before they appear publicly.</p><div className="ms-review-feed-empty"><span>NO REVIEWS PUBLISHED YET</span><i aria-hidden="true">★★★★★</i></div></div>
+              <button type="button" onClick={() => goTo(4)}>Contact the studio <ArrowRight size={15}/></button>
             </section>
           </div>
           <div className="ms-home-showcase">
