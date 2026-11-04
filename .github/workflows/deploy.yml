@@ -3,6 +3,8 @@ name: Build and deploy MAP132 DIGITALS
 on:
   push:
     branches: [main]
+  pull_request:
+    branches: [main]
   workflow_dispatch:
 
 permissions:
@@ -20,9 +22,12 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
+      - name: Test swipe navigation
+        run: npm test
       - name: Build website
         run: npm run build
       - name: Deploy Worker and static website
+        if: github.event_name != 'pull_request'
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
