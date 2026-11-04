@@ -45,12 +45,9 @@ export default function DemoShowcase() {
         <video className="compare-video compare-video-base" src={compareVideo.video} poster={compareVideo.poster} muted autoPlay loop playsInline preload="metadata"/>
         <div className="compare-video-top" style={{clipPath:'inset(0 0 0 '+split+'%)'}}><video src={compareVideo.video} poster={compareVideo.poster} muted autoPlay loop playsInline preload="metadata"/></div>
         <div className="compare-treatment-overlay" style={{clipPath:'inset(0 0 0 '+split+'%)'}}><span>MAP132 DIGITALS — CINEMATIC STUDY</span><strong>THE CITY<br/>AFTER DARK</strong><small>COLOUR · CONTRAST · TITLE DESIGN</small></div>
-        <span className="compare-label compare-before">RAW FOOTAGE</span>
-        <span className="compare-label compare-after">CINEMATIC EDIT</span>
         <div className="compare-divider" style={{left:split+'%'}}><i/></div>
         <input className="compare-stage-range" aria-label="Drag the centre handle to compare raw footage and cinematic edit" type="range" min="5" max="95" value={split} onChange={e=>setSplit(Number(e.target.value))}/>
       </div>
-      <div className="compare-range-label"><span>RAW FOOTAGE</span><strong>{split}% REVEALED</strong><span>CINEMATIC EDIT</span></div>
       <div className="demo-craft-points demo-treatment-list"><span>NEUTRAL SOURCE LOOK</span><span>CONTRAST & COLOUR</span><span>TITLE & FRAME DESIGN</span><span>VISUAL STORYTELLING</span></div>
       <p className="demo-compare-note">This is an interactive visual-grade study using the same reference clip on both sides — not a separately rendered final edit.</p>
     </section>
