@@ -107,7 +107,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   const wheelTotal = useRef(0);
   const wheelLocked = useRef(false);
   const p = content.profile;
-  const whatsappDigits = p.whatsapp.replace(/[^\\d]/g, '');
+  const whatsappDigits = p.whatsapp.replace(/\D/g, '');
   const whatsapp = whatsappDigits.length === 10 ? '91' + whatsappDigits : whatsappDigits;
   const whatsappUrl = whatsapp ? 'https://wa.me/' + whatsapp : '';
   const goTo = (index: number) => setActive(Math.max(0, Math.min(pages.length - 1, index)));
