@@ -54,9 +54,28 @@ const sampleProjects: PortfolioItem[] = DEMO_SHOWCASE.map((item, index) => ({
 }));
 
 function safeLink(value: string) {
-  if (!value) return '';
-  try { const url = new URL(value); return ['https:', 'http:'].includes(url.protocol) ? url.href : ''; }
-  catch { return ''; }
+  const raw = value.trim();
+  if (!raw) return '';
+  try {
+    const candidate = /^https?:\/\//i.test(raw) ? raw : 'https://' + raw.replace(/^\/+/, '');
+    const url = new URL(candidate);
+    return ['https:', 'http:'].includes(url.protocol) ? url.href : '';
+  } catch { return ''; }
+}
+function socialLink(value: string, platform: 'instagram' | 'youtube' | 'facebook' | 'telegram' | 'linkedin') {
+  const raw = value.trim();
+  if (!raw) return '';
+  if (/^https?:\/\//i.test(raw) || /^(www\.)?(instagram|youtube|facebook|t\.me|linkedin)\.com\//i.test(raw)) return safeLink(raw);
+  const handle = raw.replace(/^@/, '').replace(/^\/+|\/+$/g, '');
+  if (!handle || /\s/.test(handle)) return '';
+  const bases = {
+    instagram: 'https://www.instagram.com/',
+    youtube: 'https://www.youtube.com/@',
+    facebook: 'https://www.facebook.com/',
+    telegram: 'https://t.me/',
+    linkedin: 'https://www.linkedin.com/in/'
+  };
+  return bases[platform] + handle;
 }
 function mediaEmbed(item: PortfolioItem) {
   const url = item.url || item.mediaUrl || '';
@@ -88,7 +107,8 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   const wheelTotal = useRef(0);
   const wheelLocked = useRef(false);
   const p = content.profile;
-  const whatsapp = p.whatsapp.replace(/[^\d]/g, '');
+  const whatsappDigits = p.whatsapp.replace(/\D/g, '');
+  const whatsapp = whatsappDigits.length === 10 ? '91' + whatsappDigits : whatsappDigits;
   const whatsappUrl = whatsapp ? 'https://wa.me/' + whatsapp : '';
   const goTo = (index: number) => setActive(Math.max(0, Math.min(pages.length - 1, index)));
   useEffect(() => {
@@ -157,11 +177,11 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
 
   const contactLinks = [
     { label: 'WhatsApp', href: whatsappUrl, icon: <MessageCircle size={16}/> },
-    { label: 'Instagram', href: safeLink(p.instagram), icon: <Instagram size={16}/> },
-    { label: 'YouTube', href: safeLink(p.youtube), icon: <Youtube size={16}/> },
-    { label: 'Facebook', href: safeLink(p.facebook), icon: <Facebook size={16}/> },
-    { label: 'Telegram', href: safeLink(p.telegram), icon: <Send size={16}/> },
-    { label: 'LinkedIn', href: safeLink(p.linkedin), icon: <Linkedin size={16}/> },
+    { label: 'Instagram', href: socialLink(p.instagram, 'instagram'), icon: <Instagram size={16}/> },
+    { label: 'YouTube', href: socialLink(p.youtube, 'youtube'), icon: <Youtube size={16}/> },
+    { label: 'Facebook', href: socialLink(p.facebook, 'facebook'), icon: <Facebook size={16}/> },
+    { label: 'Telegram', href: socialLink(p.telegram, 'telegram'), icon: <Send size={16}/> },
+    { label: 'LinkedIn', href: socialLink(p.linkedin, 'linkedin'), icon: <Linkedin size={16}/> },
     { label: 'Email', href: p.email ? 'mailto:' + p.email : '', icon: <Mail size={16}/> }
   ].filter(link => link.href);
 
