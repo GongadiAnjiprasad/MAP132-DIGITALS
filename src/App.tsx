@@ -232,13 +232,14 @@ function PublicSite({ content }: { content: Content }) {
         <div className="approach-footer"><span>01 — DISCOVER</span><i></i><span>02 — DESIGN</span><i></i><span>03 — EDIT</span><i></i><span>04 — REFINE</span><a href="#contact">BUILD SOMETHING WITH US <ArrowRight size={14}/></a></div>
       </section>
       <section className="work-section" id="work"><div className="section-head"><div><p className="kicker">SELECTED PROJECTS</p><h2>Work that <em>speaks.</em></h2></div><p>Choose a category to explore the relevant video work and creative samples.</p></div>
-        {content.items.length ? <>
+        {content.items.length>0&&<>
           <div className="portfolio-category-filters" aria-label="Filter portfolio by category">
             {['All Projects',...categories].map(category=><button type="button" key={category} className={activeWorkCategory===category?'active':''} aria-pressed={activeWorkCategory===category} onClick={()=>setActiveWorkCategory(category)}>{category}</button>)}
           </div>
           <div className="work-grid">{content.items.filter(item=>activeWorkCategory==='All Projects'||item.category===activeWorkCategory).map(item=><article className="work-card" key={item.id}><div className="media-frame"><PortfolioMedia item={item}/><span className="media-category">{item.category}</span></div><div className="work-caption"><div><h3>{item.title}</h3><p>{item.description}</p></div><ArrowDownRight size={20}/></div></article>)}</div>
           {content.items.filter(item=>activeWorkCategory==='All Projects'||item.category===activeWorkCategory).length===0&&<div className="portfolio-empty-category"><b>{activeWorkCategory}</b><p>No original project has been published in this category yet. Check back soon.</p></div>}
-        </> : <DemoShowcase />}
+        </>}
+        <DemoShowcase />
       </section>
       <section className="services-section" id="services">
         <div className="section-head">
