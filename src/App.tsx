@@ -510,33 +510,26 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
     </nav>
     {(section==='Sound Effects'||section==='Music & BGM')&&<section className="workspace-live-search">
       <div className="workspace-section-title"><div><p className="kicker">AUDIO LIBRARY</p><h3>Find sounds</h3></div><span>{soundCount.toLocaleString()} MATCHES</span></div>
-      <div className="workspace-filterbar"><input value={soundQuery} onChange={e=>setSoundQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')searchSounds()}} placeholder="Search sounds…"/><select value={soundGenre} onChange={e=>setSoundGenre(e.target.value)}>{soundGenres.map(g=><option key={g}>{g}</option>)}</select><button type="button" className="gold-button" onClick={()=>searchSounds(1,false)} disabled={soundBusy}>{soundBusy?'Searching…':'Search'}</button></div>
-      {section==='Sound Effects'&&<div className="workspace-cinematic-filters" aria-label="Sound categories" style={{display:'grid',gap:8,margin:'12px 0 16px'}}>
-        <p className="kicker" style={{margin:'0 0 2px',fontSize:10,letterSpacing:1.2}}>SOUND CATEGORIES</p>
-        <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-          {[
-            ['Whoosh — Short','short whoosh sound effect transition'],
-            ['Whoosh — Heavy','heavy cinematic whoosh sound effect'],
-            ['Reverse Whoosh','reverse whoosh sound effect'],
-            ['Riser — Build-up','cinematic riser build up sound effect'],
-            ['Riser — Short','short cinematic riser sound effect'],
-            ['Riser → Impact','riser ending impact hit sound effect'],
-            ['Impact / Hit','cinematic impact hit sound effect'],
-            ['Boom','deep cinematic boom sound effect'],
-            ['Suspense / Horror','suspense horror tension sound effect'],
-            ['Ambience / Foley','cinematic ambience foley sound effect'],
-            ['Logo Reveal','cinematic logo reveal sound effect']
-          ].map(([label,term])=><button key={label} type="button" className={soundQuery.toLowerCase()===term.toLowerCase()?'selected':''} onClick={()=>{setSoundGenre('All genres');setSoundQuery(term);searchSounds(1,false,term,'All genres');}}>{label}</button>)}
-        </div>
+      <div className="workspace-filterbar"><input aria-label="Search sound effects" value={soundQuery} onChange={e=>setSoundQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')searchSounds()}} placeholder="Search sound effects…"/>{section==='Music & BGM'&&<select aria-label="Filter music genre" value={soundGenre} onChange={e=>setSoundGenre(e.target.value)}>{soundGenres.map(g=><option key={g}>{g}</option>)}</select>}<button type="button" className="gold-button" onClick={()=>searchSounds(1,false)} disabled={soundBusy}>{soundBusy?'Searching…':'Search'}</button></div>
+      {section==='Sound Effects'&&<div className="workspace-cinematic-filters" aria-label="Sound effect categories" style={{display:'flex',flexWrap:'wrap',gap:8,margin:'12px 0 16px'}}>
+        {[
+          ['All',''],
+          ['Whoosh','whoosh'],
+          ['Riser','riser'],
+          ['Impact','impact hit'],
+          ['Boom','cinematic boom'],
+          ['Suspense','suspense horror'],
+          ['Ambience','ambience foley'],
+          ['Logo Reveal','logo reveal']
+        ].map(([label,term])=><button key={label} type="button" className={(soundQuery.toLowerCase()===term.toLowerCase()||(label==='All'&&!soundQuery))?'selected':''} onClick={()=>{setSoundGenre('All genres');setSoundQuery(term);searchSounds(1,false,term,'All genres');}}>{label}</button>)}
       </div>}
-      {section==='Sound Effects'&&<p className="workspace-form-note">Choose a category to find matching sound effects. These are search shortcuts; they do not apply effects to your video automatically.</p>}
       <p className="workspace-form-note">Film-style sound searches across Freesound. Results are filtered to CC0 and Creative Commons Attribution licences; CC BY requires creator credit. Availability depends on the source catalogue, so try related terms if a filter returns no eligible preview.</p>
       {soundError&&<p className="error-text">{soundError}</p>}
       {soundResults.length>0&&<><div className="workspace-resource-grid" style={{gridTemplateColumns:'1fr',gap:8}}>{soundResults.map(sound=><SoundResultCard key={sound.id} sound={sound}/>)}</div><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap',padding:'12px 0'}}><span>{soundResults.length.toLocaleString()} loaded · {soundCount.toLocaleString()} provider matches</span>{soundNextPage&&<button type="button" className="gold-button" onClick={()=>searchSounds(soundNextPage!,true)} disabled={soundBusy}>{soundBusy?'Loading…':'Load more sounds'}</button>}</div></>}
       {!soundBusy&&!soundError&&soundResults.length===0&&<div className="workspace-empty"><b>No eligible previews on this page yet</b><p>Try another quick search or load the next provider page. Some results are excluded because of their licence.</p></div>}
       {soundResults.length===0&&soundNextPage!==null&&<div style={{display:'flex',justifyContent:'center',padding:'10px 0 18px'}}><button type="button" className="gold-button" onClick={()=>searchSounds(soundNextPage,false)} disabled={soundBusy}>{soundBusy?'Loading…':'Load more eligible sounds'}</button></div>}
     </section>}
-    <div className="workspace-results workspace-page">
+    {section!=='Sound Effects'&&<div className="workspace-results workspace-page">
       <div className="workspace-filterbar"><input aria-label={section==='Cinematic Fonts'?'Search fonts':'Search resources'} value={query} onChange={e=>setQuery(e.target.value)} placeholder={section==='Music & BGM'?'Search music…':section==='Sound Effects'?'Search sound effects…':section==='Cinematic Fonts'?'Search fonts by name, style or movie mood…':section==='Stock Footage'?'Search footage by subject or format…':section==='Editing Templates'?'Search templates by title or software…':'Search resources…'}/>{section==='Cinematic Fonts'?<select aria-label="Filter fonts by cinematic style" value={fontStyleFilter} onChange={e=>setFontStyleFilter(e.target.value)}>{fontStyleOptions.map(style=><option key={style}>{style}</option>)}</select>:<select aria-label="Filter by resource type" value={kind} onChange={e=>setKind(e.target.value)}><option>All types</option><option value="audio">Music / SFX</option><option value="video">Video / footage</option><option value="image">Images</option><option value="template">Templates</option><option value="font">Cinematic fonts</option><option value="other">Tools / other</option></select>}</div>
       <div className="workspace-section-title"><div><h3>{section}</h3></div><span>{visible.length} ITEMS</span></div>
       <div className="workspace-resource-grid">{visible.map((card:any)=><article className="workspace-resource-card" key={card.id}>
@@ -552,6 +545,7 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
       </article>)}</div>
       {visible.length===0&&<div className="workspace-empty"><Film size={26}/><b>{section==='Cinematic Fonts'?'No fonts match these filters':'No resources in this library yet'}</b><p>{section==='Cinematic Fonts'?'Try a different style or clear the search text.':'Try another library.'}</p></div>}
     </div>
+    </div>}
     <p className="workspace-footnote"><ShieldCheck size={15}/> Audio search currently shows Freesound CC0 and CC BY results only. CC BY requires creator attribution; CC BY-NC and other non-commercial licences are excluded. Preview is streamed from the source; use the source page for its permitted download.</p>
     {activePreview&&<div className="workspace-preview-modal" role="dialog" aria-modal="true" aria-label={activePreview.title} onClick={()=>setActivePreview(null)}><div className="workspace-preview-dialog" onClick={e=>e.stopPropagation()}><button type="button" className="workspace-preview-close" onClick={()=>setActivePreview(null)}>Close ✕</button><p className="kicker">{activePreview.provider||'MAP132 RESOURCE PREVIEW'}</p><h3>{activePreview.title}</h3>{activePreview.kind==='audio'?<audio controls autoPlay src={safeLink(activePreview.previewUrl||'')}/>:activePreview.kind==='video'?<video controls autoPlay playsInline src={safeLink(activePreview.previewUrl||'')}/>:<img src={safeLink(activePreview.previewUrl||'')} alt={activePreview.title}/>}<p>{activePreview.detail}</p><div className="workspace-card-actions">{activePreview.downloadUrl&&<a href={safeLink(activePreview.downloadUrl)} download>Download file</a>}<a href={safeLink(activePreview.href)} target="_blank" rel="noreferrer">Open original resource page ↗</a></div></div></div>}
   </section>;
