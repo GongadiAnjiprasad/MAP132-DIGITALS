@@ -2,6 +2,7 @@ import { Component, StrictMode, type ErrorInfo, type ReactNode } from 'react';
 import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
+import './HomeSlider.css';
 
 type BoundaryState = { error: Error | null };
 
