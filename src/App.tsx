@@ -447,9 +447,11 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
   };
   const all=[...seeded,...cinematicFonts,...resources.filter(x=>['Music & BGM','Sound Effects','Stock Footage','Editing Templates','Cinematic Fonts'].includes(x.category))];
   // Audio libraries use live Freesound search only; hide the old static provider/resource cards.
-  const cards=(section==='Music & BGM'||section==='Sound Effects')
-    ? resources.filter(c=>c.category===section)
-    : all.filter(c=>c.category===section);
+  const cards=section==='Cinematic Fonts'
+    ? [...cinematicFonts,...resources.filter(c=>c.category==='Cinematic Fonts')]
+    : (section==='Music & BGM'||section==='Sound Effects')
+      ? resources.filter(c=>c.category===section)
+      : all.filter(c=>c.category===section);
   const visible=cards.filter(c=>(c.title+' '+(c.detail||'')+' '+(c.provider||'')+' '+(c.tags||[]).join(' ')).toLowerCase().includes(query.toLowerCase())&&(section==='Cinematic Fonts'?fontMatchesStyle(c):(kind==='All types'||c.kind===kind)));
   function submit(e:React.FormEvent){e.preventDefault();const href=safeLink(draft.href);if(!href){setMessage('Enter a valid https:// resource URL.');return}if(!draft.title.trim()||!draft.licence.trim()){setMessage('Title and licence notes are required.');return}const previewUrl=draft.previewUrl?safeLink(draft.previewUrl):'';const downloadUrl=draft.downloadUrl?safeLink(draft.downloadUrl):'';if((draft.previewUrl&&!previewUrl)||(draft.downloadUrl&&!downloadUrl)){setMessage('Preview / download URL must be a valid https:// URL.');return}onAdd({...draft,id:crypto.randomUUID(),href,previewUrl,downloadUrl,tags:draft.category.split(' ')});setDraft({title:'',category:'Audio Library',detail:'',href:'',provider:'',licence:'',compatibility:'',kind:'audio',previewUrl:'',downloadUrl:''});setMessage('');setFormOpen(false)}
   return <section className="workspace-library">
