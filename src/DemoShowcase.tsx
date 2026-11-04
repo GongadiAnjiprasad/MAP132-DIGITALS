@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useState } from 'react';
 import { DEMO_SHOWCASE } from './demoShowcase';
 
 const clips = [
@@ -11,70 +11,58 @@ const categories = ['Cinematic Films','Wedding & Events','Birthday Films','Reels
 function pauseOtherVideos(current: HTMLVideoElement) {
   document.querySelectorAll('video').forEach(video => { if (video !== current) video.pause(); });
 }
+function formatDuration(seconds: number) {
+  if (!Number.isFinite(seconds) || seconds <= 0) return 'DURATION LOADING';
+  const mins = Math.floor(seconds / 60);
+  const secs = Math.floor(seconds % 60);
+  return 'RUNTIME ' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
+}
 export default function DemoShowcase() {
   const [split,setSplit] = useState(52);
   const [activeCategory,setActiveCategory] = useState('All Projects');
-  const audioRef = useRef<AudioContext|null>(null);
+  const [durations,setDurations] = useState<Record<string,number>>({});
   const compareVideo = clips[0];
   const visibleClips = activeCategory === 'All Projects' ? clips : clips.filter(clip => clip.category === activeCategory);
-  function stopSoundDesign() {
-    if (audioRef.current) { void audioRef.current.close().catch(()=>{}); audioRef.current = null; }
+  function handleVideoPlay(current: HTMLVideoElement) {
+    pauseOtherVideos(current);
   }
-  function playSoundDesign() {
-    stopSoundDesign();
-    const Ctx = window.AudioContext;
-    if (!Ctx) return;
-    const ctx = new Ctx();
-    audioRef.current = ctx;
-    void ctx.resume();
-    const now = ctx.currentTime;
-    // Original sound-design cue: airy whoosh, low cinematic impact and fading tonal bed.
-    const noiseBuffer = ctx.createBuffer(1, Math.floor(ctx.sampleRate * 2.8), ctx.sampleRate);
-    const noiseData = noiseBuffer.getChannelData(0);
-    for (let i=0;i<noiseData.length;i++) noiseData[i]=(Math.random()*2-1)*(1-i/noiseData.length);
-    const noise = ctx.createBufferSource(); noise.buffer=noiseBuffer;
-    const sweep = ctx.createBiquadFilter(); sweep.type='bandpass'; sweep.Q.value=.65;
-    sweep.frequency.setValueAtTime(260,now); sweep.frequency.exponentialRampToValueAtTime(3200,now+.55); sweep.frequency.exponentialRampToValueAtTime(180,now+2.5);
-    const air = ctx.createGain(); air.gain.setValueAtTime(.0001,now); air.gain.exponentialRampToValueAtTime(.22,now+.12); air.gain.exponentialRampToValueAtTime(.0001,now+2.65);
-    noise.connect(sweep); sweep.connect(air); air.connect(ctx.destination); noise.start(now); noise.stop(now+2.8);
-    const sub = ctx.createOscillator(); sub.type='sine'; sub.frequency.setValueAtTime(105,now+.18); sub.frequency.exponentialRampToValueAtTime(34,now+1.9);
-    const subGain=ctx.createGain(); subGain.gain.setValueAtTime(.0001,now); subGain.gain.setValueAtTime(.34,now+.2); subGain.gain.exponentialRampToValueAtTime(.0001,now+2.25);
-    sub.connect(subGain); subGain.connect(ctx.destination); sub.start(now); sub.stop(now+2.3);
-    const tone=ctx.createOscillator(); tone.type='triangle'; tone.frequency.setValueAtTime(220,now); tone.frequency.exponentialRampToValueAtTime(110,now+2.8);
-    const toneGain=ctx.createGain(); toneGain.gain.setValueAtTime(.0001,now); toneGain.gain.linearRampToValueAtTime(.025,now+.4); toneGain.gain.exponentialRampToValueAtTime(.0001,now+2.8);
-    tone.connect(toneGain); toneGain.connect(ctx.destination); tone.start(now); tone.stop(now+2.85);
+  function updateDuration(id: string, seconds: number) {
+    setDurations(previous => previous[id] === seconds ? previous : {...previous,[id]:seconds});
   }
-  function handleVideoPlay(current: HTMLVideoElement) { pauseOtherVideos(current); playSoundDesign(); }
   return <div className="demo-showcase">
     <div className="demo-showcase-intro">
       <span className="concept-kicker">MAP132 DIGITALS / THE CREATIVE CUT</span>
       <h3>Every frame has<br/><em>a feeling.</em></h3>
-      <p>We shape raw moments into visual stories through cinematic colour, considered pacing, expressive titles and sound. Explore the creative direction behind each format.</p>
-      <div className="demo-craft-points"><span>01 / COLOUR & MOOD</span><span>02 / MOTION & TYPE</span><span>03 / SOUND DESIGN</span></div>
+      <p>From the first cut to the final sound, every creative choice should serve the story. Explore the visual language behind cinematic films, celebrations and digital content.</p>
+      <div className="demo-craft-points"><span>01 / STORY & PACING</span><span>02 / COLOUR & MOTION</span><span>03 / SOUND & DETAIL</span></div>
     </div>
     <div className="demo-service-strip" aria-label="Explore creative categories">
       {['All Projects',...categories].map(category => <button type="button" key={category} className={activeCategory === category ? 'active' : ''} aria-pressed={activeCategory === category} onClick={() => setActiveCategory(category)}>{category}</button>)}
     </div>
     <section className="demo-compare">
-      <div className="demo-section-heading"><span>01 / THE TRANSFORMATION</span><h3>From raw scene to cinematic mood</h3><p>Move the slider to reveal the treatment: richer contrast, warm highlights, deeper shadows, a designed title and cinematic framing.</p></div>
+      <div className="demo-section-heading"><span>01 / SEE THE DIFFERENCE</span><h3>One frame. Two visual directions.</h3><p>Drag the centre handle across the image. The left side shows the neutral source look; the right side reveals a stylised cinematic treatment.</p></div>
       <div className="demo-compare-stage">
         <video className="compare-video compare-video-base" src={compareVideo.video} poster={compareVideo.poster} muted autoPlay loop playsInline preload="metadata"/>
         <div className="compare-video-top" style={{clipPath:'inset(0 '+(100-split)+'% 0 0)'}}><video src={compareVideo.video} poster={compareVideo.poster} muted autoPlay loop playsInline preload="metadata"/></div>
         <div className="compare-treatment-overlay" style={{clipPath:'inset(0 '+(100-split)+'% 0 0)'}}><span>MAP132 DIGITALS — CINEMATIC STUDY</span><strong>THE CITY<br/>AFTER DARK</strong><small>COLOUR · CONTRAST · TITLE DESIGN</small></div>
-        <span className="compare-label compare-before">RAW LOOK</span><span className="compare-label compare-after">CINEMATIC TREATMENT</span>
+        <span className="compare-label compare-before">RAW FOOTAGE</span>
+        <span className="compare-label compare-after">CINEMATIC EDIT</span>
         <div className="compare-divider" style={{left:split+'%'}}><i/></div>
+        <input className="compare-stage-range" aria-label="Drag the centre handle to compare raw footage and cinematic edit" type="range" min="5" max="95" value={split} onChange={e=>setSplit(Number(e.target.value))}/>
       </div>
-      <label className="compare-range-label">REVEAL THE EDIT <strong>{split}%</strong><input aria-label="Reveal cinematic treatment" type="range" min="5" max="95" value={split} onChange={e=>setSplit(Number(e.target.value))}/></label>
-      <div className="demo-craft-points demo-treatment-list"><span>FILM-INSPIRED COLOUR</span><span>VIGNETTE & DEPTH</span><span>ANIMATED TITLE FEEL</span><span>ORIGINAL SOUND CUE ON PLAY</span></div>
+      <div className="compare-range-label"><span>RAW FOOTAGE</span><strong>{split}% REVEALED</strong><span>CINEMATIC EDIT</span></div>
+      <div className="demo-craft-points demo-treatment-list"><span>NEUTRAL SOURCE LOOK</span><span>CONTRAST & COLOUR</span><span>TITLE & FRAME DESIGN</span><span>VISUAL STORYTELLING</span></div>
+      <p className="demo-compare-note">This is an interactive visual-grade study using the same reference clip on both sides — not a separately rendered final edit.</p>
     </section>
-    <div className="demo-section-heading demo-clips-heading"><span>02 / CREATIVE FORMATS</span><h3>{activeCategory === 'All Projects' ? 'Stories in different styles' : activeCategory}</h3><p>Choose a film to experience its visual direction and original sound-design cue.</p></div>
+    <div className="demo-section-heading demo-clips-heading"><span>02 / CREATIVE FORMATS</span><h3>{activeCategory === 'All Projects' ? 'Different stories. Distinct treatments.' : activeCategory}</h3><p>Play a clip to view it at full length. The runtime is read from the actual video file; no artificial looping or duration labels.</p></div>
     <div className="demo-video-grid">
-      {visibleClips.map((clip,index) => <article className="demo-video-card" key={clip.id}>
-        <div className="demo-video-frame"><video controls playsInline preload="metadata" poster={clip.poster} onPlay={e => handleVideoPlay(e.currentTarget)} onPause={stopSoundDesign} onEnded={stopSoundDesign}><source src={clip.video} type="video/mp4"/>Your browser does not support video playback.</video><span className="demo-video-number">0{index+1}</span><span className="demo-play-caption">PLAY WITH SOUND DESIGN</span></div>
-        <div className="demo-video-copy"><span>{clip.category}</span><h4>{clip.title}</h4><p>{clip.note}</p><a href={clip.source} target="_blank" rel="noreferrer">Footage credit ↗</a></div>
+      {visibleClips.map((clip,index) => <article className={'demo-video-card'+(index===0&&activeCategory==='All Projects'?' demo-video-featured':'')} key={clip.id}>
+        <div className="demo-video-frame"><video controls playsInline preload="metadata" poster={clip.poster} onPlay={e => handleVideoPlay(e.currentTarget)} onLoadedMetadata={e=>updateDuration(clip.id,e.currentTarget.duration)}><source src={clip.video} type="video/mp4"/>Your browser does not support video playback.</video><span className="demo-video-number">0{index+1}</span><span className="demo-video-runtime">{formatDuration(durations[clip.id] || 0)}</span></div>
+        <div className="demo-video-copy"><span>{clip.category}</span><h4>{clip.title}</h4><p>{clip.note}</p><div className="demo-video-meta"><span>REFERENCE FOOTAGE</span><a href={clip.source} target="_blank" rel="noreferrer">Footage source ↗</a></div></div>
       </article>)}
-      {visibleClips.length === 0 && <div className="demo-empty-category"><b>{activeCategory}</b><p>This creative format can be developed for your project. Contact MAP132 to discuss the visual direction.</p></div>}
+      {visibleClips.length === 0 && <div className="demo-empty-category"><b>{activeCategory}</b><p>This format can be developed around your brief, footage and intended audience. Contact MAP132 to discuss the creative direction.</p></div>}
     </div>
-    <p className="demo-disclaimer">Creative direction studies using licensed reference footage. Each sample demonstrates a visual approach; footage credits are provided with the clips.</p>
+    <div className="demo-sound-note-panel"><span>03 / SOUND DESIGN</span><p>No generic browser-generated whoosh is added to these clips. Source footage audio plays only when it exists. Final sound design should be built to the cut — with matched impacts, transitions, ambience and music, not a one-size-fits-all effect.</p><a href="https://mixkit.co/free-sound-effects/" target="_blank" rel="noreferrer">Explore sound-effect reference library ↗</a></div>
+    <p className="demo-disclaimer">Creative direction studies using Pexels reference footage. These are visual samples, not representations of commissioned client projects. Footage sources are linked with each clip.</p>
   </div>;
 }
