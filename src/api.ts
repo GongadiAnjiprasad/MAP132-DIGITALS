@@ -1,3 +1,4 @@
 type ApiResult={data:any};
 async function call(method:string,path:string,body?:unknown):Promise<ApiResult>{const response=await fetch(path,{method,credentials:'same-origin',headers:body?{'Content-Type':'application/json'}:undefined,body:body?JSON.stringify(body):undefined});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||data.message||'Request failed');return {data};}
-export const api={get:(path:string)=>call('GET',path),post:(path:string,body:unknown)=>call('POST',path,body),put:(path:string,body:unknown)=>call('PUT',path,body)};
+async function upload(path:string,file:File):Promise<ApiResult>{const response=await fetch(path,{method:'POST',credentials:'same-origin',headers:{'Content-Type':file.type,'X-File-Name':encodeURIComponent(file.name)},body:file});const data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||'Upload failed');return {data};}
+export const api={get:(path:string)=>call('GET',path),post:(path:string,body:unknown)=>call('POST',path,body),put:(path:string,body:unknown)=>call('PUT',path,body),upload};
