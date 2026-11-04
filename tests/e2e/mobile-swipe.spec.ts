@@ -55,7 +55,7 @@ test('vertical touch movement does not change the active page', async ({ page })
 
   await dispatchTouchSwipe(page, '.ms-home-copy', { x: 200, y: 220 }, { x: 205, y: 80 });
 
-  await expect(track).toHaveAttribute('style', /translateX\(-0%\)/);
+  await expect(track).toHaveAttribute('style', /translateX\(0%\)/);
 });
 
 test('mobile swipe changes the showcase video in the preview modal', async ({ page }) => {
