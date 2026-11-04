@@ -104,8 +104,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   const [activePreview, setActivePreview] = useState<number | null>(null);
   const previewGesture = useRef<{ x: number; y: number; pointerId?: number } | null>(null);
   const changePreview = (direction: number) => setActivePreview(current => current === null ? null : (current + direction + previewVideos.length) % previewVideos.length);
-  const pointerStart = useRef<{ x: number; y: number; pointerId: number } | null>(null);
-  const touchStart = useRef<{ x: number; y: number; atHomeTop: boolean } | null>(null);
+  const pointerStart = useRef<{ x: number; y: number; pointerId: number; atHomeTop: boolean } | null>(null);
   const suppressSwipeClick = useRef(false);
   const wheelTotal = useRef(0);
   const wheelLocked = useRef(false);
@@ -129,22 +128,26 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [active, activePreview]);
 
-  // Touch gestures work across cards, text and empty space; native vertical scrolling stays enabled.
-  const onTouchStart = (event: TouchEvent<HTMLElement>) => {
-    if ((event.target as HTMLElement).closest('input, textarea, select, video, iframe')) return;
-    const touch = event.touches[0];
-    if (touch) {
-      const page = (event.target as HTMLElement).closest('.ms-page') as HTMLElement | null;
-      touchStart.current = { x: touch.clientX, y: touch.clientY, atHomeTop: active === 0 && !!page && page.scrollTop <= 2 };
-    }
+  // Pointer Events unify real finger and stylus gestures; pan-y keeps native vertical scrolling.
+  const onPointerDown = (event: PointerEvent<HTMLElement>) => {
+    if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
+    const target = event.target as HTMLElement;
+    if (target.closest('input, textarea, select, video, iframe')) return;
+    const page = target.closest('.ms-page') as HTMLElement | null;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    pointerStart.current = {
+      x: event.clientX,
+      y: event.clientY,
+      pointerId: event.pointerId,
+      atHomeTop: active === 0 && !!page && page.scrollTop <= 2,
+    };
   };
-  const onTouchEnd = (event: TouchEvent<HTMLElement>) => {
-    const start = touchStart.current;
-    touchStart.current = null;
-    const touch = event.changedTouches[0];
-    if (!start || !touch) return;
-    const dx = touch.clientX - start.x;
-    const dy = touch.clientY - start.y;
+  const onPointerUp = (event: PointerEvent<HTMLElement>) => {
+    const start = pointerStart.current;
+    pointerStart.current = null;
+    if (!start || start.pointerId !== event.pointerId) return;
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
     if (start.atHomeTop && dy > 110 && dy > Math.abs(dx) * 1.3) {
       window.location.reload();
       return;
@@ -155,23 +158,6 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       goTo(active + direction);
       window.setTimeout(() => { suppressSwipeClick.current = false; }, 450);
     }
-  };
-  // Pen/stylus drag. Finger input is handled by touch events for reliable mobile browsers.
-  const onPointerDown = (event: PointerEvent<HTMLElement>) => {
-    if (event.pointerType !== 'pen') return;
-    const target = event.target as HTMLElement;
-    if (target.closest('input, textarea, select, video, iframe')) return;
-    event.currentTarget.setPointerCapture(event.pointerId);
-    pointerStart.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
-  };
-  const onPointerUp = (event: PointerEvent<HTMLElement>) => {
-    const start = pointerStart.current;
-    pointerStart.current = null;
-    if (!start || start.pointerId !== event.pointerId) return;
-    const dx = event.clientX - start.x;
-    const dy = event.clientY - start.y;
-    const direction = getHorizontalSwipeDirection(dx, dy, 38, 1.2);
-    if (direction !== 0) goTo(active + direction);
   };
   const onClickCapture = (event: MouseEvent<HTMLElement>) => {
     if (!suppressSwipeClick.current) return;
@@ -215,7 +201,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       </nav>
     </header>
 
-    <main className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider" onTouchStartCapture={onTouchStart} onTouchEndCapture={onTouchEnd} onTouchCancelCapture={() => { touchStart.current = null; }} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointerStart.current = null; }} onClickCapture={onClickCapture} onWheel={onWheel}>
+    <main className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointerStart.current = null; }} onClickCapture={onClickCapture} onWheel={onWheel}>
       <div className="ms-track" style={{ transform: `translateX(-${active * 100}%)` }}>
         <section className="ms-page ms-home-page" aria-label="Home">
           <div className="ms-home-copy">
@@ -304,7 +290,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     </main>
 
     {activePreview !== null && <div className="ms-preview-modal" role="dialog" aria-modal="true" aria-label={serviceCards[activePreview].title + ' video preview'} onClick={() => setActivePreview(null)}>
-      <div className="ms-preview-dialog" onClick={event => event.stopPropagation()} onTouchStartCapture={event => { if (event.touches.length !== 1) { previewGesture.current = null; return; } const touch = event.touches[0]; if (touch) previewGesture.current = { x: touch.clientX, y: touch.clientY }; }} onTouchEndCapture={event => { const start = previewGesture.current; previewGesture.current = null; const touch = event.changedTouches[0]; if (!start || !touch) return; const dx = touch.clientX - start.x; const dy = touch.clientY - start.y; const direction = getHorizontalSwipeDirection(dx, dy, 42, 1.15); if (direction !== 0) changePreview(direction); }} onTouchCancelCapture={() => { previewGesture.current = null; }} onPointerDown={event => { if (event.pointerType !== 'mouse' || (event.target as HTMLElement).closest('button, input')) return; previewGesture.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId }; }} onPointerUp={event => { const start = previewGesture.current; previewGesture.current = null; if (!start || start.pointerId !== event.pointerId) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; const direction = getHorizontalSwipeDirection(dx, dy, 55, 1.15); if (direction !== 0) changePreview(direction); }} onPointerCancel={() => { previewGesture.current = null; }} onWheel={event => { if (Math.abs(event.deltaX) < Math.abs(event.deltaY) * 1.15 || Math.abs(event.deltaX) < 2) return; event.preventDefault(); if (wheelLocked.current) return; wheelTotal.current += event.deltaX; if (Math.abs(wheelTotal.current) >= 58) { changePreview(wheelTotal.current > 0 ? 1 : -1); wheelTotal.current = 0; wheelLocked.current = true; window.setTimeout(() => { wheelLocked.current = false; }, 520); } }}>
+      <div className="ms-preview-dialog" onClick={event => event.stopPropagation()} onPointerDown={event => { if (event.pointerType !== 'touch' && event.pointerType !== 'pen' && event.pointerType !== 'mouse') return; if ((event.target as HTMLElement).closest('button, input')) return; event.currentTarget.setPointerCapture(event.pointerId); previewGesture.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId }; }} onPointerUp={event => { const start = previewGesture.current; previewGesture.current = null; if (!start || start.pointerId !== event.pointerId) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; const direction = getHorizontalSwipeDirection(dx, dy, event.pointerType === 'mouse' ? 55 : 42, 1.15); if (direction !== 0) changePreview(direction); }} onPointerCancel={() => { previewGesture.current = null; }} onWheel={event => { if (Math.abs(event.deltaX) < Math.abs(event.deltaY) * 1.15 || Math.abs(event.deltaX) < 2) return; event.preventDefault(); if (wheelLocked.current) return; wheelTotal.current += event.deltaX; if (Math.abs(wheelTotal.current) >= 58) { changePreview(wheelTotal.current > 0 ? 1 : -1); wheelTotal.current = 0; wheelLocked.current = true; window.setTimeout(() => { wheelLocked.current = false; }, 520); } }}>
         <div className="ms-preview-dialog-head"><div><span>MAP132 DIGITALS / SHOWCASE PREVIEW</span><h2>{serviceCards[activePreview].title}</h2></div><button type="button" className="ms-preview-close" aria-label="Close video" onClick={() => setActivePreview(null)}><X size={22}/></button></div>
         <div className="ms-preview-stage">
           <video key={activePreview} className="ms-preview-player" src={previewVideos[activePreview].src} controls autoPlay playsInline preload="metadata">Your browser does not support video playback.</video>
