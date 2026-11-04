@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from './api';
 import DemoShowcase from './DemoShowcase';
+import HomeSlider from './HomeSlider';
 import {
   ArrowDownRight, ArrowRight, Check, ChevronRight, Film, LayoutDashboard,
   Facebook, Instagram, Linkedin, Mail, MessageCircle, Play, Plus, Save, Send, ShieldCheck, Sparkles,
@@ -619,5 +620,5 @@ export default function App() {
   useEffect(()=>{if(!isAdmin&&!isWorkspace)api.get('/api/portfolio').then(r=>setContent(r.data.content||defaults)).catch(()=>{}).finally(()=>setLoading(false));},[isAdmin,isWorkspace]);
   if(isWorkspace)return <WorkspaceStandalone/>;
   if(isAdmin)return <AdminApp/>;
-  return loading?<div className="site-loading">Preparing the next frame…</div>:<PublicSite content={content}/>;
+  return loading?<div className="site-loading">Preparing the next frame…</div>:<HomeSlider content={content}/>;
 }
