@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { api } from './api';
-import { DEMO_SHOWCASE } from './demoShowcase';
+import DemoShowcase from './DemoShowcase';
 import {
   ArrowDownRight, ArrowRight, Check, ChevronRight, Film, LayoutDashboard,
   Instagram, MessageCircle, Play, Plus, Save, ShieldCheck, Sparkles,
@@ -230,7 +230,7 @@ function PublicSite({ content }: { content: Content }) {
         <div className="approach-footer"><span>01 — DISCOVER</span><i></i><span>02 — DESIGN</span><i></i><span>03 — EDIT</span><i></i><span>04 — REFINE</span><a href="#contact">BUILD SOMETHING WITH US <ArrowRight size={14}/></a></div>
       </section>
       <section className="work-section" id="work"><div className="section-head"><div><p className="kicker">SELECTED PROJECTS</p><h2>Work that <em>speaks.</em></h2></div><p>A selection of edits, experiments and visual stories.</p></div>
-        {content.items.length ? <div className="work-grid">{content.items.map((item) => <article className="work-card" key={item.id}><div className="media-frame"><PortfolioMedia item={item}/><span className="media-category">{item.category}</span></div><div className="work-caption"><div><h3>{item.title}</h3><p>{item.description}</p></div><ArrowDownRight size={20}/></div></article>)}</div> : <div className="visual-concepts"><div className="concept-intro"><span className="concept-kicker">VISUAL DIRECTION / 01</span><h3>Stories deserve<br/><em>to be seen.</em></h3><p>These are visual style concepts, not completed client projects. Your own edits will replace them as you add work to the portfolio.</p></div><article className="concept-card concept-trailer"><div className="concept-art"><span className="concept-orbit"></span><span className="concept-number">01</span><strong>THE<br/>FINAL<br/><em>FRAME</em></strong><small>CINEMATIC TRAILER / STYLE STUDY</small></div><div className="concept-caption"><b>Trailer & teaser</b><span>DRAMA · RHYTHM · SOUND</span></div></article><article className="concept-card concept-reel"><div className="concept-art"><span className="concept-number">02</span><div className="reel-sun"></div><strong>MAKE<br/>IT <em>MOVE.</em></strong><small>SHORT-FORM / STYLE STUDY</small></div><div className="concept-caption"><b>Reels & Shorts</b><span>PACE · ENERGY · IMPACT</span></div></article><article className="concept-card concept-wedding"><div className="concept-art"><span className="concept-number">03</span><div className="wedding-glow"></div><strong>FOREVER<br/><em>IN FRAME.</em></strong><small>CELEBRATION FILM / STYLE STUDY</small></div><div className="concept-caption"><b>Wedding & event film</b><span>EMOTION · LIGHT · STORY</span></div></article></div>}
+        {content.items.length ? <div className="work-grid">{content.items.map((item) => <article className="work-card" key={item.id}><div className="media-frame"><PortfolioMedia item={item}/><span className="media-category">{item.category}</span></div><div className="work-caption"><div><h3>{item.title}</h3><p>{item.description}</p></div><ArrowDownRight size={20}/></div></article>)}</div> : <DemoShowcase />}
       </section>
       <section className="services-section" id="services">
         <div className="section-head">
