@@ -496,6 +496,7 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
           </div>
         </div>)}
       </div>}
+      {section==='Sound Effects'&&<p className="workspace-form-note">These are search shortcuts, not video effects: Original Quick Filters give common one-tap searches; the other groups organise sounds by editing purpose. Tap any button to search matching sounds in the library.</p>}
       <p className="workspace-form-note">Film-style sound searches across Freesound. Results are filtered to CC0 and Creative Commons Attribution licences; CC BY requires creator credit. Availability depends on the source catalogue, so try related terms if a filter returns no eligible preview.</p>
       {soundError&&<p className="error-text">{soundError}</p>}
       {soundResults.length>0&&<><div className="workspace-resource-grid" style={{gridTemplateColumns:'1fr',gap:8}}>{soundResults.map(sound=><SoundResultCard key={sound.id} sound={sound}/>)}</div><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap',padding:'12px 0'}}><span>{soundResults.length.toLocaleString()} loaded · {soundCount.toLocaleString()} provider matches</span>{soundNextPage&&<button type="button" className="gold-button" onClick={()=>searchSounds(soundNextPage!,true)} disabled={soundBusy}>{soundBusy?'Loading…':'Load more sounds'}</button>}</div></>}
