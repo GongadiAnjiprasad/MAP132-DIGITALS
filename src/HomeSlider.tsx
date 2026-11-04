@@ -4,6 +4,7 @@ import {
   Play, Sparkles, Youtube, Facebook, Linkedin, Send, X
 } from 'lucide-react';
 import DemoShowcase from './DemoShowcase';
+import { getHorizontalSwipeDirection } from './swipeGesture';
 import { DEMO_SHOWCASE } from './demoShowcase';
 
 type PortfolioItem = {
@@ -148,9 +149,10 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       window.location.reload();
       return;
     }
-    if (Math.abs(dx) > 38 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+    const direction = getHorizontalSwipeDirection(dx, dy, 38, 1.2);
+    if (direction !== 0) {
       suppressSwipeClick.current = true;
-      goTo(active + (dx < 0 ? 1 : -1));
+      goTo(active + direction);
       window.setTimeout(() => { suppressSwipeClick.current = false; }, 450);
     }
   };
@@ -168,7 +170,8 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     if (!start || start.pointerId !== event.pointerId) return;
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
-    if (Math.abs(dx) > 38 && Math.abs(dx) > Math.abs(dy) * 1.2) goTo(active + (dx < 0 ? 1 : -1));
+    const direction = getHorizontalSwipeDirection(dx, dy, 38, 1.2);
+    if (direction !== 0) goTo(active + direction);
   };
   const onClickCapture = (event: MouseEvent<HTMLElement>) => {
     if (!suppressSwipeClick.current) return;
@@ -212,7 +215,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       </nav>
     </header>
 
-    <main className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onTouchCancel={() => { touchStart.current = null; }} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointerStart.current = null; }} onClickCapture={onClickCapture} onWheel={onWheel}>
+    <main className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider" onTouchStartCapture={onTouchStart} onTouchEndCapture={onTouchEnd} onTouchCancelCapture={() => { touchStart.current = null; }} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointerStart.current = null; }} onClickCapture={onClickCapture} onWheel={onWheel}>
       <div className="ms-track" style={{ transform: `translateX(-${active * 100}%)` }}>
         <section className="ms-page ms-home-page" aria-label="Home">
           <div className="ms-home-copy">
