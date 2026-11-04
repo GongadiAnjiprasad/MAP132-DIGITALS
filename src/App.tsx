@@ -563,12 +563,12 @@ function AdminApp() {
   useEffect(()=>{ api.get('/api/admin/session').then(()=>setLoggedIn(true)).catch(()=>setLoggedIn(false)).finally(()=>setChecking(false)); },[]);
   useEffect(()=>{ if(loggedIn) api.get('/api/portfolio').then(r=>setContent(r.data.content || defaults)).catch(()=>setError('Could not load portfolio content.')); },[loggedIn]);
   async function login(e:React.FormEvent){e.preventDefault();setError('');try{await api.post('/api/admin/login',{password});setLoggedIn(true);setPassword('');}catch(error){setError(error instanceof Error?error.message:'Could not sign in. Please try again.');}}
-  async function save(next=content){setSaving(true);setError('');try{await api.put('/api/admin/content',next);setContent(next);setNotice('Changes saved and published.');setTimeout(()=>setNotice(''),3500);}catch{setError('Could not save changes. Please retry.');}finally{setSaving(false);}}
+  async function save(next=content){setSaving(true);setError('');try{await api.put('/api/admin/content',next);setContent(next);setNotice('Changes saved and published.');setTimeout(()=>setNotice(''),3500);return true;}catch(error){const message=error instanceof Error?error.message:'Unknown save error';setError('Save failed: '+message);return false;}finally{setSaving(false);}}
   async function addProject(e:React.FormEvent){e.preventDefault();setError('');let path='';let url=mediaUrl;let kind:Item['kind']=file?(file.type.startsWith('image/')?'image':'video'):(source==='other'?'video': 'link');
     if(file){if(file.size>90*1024*1024){setError('Direct upload limit is 90 MB per file. For larger videos, use a YouTube or Google Drive link.');return;}setUploading(true);try{const result=await api.upload('/api/admin/upload',file);path=result.data.path;url='';}catch(error){setError(error instanceof Error?error.message:'Upload failed. Try again or use a YouTube / Google Drive link.');setUploading(false);return;}setUploading(false);}
     if(!file && !safeLink(mediaUrl)){setError('Enter a valid http or https media link.');return;}
     const item:Item={id:crypto.randomUUID(),title,category,description,kind,url,path,source:file?'upload':source};
-    await save({...content,items:[item,...content.items]});setTitle('');setDescription('');setMediaUrl('');setFile(null);
+    const saved=await save({...content,items:[item,...content.items]});if(saved){setTitle('');setDescription('');setMediaUrl('');setFile(null);}
   }
   async function removeItem(item:Item){if(!confirm('Delete this portfolio item?'))return;const next={...content,items:content.items.filter(x=>x.id!==item.id)};await save(next);if(item.path)api.post('/api/admin/delete-media',{path:item.path}).catch(()=>{});}
   async function logout(){try{await api.post('/api/admin/logout',{});}finally{setLoggedIn(false);window.location.hash='#top';}}
