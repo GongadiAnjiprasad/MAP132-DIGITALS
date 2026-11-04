@@ -397,3 +397,89 @@
  .ms-pagination button{width:24px;height:26px}
 }
 @media(prefers-reduced-motion:reduce){.ms-track{transition:none}}
+
+
+/* MAP132 polish pass: clearer type hierarchy, touch-sized controls and client feedback feed. */
+.ms-kicker{font-size:clamp(10px,.78vw,12px);letter-spacing:1.8px}
+.ms-nav button,.ms-nav a{font-size:clamp(12px,.9vw,14px)}
+.ms-intro{font-size:clamp(15px,1.05vw,17px);line-height:1.8}
+.ms-home-proof{font-size:clamp(10px,.72vw,12px);gap:clamp(12px,1.5vw,22px)}
+.ms-showcase-top{font-size:10px}
+.ms-service-tile>span{font-size:10px}
+.ms-service-tile b{font-size:clamp(12px,.9vw,15px)}
+.ms-service-tile small{font-size:clamp(10px,.72vw,12px)}
+.ms-showcase-foot{font-size:11px;line-height:1.5}
+.ms-page-heading>p{font-size:clamp(14px,1vw,16px);line-height:1.75}
+.ms-project-card h3{font-size:clamp(15px,1.05vw,17px)}
+.ms-project-card p{font-size:clamp(13px,.9vw,15px);line-height:1.65}
+.ms-project-frame>span{font-size:10px}
+.ms-service-detail>span,.ms-process-grid article>span{font-size:10px}
+.ms-service-detail h3{font-size:clamp(15px,1vw,17px)}
+.ms-service-detail p,.ms-process-grid p{font-size:clamp(13px,.9vw,15px);line-height:1.7}
+.ms-process-grid h3{font-size:clamp(16px,1.1vw,18px)}
+.ms-skills h3{font-size:clamp(22px,1.7vw,28px)}
+.ms-skill-list span{font-size:12px}
+.ms-contact-copy>p:not(.ms-kicker){font-size:clamp(15px,1vw,17px);line-height:1.8}
+.ms-contact-links a{font-size:12px;padding:11px 14px}
+.ms-contact-panel>span{font-size:11px}
+.ms-contact-panel label{font-size:12px}
+.ms-contact-panel input,.ms-contact-panel select,.ms-contact-panel textarea{font-size:14px;padding:12px}
+.ms-primary,.ms-text-button{font-size:13px}
+.ms-current-label{font-size:11px}
+.ms-pagination button{font-size:10px}
+.ms-footer{font-size:10px}
+.ms-home-review-invite{grid-column:1/-1;display:flex;align-items:center;gap:18px;margin-top:2px;padding:18px 20px;border:1px solid rgba(232,199,122,.28);background:linear-gradient(110deg,rgba(232,199,122,.09),rgba(255,255,255,.025));}
+.ms-review-invite-mark{flex:none;color:var(--ms-gold);font:700 58px/.8 Georgia,serif}
+.ms-home-review-invite>div:nth-child(2){min-width:0;flex:1}
+.ms-home-review-invite>div:nth-child(2)>span{display:block;color:var(--ms-gold);font-size:10px;font-weight:800;letter-spacing:1.5px;margin-bottom:5px}
+.ms-home-review-invite b{display:block;font:700 17px/1.25 Manrope,sans-serif}
+.ms-home-review-invite p{margin:5px 0 0;color:var(--ms-muted);font-size:13px;line-height:1.55}
+.ms-home-review-invite button{flex:none;display:inline-flex;align-items:center;gap:9px;padding:12px 15px;border:1px solid rgba(232,199,122,.65);background:rgba(232,199,122,.12);color:var(--ms-gold);font-size:12px;font-weight:700;transition:background .2s,transform .2s}
+.ms-home-review-invite button:hover{background:var(--ms-gold);color:#111;transform:translateY(-2px)}
+.ms-arrow{width:54px;height:54px;border:1px solid rgba(245,220,167,.85);border-radius:50%;background:linear-gradient(145deg,#302719,#0d1016 70%);color:#f5dca7;box-shadow:0 8px 24px #0008,inset 0 1px 0 #fff3,0 0 0 5px rgba(232,199,122,.07);transition:transform .22s,background .22s,color .22s,box-shadow .22s}
+.ms-arrow svg{width:22px;height:22px;stroke-width:2.5}
+.ms-arrow:hover:not(:disabled){transform:translateY(-50%) scale(1.08);background:linear-gradient(145deg,#f5dca7,#d6a84f);color:#101114;box-shadow:0 10px 28px #0009,0 0 0 8px rgba(232,199,122,.13)}
+.ms-arrow:active:not(:disabled){transform:translateY(-50%) scale(.96)}
+.ms-arrow:focus-visible,.ms-home-review-invite button:focus-visible{outline:3px solid #fff;outline-offset:4px}
+.ms-arrow:disabled{opacity:.28;filter:grayscale(.5)}
+@media(max-width:1100px){
+ .ms-home-page{grid-template-columns:minmax(0,.8fr) minmax(0,1.2fr)}
+ .ms-home-review-invite{gap:12px;padding:15px}
+ .ms-home-review-invite b{font-size:15px}
+}
+@media(max-width:760px){
+ .ms-kicker{font-size:10px;letter-spacing:1.5px}
+ .ms-nav button,.ms-nav a{font-size:11px}
+ .ms-intro{font-size:15px;line-height:1.7}
+ .ms-home-proof{font-size:9px;line-height:1.5}
+ .ms-service-tile b{font-size:13px}
+ .ms-service-tile small{font-size:10px}
+ .ms-showcase-foot{font-size:11px}
+ .ms-page-heading h2{font-size:clamp(37px,9vw,46px)}
+ .ms-page-heading>p{font-size:14px;line-height:1.7}
+ .ms-project-card h3{font-size:14px}
+ .ms-project-card p{font-size:12px;line-height:1.55}
+ .ms-service-detail h3{font-size:14px}
+ .ms-service-detail p,.ms-process-grid p{font-size:12px;line-height:1.6}
+ .ms-process-grid h3{font-size:14px}
+ .ms-skill-list span{font-size:11px}
+ .ms-contact-copy>p:not(.ms-kicker){font-size:14px}
+ .ms-contact-panel label{font-size:12px}
+ .ms-contact-panel input,.ms-contact-panel select,.ms-contact-panel textarea{font-size:14px;min-height:44px}
+ .ms-primary,.ms-text-button{font-size:13px;min-height:44px}
+ .ms-home-review-invite{display:grid;grid-template-columns:auto 1fr;gap:9px 12px;padding:14px}
+ .ms-review-invite-mark{font-size:44px}
+ .ms-home-review-invite b{font-size:15px}
+ .ms-home-review-invite p{font-size:12px;line-height:1.5}
+ .ms-home-review-invite button{grid-column:2;justify-self:start;min-height:42px}
+ .ms-controls{gap:9px}
+ .ms-arrow{width:44px;height:44px}
+ .ms-arrow:first-child{left:9px}
+ .ms-arrow.ms-next{right:9px}
+}
+@media(max-width:420px){
+ .ms-home-review-invite{grid-template-columns:1fr}
+ .ms-review-invite-mark{display:none}
+ .ms-home-review-invite button{grid-column:1}
+ .ms-arrow{width:40px;height:40px}
+}
