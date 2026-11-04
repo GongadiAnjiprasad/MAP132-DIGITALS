@@ -55,7 +55,7 @@ function PortfolioMedia({ item }: { item: Item }) {
   const src = item.mediaUrl || safeLink(item.url || '');
   const embed = embedUrl(item);
   if (embed) return <iframe className="work-media" src={embed} title={item.title} loading="lazy" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />;
-  if (item.kind === 'video' && src) return <video className="work-media" src={src} controls preload="metadata" />;
+  if (item.kind === 'video' && src) return <video className="work-media" src={src} controls preload="metadata" onPlay={e=>document.querySelectorAll('video').forEach(v=>{if(v!==e.currentTarget)v.pause();})} />
   if (item.kind === 'image' && src) return <img className="work-media" src={src} alt={item.title} loading="lazy" />;
   return <div className="work-placeholder"><Play size={25} /><span>PROJECT PREVIEW</span></div>;
 }
@@ -191,6 +191,7 @@ function IndianFestivalAtmosphere(){
 }
 function PublicSite({ content }: { content: Content }) {
   const [activeSkill,setActiveSkill] = useState(0);
+  const [activeWorkCategory,setActiveWorkCategory] = useState('All Projects');
   const p = content.profile;
   const wa = p.whatsapp.replace(/[^\d]/g, '');
   const whatsappUrl = wa ? 'https://wa.me/' + wa : '';
@@ -199,7 +200,7 @@ function PublicSite({ content }: { content: Content }) {
     <WebsiteIntro />
     <header className="nav">
       <a className="wordmark" href="#top"><BrandLogo/></a>
-      <nav aria-label="Main navigation"><a href="#top">Home</a><a href="#work">Portfolio</a><a href="#services">Services</a><a href="#approach">Our Approach</a><a href="#skills">Creative Lab</a><a href="#about">About</a><a className="nav-workspace" href="#workspace"><Film size={14}/> Editor Workspace</a><a className="nav-dashboard" href="#admin"><LayoutDashboard size={14}/> Dashboard</a><a className="nav-hire" href="#contact">Start a project <ArrowRight size={15}/></a></nav>
+      <nav aria-label="Main navigation"><a href="#top">Home</a><a href="#work">Portfolio</a><a href="#services">Services</a><a href="#approach">Our Approach</a><a href="#skills">Creative Lab</a><a href="#about">About</a><a className="nav-workspace" href="#workspace"><Film size={14}/> Editor Workspace</a><a className="nav-hire" href="#contact">Start a project <ArrowRight size={15}/></a></nav>
     </header>
     <nav className="mobile-dock" aria-label="Quick navigation"><a href="#top"><span>⌂</span>Home</a><a href="#work"><span>▧</span>Work</a><a href="#services"><span>✳</span>Services</a><a href="#approach"><span>◈</span>Approach</a><a href="#contact"><span>↗</span>Contact</a></nav>
     <main>
@@ -229,8 +230,14 @@ function PublicSite({ content }: { content: Content }) {
         </div>
         <div className="approach-footer"><span>01 — DISCOVER</span><i></i><span>02 — DESIGN</span><i></i><span>03 — EDIT</span><i></i><span>04 — REFINE</span><a href="#contact">BUILD SOMETHING WITH US <ArrowRight size={14}/></a></div>
       </section>
-      <section className="work-section" id="work"><div className="section-head"><div><p className="kicker">SELECTED PROJECTS</p><h2>Work that <em>speaks.</em></h2></div><p>A selection of edits, experiments and visual stories.</p></div>
-        {content.items.length ? <div className="work-grid">{content.items.map((item) => <article className="work-card" key={item.id}><div className="media-frame"><PortfolioMedia item={item}/><span className="media-category">{item.category}</span></div><div className="work-caption"><div><h3>{item.title}</h3><p>{item.description}</p></div><ArrowDownRight size={20}/></div></article>)}</div> : <DemoShowcase />}
+      <section className="work-section" id="work"><div className="section-head"><div><p className="kicker">SELECTED PROJECTS</p><h2>Work that <em>speaks.</em></h2></div><p>Choose a category to explore the relevant video work and creative samples.</p></div>
+        {content.items.length ? <>
+          <div className="portfolio-category-filters" aria-label="Filter portfolio by category">
+            {['All Projects',...categories].map(category=><button type="button" key={category} className={activeWorkCategory===category?'active':''} aria-pressed={activeWorkCategory===category} onClick={()=>setActiveWorkCategory(category)}>{category}</button>)}
+          </div>
+          <div className="work-grid">{content.items.filter(item=>activeWorkCategory==='All Projects'||item.category===activeWorkCategory).map(item=><article className="work-card" key={item.id}><div className="media-frame"><PortfolioMedia item={item}/><span className="media-category">{item.category}</span></div><div className="work-caption"><div><h3>{item.title}</h3><p>{item.description}</p></div><ArrowDownRight size={20}/></div></article>)}</div>
+          {content.items.filter(item=>activeWorkCategory==='All Projects'||item.category===activeWorkCategory).length===0&&<div className="portfolio-empty-category"><b>{activeWorkCategory}</b><p>No original project has been published in this category yet. Check back soon.</p></div>}
+        </> : <DemoShowcase />}
       </section>
       <section className="services-section" id="services">
         <div className="section-head">
