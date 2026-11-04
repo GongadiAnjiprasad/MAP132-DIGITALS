@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState, type PointerEvent, type WheelEvent } from 'react';
 import {
   ArrowLeft, ArrowRight, Camera, Film, Instagram, Mail, MessageCircle,
   Play, Sparkles, Youtube, Facebook, Linkedin, Send
@@ -61,6 +61,9 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 
 export default function HomeSlider({ content }: { content: HomeContent }) {
   const [active, setActive] = useState(0);
+  const pointerStart = useRef<{ x: number; y: number; pointerId: number } | null>(null);
+  const wheelTotal = useRef(0);
+  const wheelLocked = useRef(false);
   const p = content.profile;
   const whatsapp = p.whatsapp.replace(/[^\d]/g, '');
   const whatsappUrl = whatsapp ? 'https://wa.me/' + whatsapp : '';
@@ -73,6 +76,36 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
   }, [active]);
+
+  // Finger swipe / stylus drag. Vertical page scrolling remains native.
+  const onPointerDown = (event: PointerEvent<HTMLElement>) => {
+    if (event.pointerType === 'mouse') return;
+    const target = event.target as HTMLElement;
+    if (target.closest('button, a, input, textarea, select, video, iframe')) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
+    pointerStart.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
+  };
+  const onPointerUp = (event: PointerEvent<HTMLElement>) => {
+    const start = pointerStart.current;
+    pointerStart.current = null;
+    if (!start || start.pointerId !== event.pointerId) return;
+    const dx = event.clientX - start.x;
+    const dy = event.clientY - start.y;
+    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.25) goTo(active + (dx < 0 ? 1 : -1));
+  };
+  const onWheel = (event: WheelEvent<HTMLElement>) => {
+    // Trackpads report horizontal gestures as deltaX; ordinary vertical scrolling is untouched.
+    if (Math.abs(event.deltaX) < Math.abs(event.deltaY) * 1.15 || Math.abs(event.deltaX) < 2) return;
+    event.preventDefault();
+    if (wheelLocked.current) return;
+    wheelTotal.current += event.deltaX;
+    if (Math.abs(wheelTotal.current) >= 58) {
+      goTo(active + (wheelTotal.current > 0 ? 1 : -1));
+      wheelTotal.current = 0;
+      wheelLocked.current = true;
+      window.setTimeout(() => { wheelLocked.current = false; }, 520);
+    }
+  };
 
   const contactLinks = [
     { label: 'WhatsApp', href: whatsappUrl, icon: <MessageCircle size={16}/> },
@@ -96,7 +129,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       </nav>
     </header>
 
-    <main className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider">
+    <main className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointerStart.current = null; }} onWheel={onWheel}>
       <div className="ms-track" style={{ transform: `translateX(-${active * 100}%)` }}>
         <section className="ms-page ms-home-page" aria-label="Home">
           <div className="ms-home-copy">
@@ -116,7 +149,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
                 <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small><i><ArrowRight size={14}/></i>
               </button>)}
             </div>
-            <p className="ms-showcase-foot">A clear look at our creative range. Select a tile or use the arrows to explore.</p>
+            <p className="ms-showcase-foot">A clear look at our creative range. Tap a tile, swipe sideways or use the arrows to explore.</p>
           </div>
         </section>
 
@@ -129,7 +162,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
         <section className="ms-page ms-services-page" aria-label="Services">
           <div className="ms-page-heading"><div><p className="ms-kicker">SERVICES / MADE FOR YOUR STORY</p><h2>One studio.<br/><em>Many ways to tell it.</em></h2></div><p>Choose the format that fits your idea. Every project starts with a clear purpose and a simple conversation.</p></div>
           <div className="ms-services-grid">
-            {serviceCards.map((card, index) => <article className="ms-service-detail" key={card.title}><span>{card.number} / SERVICE</span><div className="ms-service-detail-image" style={{backgroundImage:`linear-gradient(180deg,transparent,#080a0de8),url("${card.image}")`}}/><h3>{card.title}</h3><p>{card.note}. Thoughtful editing, clean pacing and sound shaped around your audience.</p></article>)}
+            {serviceCards.map((card, index) => <article className="ms-service-detail" key={card.title}><span>{card.number} / SERVICE</span><div className="ms-service-detail-image" style={{backgroundImage:`linear-gradient(180deg,transparent,#080a0de8),url("${card.image}")`}}/><h3>{card.title}</h3><p>{['Story-led teaser cuts, cinematic trailers and mood-driven short films.','Wedding highlights, event recaps, couple entries and emotional memory films.','Birthday invitations, surprise edits, photo-to-film montages and celebration reels.','Fast hooks, captions, beat cuts and vertical edits for Instagram and YouTube Shorts.','Creator intros, explainers, vlogs, tutorials and polished long-form storytelling.','Product showcases, launch promos, service ads and social campaign videos.','AI-assisted concepts, generated visual sequences and creative motion treatments.','Interview edits, podcast episodes, news packages and short highlight clips.'][index]}</p></article>)}
           </div>
           <div className="ms-services-note"><Sparkles size={17}/> Also available: motion titles, logo reveals, lyric videos and custom editing support.</div>
         </section>
@@ -137,7 +170,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
         <section className="ms-page ms-studio-page" aria-label="Studio">
           <div className="ms-page-heading"><div><p className="ms-kicker">THE MAP132 APPROACH</p><h2>Story first.<br/><em>Details matter.</em></h2></div><p>{p.about || 'We shape raw footage into purposeful visual stories through editing, rhythm, colour, motion and sound.'}</p></div>
           <div className="ms-process-grid">
-            {['Discover the story','Shape the rhythm','Design the visuals','Finish with sound'].map((step,index)=><article key={step}><span>0{index+1}</span><h3>{step}</h3><p>{['Understand the message, audience and feeling behind the footage.','Build a clear edit with intentional cuts, pacing and flow.','Use typography, motion and colour to support the story.','Balance music, ambience and effects for a polished finish.'][index]}</p></article>)}
+            {['Brief & references','Rough cut','Visual polish','Final delivery'].map((step,index)=><article key={step}><span>0{index+1}</span><h3>{step}</h3><p>{['Share your footage, target platform, sample style and delivery date.','Select the strongest moments and shape the story before effects.','Add titles, transitions, colour treatment, captions and motion where useful.','Balance dialogue, music and effects, then export in the agreed format.'][index]}</p></article>)}
           </div>
           <div className="ms-skills"><div><p className="ms-kicker">TOOLS & CREATIVE CRAFT</p><h3>Made frame by frame.</h3></div><div className="ms-skill-list">{content.skills.map((skill,index)=><span key={skill}>{String(index+1).padStart(2,'0')} · {skill}</span>)}</div></div>
           <div className="ms-studio-foot"><span><Camera size={15}/> {p.location || 'India'}</span><span>MAP132 DIGITALS · VIDEO EDITING</span></div>
