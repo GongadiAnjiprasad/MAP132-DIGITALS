@@ -1,0 +1,32 @@
+name: SFX feature build check
+
+on:
+  push:
+    branches:
+      - feature/sfx-simple-editor-library-2026-11-04
+  pull_request:
+    branches:
+      - main
+    paths:
+      - "src/**"
+      - "package.json"
+      - "vite.config.*"
+      - ".github/workflows/sfx-build-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout feature branch
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install
+      - name: Build without deploying
+        run: npm run build
