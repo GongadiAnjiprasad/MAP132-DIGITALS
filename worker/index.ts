@@ -14,7 +14,7 @@ async function api(req:Request,env:Env){const url=new URL(req.url),path=url.path
 if(path.startsWith('/api/resources/sounds/')&&path.endsWith('/preview')&&method==='GET'){
   if(!env.FREESOUND_API_KEY)return json({error:'Sound preview is not connected.'},503);
   const id=path.split('/')[4];
-  if(!/^\\d+$/.test(id))return json({error:'Invalid sound id.'},400);
+  if(!/^\d+$/.test(id))return json({error:'Invalid sound id.'},400);
   const detailUrl=new URL('https://freesound.org/apiv2/sounds/'+id+'/');
   detailUrl.searchParams.set('fields','id,previews');
   detailUrl.searchParams.set('token',env.FREESOUND_API_KEY);
