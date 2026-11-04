@@ -180,3 +180,44 @@
  .ms-stage{cursor:grab}
  .ms-stage:active{cursor:grabbing}
 }
+
+
+/* MAP132 showcase video modal and refined navigation controls */
+.ms-service-tile{isolation:isolate}
+.ms-service-tile:after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(232,199,122,.12),transparent 48%);opacity:0;transition:opacity .25s;pointer-events:none}
+.ms-service-tile:hover:after{opacity:1}
+.ms-service-tile .ms-tile-play{position:absolute;right:12px;top:12px;display:grid;place-items:center;width:42px;height:42px;border:1px solid rgba(245,220,167,.72);border-radius:50%;background:rgba(8,11,16,.72);color:#f5dca7;opacity:.95;box-shadow:0 5px 22px #0008;backdrop-filter:blur(8px);transition:transform .25s,background .25s,box-shadow .25s}
+.ms-service-tile:hover .ms-tile-play{transform:scale(1.1);background:#e8c77a;color:#111;box-shadow:0 0 0 6px #e8c77a22,0 8px 26px #0009}
+.ms-preview-modal{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:clamp(12px,4vw,48px);background:rgba(3,5,9,.88);backdrop-filter:blur(16px);animation:ms-modal-in .22s ease-out}
+.ms-preview-dialog{width:min(1040px,100%);max-height:92svh;overflow:auto;border:1px solid rgba(232,199,122,.42);background:linear-gradient(145deg,#151b25,#080b11);box-shadow:0 30px 100px #000c;padding:clamp(14px,2.5vw,26px)}
+.ms-preview-dialog-head{display:flex;align-items:center;justify-content:space-between;gap:20px;margin-bottom:14px}
+.ms-preview-dialog-head span{font-size:9px;letter-spacing:2px;color:var(--ms-gold);font-weight:800}
+.ms-preview-dialog-head h2{margin:7px 0 0;font:800 clamp(22px,4vw,36px)/1.05 Manrope,sans-serif;color:var(--ms-text)}
+.ms-preview-close{width:42px;height:42px;flex:0 0 42px;display:grid;place-items:center;border:1px solid #e8c77a66;border-radius:50%;background:#e8c77a12;color:var(--ms-gold);cursor:pointer;transition:.2s}
+.ms-preview-close:hover{background:var(--ms-gold);color:#101318;transform:rotate(90deg)}
+.ms-preview-player{display:block;width:100%;max-height:68svh;aspect-ratio:16/9;object-fit:contain;background:#030507;border:1px solid #ffffff18}
+.ms-preview-disclaimer{margin:12px 0 0;color:#a8a9ad;font-size:10px;line-height:1.7}
+@keyframes ms-modal-in{from{opacity:0;transform:scale(.985)}to{opacity:1;transform:scale(1)}}
+.ms-arrow{width:48px;height:48px;border:1px solid rgba(245,220,167,.72);border-radius:50%;background:linear-gradient(145deg,rgba(31,37,47,.96),rgba(7,10,15,.96));color:#f5dca7;box-shadow:0 8px 26px #0008,0 0 0 4px rgba(232,199,122,.07);transition:transform .22s,background .22s,color .22s,box-shadow .22s}
+.ms-arrow svg{stroke-width:2.6;filter:drop-shadow(0 1px 5px #e8c77a55)}
+.ms-arrow:hover:not(:disabled){background:linear-gradient(145deg,#f5dca7,#d5a95d);color:#111;transform:translateY(-50%) scale(1.09);box-shadow:0 10px 30px #000a,0 0 0 7px rgba(232,199,122,.13)}
+.ms-arrow:active:not(:disabled){transform:translateY(-50%) scale(.96)}
+.ms-arrow:disabled{opacity:.28;filter:grayscale(.7)}
+.ms-studio-extra{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-top:22px}
+.ms-studio-extra article{padding:17px;border:1px solid var(--ms-line);background:linear-gradient(145deg,#ffffff09,#ffffff03)}
+.ms-studio-extra article>span{font-size:8px;letter-spacing:1.4px;color:var(--ms-gold);font-weight:800}
+.ms-studio-extra h3{margin:13px 0 7px;font:700 14px Manrope,sans-serif}
+.ms-studio-extra p{margin:0;color:var(--ms-muted);font-size:10px;line-height:1.7}
+.ms-service-bottom{display:flex;justify-content:space-between;align-items:center;gap:18px;margin-top:22px;padding:17px;border:1px solid var(--ms-line);background:#ffffff06}
+.ms-service-bottom>div{display:flex;flex-direction:column;gap:5px}
+.ms-service-bottom b{font:700 14px Manrope,sans-serif;color:var(--ms-text)}
+.ms-service-bottom span{font-size:10px;color:var(--ms-muted)}
+@media(max-width:760px){
+ .ms-preview-modal{padding:10px}
+ .ms-preview-dialog{max-height:94svh;padding:12px}
+ .ms-preview-player{max-height:65svh}
+ .ms-studio-extra{grid-template-columns:1fr;gap:8px}
+ .ms-studio-extra article{padding:13px}
+ .ms-service-bottom{align-items:flex-start;flex-direction:column}
+ .ms-arrow{width:38px;height:38px}
+}
