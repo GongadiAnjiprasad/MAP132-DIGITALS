@@ -1068,3 +1068,47 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .demo-showcase-caption small{color:#8996A6;font-size:8px;letter-spacing:1.2px}
 @media(max-width:1000px){.demo-showcase{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:560px){.demo-showcase{grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.demo-showcase-intro{grid-column:span 2}.demo-image-link{height:155px}}
+
+
+.demo-showcase{display:block;margin-top:36px}
+.demo-showcase-intro{max-width:780px;padding:16px 0 24px}
+.demo-showcase-intro h3{font:900 clamp(38px,5vw,68px)/.98 Manrope,sans-serif;letter-spacing:-2px;color:#172333;margin:16px 0}
+.demo-showcase-intro h3 em{font-style:normal;color:#B86C50}
+.demo-showcase-intro p{max-width:670px;color:#687487;line-height:1.8;font-size:14px}
+.demo-showcase-intro b{display:inline-block;margin-top:12px;color:#9A7444;font-size:9px;letter-spacing:1.5px}
+.demo-service-strip{display:flex;flex-wrap:wrap;gap:8px;margin:8px 0 38px}
+.demo-service-strip span{border:1px solid rgba(178,139,82,.35);padding:8px 12px;border-radius:30px;color:#8D7049;font-size:10px;letter-spacing:.4px}
+.demo-section-heading{margin:0 0 18px}
+.demo-section-heading>span{color:#A98451;font-size:9px;font-weight:800;letter-spacing:1.8px}
+.demo-section-heading h3{margin:8px 0;font:800 clamp(23px,3vw,34px)/1.1 Manrope,sans-serif;color:#172333}
+.demo-section-heading p{margin:0;color:#718093;font-size:12px;line-height:1.7}
+.demo-compare{padding:26px;background:#111A27;margin-bottom:42px;box-shadow:0 20px 48px rgba(10,16,26,.15)}
+.demo-compare .demo-section-heading h3{color:#F4F0E9}
+.demo-compare .demo-section-heading p{color:#AAB5C3}
+.demo-compare-stage{position:relative;width:100%;height:clamp(220px,42vw,480px);overflow:hidden;background:#080D15}
+.compare-video,.compare-video-top,.compare-video-top video{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.compare-video-base{filter:saturate(.8) contrast(.94) brightness(1.08)}
+.compare-video-top{filter:saturate(1.4) contrast(1.15) brightness(.82) sepia(.12)}
+.compare-label{position:absolute;top:14px;z-index:3;padding:7px 10px;background:rgba(5,9,15,.72);color:#fff;font-size:9px;letter-spacing:1px}
+.compare-before{left:14px}.compare-after{right:14px}
+.compare-divider{position:absolute;z-index:4;top:0;bottom:0;width:2px;background:#E7C78E;transform:translateX(-1px);pointer-events:none}
+.compare-divider i{position:absolute;top:50%;left:50%;width:38px;height:38px;border-radius:50%;background:#E7C78E;transform:translate(-50%,-50%);box-shadow:0 2px 12px #0008}
+.compare-divider i:after{content:'↔';position:absolute;inset:0;display:grid;place-items:center;color:#18202A;font-size:20px;font-style:normal}
+.compare-range-label{display:flex;align-items:center;gap:12px;margin-top:17px;color:#D8C7A8;font-size:11px}
+.compare-range-label strong{margin-left:auto}
+.compare-range-label input{width:100%;accent-color:#D8B477}
+.demo-disclaimer{display:block;margin-top:8px;color:#8E9AA9;font-size:9px}
+.demo-clips-heading{margin-bottom:18px}
+.demo-video-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:18px}
+.demo-video-card{overflow:hidden;background:#111A27;border:1px solid rgba(214,174,99,.16);box-shadow:0 14px 34px rgba(10,16,26,.12)}
+.demo-video-frame{position:relative;aspect-ratio:16/9;background:#080D15}
+.demo-video-frame video{display:block;width:100%;height:100%;object-fit:cover}
+.demo-video-number{position:absolute;top:12px;left:12px;pointer-events:none;color:#fff;font-size:9px;letter-spacing:1px;text-shadow:0 1px 6px #000}
+.demo-video-copy{padding:17px 18px 19px;color:#F4F0E9}
+.demo-video-copy>span{color:#D9B77C;font-size:9px;font-weight:800;letter-spacing:1.4px;text-transform:uppercase}
+.demo-video-copy h4{margin:8px 0;font:800 18px/1.2 Manrope,sans-serif}
+.demo-video-copy p{margin:0 0 12px;color:#B4BECA;font-size:11px;line-height:1.65}
+.demo-video-copy a{color:#E4C58E;font-size:10px;text-decoration:none}
+.demo-video-copy a:hover{text-decoration:underline}
+.demo-final-note{margin:24px 0 0;padding:16px;border:1px solid rgba(178,139,82,.3);color:#8B704C;font-size:11px;line-height:1.7}
+@media(max-width:650px){.demo-compare{padding:14px;margin-bottom:32px}.demo-video-grid{grid-template-columns:1fr;gap:14px}.demo-showcase-intro h3{font-size:42px}.demo-compare-stage{height:240px}.demo-service-strip{gap:6px}.demo-service-strip span{font-size:9px;padding:7px 9px}.demo-video-copy{padding:14px}}
