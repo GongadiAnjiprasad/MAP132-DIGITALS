@@ -24,6 +24,10 @@ jobs:
         run: npm install
       - name: Test swipe navigation
         run: npm test
+      - name: Install mobile browser
+        run: npx playwright install --with-deps chromium
+      - name: Test mobile swipe interactions
+        run: npm run test:e2e
       - name: Build website
         run: npm run build
       - name: Deploy Worker and static website
