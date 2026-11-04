@@ -511,13 +511,17 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
         <p className="kicker" style={{margin:'0 0 2px',fontSize:10,letterSpacing:1.2}}>SOUND CATEGORIES</p>
         <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
           {[
-            ['Cinematic','cinematic sound effect'],
-            ['Impact & Boom','cinematic impact boom'],
-            ['Whoosh & Transitions','whoosh transition sound effect'],
-            ['Action & Fight','action fight sound effects'],
-            ['Suspense & Horror','suspense horror sound effects'],
-            ['Ambience & Foley','ambience foley sound effects'],
-            ['Logo Reveal','logo reveal sound effect']
+            ['Whoosh — Short','short whoosh sound effect transition'],
+            ['Whoosh — Heavy','heavy cinematic whoosh sound effect'],
+            ['Reverse Whoosh','reverse whoosh sound effect'],
+            ['Riser — Build-up','cinematic riser build up sound effect'],
+            ['Riser — Short','short cinematic riser sound effect'],
+            ['Riser → Impact','riser ending impact hit sound effect'],
+            ['Impact / Hit','cinematic impact hit sound effect'],
+            ['Boom','deep cinematic boom sound effect'],
+            ['Suspense / Horror','suspense horror tension sound effect'],
+            ['Ambience / Foley','cinematic ambience foley sound effect'],
+            ['Logo Reveal','cinematic logo reveal sound effect']
           ].map(([label,term])=><button key={label} type="button" className={soundQuery.toLowerCase()===term.toLowerCase()?'selected':''} onClick={()=>{setSoundGenre('All genres');setSoundQuery(term);searchSounds(1,false,term,'All genres');}}>{label}</button>)}
         </div>
       </div>}
