@@ -1112,3 +1112,36 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .demo-video-copy a:hover{text-decoration:underline}
 .demo-final-note{margin:24px 0 0;padding:16px;border:1px solid rgba(178,139,82,.3);color:#8B704C;font-size:11px;line-height:1.7}
 @media(max-width:650px){.demo-compare{padding:14px;margin-bottom:32px}.demo-video-grid{grid-template-columns:1fr;gap:14px}.demo-showcase-intro h3{font-size:42px}.demo-compare-stage{height:240px}.demo-service-strip{gap:6px}.demo-service-strip span{font-size:9px;padding:7px 9px}.demo-video-copy{padding:14px}}
+
+
+/* MAP132 client-first portfolio polish */
+.nav-dashboard{display:none!important}
+.hero-visual{isolation:isolate}
+.hero-copy{position:relative;z-index:2}
+.float-note{z-index:3;max-width:150px;white-space:nowrap}
+.note-one{top:7%;right:2%;transform:translateY(0)}
+.note-two{bottom:8%;right:1%}
+.demo-service-strip{grid-column:1/-1;display:flex;flex-wrap:wrap;gap:9px;padding:18px 0 4px}
+.demo-service-strip button,.portfolio-category-filters button{border:1px solid rgba(184,140,83,.35);background:rgba(12,19,29,.82);color:#c8cbd2;padding:10px 14px;font-size:10px;font-weight:600;letter-spacing:.3px;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.demo-service-strip button.active,.portfolio-category-filters button.active,.demo-service-strip button:hover,.portfolio-category-filters button:hover{background:rgba(198,157,94,.2);border-color:#d4ae73;color:#f4d8a6}
+.demo-sound-button{display:inline-flex;align-items:center;align-self:flex-start;margin-top:12px;padding:11px 15px;border:1px solid #c79b5c;background:linear-gradient(120deg,#b8884d,#d9b879);color:#111722;font-weight:800;font-size:10px;cursor:pointer}
+.demo-sound-note{display:block;margin-top:7px;color:#8e99a9;font-size:10px;line-height:1.5}
+.demo-compare-stage{position:relative;isolation:isolate}
+.compare-video-top video{filter:contrast(1.18) saturate(1.34) sepia(.12) brightness(.82);transform:scale(1.015)}
+.compare-video-base{filter:saturate(.72) contrast(.94) brightness(1.04)}
+.compare-treatment-overlay{position:absolute;inset:0;z-index:3;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;padding:clamp(16px,4vw,44px);background:linear-gradient(0deg,rgba(3,8,16,.78),transparent 68%);pointer-events:none}
+.compare-treatment-overlay span{font-size:9px;letter-spacing:4px;color:#e4bd7d;margin-bottom:10px}
+.compare-treatment-overlay strong{font-size:clamp(22px,4vw,48px);line-height:.94;letter-spacing:-1px;color:#fff4dc;text-shadow:0 4px 24px #000}
+.compare-treatment-overlay small{margin-top:10px;color:#e3c58e;font-size:8px;letter-spacing:2px}
+.portfolio-category-filters{display:flex;flex-wrap:wrap;gap:9px;margin:0 0 25px}
+.portfolio-empty-category,.demo-empty-category{grid-column:1/-1;padding:28px;border:1px dashed rgba(198,157,94,.4);background:rgba(15,22,32,.6);color:#c6cbd4}
+.portfolio-empty-category p,.demo-empty-category p{margin:8px 0 0;color:#929dad;font-size:12px;line-height:1.7}
+@media(max-width:700px){
+ .demo-service-strip{gap:7px}
+ .demo-service-strip button,.portfolio-category-filters button{padding:9px 10px;font-size:9px}
+ .compare-treatment-overlay{padding:14px}
+ .compare-treatment-overlay strong{font-size:clamp(19px,7vw,30px)}
+ .float-note{font-size:7px;max-width:112px}
+ .note-one{top:3%;right:1%}
+ .note-two{bottom:4%;right:1%}
+}
