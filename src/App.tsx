@@ -56,7 +56,7 @@ function PortfolioMedia({ item }: { item: Item }) {
   const src = item.mediaUrl || safeLink(item.url || '');
   const embed = embedUrl(item);
   if (embed) return <iframe className="work-media" src={embed} title={item.title} loading="lazy" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />;
-  if (item.kind === 'video' && src) return <div className="work-video-runtime"><video className="work-media" src={src} controls preload="metadata" onLoadedMetadata={e=>{const seconds=e.currentTarget.duration;setRuntime(Number.isFinite(seconds)?String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(Math.floor(seconds%60)).padStart(2,'0'):'');}} onPlay={e=>document.querySelectorAll('video').forEach(v=>{if(v!==e.currentTarget)v.pause();})} />{runtime&&<span className="work-runtime-badge">RUNTIME {runtime}</span>}</div>;
+  if (item.kind === 'video' && src) return <div className="work-video-runtime"><video className="work-media" src={src} controls preload="metadata" onLoadedMetadata={e=>{const media=e.currentTarget;if(!media)return;const seconds=media.duration;setRuntime(Number.isFinite(seconds)?String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(Math.floor(seconds%60)).padStart(2,'0'):'');}} onPlay={e=>document.querySelectorAll('video').forEach(v=>{if(v!==e.currentTarget)v.pause();})} />{runtime&&<span className="work-runtime-badge">RUNTIME {runtime}</span>}</div>;
   if (item.kind === 'image' && src) return <img className="work-media" src={src} alt={item.title} loading="lazy" />;
   return <div className="work-placeholder"><Play size={25} /><span>PROJECT PREVIEW</span></div>;
 }
@@ -305,6 +305,7 @@ const workspaceResources = [
 {id:'createthat-free',title:'CreateThat Free Assets',provider:'CreateThat',detail:'Free b-roll, music, sound effects, LUTs and images in one library',tags:['B-roll','Music','SFX','LUTs'],licence:'The provider states its listed free assets can be used commercially, but do not redistribute assets as standalone files. Verify the current terms on the asset page.',href:'https://www.createthat.ai/free-assets'}]},
 {section:'My Collections',title:'Saved resources',description:'MAP132 editor-curated picks are preloaded here. Add your own favourites too; the starter picks are selected from established free SFX catalogues and asset-page engagement signals, not a claimed worldwide ranking.',cards:[]}];
 function SoundResultCard({sound}:{sound:any}){
+  sound = sound && typeof sound === 'object' ? sound : {};
   const audioRef=useRef<HTMLAudioElement|null>(null);
   const [playing,setPlaying]=useState(false);
   const [currentTime,setCurrentTime]=useState(0);
@@ -341,7 +342,7 @@ function SoundResultCard({sound}:{sound:any}){
   const downloadAllowed=licence.includes('creativecommons.org/publicdomain/zero/')||(licence.includes('creativecommons.org/licenses/by/')&&!licence.includes('/by-nc/'));
   const duration=mediaDuration||Number(sound.duration)||0;
   return <article className="workspace-resource-card" style={{display:'flex',flexDirection:'column',alignItems:'stretch',gap:10,padding:'14px 16px',minWidth:0,overflow:'hidden'}}>
-    <audio ref={audioRef} preload="metadata" loop={false} src={sound.id?'/api/resources/sounds/'+encodeURIComponent(String(sound.id))+'/preview':undefined} onLoadedMetadata={e=>setMediaDuration(Number.isFinite(e.currentTarget.duration)?e.currentTarget.duration:0)} onDurationChange={e=>setMediaDuration(Number.isFinite(e.currentTarget.duration)?e.currentTarget.duration:0)} onTimeUpdate={e=>setCurrentTime(e.currentTarget.currentTime)} onEnded={e=>{e.currentTarget.pause();e.currentTarget.currentTime=0;setCurrentTime(0);setPlaying(false);}} onPause={()=>setPlaying(false)} onPlay={()=>{setPlaying(true);setPlayError('');}} onError={()=>{setPlaying(false);setPlayError('Preview unavailable from the source. Try another sound.');}} />
+    <audio ref={audioRef} preload="metadata" loop={false} src={sound.id?'/api/resources/sounds/'+encodeURIComponent(String(sound.id))+'/preview':undefined} onLoadedMetadata={e=>{const media=e.currentTarget;if(media)setMediaDuration(Number.isFinite(media.duration)?media.duration:0);}} onDurationChange={e=>{const media=e.currentTarget;if(media)setMediaDuration(Number.isFinite(media.duration)?media.duration:0);}} onTimeUpdate={e=>setCurrentTime(e.currentTarget.currentTime)} onEnded={e=>{e.currentTarget.pause();e.currentTarget.currentTime=0;setCurrentTime(0);setPlaying(false);}} onPause={()=>setPlaying(false)} onPlay={()=>{setPlaying(true);setPlayError('');}} onError={()=>{setPlaying(false);setPlayError('Preview unavailable from the source. Try another sound.');}} />
     <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:12,minWidth:0}}>
       <div style={{minWidth:0,flex:'1 1 auto'}}>
         <strong title={sound.title} style={{display:'block',fontSize:15,lineHeight:1.35,overflowWrap:'anywhere'}}>{sound.title}</strong>
