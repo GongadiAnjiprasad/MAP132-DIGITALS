@@ -3,7 +3,7 @@ import { api } from './api';
 import {
   ArrowDownRight, ArrowRight, Check, ChevronRight, Film,
   Instagram, MessageCircle, Play, Plus, Save, ShieldCheck, Sparkles,
-  Trash2, Upload, Video, X, Youtube, Camera, WandSparkles, ExternalLink
+  Trash2, Upload, Video, X, Youtube, Camera, WandSparkles, ExternalLink, Eye, EyeOff
 } from 'lucide-react';
 import { MonitorPlay } from 'lucide-react';
 
@@ -536,6 +536,7 @@ function AdminApp() {
   const [loggedIn,setLoggedIn] = useState(false);
   const [checking,setChecking] = useState(true);
   const [password,setPassword] = useState('');
+  const [showPassword,setShowPassword] = useState(false);
   const [error,setError] = useState('');
   const [content,setContent] = useState<Content>(defaults);
   const [tab,setTab] = useState<'profile'|'skills'|'portfolio'|'social'|'workspace'>(window.location.hash === '#workspace' ? 'workspace' : 'portfolio');
@@ -560,7 +561,7 @@ function AdminApp() {
   async function removeItem(item:Item){if(!confirm('Delete this portfolio item?'))return;const next={...content,items:content.items.filter(x=>x.id!==item.id)};await save(next);if(item.path)api.post('/api/admin/delete-media',{path:item.path}).catch(()=>{});}
   async function logout(){try{await api.post('/api/admin/logout',{});}finally{setLoggedIn(false);window.location.hash='#top';}}
   if(checking)return <div className="admin-loading">Checking secure admin session…</div>;
-  if(!loggedIn)return <div className="login-screen"><div className="login-card"><a className="wordmark" href="#top"><BrandLogo/></a><div className="login-icon"><ShieldCheck size={25}/></div><p className="kicker">PRIVATE STUDIO ACCESS</p><h1>Admin <em>Dashboard.</em></h1><p>Sign in to manage your portfolio, skills and contact links.</p><form onSubmit={login}><label>Admin password<input type="password" value={password} onChange={e=>setPassword(e.target.value)} required autoComplete="current-password" placeholder="Enter your password"/></label><button className="gold-button" type="submit">Secure sign in <ArrowRight size={16}/></button></form>{error&&<p className="error-text">{error}</p>}<a className="back-link" href="#top">← Back to website</a></div></div>;
+  if(!loggedIn)return <div className="login-screen"><div className="login-card"><a className="wordmark" href="#top"><BrandLogo/></a><div className="login-icon"><ShieldCheck size={25}/></div><p className="kicker">PRIVATE STUDIO ACCESS</p><h1>Admin <em>Dashboard.</em></h1><p>Sign in to manage your portfolio, skills and contact links.</p><form onSubmit={login}><label>Admin password<span className="login-password-field"><input type={showPassword?'text':'password'} value={password} onChange={e=>setPassword(e.target.value)} required autoComplete="current-password" placeholder="Enter your password"/><button type="button" className="password-visibility" onClick={()=>setShowPassword(v=>!v)} aria-label={showPassword?'Hide password':'Show password'} aria-pressed={showPassword}>{showPassword?<EyeOff size={18}/>:<Eye size={18}/>}</button></span></label><button className="gold-button" type="submit">Secure sign in <ArrowRight size={16}/></button></form>{error&&<p className="error-text">{error}</p>}<a className="back-link" href="#top">← Back to website</a></div></div>;
   const updateProfile=(key:keyof Content['profile'],value:string)=>setContent(c=>({...c,profile:{...c.profile,[key]:value}}));
   return <div className="admin-shell"><aside className="admin-side"><a className="wordmark" href="#top"><BrandLogo/></a><p className="admin-eyebrow">STUDIO CONTROL</p>{(['portfolio','profile','skills','social','workspace'] as const).map(t=><button key={t} className={tab===t?'admin-nav active':'admin-nav'} onClick={()=>setTab(t)}>{t==='portfolio'?'Portfolio manager':t==='profile'?'Profile & about':t==='skills'?'Skills & tools':t==='social'?'Social & contact':'Editor Workspace'}<ChevronRight size={15}/></button>)}<div className="side-bottom"><a href="#top" target="_blank">View live website <ExternalLink size={13}/></a><button onClick={logout}>Sign out <X size={14}/></button></div></aside>
     <main className="admin-main"><div className="admin-top"><div><p className="kicker">MAP132 DIGITALS / CONTROL ROOM</p><h1>{tab==='portfolio'?'Portfolio manager':tab==='profile'?'Profile & about':tab==='skills'?'Skills & tools':tab==='social'?'Social & contact':'Editor Workspace'}</h1><p>Manage what visitors see on your public portfolio.</p></div>{tab!=='workspace'&&<button className="save-button" onClick={()=>save()} disabled={saving}><Save size={16}/>{saving?'Saving…':'Save changes'}</button>}</div>
