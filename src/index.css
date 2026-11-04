@@ -1145,3 +1145,6 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
  .note-one{top:3%;right:1%}
  .note-two{bottom:4%;right:1%}
 }
+
+/* Prevent hero annotation collision with the monitor's CREATIVE STUDIO label */
+.float-note.note-one{display:none!important}
