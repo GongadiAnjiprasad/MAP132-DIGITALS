@@ -14,7 +14,7 @@
 .ms-nav .ms-workspace{border:1px solid var(--ms-line);padding:10px 12px;color:var(--ms-gold)}
 .ms-stage{flex:1;min-height:0;overflow:hidden;position:relative}
 .ms-track{height:100%;width:500%;display:flex;transition:transform .68s cubic-bezier(.22,.75,.22,1);will-change:transform}
-.ms-page{width:20%;height:100%;flex:0 0 20%;min-width:0;overflow-y:auto;overscroll-behavior:contain;scrollbar-width:none;padding:clamp(24px,4vh,48px) clamp(22px,6vw,92px)}
+.ms-page{width:20%;height:100%;flex:0 0 20%;min-width:0;overflow-y:auto;overscroll-behavior-y:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:clamp(24px,4vh,48px) clamp(22px,6vw,92px)}
 .ms-page::-webkit-scrollbar{display:none}
 .ms-home-page{display:grid;grid-template-columns:minmax(280px,.82fr) minmax(460px,1.18fr);align-items:center;gap:clamp(24px,4vw,64px);background:radial-gradient(ellipse at 25% 50%,#4a38201f,transparent 55%)}
 .ms-kicker{margin:0 0 16px;color:var(--ms-gold);font-size:9px;font-weight:800;letter-spacing:2.2px}
@@ -186,7 +186,7 @@
 .ms-service-tile{isolation:isolate}
 .ms-service-tile:after{content:"";position:absolute;inset:0;background:linear-gradient(135deg,rgba(232,199,122,.12),transparent 48%);opacity:0;transition:opacity .25s;pointer-events:none}
 .ms-service-tile:hover:after{opacity:1}
-.ms-service-tile .ms-tile-play{position:absolute;right:12px;top:auto;bottom:12px;display:inline-flex;align-items:center;justify-content:center;gap:7px;width:auto;min-width:76px;height:32px;padding:0 11px;border:1px solid rgba(245,220,167,.72);border-radius:7px;background:rgba(8,11,16,.88);color:#f5dca7;font-style:normal;opacity:.98;box-shadow:0 5px 22px #0008;backdrop-filter:blur(8px);transition:transform .25s,background .25s,box-shadow .25s}
+.ms-service-tile .ms-tile-play{position:absolute;right:12px;top:10px;bottom:auto;z-index:2;display:inline-flex;align-items:center;justify-content:center;gap:7px;width:auto;min-width:76px;height:32px;padding:0 11px;border:1px solid rgba(245,220,167,.72);border-radius:7px;background:rgba(8,11,16,.88);color:#f5dca7;font-style:normal;opacity:.98;box-shadow:0 5px 22px #0008;backdrop-filter:blur(8px);transition:transform .25s,background .25s,box-shadow .25s}
 .ms-service-tile .ms-tile-play small{font:800 9px/1 Manrope,sans-serif;letter-spacing:1.1px}
 .ms-service-tile:hover .ms-tile-play{transform:translateY(-2px);background:#e8c77a;color:#111;box-shadow:0 0 0 4px #e8c77a22,0 8px 26px #0009}
 .ms-preview-modal{position:fixed;inset:0;z-index:1000;display:grid;place-items:center;padding:clamp(12px,4vw,48px);background:rgba(3,5,9,.88);backdrop-filter:blur(16px);animation:ms-modal-in .22s ease-out}

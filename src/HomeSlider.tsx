@@ -102,7 +102,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   const [active, setActive] = useState(0);
   const [activePreview, setActivePreview] = useState<number | null>(null);
   const pointerStart = useRef<{ x: number; y: number; pointerId: number } | null>(null);
-  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const touchStart = useRef<{ x: number; y: number; atHomeTop: boolean } | null>(null);
   const suppressSwipeClick = useRef(false);
   const wheelTotal = useRef(0);
   const wheelLocked = useRef(false);
@@ -124,7 +124,10 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   const onTouchStart = (event: TouchEvent<HTMLElement>) => {
     if ((event.target as HTMLElement).closest('input, textarea, select, video, iframe')) return;
     const touch = event.touches[0];
-    if (touch) touchStart.current = { x: touch.clientX, y: touch.clientY };
+    if (touch) {
+      const page = (event.target as HTMLElement).closest('.ms-page') as HTMLElement | null;
+      touchStart.current = { x: touch.clientX, y: touch.clientY, atHomeTop: active === 0 && !!page && page.scrollTop <= 2 };
+    }
   };
   const onTouchEnd = (event: TouchEvent<HTMLElement>) => {
     const start = touchStart.current;
@@ -133,6 +136,10 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     if (!start || !touch) return;
     const dx = touch.clientX - start.x;
     const dy = touch.clientY - start.y;
+    if (start.atHomeTop && dy > 110 && dy > Math.abs(dx) * 1.3) {
+      window.location.reload();
+      return;
+    }
     if (Math.abs(dx) > 38 && Math.abs(dx) > Math.abs(dy) * 1.2) {
       suppressSwipeClick.current = true;
       goTo(active + (dx < 0 ? 1 : -1));
