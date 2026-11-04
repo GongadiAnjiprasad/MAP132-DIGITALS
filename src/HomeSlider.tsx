@@ -221,8 +221,8 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
           <div className="ms-home-showcase">
             <div className="ms-showcase-top"><span>WHAT WE CAN CREATE</span><span>MAP132 / 01—08</span></div>
             <div className="ms-service-bento">
-              {serviceCards.map((card, index) => <button type="button" key={card.title} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onClick={() => setActivePreview(index)} style={{ backgroundImage: `linear-gradient(180deg, #090b0e08 5%, #090b0edb 100%), url("${card.image}")` }}>
-                <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small><i className="ms-tile-play"><Play size={14} fill="currentColor"/><small>PLAY</small></i>
+              {serviceCards.map((card, index) => <button type="button" key={card.title} aria-label={`Play ${card.title} sample video`} title={`Play ${card.title} sample video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onClick={() => setActivePreview(index)} style={{ backgroundImage: `linear-gradient(180deg, #090b0e08 5%, #090b0edb 100%), url("${card.image}")` }}>
+                <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small>
               </button>)}
             </div>
             <p className="ms-showcase-foot">Tap any showcase tile to play its sample video here — no page navigation.</p>
