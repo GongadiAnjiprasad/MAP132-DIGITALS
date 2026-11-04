@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, type PointerEvent, type WheelEvent } from 'react';
 import {
   ArrowLeft, ArrowRight, Camera, Film, Instagram, Mail, MessageCircle,
   Play, Sparkles, Youtube, Facebook, Linkedin, Send
@@ -78,7 +78,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   }, [active]);
 
   // Finger swipe / stylus drag. Vertical page scrolling remains native.
-  const onPointerDown = (event: React.PointerEvent<HTMLElement>) => {
+  const onPointerDown = (event: PointerEvent<HTMLElement>) => {
     if (event.pointerType === 'mouse') return;
     const target = event.target as HTMLElement;
     if (target.closest('button, a, input, textarea, select, video, iframe')) return;
@@ -92,7 +92,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     const dy = event.clientY - start.y;
     if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.25) goTo(active + (dx < 0 ? 1 : -1));
   };
-  const onWheel = (event: React.WheelEvent<HTMLElement>) => {
+  const onWheel = (event: WheelEvent<HTMLElement>) => {
     // Trackpads report horizontal gestures as deltaX; ordinary vertical scrolling is untouched.
     if (Math.abs(event.deltaX) < Math.abs(event.deltaY) * 1.15 || Math.abs(event.deltaX) < 2) return;
     event.preventDefault();
