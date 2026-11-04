@@ -16,8 +16,8 @@ export default function DemoShowcase() {
       <p>Explore sample stock footage to understand the types of videos and editing styles we can create. These are licensed reference clips, not MAP132 completed client projects.</p>
       <b>STOCK FOOTAGE DEMO · NOT ORIGINAL CLIENT WORK</b><button type="button" className="demo-sound-button" onClick={playSoundDesign}>▶ Hear original cinematic impact</button><small className="demo-sound-note">Original synthesized sound preview. Stock footage itself may not include recorded audio.</small>
     </div>
-    <div className="demo-service-strip">
-      {DEMO_SHOWCASE.map((demo)=><span key={demo.id}>{demo.category}</span>)}
+    <div className="demo-service-strip" aria-label="Filter demo categories">
+      {["All Projects",...DEMO_SHOWCASE.map(demo=>demo.category)].map(category=><button type="button" key={category} className={activeCategory===category?"active":""} aria-pressed={activeCategory===category} onClick={()=>setActiveCategory(category)}>{category}</button>)}
     </div>
     <section className="demo-compare">
       <div className="demo-section-heading"><span>01 / LOOK DEVELOPMENT</span><h3>Before & After Look Preview</h3><p>Move the slider to compare a neutral stock clip with a stylised cinematic colour treatment.</p></div>
@@ -32,10 +32,11 @@ export default function DemoShowcase() {
     </section>
     <div className="demo-section-heading demo-clips-heading"><span>02 / PLAYABLE REFERENCES</span><h3>Explore Sample Footage</h3><p>Tap play on each clip. These references help explain the service category and visual direction.</p></div>
     <div className="demo-video-grid">
-      {clips.map((clip,index)=><article className="demo-video-card" key={clip.id}>
-        <div className="demo-video-frame"><video controls playsInline preload="metadata" poster={clip.poster}><source src={clip.video} type="video/mp4"/>Your browser does not support video playback.</video><span className="demo-video-number">0{index+1}</span></div>
+      {visibleClips.map((clip,index)=><article className="demo-video-card" key={clip.id}>
+        <div className="demo-video-frame"><video controls playsInline preload="metadata" poster={clip.poster} onPlay={e=>document.querySelectorAll("video").forEach(v=>{if(v!==e.currentTarget)v.pause();})}><source src={clip.video} type="video/mp4"/>Your browser does not support video playback.</video><span className="demo-video-number">0{index+1}</span></div>
         <div className="demo-video-copy"><span>{clip.category}</span><h4>{clip.title}</h4><p>{clip.note}</p><a href={clip.source} target="_blank" rel="noreferrer">Stock footage source ↗</a></div>
       </article>)}
+      {visibleClips.length===0&&<div className="demo-empty-category"><b>{activeCategory}</b><p>Demo footage for this category is not added yet. Original MAP132 projects will appear here when published.</p></div>}
     </div>
     <p className="demo-final-note">When your own edits are ready, upload them in Dashboard. Your original portfolio items will replace this demo showcase.</p>
   </div>;
