@@ -82,6 +82,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     if (event.pointerType === 'mouse') return;
     const target = event.target as HTMLElement;
     if (target.closest('button, a, input, textarea, select, video, iframe')) return;
+    event.currentTarget.setPointerCapture(event.pointerId);
     pointerStart.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
   };
   const onPointerUp = (event: PointerEvent<HTMLElement>) => {
