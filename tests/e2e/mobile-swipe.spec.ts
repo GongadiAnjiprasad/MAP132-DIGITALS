@@ -53,7 +53,7 @@ test('vertical touch movement does not change the active page', async ({ page })
   const track = page.locator('.ms-track');
   await expect(page.locator('.ms-stage')).toBeVisible();
 
-  await dispatchTouchSwipe(page, '.ms-home-copy', { x: 200, y: 220 }, { x: 205, y: 360 });
+  await dispatchTouchSwipe(page, '.ms-home-copy', { x: 200, y: 220 }, { x: 205, y: 80 });
 
   await expect(track).toHaveAttribute('style', /translateX\(-0%\)/);
 });
