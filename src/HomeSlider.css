@@ -518,3 +518,12 @@
  .ms-review-feed-foot{align-items:flex-start;flex-direction:column}
  .ms-review-feed-foot button{min-height:42px}
 }
+
+
+/* Reliable mobile video navigation: capture swipes above native video controls and provide button fallback. */
+.ms-preview-dialog{touch-action:pan-y;overscroll-behavior:contain}
+.ms-preview-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}
+.ms-preview-nav button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 13px;border:1px solid rgba(232,199,122,.48);background:rgba(232,199,122,.09);color:var(--ms-gold);font-size:12px;font-weight:700;cursor:pointer}
+.ms-preview-nav button:active{background:var(--ms-gold);color:#101318}
+.ms-preview-nav span{color:var(--ms-muted);font-size:11px;font-variant-numeric:tabular-nums}
+@media(max-width:420px){.ms-preview-nav button{min-height:44px;padding:8px 10px;font-size:11px}}
