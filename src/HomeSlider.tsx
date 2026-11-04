@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent, type WheelEvent } from 'react';
+import { useEffect, useRef, useState, type PointerEvent, type TouchEvent, type WheelEvent, type MouseEvent } from 'react';
 import {
   ArrowLeft, ArrowRight, Camera, Film, Instagram, Mail, MessageCircle,
   Play, Sparkles, Youtube, Facebook, Linkedin, Send
@@ -62,6 +62,8 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 export default function HomeSlider({ content }: { content: HomeContent }) {
   const [active, setActive] = useState(0);
   const pointerStart = useRef<{ x: number; y: number; pointerId: number } | null>(null);
+  const touchStart = useRef<{ x: number; y: number } | null>(null);
+  const suppressSwipeClick = useRef(false);
   const wheelTotal = useRef(0);
   const wheelLocked = useRef(false);
   const p = content.profile;
@@ -77,11 +79,30 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     return () => window.removeEventListener('keydown', onKey);
   }, [active]);
 
-  // Finger swipe / stylus drag. Vertical page scrolling remains native.
+  // Touch gestures work across cards, text and empty space; native vertical scrolling stays enabled.
+  const onTouchStart = (event: TouchEvent<HTMLElement>) => {
+    if ((event.target as HTMLElement).closest('input, textarea, select, video, iframe')) return;
+    const touch = event.touches[0];
+    if (touch) touchStart.current = { x: touch.clientX, y: touch.clientY };
+  };
+  const onTouchEnd = (event: TouchEvent<HTMLElement>) => {
+    const start = touchStart.current;
+    touchStart.current = null;
+    const touch = event.changedTouches[0];
+    if (!start || !touch) return;
+    const dx = touch.clientX - start.x;
+    const dy = touch.clientY - start.y;
+    if (Math.abs(dx) > 38 && Math.abs(dx) > Math.abs(dy) * 1.2) {
+      suppressSwipeClick.current = true;
+      goTo(active + (dx < 0 ? 1 : -1));
+      window.setTimeout(() => { suppressSwipeClick.current = false; }, 450);
+    }
+  };
+  // Pen/stylus drag. Finger input is handled by touch events for reliable mobile browsers.
   const onPointerDown = (event: PointerEvent<HTMLElement>) => {
-    if (event.pointerType === 'mouse') return;
+    if (event.pointerType !== 'pen') return;
     const target = event.target as HTMLElement;
-    if (target.closest('button, a, input, textarea, select, video, iframe')) return;
+    if (target.closest('input, textarea, select, video, iframe')) return;
     event.currentTarget.setPointerCapture(event.pointerId);
     pointerStart.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
   };
@@ -91,7 +112,13 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     if (!start || start.pointerId !== event.pointerId) return;
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
-    if (Math.abs(dx) > 48 && Math.abs(dx) > Math.abs(dy) * 1.25) goTo(active + (dx < 0 ? 1 : -1));
+    if (Math.abs(dx) > 38 && Math.abs(dx) > Math.abs(dy) * 1.2) goTo(active + (dx < 0 ? 1 : -1));
+  };
+  const onClickCapture = (event: MouseEvent<HTMLElement>) => {
+    if (!suppressSwipeClick.current) return;
+    event.preventDefault();
+    event.stopPropagation();
+    suppressSwipeClick.current = false;
   };
   const onWheel = (event: WheelEvent<HTMLElement>) => {
     // Trackpads report horizontal gestures as deltaX; ordinary vertical scrolling is untouched.
@@ -129,7 +156,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       </nav>
     </header>
 
-    <main className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointerStart.current = null; }} onWheel={onWheel}>
+    <main className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider" onTouchStart={onTouchStart} onTouchEnd={onTouchEnd} onTouchCancel={() => { touchStart.current = null; }} onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointerStart.current = null; }} onClickCapture={onClickCapture} onWheel={onWheel}>
       <div className="ms-track" style={{ transform: `translateX(-${active * 100}%)` }}>
         <section className="ms-page ms-home-page" aria-label="Home">
           <div className="ms-home-copy">
