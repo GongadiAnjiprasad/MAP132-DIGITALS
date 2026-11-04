@@ -520,10 +520,12 @@
 }
 
 
-/* Reliable mobile video navigation: capture swipes above native video controls and provide button fallback. */
+/* Swipe-first showcase navigation: desktop mouse-drag / trackpad and mobile touch. */
 .ms-preview-dialog{touch-action:pan-y;overscroll-behavior:contain}
-.ms-preview-nav{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}
-.ms-preview-nav button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 13px;border:1px solid rgba(232,199,122,.48);background:rgba(232,199,122,.09);color:var(--ms-gold);font-size:12px;font-weight:700;cursor:pointer}
-.ms-preview-nav button:active{background:var(--ms-gold);color:#101318}
-.ms-preview-nav span{color:var(--ms-muted);font-size:11px;font-variant-numeric:tabular-nums}
-@media(max-width:420px){.ms-preview-nav button{min-height:44px;padding:8px 10px;font-size:11px}}
+.ms-preview-stage{position:relative;width:100%;touch-action:pan-y}
+.ms-preview-swipe-hint{position:absolute;z-index:2;top:50%;display:grid;place-items:center;width:46px;height:46px;border:1px solid rgba(232,199,122,.58);border-radius:50%;background:rgba(5,8,13,.72);color:#f5dca7;box-shadow:0 5px 20px #0009;pointer-events:none;transform:translateY(-50%);opacity:.82}
+.ms-preview-swipe-left{left:14px}
+.ms-preview-swipe-right{right:14px}
+.ms-preview-count{margin-top:10px;text-align:center;color:var(--ms-muted);font-size:11px;font-variant-numeric:tabular-nums;letter-spacing:1px}
+.ms-preview-dialog:active{cursor:grabbing}
+@media(max-width:760px){.ms-preview-swipe-hint{display:none}.ms-preview-count{margin-top:8px}}
