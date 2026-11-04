@@ -297,9 +297,12 @@ const workspaceResources = [
 function SoundResultCard({sound}:{sound:any}){
   const audioRef=useRef<HTMLAudioElement|null>(null);
   const [playing,setPlaying]=useState(false);
+  const [currentTime,setCurrentTime]=useState(0);
+  const [mediaDuration,setMediaDuration]=useState(0);
   const [downloading,setDownloading]=useState(false);
   const [downloadError,setDownloadError]=useState('');
   const [playError,setPlayError]=useState('');
+  const formatTime=(value:number)=>{const safe=Math.max(0,Math.floor(Number.isFinite(value)?value:0));return Math.floor(safe/60)+':'+String(safe%60).padStart(2,'0');};
   async function toggle(){
     const audio=audioRef.current;
     if(!audio)return;
@@ -326,20 +329,24 @@ function SoundResultCard({sound}:{sound:any}){
   }
   const licence=String(sound.license||'').toLowerCase();
   const downloadAllowed=licence.includes('creativecommons.org/publicdomain/zero/')||(licence.includes('creativecommons.org/licenses/by/')&&!licence.includes('/by-nc/'));
-  const duration=Number.isFinite(Number(sound.duration))?Math.floor(Number(sound.duration)):0;
-  const time=duration?Math.floor(duration/60)+':'+String(duration%60).padStart(2,'0'):'';
+  const duration=mediaDuration||Number(sound.duration)||0;
   return <article className="workspace-resource-card" style={{display:'flex',flexDirection:'column',alignItems:'stretch',gap:10,padding:'14px 16px',minWidth:0,overflow:'hidden'}}>
-    <audio ref={audioRef} preload="none" src={sound.id?'/api/resources/sounds/'+encodeURIComponent(String(sound.id))+'/preview':undefined} onEnded={()=>setPlaying(false)} onPause={()=>setPlaying(false)} onPlay={()=>{setPlaying(true);setPlayError('');}} onError={()=>{setPlaying(false);setPlayError('Preview unavailable from the source. Try another sound.');}} />
+    <audio ref={audioRef} preload="metadata" loop={false} src={sound.id?'/api/resources/sounds/'+encodeURIComponent(String(sound.id))+'/preview':undefined} onLoadedMetadata={e=>setMediaDuration(Number.isFinite(e.currentTarget.duration)?e.currentTarget.duration:0)} onDurationChange={e=>setMediaDuration(Number.isFinite(e.currentTarget.duration)?e.currentTarget.duration:0)} onTimeUpdate={e=>setCurrentTime(e.currentTarget.currentTime)} onEnded={e=>{e.currentTarget.pause();e.currentTarget.currentTime=0;setCurrentTime(0);setPlaying(false);}} onPause={()=>setPlaying(false)} onPlay={()=>{setPlaying(true);setPlayError('');}} onError={()=>{setPlaying(false);setPlayError('Preview unavailable from the source. Try another sound.');}} />
     <div style={{display:'flex',alignItems:'flex-start',justifyContent:'space-between',gap:12,minWidth:0}}>
       <div style={{minWidth:0,flex:'1 1 auto'}}>
         <strong title={sound.title} style={{display:'block',fontSize:15,lineHeight:1.35,overflowWrap:'anywhere'}}>{sound.title}</strong>
-        <span style={{display:'block',fontSize:12,opacity:.72,marginTop:5}}>Preview available{sound.creator?' · '+sound.creator:''}{time?' · '+time:''}</span>
+        <span style={{display:'block',fontSize:12,opacity:.72,marginTop:5}}>{sound.creator||'Sound preview'}{duration?' · '+formatTime(duration):''}</span>
       </div>
       <span style={{fontSize:11,opacity:.7,whiteSpace:'nowrap',flexShrink:0}}>{downloadAllowed?'CC licence':'Licence check'}</span>
     </div>
     <div style={{display:'flex',alignItems:'center',gap:9,flexWrap:'wrap'}}>
       <button type="button" className="gold-button" aria-label={playing?'Pause preview':'Play preview'} onClick={toggle} disabled={!sound.previewUrl} style={{minWidth:132,padding:'9px 14px',justifyContent:'center'}}>{playing?'Ⅱ Pause Preview':'▶ Play Preview'}</button>
       <button type="button" className="gold-button" onClick={downloadPreview} disabled={!downloadAllowed||downloading} style={{minWidth:140,padding:'9px 14px',justifyContent:'center',opacity:downloadAllowed?1:.45}}>{downloading?'Downloading…':'↓ Download Preview'}</button>
+    </div>
+    <div style={{display:'grid',gridTemplateColumns:'42px minmax(0,1fr) 42px',alignItems:'center',gap:9}}>
+      <span style={{fontSize:11,fontVariantNumeric:'tabular-nums',opacity:.8}}>{formatTime(currentTime)}</span>
+      <input aria-label={'Seek '+String(sound.title||'sound preview')} type="range" min="0" max={Math.max(duration,0.1)} step="0.1" value={Math.min(currentTime,duration||0)} disabled={!duration} onChange={e=>{const next=Number(e.target.value);if(audioRef.current){audioRef.current.currentTime=next;setCurrentTime(next);}}} style={{width:'100%',accentColor:'var(--accent,#d5ad62)',cursor:duration?'pointer':'default'}} />
+      <span style={{fontSize:11,fontVariantNumeric:'tabular-nums',opacity:.8,textAlign:'right'}}>{formatTime(duration)}</span>
     </div>
     {playError&&<span className="error-text" role="status">{playError}</span>}
     {downloadError&&<span className="error-text">{downloadError}</span>}
