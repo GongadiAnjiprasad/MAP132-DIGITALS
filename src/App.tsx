@@ -52,10 +52,11 @@ function embedUrl(item: Item) {
   return '';
 }
 function PortfolioMedia({ item }: { item: Item }) {
+  const [runtime,setRuntime] = useState('');
   const src = item.mediaUrl || safeLink(item.url || '');
   const embed = embedUrl(item);
   if (embed) return <iframe className="work-media" src={embed} title={item.title} loading="lazy" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />;
-  if (item.kind === 'video' && src) return <video className="work-media" src={src} controls preload="metadata" onPlay={e=>document.querySelectorAll('video').forEach(v=>{if(v!==e.currentTarget)v.pause();})} />
+  if (item.kind === 'video' && src) return <div className="work-video-runtime"><video className="work-media" src={src} controls preload="metadata" onLoadedMetadata={e=>{const seconds=e.currentTarget.duration;setRuntime(Number.isFinite(seconds)?String(Math.floor(seconds/60)).padStart(2,'0')+':'+String(Math.floor(seconds%60)).padStart(2,'0'):'');}} onPlay={e=>document.querySelectorAll('video').forEach(v=>{if(v!==e.currentTarget)v.pause();})} />{runtime&&<span className="work-runtime-badge">RUNTIME {runtime}</span>}</div>;
   if (item.kind === 'image' && src) return <img className="work-media" src={src} alt={item.title} loading="lazy" />;
   return <div className="work-placeholder"><Play size={25} /><span>PROJECT PREVIEW</span></div>;
 }
