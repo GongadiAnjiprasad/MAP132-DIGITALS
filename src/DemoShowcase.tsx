@@ -43,8 +43,8 @@ export default function DemoShowcase() {
       <div className="demo-section-heading"><span>01 / SEE THE DIFFERENCE</span><h3>One frame. Two visual directions.</h3><p>Drag the centre handle across the image. The left side shows the neutral source look; the right side reveals a stylised cinematic treatment.</p></div>
       <div className="demo-compare-stage">
         <video className="compare-video compare-video-base" src={compareVideo.video} poster={compareVideo.poster} muted autoPlay loop playsInline preload="metadata"/>
-        <div className="compare-video-top" style={{clipPath:'inset(0 '+(100-split)+'% 0 0)'}}><video src={compareVideo.video} poster={compareVideo.poster} muted autoPlay loop playsInline preload="metadata"/></div>
-        <div className="compare-treatment-overlay" style={{clipPath:'inset(0 '+(100-split)+'% 0 0)'}}><span>MAP132 DIGITALS — CINEMATIC STUDY</span><strong>THE CITY<br/>AFTER DARK</strong><small>COLOUR · CONTRAST · TITLE DESIGN</small></div>
+        <div className="compare-video-top" style={{clipPath:'inset(0 0 0 '+split+'%)'}}><video src={compareVideo.video} poster={compareVideo.poster} muted autoPlay loop playsInline preload="metadata"/></div>
+        <div className="compare-treatment-overlay" style={{clipPath:'inset(0 0 0 '+split+'%)'}}><span>MAP132 DIGITALS — CINEMATIC STUDY</span><strong>THE CITY<br/>AFTER DARK</strong><small>COLOUR · CONTRAST · TITLE DESIGN</small></div>
         <span className="compare-label compare-before">RAW FOOTAGE</span>
         <span className="compare-label compare-after">CINEMATIC EDIT</span>
         <div className="compare-divider" style={{left:split+'%'}}><i/></div>
