@@ -209,10 +209,14 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
               <button type="button" className="ms-text-button" onClick={() => goTo(4)}>Start a project <ArrowRight size={15}/></button>
             </div>
             <div className="ms-home-proof"><span>01 / STORY</span><span>02 / VISUAL RHYTHM</span><span>03 / SOUND DESIGN</span></div>
-            <section className="ms-home-review-invite" aria-label="Client review feed">
-              <div className="ms-review-invite-mark" aria-hidden="true">“</div>
-              <div><span>CLIENT FEEDBACK / REVIEW FEED</span><b>Real stories from our clients.</b><p>Only genuine client feedback will be shown here, with permission. Reviews will be checked before they appear publicly.</p><div className="ms-review-feed-empty"><span>NO REVIEWS PUBLISHED YET</span><i aria-hidden="true">★★★★★</i></div></div>
-              <button type="button" onClick={() => goTo(4)}>Contact the studio <ArrowRight size={15}/></button>
+            <section className="ms-home-review-feed" aria-label="Client feedback demo feed">
+              <div className="ms-review-feed-heading"><div><span>CLIENT LOVE / FEEDBACK FEED</span><b>Kind words. Creative stories.</b></div><span className="ms-demo-label">DEMO REVIEWS</span></div>
+              <div className="ms-review-feed-grid">
+                <article className="ms-review-card"><div className="ms-review-stars" aria-label="Five stars">★★★★★</div><p>“The teaser felt cinematic and captured the mood we wanted. Every shot flowed beautifully.”</p><div className="ms-review-by"><span>W</span><div><b>Wedding Teaser</b><small>Sample review · Demo content</small></div></div></article>
+                <article className="ms-review-card"><div className="ms-review-stars" aria-label="Five stars">★★★★★</div><p>“The reel was crisp, engaging and perfectly paced for social media. Loved the final look.”</p><div className="ms-review-by"><span>B</span><div><b>Brand Reel</b><small>Sample review · Demo content</small></div></div></article>
+                <article className="ms-review-card"><div className="ms-review-stars" aria-label="Five stars">★★★★★</div><p>“The storytelling and sound design gave our video a polished, professional finish.”</p><div className="ms-review-by"><span>Y</span><div><b>YouTube Edit</b><small>Sample review · Demo content</small></div></div></article>
+              </div>
+              <div className="ms-review-feed-foot"><span>Illustrative sample feedback — replace with verified client reviews before public promotion.</span><button type="button" onClick={() => goTo(4)}>Share your project <ArrowRight size={15}/></button></div>
             </section>
           </div>
           <div className="ms-home-showcase">
