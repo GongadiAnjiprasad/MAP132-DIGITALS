@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent, type TouchEvent, type WheelEvent, type MouseEvent } from 'react';
+import { useEffect, useRef, useState, type PointerEvent, type WheelEvent, type MouseEvent } from 'react';
 import {
   ArrowLeft, ArrowRight, Camera, Film, Instagram, Mail, MessageCircle,
   Play, Sparkles, Youtube, Facebook, Linkedin, Send, X
