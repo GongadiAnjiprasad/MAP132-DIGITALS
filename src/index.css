@@ -1335,3 +1335,6 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
  .site-footer .footer-navigation{justify-content:flex-start;gap:12px 15px}
  .footer-socials{grid-column:1;justify-content:flex-start;padding-top:13px}
 }
+
+.footer-socials a.is-unconfigured{border-style:dashed;border-color:rgba(170,181,196,.32);color:#8995A6;background:rgba(19,29,43,.55)}
+.footer-socials a.is-unconfigured:hover{border-color:#E9C78D;color:#101722;background:#E9C78D}
