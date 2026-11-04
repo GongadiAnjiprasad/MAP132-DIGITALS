@@ -481,22 +481,21 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
     {(section==='Sound Effects'||section==='Music & BGM')&&<section className="workspace-live-search">
       <div className="workspace-section-title"><div><p className="kicker">AUDIO LIBRARY</p><h3>Find sounds</h3></div><span>{soundCount.toLocaleString()} MATCHES</span></div>
       <div className="workspace-filterbar"><input value={soundQuery} onChange={e=>setSoundQuery(e.target.value)} onKeyDown={e=>{if(e.key==='Enter')searchSounds()}} placeholder="Search sounds…"/><select value={soundGenre} onChange={e=>setSoundGenre(e.target.value)}>{soundGenres.map(g=><option key={g}>{g}</option>)}</select><button type="button" className="gold-button" onClick={()=>searchSounds(1,false)} disabled={soundBusy}>{soundBusy?'Searching…':'Search'}</button></div>
-      {section==='Sound Effects'&&<div className="workspace-cinematic-filters" aria-label="Film-style sound effect filters" style={{display:'grid',gap:12,margin:'12px 0 16px'}}>
-        {[
-          {group:'ORIGINAL QUICK FILTERS',items:[['Whoosh','cinematic whoosh'],['Riser','cinematic riser build'],['Impact','cinematic impact hit'],['Boom','cinematic deep boom'],['Transition','transition sound effect'],['Cinematic Hit','cinematic impact hit'],['Logo Reveal','logo reveal sound'],['Swipe','fast swipe transition'],['Punch','punch impact sound'],['Heartbeat','heartbeat suspense'],['Suspense','suspense tension sound'],['Ambient','cinematic ambient atmosphere']]},
-          {group:'TRAILER & CINEMATIC IMPACT',items:[['Deep Boom','cinematic deep boom'],['Cinematic Hit','cinematic impact hit'],['Riser','cinematic riser build'],['Bass Drop','bass drop impact'],['Trailer Stinger','trailer stinger'],['Metallic Hit','metallic cinematic hit']]},
-          {group:'ACTION & FIGHT',items:[['Punch','punch impact sound'],['Kick / Body Hit','body hit impact'],['Sword Clash','sword clash metal'],['Gunshot','cinematic gunshot'],['Explosion','cinematic explosion'],['Vehicle Pass','vehicle pass by']]},
-          {group:'TRANSITIONS & LOGO REVEALS',items:[['Whoosh','cinematic whoosh'],['Fast Swipe','fast swipe transition'],['Reverse Whoosh','reverse whoosh'],['Logo Reveal','logo reveal sound'],['Transition Impact','transition impact']]},
-          {group:'SUSPENSE & HORROR',items:[['Heartbeat','heartbeat suspense'],['Tension Drone','dark tension drone'],['Horror Stinger','horror stinger'],['Dark Atmosphere','dark cinematic ambience'],['Rising Tension','rising suspense tension']]},
-          {group:'AMBIENCE & FOLEY',items:[['Thunder & Rain','thunder rain ambience'],['Wind','strong wind ambience'],['Fire','fire crackling'],['Crowd','cinematic crowd ambience'],['Footsteps','cinematic footsteps'],['Door / Metal Creak','creaking door metal']]},
-        ].map(group=><div key={group.group}>
-          <p className="kicker" style={{margin:'0 0 7px',fontSize:10,letterSpacing:1.2}}>{group.group}</p>
-          <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
-            {group.items.map(([label,term])=><button key={label} type="button" className={soundQuery.toLowerCase()===term.toLowerCase()?'selected':''} onClick={()=>{setSoundGenre('All genres');setSoundQuery(term);searchSounds(1,false,term,'All genres');}}>{label}</button>)}
-          </div>
-        </div>)}
+      {section==='Sound Effects'&&<div className="workspace-cinematic-filters" aria-label="Sound categories" style={{display:'grid',gap:8,margin:'12px 0 16px'}}>
+        <p className="kicker" style={{margin:'0 0 2px',fontSize:10,letterSpacing:1.2}}>SOUND CATEGORIES</p>
+        <div style={{display:'flex',flexWrap:'wrap',gap:8}}>
+          {[
+            ['Cinematic','cinematic sound effect'],
+            ['Impact & Boom','cinematic impact boom'],
+            ['Whoosh & Transitions','whoosh transition sound effect'],
+            ['Action & Fight','action fight sound effects'],
+            ['Suspense & Horror','suspense horror sound effects'],
+            ['Ambience & Foley','ambience foley sound effects'],
+            ['Logo Reveal','logo reveal sound effect']
+          ].map(([label,term])=><button key={label} type="button" className={soundQuery.toLowerCase()===term.toLowerCase()?'selected':''} onClick={()=>{setSoundGenre('All genres');setSoundQuery(term);searchSounds(1,false,term,'All genres');}}>{label}</button>)}
+        </div>
       </div>}
-      {section==='Sound Effects'&&<p className="workspace-form-note">These are search shortcuts, not video effects: Original Quick Filters give common one-tap searches; the other groups organise sounds by editing purpose. Tap any button to search matching sounds in the library.</p>}
+      {section==='Sound Effects'&&<p className="workspace-form-note">Choose a category to find matching sound effects. These are search shortcuts; they do not apply effects to your video automatically.</p>}
       <p className="workspace-form-note">Film-style sound searches across Freesound. Results are filtered to CC0 and Creative Commons Attribution licences; CC BY requires creator credit. Availability depends on the source catalogue, so try related terms if a filter returns no eligible preview.</p>
       {soundError&&<p className="error-text">{soundError}</p>}
       {soundResults.length>0&&<><div className="workspace-resource-grid" style={{gridTemplateColumns:'1fr',gap:8}}>{soundResults.map(sound=><SoundResultCard key={sound.id} sound={sound}/>)}</div><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap',padding:'12px 0'}}><span>{soundResults.length.toLocaleString()} loaded · {soundCount.toLocaleString()} provider matches</span>{soundNextPage&&<button type="button" className="gold-button" onClick={()=>searchSounds(soundNextPage!,true)} disabled={soundBusy}>{soundBusy?'Loading…':'Load more sounds'}</button>}</div></>}
