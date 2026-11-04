@@ -9,7 +9,45 @@ async function signature(payload:string,password:string){const key=await crypto.
 async function validSession(req:Request,env:Env){if(!env.ADMIN_PASSWORD)return false;const cookie=req.headers.get('Cookie')||'',match=cookie.split(';').map(x=>x.trim()).find(x=>x.startsWith(COOKIE+'='));if(!match)return false;const token=match.slice(COOKIE.length+1),parts=token.split('.');if(parts.length!==2)return false;try{const payload=atob(parts[0].replace(/-/g,'+').replace(/_/g,'/'));const data=JSON.parse(payload);if(!Number.isFinite(data.exp)||data.exp<Date.now())return false;return parts[1]===await signature(parts[0],env.ADMIN_PASSWORD);}catch{return false;}}
 function sessionCookie(value:string,maxAge:number){return COOKIE+'='+value+'; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age='+maxAge;}
 
-async function read(env:Env){if(!env.MAP132_KV)return DEFAULTS;try{const stored=JSON.parse(await env.MAP132_KV.get('portfolio/content')||'{}');if(!stored||typeof stored!=='object'||Array.isArray(stored))return DEFAULTS;const sourceProfile=stored.profile&&typeof stored.profile==='object'&&!Array.isArray(stored.profile)?stored.profile:{};const profile:any={...DEFAULTS.profile};for(const key of Object.keys(DEFAULTS.profile)){if(typeof sourceProfile[key]==='string')profile[key]=sourceProfile[key];}return {...DEFAULTS,...stored,profile,skills:Array.isArray(stored.skills)?stored.skills:DEFAULTS.skills,items:Array.isArray(stored.items)?stored.items.filter((item:any)=>item&&typeof item==='object'&&!Array.isArray(item)):[],resources:Array.isArray(stored.resources)?stored.resources.filter((item:any)=>item&&typeof item==='object'&&!Array.isArray(item)):[]};}catch{return DEFAULTS;}}
+async function read(env:Env){
+  if(!env.MAP132_KV)return DEFAULTS;
+  try{
+    const stored=JSON.parse(await env.MAP132_KV.get('portfolio/content')||'{}');
+    if(!stored||typeof stored!=='object'||Array.isArray(stored))return DEFAULTS;
+    const sourceProfile=stored.profile&&typeof stored.profile==='object'&&!Array.isArray(stored.profile)?stored.profile:{};
+    const profile:any={...DEFAULTS.profile};
+    for(const key of Object.keys(DEFAULTS.profile)){if(typeof sourceProfile[key]==='string')profile[key]=sourceProfile[key];}
+    const skills=Array.isArray(stored.skills)?stored.skills.filter((value:any)=>typeof value==='string'&&value.trim()):DEFAULTS.skills;
+    const items=Array.isArray(stored.items)?stored.items.filter((item:any)=>item&&typeof item==='object'&&!Array.isArray(item)).map((item:any,index:number)=>({
+      ...item,
+      id:typeof item.id==='string'&&item.id?item.id:'project-'+index,
+      title:typeof item.title==='string'?item.title:'Untitled project',
+      category:typeof item.category==='string'?item.category:'Other Projects',
+      description:typeof item.description==='string'?item.description:'',
+      kind:['video','image','link'].includes(item.kind)?item.kind:'link',
+      url:typeof item.url==='string'?item.url:'',
+      path:typeof item.path==='string'?item.path:'',
+      mediaUrl:typeof item.mediaUrl==='string'?item.mediaUrl:'',
+      source:['upload','youtube','drive','other'].includes(item.source)?item.source:undefined
+    })):DEFAULTS.items;
+    const resources=Array.isArray(stored.resources)?stored.resources.filter((item:any)=>item&&typeof item==='object'&&!Array.isArray(item)).map((item:any,index:number)=>({
+      ...item,
+      id:typeof item.id==='string'&&item.id?item.id:'resource-'+index,
+      title:typeof item.title==='string'?item.title:'Untitled resource',
+      category:typeof item.category==='string'?item.category:'Editing Assets',
+      detail:typeof item.detail==='string'?item.detail:'',
+      href:typeof item.href==='string'?item.href:'',
+      provider:typeof item.provider==='string'?item.provider:'',
+      licence:typeof item.licence==='string'?item.licence:'Check the original provider licence before commercial use.',
+      compatibility:typeof item.compatibility==='string'?item.compatibility:'',
+      tags:Array.isArray(item.tags)?item.tags.filter((tag:any)=>typeof tag==='string'):[],
+      kind:['audio','video','image','template','font','other'].includes(item.kind)?item.kind:'other',
+      previewUrl:typeof item.previewUrl==='string'?item.previewUrl:'',
+      downloadUrl:typeof item.downloadUrl==='string'?item.downloadUrl:''
+    })):[]; 
+    return {...DEFAULTS,...stored,profile,skills,items,resources};
+  }catch{return DEFAULTS;}
+}
 async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;
 if(path.startsWith('/api/resources/sounds/')&&path.endsWith('/preview')&&method==='GET'){
   if(!env.FREESOUND_API_KEY)return json({error:'Sound preview is not connected.'},503);
