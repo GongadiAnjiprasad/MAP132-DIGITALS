@@ -1,15 +1,22 @@
-name: Build and deploy MAP132 DIGITALS
+name: MAP132 DIGITALS — Protected deployment
 
 on:
-  push:
+  pull_request:
     branches: [main]
   workflow_dispatch:
+    inputs:
+      deploy_production:
+        description: "Deploy to production (requires verified KV/R2 backup gate)"
+        required: true
+        type: boolean
+        default: false
 
 permissions:
   contents: read
 
 jobs:
-  deploy:
+  validate:
+    name: Build and validate
     runs-on: ubuntu-latest
     steps:
       - name: Checkout source
@@ -19,13 +26,131 @@ jobs:
         with:
           node-version: 22
       - name: Install dependencies
-        run: npm install
+        run: npm install --no-audit --no-fund
       - name: Build website
         run: npm run build
-      - name: Deploy Worker and static website
+      - name: Verify built entry point
+        run: test -s dist/index.html
+
+  deploy:
+    name: Deploy with automatic rollback
+    needs: validate
+    if: github.event_name == 'workflow_dispatch' && inputs.deploy_production == true && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    environment: production
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build website
+        run: npm run build
+      - name: Require verified data backup
+        env:
+          DATA_BACKUP_CONFIRMED: ${{ secrets.MAP132_DATA_BACKUP_CONFIRMED }}
+        run: |
+          if [ "$DATA_BACKUP_CONFIRMED" != "true" ]; then
+            echo "::error::Production deployment blocked. KV/R2 backup and restore have not been explicitly verified."
+            exit 1
+          fi
+      - name: Capture current active deployment versions
+        id: checkpoint
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+        run: |
+          set -euo pipefail
+          response="$(curl --fail --silent --show-error \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/workers/scripts/map132-digitals/deployments?per_page=1")"
+          echo "$response" | jq -e '.success == true' >/dev/null
+          versions="$(echo "$response" | jq -c '.result.deployments[0].versions // []')"
+          echo "$versions" | jq -e 'length > 0 and (([.[].percentage] | add) - 100 | fabs < 0.001)' >/dev/null || {
+            echo "::error::Could not identify a complete active deployment checkpoint. Aborting before deployment."
+            exit 1
+          }
+          echo "previous_versions=$versions" >> "$GITHUB_OUTPUT"
+          echo "Previous active deployment checkpoint captured."
+      - name: Deploy Worker and static assets
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           command: deploy
           workingDirectory: .
+      - name: Verify deployment or automatically roll back
+        env:
+          CF_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CF_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          PREVIOUS_VERSIONS: ${{ steps.checkpoint.outputs.previous_versions }}
+          SITE_URL: https://map132-digitals.anji-gongadi.workers.dev
+        run: |
+          set -euo pipefail
+
+          check_site() {
+            local html health portfolio
+            html="$(curl --fail --silent --show-error --max-time 20 "$SITE_URL/")" || return 1
+            printf '%s' "$html" | grep -q 'MAP132 DIGITALS' || return 1
+            printf '%s' "$html" | grep -q 'id="root"' || return 1
+
+            health="$(curl --fail --silent --show-error --max-time 20 "$SITE_URL/api/_healthcheck")" || return 1
+            printf '%s' "$health" | jq -e '.message == "Success"' >/dev/null || return 1
+
+            portfolio="$(curl --fail --silent --show-error --max-time 20 "$SITE_URL/api/portfolio")" || return 1
+            printf '%s' "$portfolio" | jq -e '.content.profile and (.content.skills | type == "array") and (.content.items | type == "array")' >/dev/null || return 1
+          }
+
+          healthy=false
+          for attempt in $(seq 1 12); do
+            if check_site; then
+              healthy=true
+              break
+            fi
+            echo "Post-deploy smoke check $attempt/12 did not pass; retrying in 5 seconds."
+            sleep 5
+          done
+
+          if [ "$healthy" = "true" ]; then
+            echo "Deployment passed homepage, health endpoint, and portfolio API smoke checks."
+            exit 0
+          fi
+
+          echo "::error::Post-deployment smoke checks failed. Restoring the previous active Worker deployment."
+          rollback_body="$(jq -n --argjson versions "$PREVIOUS_VERSIONS" \
+            '{strategy:"percentage",versions:$versions,annotations:{"workers/message":"Automatic rollback after MAP132 post-deployment smoke-check failure","workers/triggered_by":"github-actions-health-check"}}')"
+
+          rollback_response="$(curl --fail --silent --show-error -X POST \
+            -H "Authorization: Bearer $CF_API_TOKEN" \
+            -H "Content-Type: application/json" \
+            --data "$rollback_body" \
+            "https://api.cloudflare.com/client/v4/accounts/$CF_ACCOUNT_ID/workers/scripts/map132-digitals/deployments")" || {
+              echo "::error::Automatic rollback API request failed. Manual Cloudflare rollback is required immediately."
+              exit 1
+            }
+
+          echo "$rollback_response" | jq -e '.success == true' >/dev/null || {
+            echo "::error::Cloudflare rejected the rollback request. Manual rollback is required immediately."
+            exit 1
+          }
+
+          restored=false
+          for attempt in $(seq 1 12); do
+            if check_site; then
+              restored=true
+              break
+            fi
+            echo "Rollback verification $attempt/12 did not pass; retrying in 5 seconds."
+            sleep 5
+          done
+
+          if [ "$restored" != "true" ]; then
+            echo "::error::Rollback was requested but the site did not pass verification. Manual intervention is required."
+            exit 1
+          fi
+
+          echo "::error::New deployment failed health checks. Previous deployment was restored and verified."
+          exit 1
