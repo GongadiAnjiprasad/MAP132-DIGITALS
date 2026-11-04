@@ -483,3 +483,8 @@
  .ms-home-review-invite button{grid-column:1}
  .ms-arrow{width:40px;height:40px}
 }
+
+.ms-review-feed-empty{display:flex;align-items:center;gap:12px;margin-top:10px}
+.ms-review-feed-empty span{color:#b4b1a9;font-size:10px;letter-spacing:1px}
+.ms-review-feed-empty i{color:var(--ms-gold);font-size:12px;font-style:normal;letter-spacing:2px;opacity:.7}
+@media(max-width:760px){.ms-review-feed-empty span{font-size:9px}.ms-review-feed-empty i{font-size:11px}}
