@@ -299,3 +299,101 @@
  .ms-contact-panel label{font-size:11px}
  .ms-contact-panel input,.ms-contact-panel select,.ms-contact-panel textarea{font-size:14px}
 }
+
+/* 2026-11-05 responsive page sizing fix:
+   Each page is one stage-width. Transform percentages now map exactly one page,
+   preventing non-home pages from sliding completely outside the viewport. */
+.map132-slider-site{min-height:100svh;height:100svh;overflow:hidden}
+.ms-header{flex:0 0 auto;min-height:72px;height:auto}
+.ms-stage{flex:1 1 auto;height:auto;min-height:0;overflow:hidden}
+.ms-track{width:100%;height:100%;flex:0 0 100%}
+.ms-page{width:100%;height:100%;flex:0 0 100%;min-width:100%;padding:clamp(18px,3.2vh,42px) clamp(16px,4.5vw,72px);overflow-y:auto;overflow-x:hidden;scrollbar-width:thin;scrollbar-color:#d5aa6650 transparent}
+.ms-home-page{grid-template-columns:minmax(0,.82fr) minmax(0,1.18fr);gap:clamp(18px,3.2vw,48px)}
+.ms-home-copy h1{font-size:clamp(32px,5.1vw,76px);line-height:1.04;letter-spacing:clamp(-3.5px,-.25vw,-1px);overflow-wrap:anywhere}
+.ms-intro{font-size:clamp(13px,1.15vw,17px)}
+.ms-kicker{font-size:clamp(9px,.8vw,12px);letter-spacing:clamp(1px,.16vw,2px)}
+.ms-page-heading h2{font-size:clamp(30px,4.7vw,66px);line-height:1.08}
+.ms-page-heading>p{font-size:clamp(12px,1.05vw,15px);line-height:1.75}
+.ms-project-grid{grid-template-columns:repeat(3,minmax(0,1fr));gap:clamp(10px,1.5vw,20px)}
+.ms-project-card h3{font-size:clamp(14px,1.25vw,19px);line-height:1.4}
+.ms-project-card>p{font-size:clamp(11px,.95vw,14px);line-height:1.65}
+.ms-services-grid{grid-template-columns:repeat(4,minmax(0,1fr));gap:clamp(10px,1.4vw,18px)}
+.ms-service-detail h3{font-size:clamp(14px,1.2vw,18px)}
+.ms-service-detail p,.ms-process-grid p,.ms-studio-extra p{font-size:clamp(11px,.95vw,14px);line-height:1.7}
+.ms-process-grid{grid-template-columns:repeat(4,minmax(0,1fr))}
+.ms-contact-page{grid-template-columns:minmax(0,1fr) minmax(0,.82fr);gap:clamp(18px,4vw,55px)}
+.ms-contact-copy h2{font-size:clamp(34px,5vw,70px);line-height:1.07}
+.ms-contact-panel input,.ms-contact-panel select,.ms-contact-panel textarea{font-size:clamp(12px,1vw,14px)}
+.ms-controls{flex:0 0 auto;min-height:54px}
+.ms-footer{flex:0 0 auto;min-height:32px}
+@media(max-width:1100px){
+ .ms-home-page{grid-template-columns:minmax(0,1fr);align-items:start}
+ .ms-page{padding:clamp(16px,2.6vh,28px) clamp(16px,3vw,32px)}
+ .ms-project-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+ .ms-services-grid{grid-template-columns:repeat(3,minmax(0,1fr))}
+ .ms-home-showcase{max-width:100%}
+ .ms-service-bento{grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(85px,1fr))}
+ .ms-service-tile:first-child{grid-column:span 2;grid-row:span 2;min-height:180px}
+ .ms-service-tile{min-height:85px}
+}
+@media(max-width:760px){
+ .map132-slider-site{height:100svh;min-height:0}
+ .ms-header{min-height:0;padding:9px 12px;gap:8px;align-items:center}
+ .ms-brand img{width:38px;height:38px}
+ .ms-brand b{font-size:clamp(13px,4vw,17px)}
+ .ms-brand small{font-size:clamp(7px,1.8vw,9px);letter-spacing:1px}
+ .ms-nav{gap:4px;flex-wrap:nowrap;overflow-x:auto;max-width:100%;scrollbar-width:none}
+ .ms-nav::-webkit-scrollbar{display:none}
+ .ms-nav button,.ms-nav a{font-size:clamp(10px,2.7vw,12px);padding:8px 9px;flex:none}
+ .ms-nav .ms-workspace{display:none}
+ .ms-stage{height:auto;min-height:0;flex:1 1 auto}
+ .ms-page{padding:18px 14px 26px}
+ .ms-home-page{display:flex;flex-direction:column;align-items:stretch;gap:22px}
+ .ms-home-copy h1{font-size:clamp(31px,8.5vw,48px);letter-spacing:-1.5px}
+ .ms-intro{font-size:clamp(13px,3.5vw,15px);line-height:1.7;margin:14px 0 18px}
+ .ms-home-proof{margin-top:20px;gap:7px;font-size:clamp(8px,2vw,10px)}
+ .ms-home-proof span{padding:7px 8px}
+ .ms-home-showcase{padding:10px}
+ .ms-service-bento{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:auto;gap:7px}
+ .ms-service-tile,.ms-service-tile:first-child{grid-column:auto;grid-row:auto;min-height:120px;padding:10px}
+ .ms-service-tile:first-child{min-height:160px}
+ .ms-service-tile b{font-size:clamp(11px,3vw,14px)}
+ .ms-service-tile small{font-size:clamp(9px,2.4vw,11px)}
+ .ms-page-heading{display:flex;flex-direction:column;align-items:flex-start;gap:10px;margin-bottom:20px}
+ .ms-page-heading h2{font-size:clamp(30px,8vw,42px);letter-spacing:-1px}
+ .ms-page-heading>p{font-size:clamp(12px,3.3vw,14px);line-height:1.7}
+ .ms-project-grid{grid-template-columns:1fr;gap:12px}
+ .ms-project-frame{height:clamp(180px,52vw,290px)}
+ .ms-project-card h3{font-size:clamp(15px,4vw,18px)}
+ .ms-project-card>p{font-size:clamp(12px,3.2vw,14px)}
+ .ms-services-grid,.ms-service-includes{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .ms-service-detail h3{font-size:clamp(14px,3.8vw,17px)}
+ .ms-service-detail p{font-size:clamp(11px,3vw,13px)}
+ .ms-process-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+ .ms-skills,.ms-studio-brief{grid-template-columns:1fr;gap:14px;padding:14px}
+ .ms-studio-extra{grid-template-columns:1fr}
+ .ms-contact-page{grid-template-columns:1fr;gap:22px}
+ .ms-contact-copy h2{font-size:clamp(34px,9vw,48px)}
+ .ms-contact-copy>p:not(.ms-kicker){font-size:clamp(12px,3.3vw,14px)}
+ .ms-contact-links a{font-size:clamp(10px,2.8vw,12px);padding:9px 10px}
+ .ms-contact-panel{padding:15px}
+ .ms-contact-panel label{font-size:clamp(11px,3vw,13px)}
+ .ms-form-row,.ms-brief-points{grid-template-columns:1fr}
+ .ms-controls{gap:7px;padding:7px 8px;min-height:0;flex-wrap:wrap}
+ .ms-arrow{width:33px;height:33px}
+ .ms-pagination{gap:4px}
+ .ms-pagination button{width:27px;height:28px;font-size:9px}
+ .ms-current-label{font-size:10px;order:3;width:100%;text-align:center}
+ .ms-footer{justify-content:center;text-align:center;padding:8px 10px;font-size:9px}
+ .ms-footer span:nth-child(2){display:none}
+}
+@media(max-width:380px){
+ .ms-header{padding:8px 9px}
+ .ms-nav button{padding:7px 7px;font-size:10px}
+ .ms-page{padding:16px 11px 22px}
+ .ms-home-copy h1{font-size:clamp(29px,8.3vw,34px)}
+ .ms-services-grid,.ms-service-includes,.ms-process-grid{grid-template-columns:1fr}
+ .ms-controls{gap:5px}
+ .ms-pagination button{width:24px;height:26px}
+}
+@media(prefers-reduced-motion:reduce){.ms-track{transition:none}}
