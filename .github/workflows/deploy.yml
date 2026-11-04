@@ -25,7 +25,7 @@ jobs:
       - name: Test swipe navigation
         run: npm test
       - name: Install mobile browser
-        run: npx playwright install --with-deps chromium
+        run: npx playwright install chromium
       - name: Test mobile swipe interactions
         run: npm run test:e2e
       - name: Build website
