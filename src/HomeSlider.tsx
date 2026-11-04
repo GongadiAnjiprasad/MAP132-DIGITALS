@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent, type TouchEvent, type WheelEvent, type MouseEvent } from 'react';
 import {
   ArrowLeft, ArrowRight, Camera, Film, Instagram, Mail, MessageCircle,
-  Play, Sparkles, Youtube, Facebook, Linkedin, Send, X, PlayCircle
+  Play, Sparkles, Youtube, Facebook, Linkedin, Send, X
 } from 'lucide-react';
 import DemoShowcase from './DemoShowcase';
 import { DEMO_SHOWCASE } from './demoShowcase';
@@ -209,6 +209,17 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
               <button type="button" className="ms-text-button" onClick={() => goTo(4)}>Start a project <ArrowRight size={15}/></button>
             </div>
             <div className="ms-home-proof"><span>01 / STORY</span><span>02 / VISUAL RHYTHM</span><span>03 / SOUND DESIGN</span></div>
+
+          </div>
+          <div className="ms-home-showcase">
+            <div className="ms-showcase-top"><span>WHAT WE CAN CREATE</span><span>MAP132 / 01—08</span></div>
+            <div className="ms-service-bento">
+              {serviceCards.map((card, index) => <button type="button" key={card.title} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onClick={() => setActivePreview(index)} style={{ backgroundImage: `linear-gradient(180deg, #090b0e08 5%, #090b0edb 100%), url("${card.image}")` }}>
+                <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small><i className="ms-tile-play"><Play size={14} fill="currentColor"/><small>PLAY</small></i>
+              </button>)}
+            </div>
+            <p className="ms-showcase-foot">Tap any showcase tile to play its sample video here — no page navigation.</p>
+          </div>
             <section className="ms-home-review-feed" aria-label="Client feedback demo feed">
               <div className="ms-review-feed-heading"><div><span>CLIENT LOVE / FEEDBACK FEED</span><b>Kind words. Creative stories.</b></div><span className="ms-demo-label">DEMO REVIEWS</span></div>
               <div className="ms-review-feed-grid">
@@ -218,16 +229,6 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
               </div>
               <div className="ms-review-feed-foot"><span>Illustrative sample feedback — replace with verified client reviews before public promotion.</span><button type="button" onClick={() => goTo(4)}>Share your project <ArrowRight size={15}/></button></div>
             </section>
-          </div>
-          <div className="ms-home-showcase">
-            <div className="ms-showcase-top"><span>WHAT WE CAN CREATE</span><span>MAP132 / 01—08</span></div>
-            <div className="ms-service-bento">
-              {serviceCards.map((card, index) => <button type="button" key={card.title} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onClick={() => setActivePreview(index)} style={{ backgroundImage: `linear-gradient(180deg, #090b0e08 5%, #090b0edb 100%), url("${card.image}")` }}>
-                <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small><i className="ms-tile-play"><PlayCircle size={25}/></i>
-              </button>)}
-            </div>
-            <p className="ms-showcase-foot">Tap any showcase tile to play its sample video here — no page navigation.</p>
-          </div>
         </section>
 
         <section className="ms-page ms-work-page" aria-label="Selected work">
@@ -276,7 +277,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
               <div className="ms-form-row"><label>Email<input name="email" type="email" required placeholder="you@example.com"/></label><label>Phone<input name="phone" required placeholder="+91…"/></label></div>
               <label>Service needed<select name="service">{serviceCards.map(card=><option key={card.title}>{card.title}</option>)}<option>Motion titles / Logo reveal</option><option>Other project</option></select></label>
               <label>Project details<textarea name="details" rows={3} placeholder="Tell us about the video, style and deadline…"/></label>
-              <button className="ms-primary" type="submit">Continue enquiry <ArrowRight size={16}/></button>
+              <button className="ms-primary" type="submit">Send enquiry <ArrowRight size={16}/></button>
             </form>
             <small>Your details are prepared for WhatsApp or email; this form does not store submissions.</small>
           </div>
