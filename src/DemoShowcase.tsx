@@ -14,7 +14,7 @@ export default function DemoShowcase() {
       <span className="concept-kicker">MAP132 DIGITALS / CREATIVE SERVICES</span>
       <h3>See the story.<br/><em>Feel the edit.</em></h3>
       <p>Explore sample stock footage to understand the types of videos and editing styles we can create. These are licensed reference clips, not MAP132 completed client projects.</p>
-      <b>STOCK FOOTAGE DEMO · NOT ORIGINAL CLIENT WORK</b>
+      <b>STOCK FOOTAGE DEMO · NOT ORIGINAL CLIENT WORK</b><button type="button" className="demo-sound-button" onClick={playSoundDesign}>▶ Hear original cinematic impact</button><small className="demo-sound-note">Original synthesized sound preview. Stock footage itself may not include recorded audio.</small>
     </div>
     <div className="demo-service-strip">
       {DEMO_SHOWCASE.map((demo)=><span key={demo.id}>{demo.category}</span>)}
