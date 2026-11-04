@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent, type TouchEvent, type WheelEvent, type MouseEvent } from 'react';
 import {
   ArrowLeft, ArrowRight, Camera, Film, Instagram, Mail, MessageCircle,
-  Play, Sparkles, Youtube, Facebook, Linkedin, Send
+  Play, Sparkles, Youtube, Facebook, Linkedin, Send, X, PlayCircle
 } from 'lucide-react';
 import DemoShowcase from './DemoShowcase';
 import { DEMO_SHOWCASE } from './demoShowcase';
@@ -22,6 +22,16 @@ type HomeContent = {
 };
 
 const pages = ['Home', 'Selected Work', 'Services', 'Studio', 'Contact'];
+const previewVideos = [
+ {src:'https://videos.pexels.com/video-files/27099636/12071805_1920_1080_60fps.mp4',note:'Stock-footage visual study · cinematic atmosphere'},
+ {src:'https://videos.pexels.com/video-files/31245302/13345103_1920_1080_50fps.mp4',note:'Stock-footage visual study · wedding celebration'},
+ {src:'https://videos.pexels.com/video-files/7424531/7424531-uhd_3840_2160_30fps.mp4',note:'Stock-footage visual study · birthday celebration'},
+ {src:'https://videos.pexels.com/video-files/8100337/8100337-uhd_4096_2160_25fps.mp4',note:'Stock-footage visual study · editing workflow'},
+ {src:'https://videos.pexels.com/video-files/8100337/8100337-uhd_4096_2160_25fps.mp4',note:'Stock-footage visual study · creator content'},
+ {src:'https://videos.pexels.com/video-files/27099636/12071805_1920_1080_60fps.mp4',note:'Stock-footage visual study · commercial mood reference'},
+ {src:'https://videos.pexels.com/video-files/27099636/12071805_1920_1080_60fps.mp4',note:'Stock-footage visual study · experimental visual reference'},
+ {src:'https://videos.pexels.com/video-files/8100337/8100337-uhd_4096_2160_25fps.mp4',note:'Stock-footage visual study · podcast workflow'}
+];
 const serviceCards = [
   { title: 'Cinematic Films', note: 'Trailers · Teasers · Story edits', image: DEMO_SHOWCASE[0].image, number: '01' },
   { title: 'Wedding & Events', note: 'Highlights · Emotional films', image: DEMO_SHOWCASE[1].image, number: '02' },
@@ -61,6 +71,7 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 
 export default function HomeSlider({ content }: { content: HomeContent }) {
   const [active, setActive] = useState(0);
+  const [activePreview, setActivePreview] = useState<number | null>(null);
   const pointerStart = useRef<{ x: number; y: number; pointerId: number } | null>(null);
   const touchStart = useRef<{ x: number; y: number } | null>(null);
   const suppressSwipeClick = useRef(false);
@@ -172,11 +183,11 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
           <div className="ms-home-showcase">
             <div className="ms-showcase-top"><span>WHAT WE CAN CREATE</span><span>MAP132 / 01—08</span></div>
             <div className="ms-service-bento">
-              {serviceCards.map((card, index) => <button type="button" key={card.title} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onClick={() => goTo(index === 0 ? 1 : 2)} style={{ backgroundImage: `linear-gradient(180deg, #090b0e08 5%, #090b0edb 100%), url("${card.image}")` }}>
-                <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small><i><ArrowRight size={14}/></i>
+              {serviceCards.map((card, index) => <button type="button" key={card.title} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onClick={() => setActivePreview(index)} style={{ backgroundImage: `linear-gradient(180deg, #090b0e08 5%, #090b0edb 100%), url("${card.image}")` }}>
+                <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small><i className="ms-tile-play"><PlayCircle size={25}/></i>
               </button>)}
             </div>
-            <p className="ms-showcase-foot">A clear look at our creative range. Tap a tile, swipe sideways or use the arrows to explore.</p>
+            <p className="ms-showcase-foot">Tap any showcase tile to play its sample video here — no page navigation.</p>
           </div>
         </section>
 
@@ -192,6 +203,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
             {serviceCards.map((card, index) => <article className="ms-service-detail" key={card.title}><span>{card.number} / SERVICE</span><div className="ms-service-detail-image" style={{backgroundImage:`linear-gradient(180deg,transparent,#080a0de8),url("${card.image}")`}}/><h3>{card.title}</h3><p>{['Story-led teaser cuts, cinematic trailers and mood-driven short films.','Wedding highlights, event recaps, couple entries and emotional memory films.','Birthday invitations, surprise edits, photo-to-film montages and celebration reels.','Fast hooks, captions, beat cuts and vertical edits for Instagram and YouTube Shorts.','Creator intros, explainers, vlogs, tutorials and polished long-form storytelling.','Product showcases, launch promos, service ads and social campaign videos.','AI-assisted concepts, generated visual sequences and creative motion treatments.','Interview edits, podcast episodes, news packages and short highlight clips.'][index]}</p></article>)}
           </div>
           <div className="ms-services-note"><Sparkles size={17}/> Also available: motion titles, logo reveals, lyric videos and custom editing support.</div>
+          <div className="ms-service-bottom"><div><b>Have a specific brief?</b><span>Share your footage, reference style and delivery format.</span></div><button type="button" className="ms-primary" onClick={() => goTo(4)}>Discuss your project <ArrowRight size={16}/></button></div>
         </section>
 
         <section className="ms-page ms-studio-page" aria-label="Studio">
@@ -200,6 +212,11 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
             {['Brief & references','Rough cut','Visual polish','Final delivery'].map((step,index)=><article key={step}><span>0{index+1}</span><h3>{step}</h3><p>{['Share your footage, target platform, sample style and delivery date.','Select the strongest moments and shape the story before effects.','Add titles, transitions, colour treatment, captions and motion where useful.','Balance dialogue, music and effects, then export in the agreed format.'][index]}</p></article>)}
           </div>
           <div className="ms-skills"><div><p className="ms-kicker">TOOLS & CREATIVE CRAFT</p><h3>Made frame by frame.</h3></div><div className="ms-skill-list">{content.skills.map((skill,index)=><span key={skill}>{String(index+1).padStart(2,'0')} · {skill}</span>)}</div></div>
+          <div className="ms-studio-extra">
+            <article><span>DELIVERY / 01</span><h3>Platform-ready exports.</h3><p>Vertical 9:16 reels, square 1:1 posts and widescreen 16:9 videos, prepared for the destination platform.</p></article>
+            <article><span>CRAFT / 02</span><h3>More than transitions.</h3><p>Clean cuts, typography, motion accents, colour finishing, captions and sound design chosen to serve the story.</p></article>
+            <article><span>COLLABORATION / 03</span><h3>Clear review rounds.</h3><p>Start with a brief and references, review a draft, share focused feedback and approve the final export.</p></article>
+          </div>
           <div className="ms-studio-foot"><span><Camera size={15}/> {p.location || 'India'}</span><span>MAP132 DIGITALS · VIDEO EDITING</span></div>
         </section>
 
@@ -221,6 +238,13 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       </div>
     </main>
 
+    {activePreview !== null && <div className="ms-preview-modal" role="dialog" aria-modal="true" aria-label={serviceCards[activePreview].title + ' video preview'} onClick={() => setActivePreview(null)}>
+      <div className="ms-preview-dialog" onClick={event => event.stopPropagation()}>
+        <div className="ms-preview-dialog-head"><div><span>MAP132 DIGITALS / SHOWCASE PREVIEW</span><h2>{serviceCards[activePreview].title}</h2></div><button type="button" className="ms-preview-close" aria-label="Close video" onClick={() => setActivePreview(null)}><X size={22}/></button></div>
+        <video key={activePreview} className="ms-preview-player" src={previewVideos[activePreview].src} controls autoPlay playsInline preload="metadata">Your browser does not support video playback.</video>
+        <p className="ms-preview-disclaimer">{previewVideos[activePreview].note}. Reference footage only — not a commissioned MAP132 client project.</p>
+      </div>
+    </div>}
     <div className="ms-controls">
       <button type="button" className="ms-arrow" aria-label="Previous page" onClick={() => goTo(active - 1)} disabled={active === 0}><ArrowLeft size={19}/></button>
       <div className="ms-pagination">{pages.map((page,index)=><button type="button" key={page} className={active===index?'active':''} aria-label={page} aria-current={active===index?'page':undefined} onClick={() => goTo(index)}><span>{String(index+1).padStart(2,'0')}</span></button>)}</div>
