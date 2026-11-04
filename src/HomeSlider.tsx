@@ -84,7 +84,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     if (target.closest('button, a, input, textarea, select, video, iframe')) return;
     pointerStart.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId };
   };
-  const onPointerUp = (event: React.PointerEvent<HTMLElement>) => {
+  const onPointerUp = (event: PointerEvent<HTMLElement>) => {
     const start = pointerStart.current;
     pointerStart.current = null;
     if (!start || start.pointerId !== event.pointerId) return;
@@ -169,7 +169,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
         <section className="ms-page ms-studio-page" aria-label="Studio">
           <div className="ms-page-heading"><div><p className="ms-kicker">THE MAP132 APPROACH</p><h2>Story first.<br/><em>Details matter.</em></h2></div><p>{p.about || 'We shape raw footage into purposeful visual stories through editing, rhythm, colour, motion and sound.'}</p></div>
           <div className="ms-process-grid">
-            {['Brief & references','Rough cut','Visual polish','Final delivery'].map((step,index)=><article key={step}><span>0{index+1}</span><h3>{step}</h3><p>{['Share your footage, target platform, sample style and delivery date.','Select the strongest moments and shape the story before effects.','Add titles, transitions, colour treatment, captions and motion where useful.','Balance dialogue, music and effects, then export in the agreed format.'][index]}</p></article>)}}
+            {['Brief & references','Rough cut','Visual polish','Final delivery'].map((step,index)=><article key={step}><span>0{index+1}</span><h3>{step}</h3><p>{['Share your footage, target platform, sample style and delivery date.','Select the strongest moments and shape the story before effects.','Add titles, transitions, colour treatment, captions and motion where useful.','Balance dialogue, music and effects, then export in the agreed format.'][index]}</p></article>)}
           </div>
           <div className="ms-skills"><div><p className="ms-kicker">TOOLS & CREATIVE CRAFT</p><h3>Made frame by frame.</h3></div><div className="ms-skill-list">{content.skills.map((skill,index)=><span key={skill}>{String(index+1).padStart(2,'0')} · {skill}</span>)}</div></div>
           <div className="ms-studio-foot"><span><Camera size={15}/> {p.location || 'India'}</span><span>MAP132 DIGITALS · VIDEO EDITING</span></div>
