@@ -397,7 +397,11 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
     const base=(quickTerm??soundQuery).trim();
     const selectedGenre=quickGenre??soundGenre;
     const genre=selectedGenre==='All genres'?'':selectedGenre;
-    const terms=[base,genre].filter(Boolean).join(' ').trim()||(section==='Music & BGM'?'music background score':'sound effect');
+    // Sound Effects searches should not require generic words like “cinematic” and “sound effects” to match every result. Freesound treats query terms as mandatory by default, so keep the actual effect keyword when one is present.
+    const effectSearch=section==='Sound Effects';
+    const meaningfulBase=effectSearch?base.toLowerCase().replace(/\\b(sound|sounds|effect|effects|sfx|cinema|cinematic)\\b/g,' ').replace(/\\s+/g,' ').trim():base;
+    const fallbackBase=effectSearch?(base.toLowerCase().includes('cinematic')?'cinematic':'sound effect'):(section==='Music & BGM'?'music background score':'sound effect');
+    const terms=(effectSearch&&genre?[genre,meaningfulBase].filter(Boolean):[meaningfulBase||fallbackBase,genre].filter(Boolean)).join(' ').trim();
     setSoundBusy(true);setSoundError('');
     try{
       const response=await fetch('/api/resources/sounds?query='+encodeURIComponent(terms)+'&page='+page);
