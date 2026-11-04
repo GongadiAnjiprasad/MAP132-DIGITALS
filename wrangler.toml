@@ -3,6 +3,10 @@ main = "worker/index.ts"
 compatibility_date = "2026-10-31"
 keep_vars = true
 
+[[kv_namespaces]]
+binding = "MAP132_KV"
+id = "132f9ac025434a89a7d73a83328e20bf"
+
 [assets]
 directory = "./dist"
 binding = "ASSETS"
