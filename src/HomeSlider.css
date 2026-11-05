@@ -1314,3 +1314,13 @@
   .ms-theme-toggle { min-height: 36px; width: 36px; padding: 0; gap: 0; }
   .ms-theme-toggle span { display: none; }
 }
+
+/* MAP132 logo refinement: preserve the existing desktop footprint and improve light-theme contrast. */
+.map132-slider-site[data-theme="light"] .ms-brand img {
+  filter: contrast(1.08) saturate(1.08)
+    drop-shadow(0 1px 1px rgba(42, 31, 17, .52))
+    drop-shadow(0 0 5px rgba(154, 107, 44, .22));
+}
+@media (max-width: 760px) {
+  .ms-brand img { width: 46px; height: 42px; }
+}
