@@ -1324,3 +1324,17 @@
 @media (max-width: 760px) {
   .ms-brand img { width: 46px; height: 42px; }
 }
+
+/* Final mobile logo sizing override: supersedes the earlier compact-header 36px rule. */
+@media (max-width: 760px) {
+  .map132-slider-site .ms-header .ms-brand {
+    min-height: 52px;
+    align-items: center;
+  }
+  .map132-slider-site .ms-header .ms-brand img {
+    flex: 0 0 64px;
+    width: 64px;
+    height: 48px;
+    object-fit: contain;
+  }
+}
