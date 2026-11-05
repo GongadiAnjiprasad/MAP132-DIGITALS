@@ -830,3 +830,29 @@
  .ms-stage{height:auto;min-height:0;flex:1 1 auto;overflow:hidden}
  .ms-page{height:100%;min-height:0;overflow-y:auto;overflow-x:hidden}
 }
+
+
+/* Natural document height for tablet/Android Chrome Desktop-site CSS viewports.
+   Do not reserve the unused viewport area: each slide and the shell end with content. */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .map132-slider-site {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+  .ms-stage {
+    height: auto;
+    min-height: 0;
+    flex: 0 0 auto;
+    overflow: hidden;
+  }
+  .ms-track {
+    height: 100%;
+    align-items: flex-start;
+  }
+  .ms-page {
+    height: auto;
+    min-height: 0;
+    overflow: visible;
+  }
+}
