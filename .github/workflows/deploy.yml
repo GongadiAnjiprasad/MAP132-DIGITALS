@@ -30,6 +30,8 @@ jobs:
         run: npm run test:e2e
       - name: Build website
         run: npm run build
+      - name: Validate Cloudflare Worker bundle (no deployment)
+        run: npx --yes wrangler deploy --dry-run --outdir .wrangler-dry-run
       - name: Deploy Worker and static website
         if: github.event_name != 'pull_request'
         uses: cloudflare/wrangler-action@v3
