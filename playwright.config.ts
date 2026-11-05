@@ -11,7 +11,13 @@ export default defineConfig({
   projects: [
     {
       name: 'mobile-chromium',
+      testMatch: 'mobile-swipe.spec.ts',
       use: { ...devices['iPhone 13'], browserName: 'chromium' },
+    },
+    {
+      name: 'desktop-chromium',
+      testMatch: 'responsive-layout.spec.ts',
+      use: { browserName: 'chromium', viewport: { width: 1440, height: 900 } },
     },
   ],
   webServer: {
