@@ -56,14 +56,34 @@ for (const viewport of viewports) {
 }
 
 
-test('content pages distribute spare vertical space without changing page structure', async ({ page }) => {
-  await page.setViewportSize({ width: 1440, height: 900 });
-  await page.goto('/');
-  for (const selector of ['.ms-work-page', '.ms-services-page', '.ms-studio-page']) {
-    const layout = await page.locator(selector).evaluate(element => {
-      const style = getComputedStyle(element);
-      return { display: style.display, direction: style.flexDirection, justify: style.justifyContent };
+test('Android desktop-site viewport keeps content top-led, readable and balanced', async ({ page }) => {
+  for (const height of [1740, 800]) {
+    await page.setViewportSize({ width: 980, height });
+    await page.goto('/');
+    const home = await page.locator('.ms-home-page').evaluate(element => {
+      const page = element as HTMLElement;
+      const heading = page.querySelector('.ms-home-copy h1')!;
+      const intro = page.querySelector('.ms-intro')!;
+      const style = getComputedStyle(page);
+      return {
+        columns: style.gridTemplateColumns.trim().split(/\\s+/).length,
+        alignContent: style.alignContent,
+        headingSize: parseFloat(getComputedStyle(heading).fontSize),
+        introSize: parseFloat(getComputedStyle(intro).fontSize),
+      };
     });
-    expect(layout, selector).toEqual({ display: 'flex', direction: 'column', justify: 'space-between' });
+    expect(home.columns, 'desktop-site Home should retain a balanced two-column composition').toBe(2);
+    expect(home.alignContent).toBe('start');
+    expect(home.headingSize).toBeGreaterThanOrEqual(48);
+    expect(home.introSize).toBeGreaterThanOrEqual(14);
+
+    for (const selector of ['.ms-work-page', '.ms-services-page', '.ms-studio-page']) {
+      const layout = await page.locator(selector).evaluate(element => ({
+        display: getComputedStyle(element).display,
+        alignContent: getComputedStyle(element).alignContent,
+      }));
+      expect(layout.display, selector).not.toBe('flex');
+      expect(layout.alignContent, selector).toBe('start');
+    }
   }
 });
