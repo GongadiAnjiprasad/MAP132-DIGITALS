@@ -101,7 +101,7 @@ test('cinematic enquiry form submits in-page and shows confirmation without open
 });
 
 test('page 5 enquiry panel scrolls vertically with a finger without changing pages', async ({ page }) => {
-  await page.setViewportSize({ width: 390, height: 844 });
+  await page.setViewportSize({ width: 390, height: 700 });
   await page.goto('/');
   await page.locator('.ms-nav').getByRole('button', { name: 'Contact', exact: true }).click();
   const contactPage = page.locator('.ms-page').nth(4);
