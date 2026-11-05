@@ -776,18 +776,42 @@
 }
 
 
-/* Balance unused vertical space across the content pages without changing
-   their visual components. When content exceeds the viewport, pages retain
-   their natural height and scroll normally. */
-.ms-work-page,
-.ms-services-page,
-.ms-studio-page {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.ms-work-page > *,
-.ms-services-page > *,
-.ms-studio-page > * {
-  flex: 0 0 auto;
+/* Android Chrome "Desktop site" commonly reports a 761–1100px CSS viewport.
+   Keep the desktop composition, readable type and top-led content flow there,
+   instead of squeezing everything into a narrow tablet stack with large voids. */
+@media (min-width: 761px) and (max-width: 1100px) {
+  .ms-page {
+    align-content: start;
+    padding-top: clamp(18px, 2vh, 30px);
+    padding-bottom: clamp(18px, 2vh, 30px);
+  }
+  .ms-home-page {
+    display: grid;
+    grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
+    align-items: start;
+    gap: clamp(18px, 2.4vw, 26px);
+  }
+  .ms-home-copy h1 { font-size: clamp(42px, 5.1vw, 56px); line-height: 1.04; letter-spacing: -2.5px; }
+  .ms-intro { font-size: clamp(14px, 1.45vw, 16px); line-height: 1.75; }
+  .ms-home-proof { margin-top: 28px; font-size: 10px; line-height: 1.6; }
+  .ms-home-showcase { padding: 13px; }
+  .ms-service-bento { grid-template-columns: repeat(2, minmax(0, 1fr)); grid-template-rows: repeat(4, minmax(88px, auto)); }
+  .ms-service-tile, .ms-service-tile:first-child { grid-column: auto; grid-row: auto; min-height: 88px; }
+  .ms-service-tile:first-child { min-height: 180px; }
+  .ms-service-tile b { font-size: 13px; }
+  .ms-service-tile small { font-size: 10px; }
+  .ms-page-heading h2 { font-size: clamp(40px, 4.8vw, 54px); }
+  .ms-page-heading > p { font-size: 14px; line-height: 1.75; }
+  .ms-project-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
+  .ms-project-frame { height: clamp(160px, 20vw, 205px); }
+  .ms-project-card h3, .ms-service-detail h3 { font-size: 15px; }
+  .ms-project-card p, .ms-service-detail p, .ms-process-grid p { font-size: 13px; line-height: 1.65; }
+  .ms-services-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 11px; }
+  .ms-process-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 11px; }
+  .ms-process-grid h3 { font-size: 16px; }
+  .ms-contact-copy h2 { font-size: clamp(42px, 5vw, 56px); }
+  .ms-contact-copy > p:not(.ms-kicker) { font-size: 14px; line-height: 1.75; }
+  .ms-contact-panel label { font-size: 12px; }
+  .ms-contact-panel input, .ms-contact-panel select, .ms-contact-panel textarea { font-size: 14px; }
+  .ms-nav button, .ms-nav a { font-size: 12px; }
 }
