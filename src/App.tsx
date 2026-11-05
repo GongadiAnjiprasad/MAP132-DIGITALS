@@ -568,6 +568,7 @@ function AdminApp() {
   const [showPassword,setShowPassword] = useState(false);
   const [error,setError] = useState('');
   const [content,setContent] = useState<Content>(defaults);
+  const [homeWorkspaceResources,setHomeWorkspaceResources] = useState<WorkspaceEntry[]>(()=>{try{return JSON.parse(localStorage.getItem('map132-private-workspace-resources')||'[]')}catch{return[]}});
   const [tab,setTab] = useState<'profile'|'skills'|'portfolio'|'social'|'workspace'|'enquiries'>(window.location.hash === '#workspace' ? 'workspace' : 'portfolio');
    const [enquiries,setEnquiries] = useState<Enquiry[]>([]);
   const [saving,setSaving] = useState(false);
@@ -622,7 +623,8 @@ export default function App() {
     return () => window.removeEventListener('hashchange', syncRoute);
   },[]);
   useEffect(()=>{if(!isAdmin&&!isWorkspace)api.get('/api/portfolio').then(r=>setContent(r.data.content||defaults)).catch(()=>{}).finally(()=>setLoading(false));},[isAdmin,isWorkspace]);
+  useEffect(()=>{try{localStorage.setItem('map132-private-workspace-resources',JSON.stringify(homeWorkspaceResources));}catch{}},[homeWorkspaceResources]);
   if(isWorkspace)return <WorkspaceStandalone/>;
   if(isAdmin)return <AdminApp/>;
-  return loading?<div className="site-loading">Preparing the next frame…</div>:<HomeSlider content={content}/>;
+  return loading?<div className="site-loading">Preparing the next frame…</div>:<><HomeSlider content={content}/><section id="editor-workspace" aria-label="MAP132 Editor Workspace" style={{padding:'24px clamp(12px,4vw,64px) 70px',background:'#080B12'}}><div style={{maxWidth:1500,margin:'0 auto'}}><WorkspaceLibrary resources={homeWorkspaceResources} onAdd={item=>setHomeWorkspaceResources(current=>[item,...current])} onDelete={id=>setHomeWorkspaceResources(current=>current.filter(item=>item.id!==id))}/></div></section></>;
 }
