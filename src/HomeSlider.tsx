@@ -99,6 +99,19 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 export default function HomeSlider({ content }: { content: HomeContent }) {
   const [active, setActive] = useState(0);
   const stageRef = useRef<HTMLElement | null>(null);
+  const navRef = useRef<HTMLElement | null>(null);
+  useEffect(() => {
+    const nav = navRef.current;
+    if (!nav || window.innerWidth > 760) return;
+    const activeButton = nav.querySelector<HTMLElement>('.ms-nav button.active');
+    if (!activeButton) return;
+    const navRect = nav.getBoundingClientRect();
+    const buttonRect = activeButton.getBoundingClientRect();
+    const leftOverflow = navRect.left - buttonRect.left;
+    const rightOverflow = buttonRect.right - navRect.right;
+    if (leftOverflow > 0) nav.scrollBy({ left: -leftOverflow - 8, behavior: 'smooth' });
+    else if (rightOverflow > 0) nav.scrollBy({ left: rightOverflow + 8, behavior: 'smooth' });
+  }, [active]);
   const [stageHeight, setStageHeight] = useState<number | null>(null);
   useEffect(() => {
     const stage = stageRef.current;
@@ -224,7 +237,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
         <img src="/resources/logo-removebg-preview.png" alt="MAP132 DIGITALS"/>
         <span><b>MAP132</b><small>DIGITALS · VIDEO EDITING</small></span>
       </a>
-      <nav className="ms-nav" aria-label="Main navigation">
+      <nav ref={navRef} className="ms-nav" aria-label="Main navigation">
         {pages.map((page, index) => <button key={page} type="button" className={active === index ? 'active' : ''} aria-current={active === index ? 'page' : undefined} onClick={() => goTo(index)}>{page}</button>)}
       </nav>
     </header>
