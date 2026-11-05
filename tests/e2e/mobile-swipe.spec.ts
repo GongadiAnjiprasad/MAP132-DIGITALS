@@ -52,6 +52,20 @@ test('mobile horizontal swipe advances the main portfolio page', async ({ page }
   await expect(track).toHaveAttribute('style', /translateX\(-100%\)/);
 });
 
+test('page 5 Contact can swipe right back to page 4 Studio', async ({ page }) => {
+  await page.goto('/');
+  const track = page.locator('.ms-track');
+  await page.locator('.ms-nav').getByRole('button', { name: 'Contact', exact: true }).click();
+  await expect(track).toHaveAttribute('style', /translateX\(-400%\)/);
+  // Allow the slider's 680ms transition to finish before calculating touch coordinates.
+  await page.waitForTimeout(750);
+  await page.locator('.ms-contact-steps').scrollIntoViewIfNeeded();
+
+  await dispatchTouchSwipe(page, '.ms-contact-steps', 'right');
+
+  await expect(track).toHaveAttribute('style', /translateX\(-300%\)/);
+});
+
 test('vertical touch movement does not change the active page', async ({ page }) => {
   await page.goto('/');
   const track = page.locator('.ms-track');

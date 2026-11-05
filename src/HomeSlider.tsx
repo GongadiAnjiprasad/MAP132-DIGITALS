@@ -136,9 +136,9 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   const onPointerDown = (event: PointerEvent<HTMLElement>) => {
     if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
     const target = event.target as HTMLElement;
-    // Let the Contact page and enquiry form own vertical touch scrolling; do not interpret those gestures as page navigation.
-    if (target.closest('.ms-contact-page, .ms-contact-panel, .ms-film-enquiry, form')) return;
-    if (target.closest('input, textarea, select, video, iframe')) return;
+    // Keep native interaction/vertical scrolling for controls, but allow horizontal page swipes
+    // from the Contact page's non-interactive areas (page 5 must swipe back to page 4).
+    if (target.closest('input, textarea, select, video, iframe, button, a')) return;
     const page = target.closest('.ms-page') as HTMLElement | null;
     // Do not capture touch pointers: native vertical scrolling must remain available inside each page.
     pointerStart.current = {
