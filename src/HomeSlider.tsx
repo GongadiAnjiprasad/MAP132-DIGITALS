@@ -138,7 +138,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     const target = event.target as HTMLElement;
     if (target.closest('input, textarea, select, video, iframe')) return;
     const page = target.closest('.ms-page') as HTMLElement | null;
-    event.currentTarget.setPointerCapture(event.pointerId);
+    // Do not capture touch pointers: native vertical scrolling must remain available inside each page.
     pointerStart.current = {
       x: event.clientX,
       y: event.clientY,
