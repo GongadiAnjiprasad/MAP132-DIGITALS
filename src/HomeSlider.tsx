@@ -256,15 +256,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
             </div>
             <p className="ms-showcase-foot">Tap any showcase tile to play its sample video here — no page navigation.</p>
           </div>
-            <section className="ms-home-review-feed" aria-label="Client feedback demo feed">
-              <div className="ms-review-feed-heading"><div><span>CLIENT LOVE / FEEDBACK FEED</span><b>Kind words. Creative stories.</b></div><span className="ms-demo-label">DEMO REVIEWS</span></div>
-              <div className="ms-review-feed-grid">
-                <article className="ms-review-card"><div className="ms-review-stars" aria-label="Five stars">★★★★★</div><p>“The teaser felt cinematic and captured the mood we wanted. Every shot flowed beautifully.”</p><div className="ms-review-by"><span>W</span><div><b>Wedding Teaser</b><small>Sample review · Demo content</small></div></div></article>
-                <article className="ms-review-card"><div className="ms-review-stars" aria-label="Five stars">★★★★★</div><p>“The reel was crisp, engaging and perfectly paced for social media. Loved the final look.”</p><div className="ms-review-by"><span>B</span><div><b>Brand Reel</b><small>Sample review · Demo content</small></div></div></article>
-                <article className="ms-review-card"><div className="ms-review-stars" aria-label="Five stars">★★★★★</div><p>“The storytelling and sound design gave our video a polished, professional finish.”</p><div className="ms-review-by"><span>Y</span><div><b>YouTube Edit</b><small>Sample review · Demo content</small></div></div></article>
-              </div>
-              <div className="ms-review-feed-foot"><span>Illustrative sample feedback — replace with verified client reviews before public promotion.</span><button type="button" onClick={() => goTo(4)}>Share your project <ArrowRight size={15}/></button></div>
-            </section>
+
         </section>
 
         <section className="ms-page ms-work-page" aria-label="Selected work">
