@@ -172,6 +172,7 @@ test('swiping updates a clearly selected page in both navigation indicators', as
   await expect(page.locator('.ms-nav button.active')).toHaveText('Selected Work');
   await expect(page.locator('.ms-nav button.active')).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('.ms-pagination button.active')).toContainText('02');
+  await page.waitForTimeout(750);
 
   // Advancing to the final page must bring its selected header label into view
   // by scrolling only the horizontal navigation container, not the page itself.
@@ -190,7 +191,10 @@ test('swiping updates a clearly selected page in both navigation indicators', as
     if (!button) return false;
     const navRect = nav.getBoundingClientRect();
     const buttonRect = button.getBoundingClientRect();
-    return buttonRect.left >= navRect.left && buttonRect.right <= navRect.right;
+    const fullyVisible = buttonRect.left >= navRect.left && buttonRect.right <= navRect.right;
+    const navCenter = navRect.left + navRect.width / 2;
+    const buttonCenter = buttonRect.left + buttonRect.width / 2;
+    return fullyVisible && Math.abs(buttonCenter - navCenter) <= 24;
   })).toBe(true);
 
   const styles = await page.evaluate(() => {
