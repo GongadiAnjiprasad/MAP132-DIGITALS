@@ -8,24 +8,11 @@
 /* Cinematic SFX browser */
 .sfx-panel{margin:28px 0;background:linear-gradient(145deg,#171a21,#101217);border:1px solid #4b4030;padding:24px}.sfx-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.sfx-head h2{margin:0}.sfx-sub{color:var(--muted);font-size:12px;line-height:1.6;margin:8px 0 18px}.sfx-cats,.sfx-presets{display:flex;gap:8px;flex-wrap:wrap;margin:13px 0}.sfx-cat,.sfx-preset{font-size:10px;letter-spacing:.045em}.sfx-cat.active,.sfx-preset.active{background:var(--gold);color:#111;border-color:var(--gold)}.sfx-tools{display:flex;gap:9px;flex-wrap:wrap;margin:14px 0}.sfx-tools input{flex:1;min-width:190px;padding:12px;background:#0b0d11;color:white;border:1px solid var(--line)}.sfx-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:16px}.sfx-track{background:#0b0d11;border:1px solid var(--line);padding:14px;min-width:0}.sfx-track-top{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}.sfx-track strong{font-size:13px;line-height:1.45;display:block;overflow-wrap:anywhere}.sfx-meta{font-size:10px;color:var(--muted);line-height:1.6;margin:7px 0 12px}.sfx-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}.sfx-actions button,.sfx-actions a{font-size:11px;padding:8px 11px}.sfx-download{color:var(--gold);border:1px solid #6c593b}.sfx-download.disabled{opacity:.35;pointer-events:none}.sfx-inline-player{display:grid;grid-template-columns:auto minmax(55px,1fr) auto;gap:8px;align-items:center;margin-top:8px}.sfx-inline-player button{min-width:58px;font-size:10px;padding:6px 9px}.sfx-inline-progress{width:100%;accent-color:var(--gold);margin:0;cursor:pointer}.sfx-inline-time{display:flex;gap:3px;white-space:nowrap;color:var(--muted);font-size:10px;font-variant-numeric:tabular-nums}.sfx-inline-time span+span:before{content:'/';margin-right:3px;color:#666}.sfx-track.is-playing{border-color:#a88a53;box-shadow:0 0 0 1px #a88a5333}.sfx-status{font-size:11px;color:var(--muted);padding:10px 0}.sfx-licence{font-size:10px;color:#aaa;line-height:1.6;margin-top:12px}.sfx-loading{opacity:.65}@media(max-width:600px){.sfx-panel{padding:16px}.sfx-results{grid-template-columns:1fr}.sfx-tools{flex-direction:column}.sfx-tools input{width:100%}}
 
-/* Pixabay-inspired sound-effects discovery header */
-.sfx-mode-tabs{display:flex;align-items:center;gap:8px;overflow-x:auto;white-space:nowrap;margin:22px 0 18px;padding:2px 0 5px;scrollbar-width:none}
-.sfx-mode-tabs::-webkit-scrollbar{display:none}
-.sfx-mode-tab{border:1px solid transparent;background:transparent;color:#d8d8dc;border-radius:999px;padding:12px 20px;font-size:13px;font-weight:600;letter-spacing:0;text-transform:none}
-.sfx-mode-tab.active{background:#f4f1eb;border-color:#f4f1eb;color:#17191e;box-shadow:0 5px 18px #0003}
-.sfx-mode-tab:disabled{opacity:.55;cursor:default}
-.sfx-searchbar{display:flex;align-items:center;gap:12px;border:1px solid #ffffff22;background:linear-gradient(110deg,#292c34,#343740);border-radius:999px;padding:7px 8px 7px 19px;min-height:58px;box-shadow:inset 0 1px 0 #ffffff0a}
-.sfx-search-icon{font-size:21px;color:#d6d7dc;line-height:1;flex:0 0 auto}
-.sfx-searchbar input{flex:1;min-width:0;border:0!important;outline:0;background:transparent!important;color:#fff!important;padding:10px 0!important;font-size:15px}
-.sfx-searchbar input::placeholder{color:#c0c2c9;opacity:1}
-.sfx-searchbar button{flex:0 0 auto;border:0;border-radius:999px;background:#f4f1eb;color:#17191e;font-weight:700;padding:12px 20px}
-.sfx-presets{margin:17px 0 18px;gap:8px}
-.sfx-preset{border:1px solid #ffffff20;background:#282b32;color:#e5e5e8;border-radius:999px;padding:9px 14px;font-size:12px;letter-spacing:0;text-transform:none}
-.sfx-preset.active{background:#f4f1eb;color:#17191e;border-color:#f4f1eb}
-.sfx-cats{display:flex;gap:8px;overflow-x:auto;white-space:nowrap;padding:2px 0 8px;margin:0 0 14px;scrollbar-width:thin}
-.sfx-cat{border-radius:999px;font-size:10px;padding:9px 13px;flex:0 0 auto}
-.sfx-cat.active{background:#d7b477;color:#111;border-color:#d7b477}
-@media(max-width:600px){.sfx-mode-tabs{gap:5px;margin:18px 0 14px}.sfx-mode-tab{padding:11px 17px;font-size:12px}.sfx-searchbar{min-height:56px;padding-left:16px;gap:9px}.sfx-searchbar input{font-size:14px}.sfx-searchbar button{padding:11px 15px;font-size:12px}.sfx-presets{flex-wrap:nowrap;overflow-x:auto;white-space:nowrap;padding-bottom:6px}.sfx-preset{flex:0 0 auto}}
+
+/* Clear selected-state styling for the existing SFX categories */
+.sfx-cats{display:flex;gap:8px;overflow-x:auto;white-space:nowrap;padding:2px 0 8px;margin:13px 0;scrollbar-width:thin}
+.sfx-cat{border-radius:999px;background:#282b32;color:#e5e5e8;border:1px solid #ffffff20;padding:9px 14px;font-size:12px;letter-spacing:0;text-transform:none;flex:0 0 auto}
+.sfx-cat.active{background:#f4f1eb;color:#17191e;border-color:#f4f1eb;box-shadow:0 5px 18px #0003}
 </style></head><body><main class="shell"><header class="top"><a class="brand" href="index.html">MAP<b>132</b> <span style="font-size:10px;color:#aaa;font-weight:400">DIGITALS</span></a><a class="back" href="index.html">← Back to website</a></header>
 <section class="welcome"><div class="kicker">Private creator area · Workspace</div><h1>Your creative control room.</h1><p>Organise your brand resources, editing references, reusable assets and project links in one place.</p></section>
 <div class="notice"><strong>Storage & privacy note:</strong> This first workspace version saves your resource list in this browser only. It is not yet connected to your 5 TB cloud storage or account login. Do not add confidential client files until secure sign-in and cloud storage are connected.</div>
@@ -33,29 +20,16 @@
 <section class="sfx-panel" id="cinematic-sfx">
 <div class="sfx-head"><h2>🎧 Cinematic Sound Effects</h2><span class="kicker">PLAY · PAUSE · DOWNLOAD</span></div>
 <p class="sfx-sub">Ready-to-preview cinematic sounds, organised by editing use. Tap any sound to play it here; starting another sound automatically stops the previous one.</p>
-<div class="sfx-mode-tabs" role="tablist" aria-label="Resource type">
-<button class="sfx-mode-tab" type="button" disabled aria-disabled="true">Music</button>
-<button class="sfx-mode-tab active" type="button" role="tab" aria-selected="true">Sound Effects</button>
-<button class="sfx-mode-tab" type="button" disabled aria-disabled="true">3D Models</button>
-<button class="sfx-mode-tab" type="button" disabled aria-disabled="true">GIFs</button>
-</div>
-<div class="sfx-searchbar"><span class="sfx-search-icon" aria-hidden="true">⌕</span><input id="sfxSearchInput" type="search" placeholder="Search for sound effects" aria-label="Search for sound effects"><button class="primary" id="sfxSearchBtn" type="button">Search</button></div>
-<div class="sfx-presets" id="sfxPresets">
-<button class="sfx-preset active" data-query="short whoosh">Whoosh</button>
-<button class="sfx-preset" data-query="short cinematic riser">Riser</button>
-<button class="sfx-preset" data-query="cinematic impact hit">Impact</button>
-<button class="sfx-preset" data-query="pop sound effect">Pop</button>
-<button class="sfx-preset" data-query="click sound effect">Click</button>
-<button class="sfx-preset" data-query="notification sound effect">Notification</button>
-</div>
 <div class="sfx-cats" id="sfxCategories">
 <button class="sfx-cat active" data-cat="quick">QUICK FILTERS</button>
-<button class="sfx-cat" data-cat="trailer">TRAILER & CINEMATIC</button>
-<button class="sfx-cat" data-cat="action">ACTION & FIGHT</button>
-<button class="sfx-cat" data-cat="transitions">TRANSITIONS</button>
-<button class="sfx-cat" data-cat="horror">SUSPENSE & HORROR</button>
-<button class="sfx-cat" data-cat="ambience">AMBIENCE & FOLEY</button>
+<button class="sfx-cat" data-cat="trailer">TRAILER &amp; CINEMATIC IMPACT</button>
+<button class="sfx-cat" data-cat="action">ACTION &amp; FIGHT</button>
+<button class="sfx-cat" data-cat="transitions">TRANSITIONS &amp; LOGO REVEALS</button>
+<button class="sfx-cat" data-cat="horror">SUSPENSE &amp; HORROR</button>
+<button class="sfx-cat" data-cat="ambience">AMBIENCE &amp; FOLEY</button>
 </div>
+<div class="sfx-presets" id="sfxPresets"></div>
+<div class="sfx-tools"><input id="sfxSearchInput" type="search" placeholder="Search sounds: braam, explosion, sword, heartbeat..." aria-label="Search sounds"><button class="primary" id="sfxSearchBtn" type="button">Search sounds</button></div>
 <div class="sfx-status" id="sfxStatus" role="status">Loading cinematic sound effects…</div>
 <div class="sfx-results" id="sfxResults"></div>
 <audio id="sfxAudioElement" preload="none" style="display:none"></audio>
