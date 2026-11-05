@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { api } from './api';
 import DemoShowcase from './DemoShowcase';
 import HomeSlider from './HomeSlider';
+import IndianFestivalAtmosphere from './modules/seasonal/IndianFestivalAtmosphere';
 import {
   ArrowDownRight, ArrowRight, Check, ChevronRight, Film, LayoutDashboard,
   Facebook, Instagram, Linkedin, Mail, MessageCircle, Play, Plus, Save, Send, ShieldCheck, Sparkles,
@@ -104,8 +105,6 @@ function TitleMotionStudio(){
 function WebsiteIntro(){
   return null;
 }
-import IndianFestivalAtmosphere from './modules/seasonal/IndianFestivalAtmosphere';
-
 function PublicSite({ content }: { content: Content }) {
   const [activeSkill,setActiveSkill] = useState(0);
   const [activeWorkCategory,setActiveWorkCategory] = useState('All Projects');
