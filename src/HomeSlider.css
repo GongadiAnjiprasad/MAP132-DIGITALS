@@ -552,3 +552,18 @@
 .ms-enquiry-success p{margin:0;color:var(--ms-muted);font-size:12px;line-height:1.75}
 .ms-enquiry-success .ms-primary{min-height:44px;border-radius:3px}
 @media(max-width:640px){.ms-film-enquiry{padding:18px 23px}.ms-film-enquiry::before{left:6px}.ms-film-enquiry::after{right:6px}.ms-film-enquiry-heading span{font-size:8px;letter-spacing:1.4px}}
+
+
+/* Page 5: keep finger scrolling native inside the enquiry panel. */
+@media (max-width: 760px) {
+  .ms-page {
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+  .ms-contact-page,
+  .ms-contact-panel,
+  .ms-film-enquiry,
+  .ms-film-enquiry form {
+    touch-action: pan-y;
+  }
+}
