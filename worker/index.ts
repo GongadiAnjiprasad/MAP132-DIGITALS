@@ -1,4 +1,4 @@
-interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; }
+interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; PIXABAY_API_KEY?: string; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
 const json=(body:unknown,status=200,headers:HeadersInit={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...Object.fromEntries(new Headers(headers))}});
 const COOKIE='map132_admin';
@@ -103,7 +103,42 @@ if(path==='/api/resources/sounds'&&method==='GET'){
   const allowed=(data.results||[]).filter((sound:any)=>{const licence=String(sound.license||'').toLowerCase();return licence.includes('creativecommons.org/publicdomain/zero/')||(licence.includes('creativecommons.org/licenses/by/')&&!licence.includes('/by-nc/'));});
   return json({count:data.count||0,providerCount:data.count||0,allowedCount:allowed.length,page,nextPage:data.next?page+1:null,previousPage:data.previous?page-1:null,results:allowed.map((sound:any)=>({id:sound.id,title:sound.name,creator:sound.username,license:sound.license,duration:sound.duration,previewUrl:sound.previews?.['preview-hq-mp3']||sound.previews?.['preview-lq-mp3']||'',sourceUrl:sound.url||('https://freesound.org/s/'+sound.id+'/'),tags:sound.tags||[],description:sound.description||''}))});
 }
-if(path==='/api/_healthcheck')return json({message:'Success'});
+
+if(path==='/api/resources/pixabay'&&method==='GET'){
+  if(!env.PIXABAY_API_KEY)return json({error:'Pixabay live search is not configured yet. Add PIXABAY_API_KEY as a Cloudflare Worker secret.'},503);
+  const query=(url.searchParams.get('query')||'').trim().slice(0,100);
+  const type=url.searchParams.get('type')==='images'?'images':'videos';
+  const page=Math.max(1,Math.min(1000,Number(url.searchParams.get('page')||1)));
+  if(!query)return json({error:'Enter a search term.'},400);
+  if(!env.MAP132_KV)return json({error:'Resource search cache is not configured.'},503);
+  const cacheKey='resource-cache/pixabay/'+type+'/'+encodeURIComponent(query.toLowerCase())+'/'+page;
+  const cached=await env.MAP132_KV.get(cacheKey);
+  if(cached){try{return json(JSON.parse(cached),200,{'X-Resource-Cache':'HIT'});}catch{}}
+  const upstream=new URL(type==='videos'?'https://pixabay.com/api/videos/':'https://pixabay.com/api/');
+  upstream.searchParams.set('key',env.PIXABAY_API_KEY);
+  upstream.searchParams.set('q',query);
+  upstream.searchParams.set('page',String(page));
+  upstream.searchParams.set('per_page','20');
+  upstream.searchParams.set('safesearch','true');
+  if(type==='images'){upstream.searchParams.set('image_type','photo');upstream.searchParams.set('orientation','all');}
+  else upstream.searchParams.set('video_type','all');
+  const response=await fetch(upstream.toString(),{headers:{'Accept':'application/json'}});
+  if(!response.ok)return json({error:response.status===429?'Pixabay rate limit reached. Try again later.':response.status===401||response.status===403?'Pixabay API key was rejected. Check the Cloudflare secret.':'Pixabay search is temporarily unavailable.'},502);
+  const data:any=await response.json();
+  const results=(data.hits||[]).map((hit:any)=>{
+    if(type==='videos'){
+      const rendition=hit.videos?.medium||hit.videos?.small||hit.videos?.tiny;
+      if(!rendition?.url||!rendition?.thumbnail)return null;
+      return {id:hit.id,title:String(hit.tags||'Pixabay video').slice(0,160),creator:String(hit.user||'Pixabay contributor'),tags:String(hit.tags||''),duration:Number(hit.duration)||0,width:Number(rendition.width)||0,height:Number(rendition.height)||0,thumbnail:rendition.thumbnail,previewUrl:rendition.url,sourceUrl:String(hit.pageURL||'https://pixabay.com/videos/'),kind:'video',licence:'Pixabay Content License — verify the original asset page'};
+    }
+    if(!hit.previewURL||!hit.pageURL)return null;
+    return {id:hit.id,title:String(hit.tags||'Pixabay image').slice(0,160),creator:String(hit.user||'Pixabay contributor'),tags:String(hit.tags||''),width:Number(hit.imageWidth)||0,height:Number(hit.imageHeight)||0,thumbnail:hit.previewURL,previewUrl:hit.largeImageURL||hit.webformatURL||hit.previewURL,sourceUrl:String(hit.pageURL),kind:'image',licence:'Pixabay Content License — verify the original asset page'};
+  }).filter(Boolean);
+  const payload={provider:'Pixabay',type,query,page,total:Number(data.total)||0,totalHits:Number(data.totalHits)||0,results};
+  await env.MAP132_KV.put(cacheKey,JSON.stringify(payload),{expirationTtl:86400});
+  return json(payload,200,{'X-Resource-Cache':'MISS'});
+}
+\nif(path==='/api/_healthcheck')return json({message:'Success'});
 if(path==='/api/enquiries'&&method==='POST'){
    if(!env.MAP132_KV)return json({error:'Enquiry storage is not configured.'},503);
    let body:any;try{body=await req.json();}catch{return json({error:'Invalid enquiry data.'},400);}
