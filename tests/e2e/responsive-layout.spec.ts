@@ -54,3 +54,16 @@ for (const viewport of viewports) {
     await expect(page.locator('.ms-film-enquiry form').getByRole('button', { name: 'Submit Enquiry' })).toBeVisible();
   });
 }
+
+
+test('content pages distribute spare vertical space without changing page structure', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  for (const selector of ['.ms-work-page', '.ms-services-page', '.ms-studio-page']) {
+    const layout = await page.locator(selector).evaluate(element => {
+      const style = getComputedStyle(element);
+      return { display: style.display, direction: style.flexDirection, justify: style.justifyContent };
+    });
+    expect(layout, selector).toEqual({ display: 'flex', direction: 'column', justify: 'space-between' });
+  }
+});
