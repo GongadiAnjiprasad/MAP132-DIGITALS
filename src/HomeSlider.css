@@ -1358,6 +1358,7 @@
 }
 .map132-slider-site[data-theme="light"] .ms-header {
   background: linear-gradient(110deg, rgba(255,254,250,.96), rgba(247,242,232,.94));
+  background-color: #faf8f2;
   border-bottom: 1px solid rgba(145,101,43,.25);
   box-shadow: 0 8px 28px rgba(68,49,24,.075), inset 0 1px 0 #fff;
 }
