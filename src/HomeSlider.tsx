@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState, type PointerEvent, type WheelEvent, type MouseEvent } from 'react';
 import {
-  ArrowLeft, ArrowRight, Camera, Film, Instagram, Mail, MessageCircle,
+  ArrowLeft, ArrowRight, Camera, Check, Film, Instagram, Mail, MessageCircle,
   Play, Sparkles, Youtube, Facebook, Linkedin, Send, X
 } from 'lucide-react';
 import DemoShowcase from './DemoShowcase';
