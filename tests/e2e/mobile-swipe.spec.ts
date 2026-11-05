@@ -173,6 +173,21 @@ test('swiping updates a clearly selected page in both navigation indicators', as
   await expect(page.locator('.ms-nav button.active')).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('.ms-pagination button.active')).toContainText('02');
 
+  // Advancing to the final page must bring its selected header label into view
+  // by scrolling only the horizontal navigation container, not the page itself.
+  const contactButton = page.locator('.ms-nav button.active');
+  await dispatchTouchSwipe(page, '.ms-work-page', 'left');
+  await dispatchTouchSwipe(page, '.ms-services-page', 'left');
+  await dispatchTouchSwipe(page, '.ms-studio-page', 'left');
+  await expect(contactButton).toHaveText('Contact');
+  await expect.poll(() => page.locator('.ms-nav').evaluate(nav => {
+    const button = nav.querySelector<HTMLElement>('button.active');
+    if (!button) return false;
+    const navRect = nav.getBoundingClientRect();
+    const buttonRect = button.getBoundingClientRect();
+    return buttonRect.left >= navRect.left && buttonRect.right <= navRect.right;
+  })).toBe(true);
+
   const styles = await page.evaluate(() => {
     const header = document.querySelector<HTMLElement>('.ms-nav button.active');
     const pager = document.querySelector<HTMLElement>('.ms-pagination button.active');
