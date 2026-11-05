@@ -110,3 +110,37 @@ test('desktop-site viewport stage follows the active page content height', async
     return Math.abs(m.stage - m.content);
   }).toBeLessThanOrEqual(3);
 });
+
+test('MAP132 header logo keeps the intended responsive size without overlapping navigation', async ({ page }) => {
+  const cases = [
+    { name: 'mobile', width: 360, height: 800, logoWidth: 72, logoHeight: 52 },
+    { name: 'tablet', width: 768, height: 1024, logoWidth: 78, logoHeight: 44 },
+    { name: 'desktop', width: 1440, height: 900, logoWidth: 100, logoHeight: 56 },
+  ];
+
+  await page.goto('/');
+  for (const item of cases) {
+    await page.setViewportSize({ width: item.width, height: item.height });
+    const metrics = await page.locator('.ms-brand img').evaluate((image) => {
+      const logo = image as HTMLImageElement;
+      const brand = logo.closest('.ms-brand') as HTMLElement;
+      const nav = document.querySelector('.ms-nav') as HTMLElement;
+      const logoRect = logo.getBoundingClientRect();
+      const brandRect = brand.getBoundingClientRect();
+      const navRect = nav.getBoundingClientRect();
+      return {
+        width: logoRect.width,
+        height: logoRect.height,
+        loaded: logo.complete && logo.naturalWidth > 0,
+        brandRight: brandRect.right,
+        navLeft: navRect.left,
+      };
+    });
+
+    expect(metrics.loaded, `logo image should load at ${item.name}`).toBe(true);
+    expect(metrics.width, `logo width at ${item.name}`).toBe(item.logoWidth);
+    expect(metrics.height, `logo height at ${item.name}`).toBe(item.logoHeight);
+    expect(metrics.brandRight, `brand should not overlap navigation at ${item.name}`)
+      .toBeLessThanOrEqual(metrics.navLeft + 1);
+  }
+});
