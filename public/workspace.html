@@ -60,18 +60,23 @@
 
 
 <section class="font-panel" id="cinematic-fonts">
- <div class="font-head"><h2>🔤 Cinematic Fonts</h2><span class="kicker">PREVIEW · SAVE · DOWNLOAD</span></div>
- <p class="font-sub">A curated collection of free Google Fonts suited to cinematic titles, posters, trailers and Telugu title cards. Choose a category, preview your own title, save favourites in this browser, or download the font family.</p>
+ <div class="font-head"><h2>🔤 Cinematic Fonts</h2><span class="kicker">100+ FREE FONTS · PREVIEW · SAVE · DOWNLOAD</span></div>
+ <p class="font-sub">An expanded library of 100+ free Google Fonts and Telugu typefaces, grouped by film-title style. These are free cinematic-style alternatives and genre matches—not claims that they are the exact proprietary fonts used in individual movie logos. Preview your title, save favourites, and download from the official source.</p>
  <div class="font-cats" id="fontCategories">
-  <button type="button" class="font-cat active" data-font-cat="tollywood">TOLLYWOOD CINEMATIC</button>
-  <button type="button" class="font-cat" data-font-cat="hollywood">HOLLYWOOD CINEMATIC</button>
-  <button type="button" class="font-cat" data-font-cat="telugu">TELUGU CINEMATIC</button>
+  <button type="button" class="font-cat active" data-font-cat="tollywood">TOLLYWOOD</button>
+  <button type="button" class="font-cat" data-font-cat="hollywood">HOLLYWOOD</button>
+  <button type="button" class="font-cat" data-font-cat="action">ACTION & MASS</button>
+  <button type="button" class="font-cat" data-font-cat="epic">EPIC & PERIOD</button>
+  <button type="button" class="font-cat" data-font-cat="thriller">THRILLER & CRIME</button>
+  <button type="button" class="font-cat" data-font-cat="scifi">SCI-FI & FUTURE</button>
+  <button type="button" class="font-cat" data-font-cat="romance">ROMANCE & DRAMA</button>
+  <button type="button" class="font-cat" data-font-cat="telugu">TELUGU</button>
   <button type="button" class="font-cat" data-font-cat="saved">SAVED FONTS</button>
  </div>
  <div class="font-controls"><input id="fontSearch" type="search" placeholder="Search font names…" aria-label="Search cinematic fonts"><button type="button" class="primary" id="fontSearchBtn">Search fonts</button></div>
  <div class="font-sample-tools"><input id="fontSampleText" type="text" value="THE FINAL CHAPTER" maxlength="90" aria-label="Font preview text" placeholder="Type a title to preview"><button type="button" id="fontSampleReset">Reset sample</button></div>
  <div class="font-grid" id="fontGrid" aria-live="polite"></div>
- <div class="font-footnote">All listed families are available free through Google Fonts under their published open-source licences. Download opens the official Google Fonts family download page. Saved favourites are stored only in this browser on this device.</div>
+ <div class="font-footnote">All fonts link to their official Google Fonts family pages and published licence details. Open-font licences generally allow video titling and commercial artwork, but the licence attached to the downloaded copy controls its use. Original movie logos may use separately licensed custom lettering. Saved favourites are stored only in this browser on this device.</div>
 </section>
 
 
@@ -105,6 +110,84 @@
 {n:'Noto Serif Telugu',c:'telugu',s:'Telugu cinematic serif',f:'Noto Serif Telugu',t:'తెలుగు కథా ప్రపంచం'},
 {n:'Ramaraja',c:'telugu',s:'Telugu classic',f:'Ramaraja',t:'ధర్మ యుద్ధం'},
 {n:'Timmana',c:'telugu',s:'Telugu display',f:'Timmana',t:'విజయం మనదే'}
-];let category='tollywood',query='';const key='map132_cinematic_fonts_saved_v1';function saved(){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch(e){return[]}}function persist(a){try{localStorage.setItem(key,JSON.stringify(a))}catch(e){}}function familyUrl(n){return 'https://fonts.google.com/download?family='+encodeURIComponent(n) }function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function render(){const fav=saved();const list=data.filter(x=>(category==='saved'?fav.includes(x.n):x.c===category)&&(!query||(x.n+' '+x.s).toLowerCase().includes(query)));if(!list.length){grid.innerHTML='<div class="font-empty">No fonts match this filter.</div>';return}const sample=$('fontSampleText').value.trim();grid.innerHTML=list.map(x=>{const isSaved=fav.includes(x.n),text=sample||x.t,tel=x.c==='telugu';return '<article class="font-card"><div class="font-card-top"><span class="font-card-name">'+esc(x.n)+'</span><span class="font-card-tag">'+esc(x.s)+'</span></div><div class="font-preview '+(tel?'telugu':'')+'" style="font-family:'+JSON.stringify(x.f)+',sans-serif" lang="'+(tel?'te':'en')+'">'+esc(text)+'</div><div class="font-card-actions"><button type="button" data-font-save="'+esc(x.n)+'" class="'+(isSaved?'saved':'')+'">'+(isSaved?'★ Saved':'☆ Save')+'</button><a href="'+familyUrl(x.n)+'" target="_blank" rel="noopener noreferrer">Download font ↗</a></div></article>'}).join('')}$('fontCategories').addEventListener('click',e=>{const b=e.target.closest('[data-font-cat]');if(!b)return;category=b.dataset.fontCat;document.querySelectorAll('.font-cat').forEach(x=>x.classList.toggle('active',x===b));render()});grid.addEventListener('click',e=>{const b=e.target.closest('[data-font-save]');if(!b)return;const name=b.dataset.fontSave,a=saved(),i=a.indexOf(name);if(i>=0)a.splice(i,1);else a.push(name);persist(a);render()});$('fontSampleText').addEventListener('input',render);$('fontSampleReset').addEventListener('click',()=>{$('fontSampleText').value=category==='telugu'?'ఒక కొత్త కథ':'THE FINAL CHAPTER';render()});$('fontSearchBtn').addEventListener('click',()=>{query=$('fontSearch').value.trim().toLowerCase();render()});$('fontSearch').addEventListener('input',()=>{query=$('fontSearch').value.trim().toLowerCase();render()});render()})();
+,
+{n:"Alfa Slab One",c:"action",s:"Heavy mass / punch title",f:"Alfa Slab One",t:"NO TURNING BACK"},
+{n:"Archivo Black",c:"action",s:"Bold action / poster",f:"Archivo Black",t:"NO TURNING BACK"},
+{n:"Bangers",c:"action",s:"Comic action / energetic",f:"Bangers",t:"NO TURNING BACK"},
+{n:"Bowlby One SC",c:"action",s:"Mass title / bold display",f:"Bowlby One SC",t:"NO TURNING BACK"},
+{n:"Bungee",c:"action",s:"Street / action title",f:"Bungee",t:"NO TURNING BACK"},
+{n:"Bungee Shade",c:"action",s:"3D-style display lettering",f:"Bungee Shade",t:"NO TURNING BACK"},
+{n:"Changa One",c:"action",s:"Energetic action / comedy",f:"Changa One",t:"NO TURNING BACK"},
+{n:"Concert One",c:"action",s:"Bold commercial title",f:"Concert One",t:"NO TURNING BACK"},
+{n:"Days One",c:"action",s:"Compact mass title",f:"Days One",t:"NO TURNING BACK"},
+{n:"Dela Gothic One",c:"action",s:"Heavy dramatic title",f:"Dela Gothic One",t:"NO TURNING BACK"},
+{n:"Jockey One",c:"action",s:"Condensed action title",f:"Jockey One",t:"NO TURNING BACK"},
+{n:"Kanit",c:"action",s:"Action / modern poster",f:"Kanit",t:"NO TURNING BACK"},
+{n:"Khand",c:"action",s:"Condensed mass title",f:"Khand",t:"NO TURNING BACK"},
+{n:"Lilita One",c:"action",s:"Playful commercial title",f:"Lilita One",t:"NO TURNING BACK"},
+{n:"Passion One",c:"action",s:"Bold action / impact",f:"Passion One",t:"NO TURNING BACK"},
+{n:"Russo One",c:"action",s:"Power / sports title",f:"Russo One",t:"NO TURNING BACK"},
+{n:"Saira Stencil One",c:"action",s:"Military / action title",f:"Saira Stencil One",t:"NO TURNING BACK"},
+{n:"Shojumaru",c:"action",s:"Martial arts / fantasy",f:"Shojumaru",t:"NO TURNING BACK"},
+{n:"Black Han Sans",c:"action",s:"Heavy display title",f:"Black Han Sans",t:"NO TURNING BACK"},
+{n:"Gasoek One",c:"action",s:"Ultra-bold display title",f:"Gasoek One",t:"NO TURNING BACK"},
+{n:"Cinzel Decorative",c:"epic",s:"Mythology / fantasy epic",f:"Cinzel Decorative",t:"THE LEGEND RISES"},
+{n:"DM Serif Display",c:"epic",s:"Prestige / period drama",f:"DM Serif Display",t:"THE LEGEND RISES"},
+{n:"Graduate",c:"epic",s:"Sports / vintage title",f:"Graduate",t:"THE LEGEND RISES"},
+{n:"Grenze Gotisch",c:"epic",s:"Gothic / dark fantasy",f:"Grenze Gotisch",t:"THE LEGEND RISES"},
+{n:"Marcellus",c:"epic",s:"Royal / historical drama",f:"Marcellus",t:"THE LEGEND RISES"},
+{n:"Playfair Display",c:"epic",s:"Romance / period poster",f:"Playfair Display",t:"THE LEGEND RISES"},
+{n:"Ultra",c:"epic",s:"Classic cinematic serif",f:"Ultra",t:"THE LEGEND RISES"},
+{n:"Vidaloka",c:"epic",s:"Vintage / period title",f:"Vidaloka",t:"THE LEGEND RISES"},
+{n:"Young Serif",c:"epic",s:"Literary / prestige drama",f:"Young Serif",t:"THE LEGEND RISES"},
+{n:"Yeseva One",c:"epic",s:"Elegant epic title",f:"Yeseva One",t:"THE LEGEND RISES"},
+{n:"IM Fell English SC",c:"epic",s:"Historical / antique title",f:"IM Fell English SC",t:"THE LEGEND RISES"},
+{n:"Libre Baskerville",c:"epic",s:"Classic drama / editorial",f:"Libre Baskerville",t:"THE LEGEND RISES"},
+{n:"Bodoni Moda",c:"epic",s:"Luxury / period title",f:"Bodoni Moda",t:"THE LEGEND RISES"},
+{n:"Cormorant SC",c:"epic",s:"Elegant historical title",f:"Cormorant SC",t:"THE LEGEND RISES"},
+{n:"Kelly Slab",c:"thriller",s:"Crime / industrial title",f:"Kelly Slab",t:"THE LAST SECRET"},
+{n:"Notable",c:"thriller",s:"Compact thriller title",f:"Notable",t:"THE LAST SECRET"},
+{n:"Patua One",c:"thriller",s:"Retro mystery / drama",f:"Patua One",t:"THE LAST SECRET"},
+{n:"Rye",c:"thriller",s:"Western / vintage title",f:"Rye",t:"THE LAST SECRET"},
+{n:"Staatliches",c:"thriller",s:"Minimal thriller poster",f:"Staatliches",t:"THE LAST SECRET"},
+{n:"Unica One",c:"thriller",s:"Mystery / suspense title",f:"Unica One",t:"THE LAST SECRET"},
+{n:"Zilla Slab Highlight",c:"thriller",s:"Graphic thriller title",f:"Zilla Slab Highlight",t:"THE LAST SECRET"},
+{n:"Barlow Condensed",c:"thriller",s:"Crime / news title",f:"Barlow Condensed",t:"THE LAST SECRET"},
+{n:"Roboto Condensed",c:"thriller",s:"Documentary / thriller",f:"Roboto Condensed",t:"THE LAST SECRET"},
+{n:"IBM Plex Mono",c:"thriller",s:"Tech mystery / dossier",f:"IBM Plex Mono",t:"THE LAST SECRET"},
+{n:"Space Mono",c:"thriller",s:"Investigative / tech title",f:"Space Mono",t:"THE LAST SECRET"},
+{n:"Cutive Mono",c:"thriller",s:"Typewriter / classified file",f:"Cutive Mono",t:"THE LAST SECRET"},
+{n:"Fira Sans Condensed",c:"thriller",s:"Tight suspense poster",f:"Fira Sans Condensed",t:"THE LAST SECRET"},
+{n:"Chakra Petch",c:"scifi",s:"Futuristic / tech title",f:"Chakra Petch",t:"BEYOND THE STARS"},
+{n:"Exo 2",c:"scifi",s:"Sci-fi / space title",f:"Exo 2",t:"BEYOND THE STARS"},
+{n:"Gugi",c:"scifi",s:"Futuristic display",f:"Gugi",t:"BEYOND THE STARS"},
+{n:"Iceland",c:"scifi",s:"Digital / sci-fi title",f:"Iceland",t:"BEYOND THE STARS"},
+{n:"Michroma",c:"scifi",s:"Space / technology",f:"Michroma",t:"BEYOND THE STARS"},
+{n:"Monoton",c:"scifi",s:"Neon / retro sci-fi",f:"Monoton",t:"BEYOND THE STARS"},
+{n:"Press Start 2P",c:"scifi",s:"Retro gaming / pixel",f:"Press Start 2P",t:"BEYOND THE STARS"},
+{n:"Rajdhani",c:"scifi",s:"Futuristic condensed title",f:"Rajdhani",t:"BEYOND THE STARS"},
+{n:"Syncopate",c:"scifi",s:"Minimal sci-fi poster",f:"Syncopate",t:"BEYOND THE STARS"},
+{n:"Wallpoet",c:"scifi",s:"Digital / terminal title",f:"Wallpoet",t:"BEYOND THE STARS"},
+{n:"Oxanium",c:"scifi",s:"Sci-fi / gaming title",f:"Oxanium",t:"BEYOND THE STARS"},
+{n:"Tektur",c:"scifi",s:"Modern tech / action",f:"Tektur",t:"BEYOND THE STARS"},
+{n:"Aldrich",c:"scifi",s:"Geometric futuristic title",f:"Aldrich",t:"BEYOND THE STARS"},
+{n:"Allura",c:"romance",s:"Elegant romance title",f:"Allura",t:"A LOVE STORY"},
+{n:"Great Vibes",c:"romance",s:"Wedding / love story",f:"Great Vibes",t:"A LOVE STORY"},
+{n:"Parisienne",c:"romance",s:"Romantic handwritten title",f:"Parisienne",t:"A LOVE STORY"},
+{n:"DM Serif Text",c:"romance",s:"Classic romance / drama",f:"DM Serif Text",t:"A LOVE STORY"},
+{n:"Libre Caslon Display",c:"romance",s:"Period romance title",f:"Libre Caslon Display",t:"A LOVE STORY"},
+{n:"Prata",c:"romance",s:"Luxury / romantic drama",f:"Prata",t:"A LOVE STORY"},
+{n:"Josefin Sans",c:"romance",s:"Minimal romance poster",f:"Josefin Sans",t:"A LOVE STORY"},
+{n:"Raleway",c:"romance",s:"Modern drama / title",f:"Raleway",t:"A LOVE STORY"},
+{n:"Italiana",c:"romance",s:"Elegant cinematic serif",f:"Italiana",t:"A LOVE STORY"},
+{n:"Gilda Display",c:"romance",s:"Classic romantic drama",f:"Gilda Display",t:"A LOVE STORY"},
+{n:"League Spartan",c:"tollywood",s:"Bold commercial / mass",f:"League Spartan",t:"THE STORY BEGINS"},
+{n:"Montserrat",c:"tollywood",s:"Modern poster / drama",f:"Montserrat",t:"THE STORY BEGINS"},
+{n:"Poppins",c:"tollywood",s:"Clean title / promo",f:"Poppins",t:"THE STORY BEGINS"},
+{n:"Roboto Slab",c:"tollywood",s:"Strong dramatic title",f:"Roboto Slab",t:"THE STORY BEGINS"},
+{n:"Archivo Narrow",c:"tollywood",s:"Condensed poster title",f:"Archivo Narrow",t:"THE STORY BEGINS"},
+{n:"Barlow Semi Condensed",c:"tollywood",s:"Trailer / title card",f:"Barlow Semi Condensed",t:"THE STORY BEGINS"},
+{n:"Saira Condensed",c:"tollywood",s:"Action / mass title",f:"Saira Condensed",t:"THE STORY BEGINS"},
+{n:"Fjalla One",c:"tollywood",s:"Bold condensed poster",f:"Fjalla One",t:"THE STORY BEGINS"}];let category='tollywood',query='';const key='map132_cinematic_fonts_saved_v1';const loadedFonts=new Set();function loadFont(f){if(loadedFonts.has(f))return;loadedFonts.add(f);const l=document.createElement('link');l.rel='stylesheet';l.href='https://fonts.googleapis.com/css2?family='+encodeURIComponent(f).replace(/%20/g,'+')+'&display=swap';document.head.appendChild(l)}function saved(){try{return JSON.parse(localStorage.getItem(key)||'[]')}catch(e){return[]}}function persist(a){try{localStorage.setItem(key,JSON.stringify(a))}catch(e){}}function familyUrl(n){return 'https://fonts.google.com/download?family='+encodeURIComponent(n) }function esc(s){return String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}function render(){const fav=saved();const list=data.filter(x=>(category==='saved'?fav.includes(x.n):x.c===category)&&(!query||(x.n+' '+x.s).toLowerCase().includes(query)));if(!list.length){grid.innerHTML='<div class="font-empty">No fonts match this filter.</div>';return}const sample=$('fontSampleText').value.trim();list.forEach(x=>loadFont(x.f));grid.innerHTML=list.map(x=>{const isSaved=fav.includes(x.n),text=sample||x.t,tel=x.c==='telugu';return '<article class="font-card"><div class="font-card-top"><span class="font-card-name">'+esc(x.n)+'</span><span class="font-card-tag">'+esc(x.s)+'</span></div><div class="font-preview '+(tel?'telugu':'')+'" style="font-family:'+JSON.stringify(x.f)+',sans-serif" lang="'+(tel?'te':'en')+'">'+esc(text)+'</div><div class="font-card-actions"><button type="button" data-font-save="'+esc(x.n)+'" class="'+(isSaved?'saved':'')+'">'+(isSaved?'★ Saved':'☆ Save')+'</button><a href="'+familyUrl(x.n)+'" target="_blank" rel="noopener noreferrer">Download font ↗</a></div></article>'}).join('')}$('fontCategories').addEventListener('click',e=>{const b=e.target.closest('[data-font-cat]');if(!b)return;category=b.dataset.fontCat;document.querySelectorAll('.font-cat').forEach(x=>x.classList.toggle('active',x===b));render()});grid.addEventListener('click',e=>{const b=e.target.closest('[data-font-save]');if(!b)return;const name=b.dataset.fontSave,a=saved(),i=a.indexOf(name);if(i>=0)a.splice(i,1);else a.push(name);persist(a);render()});$('fontSampleText').addEventListener('input',render);$('fontSampleReset').addEventListener('click',()=>{$('fontSampleText').value=category==='telugu'?'ఒక కొత్త కథ':'THE FINAL CHAPTER';render()});$('fontSearchBtn').addEventListener('click',()=>{query=$('fontSearch').value.trim().toLowerCase();render()});$('fontSearch').addEventListener('input',()=>{query=$('fontSearch').value.trim().toLowerCase();render()});render()})();
 
 </script></body></html>
