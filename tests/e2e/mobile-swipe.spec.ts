@@ -52,6 +52,26 @@ test('mobile horizontal swipe advances the main portfolio page', async ({ page }
   await expect(track).toHaveAttribute('style', /translateX\(-100%\)/);
 });
 
+
+test('Home showcase tiles support page swipe without breaking tile tap-to-preview', async ({ page }) => {
+  await page.goto('/');
+  const track = page.locator('.ms-track');
+  const firstTile = page.locator('.ms-service-tile').first();
+  await expect(firstTile).toBeVisible();
+
+  await dispatchTouchSwipe(page, '.ms-service-tile', 'left');
+  await expect(track).toHaveAttribute('style', /translateX\(-100%\)/);
+
+  // Return Home, then verify a normal tap still opens the selected sample.
+  await page.waitForTimeout(500);
+  await page.locator('.ms-nav').getByRole('button', { name: 'Home', exact: true }).click();
+  await expect(track).toHaveAttribute('style', /translateX\(0%\)/);
+  await page.waitForTimeout(750);
+  await firstTile.click();
+  await expect(page.locator('.ms-preview-dialog')).toBeVisible();
+  await expect(page.locator('.ms-preview-dialog h2')).toHaveText('Cinematic Films');
+});
+
 test('page 5 Contact can swipe right back to page 4 Studio', async ({ page }) => {
   await page.goto('/');
   const track = page.locator('.ms-track');
