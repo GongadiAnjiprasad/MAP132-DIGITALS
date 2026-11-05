@@ -105,12 +105,9 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     if (!nav || window.innerWidth > 760) return;
     const activeButton = nav.querySelector<HTMLElement>('.ms-nav button.active');
     if (!activeButton) return;
-    const navRect = nav.getBoundingClientRect();
-    const buttonRect = activeButton.getBoundingClientRect();
-    const leftOverflow = navRect.left - buttonRect.left;
-    const rightOverflow = buttonRect.right - navRect.right;
-    if (leftOverflow > 0) nav.scrollBy({ left: -leftOverflow - 8, behavior: 'smooth' });
-    else if (rightOverflow > 0) nav.scrollBy({ left: rightOverflow + 8, behavior: 'smooth' });
+    const targetLeft = activeButton.offsetLeft + activeButton.offsetWidth / 2 - nav.clientWidth / 2;
+    const maxScroll = nav.scrollWidth - nav.clientWidth;
+    nav.scrollTo({ left: Math.max(0, Math.min(targetLeft, maxScroll)), behavior: 'smooth' });
   }, [active]);
   const [stageHeight, setStageHeight] = useState<number | null>(null);
   useEffect(() => {
