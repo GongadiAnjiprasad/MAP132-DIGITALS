@@ -181,10 +181,12 @@ test('swiping updates a clearly selected page in both navigation indicators', as
       headerBackground: getComputedStyle(header).backgroundImage,
       headerBorder: getComputedStyle(header).borderTopColor,
       pagerBackground: getComputedStyle(pager).backgroundImage,
-      pagerText: getComputedStyle(pager).color,
     };
   });
   expect(styles.headerBackground).not.toBe('none');
   expect(styles.pagerBackground).not.toBe('none');
-  expect(styles.pagerText).toBe('rgb(23, 19, 13)');
+  // The active pager animates its text colour; wait for the transition to finish.
+  await expect.poll(() => page.locator('.ms-pagination button.active').evaluate(
+    element => getComputedStyle(element).color,
+  )).toBe('rgb(23, 19, 13)');
 });
