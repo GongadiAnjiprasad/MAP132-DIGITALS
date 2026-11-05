@@ -108,6 +108,7 @@ $('pixabayResults').addEventListener('click',e=>{
  if(button.dataset.pixPreview){const modal=$('previewModal');$('previewTitle').textContent=item.title;let media;if(item.kind==='video'){media=document.createElement('video');media.controls=true;media.playsInline=true}else{media=document.createElement('img');media.alt=item.title;media.style.maxWidth='100%';media.style.maxHeight='65vh';media.style.display='block';media.style.margin='auto'}media.className='preview';media.src=item.previewUrl;$('previewArea').replaceChildren(media);modal.classList.remove('hidden');}
  if(button.dataset.pixSave){data.items.unshift({id:'pixabay-'+item.id+'-'+Date.now().toString(36),title:item.title,category:'stock',url:item.sourceUrl,preview:item.previewUrl,license:item.licence,genre:item.tags,notes:'By '+item.creator+' · '+item.width+' × '+item.height+(item.duration?' · '+item.duration+' sec':''),kind:item.kind,favorite:false,collections:[],created:new Date().toISOString()});persist();button.textContent='✓ Saved';button.disabled=true;}
 });
-\nupdateCollectionSelect();updateStats();setView('all');
+
+updateCollectionSelect();updateStats();setView('all');
 })();
 </script></body></html>
