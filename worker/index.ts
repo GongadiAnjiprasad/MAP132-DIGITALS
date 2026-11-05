@@ -138,7 +138,8 @@ if(path==='/api/resources/pixabay'&&method==='GET'){
   await env.MAP132_KV.put(cacheKey,JSON.stringify(payload),{expirationTtl:86400});
   return json(payload,200,{'X-Resource-Cache':'MISS'});
 }
-\nif(path==='/api/_healthcheck')return json({message:'Success'});
+
+if(path==='/api/_healthcheck')return json({message:'Success'});
 if(path==='/api/enquiries'&&method==='POST'){
    if(!env.MAP132_KV)return json({error:'Enquiry storage is not configured.'},503);
    let body:any;try{body=await req.json();}catch{return json({error:'Invalid enquiry data.'},400);}
