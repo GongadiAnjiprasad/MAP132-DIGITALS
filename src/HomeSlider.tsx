@@ -105,7 +105,9 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     if (!nav || window.innerWidth > 760) return;
     const activeButton = nav.querySelector<HTMLElement>('.ms-nav button.active');
     if (!activeButton) return;
-    const targetLeft = activeButton.offsetLeft + activeButton.offsetWidth / 2 - nav.clientWidth / 2;
+    const navRect = nav.getBoundingClientRect();
+    const buttonRect = activeButton.getBoundingClientRect();
+    const targetLeft = nav.scrollLeft + buttonRect.left - navRect.left + buttonRect.width / 2 - nav.clientWidth / 2;
     const maxScroll = nav.scrollWidth - nav.clientWidth;
     nav.scrollTo({ left: Math.max(0, Math.min(targetLeft, maxScroll)), behavior: 'smooth' });
   }, [active]);
