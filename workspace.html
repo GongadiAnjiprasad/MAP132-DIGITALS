@@ -211,4 +211,5 @@
 // Switch the two resource libraries in-place without scrolling the workspace.
 (()=>{const buttons=[...document.querySelectorAll('[data-resource-view]')],panels=[...document.querySelectorAll('[data-resource-panel]')];if(!buttons.length||!panels.length)return;function show(view){buttons.forEach(b=>{const active=b.dataset.resourceView===view;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});panels.forEach(p=>{p.hidden=p.dataset.resourcePanel!==view})}document.querySelector('.resource-switcher').addEventListener('click',e=>{const b=e.target.closest('[data-resource-view]');if(b)show(b.dataset.resourceView)});show('sounds')})();
 </script><!-- MAP132 production deploy trigger: 2026-11-05 --><!-- MAP132 resource capsule deploy trigger 2026-11-05 --><!-- MAP132 minimal segmented switcher deploy trigger 2026-11-05 -->
+<!-- MAP132 Telugu preview fix deploy trigger 2026-11-05 -->
 </body></html>
