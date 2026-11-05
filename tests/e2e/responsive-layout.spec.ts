@@ -43,7 +43,7 @@ for (const viewport of viewports) {
     expect(contactMetrics.body, `body overflow on Contact: ${JSON.stringify(contactMetrics)}`)
       .toBeLessThanOrEqual(viewport.width + 2);
 
-    await expect(page.locator('.ms-film-enquiry form').locator('input[name="name"])).toBeVisible();
+    await expect(page.locator(".ms-film-enquiry form").locator("input[name='name']")).toBeVisible();
     await expect(page.locator('.ms-film-enquiry form').getByRole('button', { name: 'Submit Enquiry' })).toBeVisible();
   });
 }
