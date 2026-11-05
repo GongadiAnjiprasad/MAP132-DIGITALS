@@ -20,7 +20,7 @@
 | M09 | Admin — Workspace Resource Library | `WorkspaceLibrary` in `src/App.tsx`; content resources persisted via Worker | Add/edit resource metadata where supported; classify audio/video/image/template/font; preview/open source; delete resources; retain licence notes |
 | M10 | Admin — Client Enquiries | `AdminApp` enquiries tab in `src/App.tsx`; `/api/enquiries` and `/api/admin/enquiries` in Worker | Receive public enquiry; validate fields; store in KV; protected admin can view and delete enquiry |
 | M11 | Cinematic Logo / Motion Studio | `TitleMotionStudio` in `src/App.tsx` | Preview logo intro styles; choose aspect ratio/resolution; render a local WebM with synthesized sound; download result |
-| M12 | Festival / Seasonal Atmosphere | `IndianFestivalAtmosphere` and curated `MAP132_FESTIVALS` in `src/App.tsx` | Show time-windowed seasonal effect/greeting; generate greeting poster; optional share flow |
+| M12 | Festival / Seasonal Atmosphere | `src/modules/seasonal/IndianFestivalAtmosphere.tsx`; mounted by `PublicSite` in `src/App.tsx` | Show time-windowed seasonal effect/greeting; generate greeting poster; optional share flow |
 | M13 | Workspace SFX Catalogue | SFX markup and script in `workspace.html` (mirrored in `public/workspace.html`); proxy endpoints in `worker/index.ts` | Search sound effects; filter allowed licences; preview; download only eligible source files; handle provider/key errors |
 | M14 | Cinematic Fonts Catalogue | Font data, preview and script in `workspace.html` (mirrored in `public/workspace.html`) | Browse English/Telugu font categories; live sample preview; search; save favourites locally; download font files |
 | M15 | API / Data Persistence / Media Storage | `src/api.ts`, `worker/index.ts`, `wrangler.toml` | Read public portfolio; persist admin content; store enquiries in KV; upload/serve media through R2 when configured; expose health endpoint; validate inputs |
@@ -70,6 +70,7 @@ This is the destination for gradual extraction. Do not move everything in one ri
 src/
   app/                 # bootstrap, route selection, shared shell
   modules/
+    seasonal/          # M12 festival atmosphere (first extracted module)
     home/              # M01 public Home / slider
     portfolio/         # M02 public media presentation
     workspace/         # M03 React workspace library
@@ -119,5 +120,6 @@ For each user story, record:
 - `src/App.tsx` is a large combined file containing public/admin/workspace components and multiple features. The register above describes logical modules, not yet separate build bundles.
 - The static workspace HTML is about 41 KB and includes the SFX and font catalogues in one document. They are logical modules but not separate source files yet.
 - `src/HomeSlider.tsx` and `src/HomeSlider.css` are already separate from `App.tsx`.
+- M12 Festival / Seasonal Atmosphere has now been extracted into `src/modules/seasonal/IndianFestivalAtmosphere.tsx`; the existing mount point and visual behaviour are preserved.
 - Existing tests include swipe navigation, responsive layout and swipe gesture unit coverage. Expand them with module-specific tests before extracting/refactoring.
 - The Worker uses Cloudflare KV for content/enquiries and optionally R2 for media; secrets/bindings are configured outside this document in Cloudflare.
