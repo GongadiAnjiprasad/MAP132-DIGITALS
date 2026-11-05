@@ -1338,3 +1338,14 @@
     object-fit: contain;
   }
 }
+
+
+/* Light-theme readability fix for Contact page's three process steps only. */
+.map132-slider-site[data-theme="light"] .ms-contact-steps span {
+  color: #51493e;
+  font-weight: 500;
+}
+.map132-slider-site[data-theme="light"] .ms-contact-steps span b {
+  color: #93601f;
+  font-weight: 700;
+}
