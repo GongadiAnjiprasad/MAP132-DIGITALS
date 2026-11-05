@@ -24,6 +24,7 @@ for (const viewport of viewports) {
       viewport: window.innerWidth,
       document: document.documentElement.scrollWidth,
       body: document.body.scrollWidth,
+      homeColumns: getComputedStyle(document.querySelector('.ms-home-page')!).gridTemplateColumns,
     }));
     expect(homeMetrics.document, `horizontal overflow on Home: ${JSON.stringify(homeMetrics)}`)
       .toBeLessThanOrEqual(viewport.width + 2);
