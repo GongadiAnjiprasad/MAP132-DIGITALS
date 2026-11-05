@@ -155,3 +155,36 @@ test('page 5 enquiry panel scrolls vertically with a finger without changing pag
   await expect.poll(() => contactPage.evaluate(el => el.scrollTop)).toBeGreaterThan(before + 20);
   await expect(page.locator('.ms-track')).toHaveAttribute('style', /translateX\(-400%\)/);
 });
+
+
+test('swiping updates a clearly selected page in both navigation indicators', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const headerActive = page.locator('.ms-nav button.active');
+  const pagerActive = page.locator('.ms-pagination button.active');
+
+  await expect(headerActive).toHaveText('Home');
+  await expect(headerActive).toHaveAttribute('aria-current', 'page');
+  await expect(pagerActive).toContainText('01');
+
+  await dispatchTouchSwipe(page, '.ms-home-copy', 'left');
+
+  await expect(page.locator('.ms-nav button.active')).toHaveText('Selected Work');
+  await expect(page.locator('.ms-nav button.active')).toHaveAttribute('aria-current', 'page');
+  await expect(page.locator('.ms-pagination button.active')).toContainText('02');
+
+  const styles = await page.evaluate(() => {
+    const header = document.querySelector<HTMLElement>('.ms-nav button.active');
+    const pager = document.querySelector<HTMLElement>('.ms-pagination button.active');
+    if (!header || !pager) throw new Error('Active page indicators are missing');
+    return {
+      headerBackground: getComputedStyle(header).backgroundColor,
+      headerBorder: getComputedStyle(header).borderTopColor,
+      pagerBackground: getComputedStyle(pager).backgroundImage,
+      pagerText: getComputedStyle(pager).color,
+    };
+  });
+  expect(styles.headerBackground).not.toBe('rgba(0, 0, 0, 0)');
+  expect(styles.pagerBackground).not.toBe('none');
+  expect(styles.pagerText).toBe('rgb(23, 19, 13)');
+});
