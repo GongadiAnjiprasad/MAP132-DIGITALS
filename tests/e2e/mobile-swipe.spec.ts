@@ -105,7 +105,7 @@ test('mobile swipe changes the showcase video in the preview modal', async ({ pa
 
   await dispatchTouchSwipe(page, '.ms-preview-player', 'left');
 
-  await expect(dialog.locator('h2')).toHaveText('Wedding & Events');
+  await expect(dialog.locator('h2')).toHaveText('Wedding & Celebrations');
 });
 
 test('cinematic enquiry form submits in-page and shows confirmation without opening external links', async ({ page }) => {
