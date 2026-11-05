@@ -107,7 +107,16 @@ test('page 5 enquiry panel scrolls vertically with a finger without changing pag
   const contactPage = page.locator('.ms-page').nth(4);
   const enquiry = page.locator('.ms-film-enquiry');
   await enquiry.scrollIntoViewIfNeeded();
-  const before = await contactPage.evaluate(el => el.scrollTop);
+  const metrics = await contactPage.evaluate(el => ({
+    scrollTop: el.scrollTop,
+    scrollHeight: el.scrollHeight,
+    clientHeight: el.clientHeight,
+    overflowY: getComputedStyle(el).overflowY,
+    panelHeight: el.querySelector('.ms-film-enquiry')?.getBoundingClientRect().height,
+    panelTop: el.querySelector('.ms-film-enquiry')?.getBoundingClientRect().top,
+  }));
+  console.log('PAGE5_ENQUIRY_SCROLL_METRICS', JSON.stringify(metrics));
+  const before = metrics.scrollTop;
   await dispatchTouchSwipe(page, '.ms-film-enquiry', 'up');
   await expect.poll(() => contactPage.evaluate(el => el.scrollTop)).toBeGreaterThan(before + 20);
   await expect(page.locator('.ms-track')).toHaveAttribute('style', /translateX\(-400%\)/);
