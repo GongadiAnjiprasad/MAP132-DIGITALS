@@ -66,7 +66,7 @@ test('Android desktop-site viewport keeps content top-led, readable and balanced
       const intro = page.querySelector('.ms-intro')!;
       const style = getComputedStyle(page);
       return {
-        columns: style.gridTemplateColumns.trim().split(/\\s+/).length,
+        columns: style.gridTemplateColumns.trim().split(/\s+/).length,
         alignContent: style.alignContent,
         headingSize: parseFloat(getComputedStyle(heading).fontSize),
         introSize: parseFloat(getComputedStyle(intro).fontSize),
