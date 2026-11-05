@@ -110,7 +110,7 @@ if(path==='/api/enquiries'&&method==='POST'){
    const name=String(body.name||'').trim(),email=String(body.email||'').trim(),phone=String(body.phone||'').trim(),service=String(body.service||'').trim(),details=String(body.details||'').trim();
    if(!name||!email||!phone||!service)return json({error:'Please complete all required fields.'},400);
    if(name.length>120||email.length>254||phone.length>40||service.length>180||details.length>4000)return json({error:'One or more fields are too long.'},400);
-   if(!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email))return json({error:'Please enter a valid email address.'},400);
+   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return json({error:'Please enter a valid email address.'},400);
    const id=Date.now().toString(36)+'-'+crypto.randomUUID();
    const entry={id,name,email,phone,service,details,createdAt:new Date().toISOString(),status:'new'};
    await env.MAP132_KV.put('enquiries/'+id,JSON.stringify(entry));
