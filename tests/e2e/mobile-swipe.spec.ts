@@ -151,7 +151,8 @@ test('page 5 enquiry panel scrolls vertically with a finger without changing pag
   }));
   console.log('PAGE5_ENQUIRY_SCROLL_METRICS', JSON.stringify(metrics));
   const before = metrics.scrollTop;
-  await dispatchTouchSwipe(page, '.ms-film-enquiry', 'up');
+  // Start inside the visible enquiry heading; the full panel extends below the viewport.
+  await dispatchTouchSwipe(page, '.ms-film-enquiry-heading', 'up');
   await expect.poll(() => contactPage.evaluate(el => el.scrollTop)).toBeGreaterThan(before + 20);
   await expect(page.locator('.ms-track')).toHaveAttribute('style', /translateX\(-400%\)/);
 });
