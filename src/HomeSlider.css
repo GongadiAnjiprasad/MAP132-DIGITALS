@@ -1300,3 +1300,17 @@
 @media(max-width:1100px){.ms-header{gap:12px}.ms-nav{gap:clamp(8px,1.2vw,16px)}}
 @media(max-width:760px){.ms-header{gap:7px}.ms-nav{flex:1 1 auto;min-width:0;justify-content:flex-start}.ms-theme-toggle{min-height:34px;width:36px;padding:0;gap:0}.ms-theme-toggle span{display:none}}
 @media(prefers-reduced-motion:reduce){.map132-slider-site,.ms-theme-toggle{transition:none}}
+
+/* Compact tablet header: keep the added theme control from widening 761–899px layouts. */
+@media (min-width: 761px) and (max-width: 899px) {
+  .map132-slider-site { overflow-x: clip; }
+  .ms-header { padding-left: 16px; padding-right: 16px; gap: 8px; }
+  .ms-brand { min-width: 145px; gap: 8px; }
+  .ms-brand img { width: 46px; height: 42px; }
+  .ms-brand b { font-size: 14px; }
+  .ms-brand small { font-size: 7px; letter-spacing: 1px; }
+  .ms-nav { flex: 1 1 auto; min-width: 0; gap: 8px; }
+  .ms-nav button { font-size: 10px; }
+  .ms-theme-toggle { min-height: 36px; width: 36px; padding: 0; gap: 0; }
+  .ms-theme-toggle span { display: none; }
+}
