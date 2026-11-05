@@ -94,9 +94,8 @@ test('desktop-site viewport stage follows the active page content height', async
   await page.goto('/');
   const measure = () => page.evaluate(() => {
     const stage = document.querySelector('.ms-stage') as HTMLElement;
-    const active = stage.querySelectorAll<HTMLElement>('.ms-page')[Number(
-      getComputedStyle(document.querySelector('.ms-track')!).transform.match(/matrix\\([^,]+, [^,]+, [^,]+, [^,]+, (-?[\\d.]+)/)?.[1] || 0
-    )] || stage.querySelector('.ms-page') as HTMLElement;
+    const activeIndex = Array.from(document.querySelectorAll('.ms-nav button')).findIndex(button => button.classList.contains('active'));
+    const active = stage.querySelectorAll<HTMLElement>('.ms-page')[Math.max(0, activeIndex)];
     return { stage: stage.clientHeight, content: active.scrollHeight };
   });
   await expect.poll(async () => {
