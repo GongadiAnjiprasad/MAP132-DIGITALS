@@ -571,3 +571,139 @@
     touch-action: pan-y;
   }
 }
+
+
+/* MAP132 DIGITALS — cinematic editor-suite enquiry frame refresh.
+   Visual-only overrides: preserve form markup, API submission and native touch scrolling. */
+.ms-film-enquiry{
+  position:relative;
+  isolation:isolate;
+  overflow:hidden;
+  padding:clamp(22px,2.5vw,34px) clamp(25px,3vw,40px);
+  border:1px solid rgba(226,190,119,.58);
+  border-radius:14px;
+  background:
+    radial-gradient(ellipse at 88% 4%,rgba(224,177,99,.15),transparent 34%),
+    linear-gradient(145deg,#1b1c20 0%,#11151c 48%,#0b0e14 100%);
+  box-shadow:0 30px 85px rgba(0,0,0,.52),0 0 0 1px rgba(255,255,255,.035),inset 0 1px 0 rgba(255,255,255,.09),inset 0 0 48px rgba(222,180,104,.035);
+}
+.ms-film-enquiry::before,
+.ms-film-enquiry::after{
+  content:"";
+  position:absolute;
+  z-index:-1;
+  left:24px;
+  right:24px;
+  width:auto;
+  height:9px;
+  border-radius:2px;
+  background:repeating-linear-gradient(90deg,rgba(224,190,125,.72) 0 10px,transparent 10px 22px);
+  opacity:.34;
+  pointer-events:none;
+}
+.ms-film-enquiry::before{top:0;bottom:auto}
+.ms-film-enquiry::after{top:auto;bottom:0}
+.ms-film-enquiry-heading{
+  position:relative;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+  padding:3px 0 17px;
+  margin:0 0 15px;
+  border-bottom:1px solid rgba(224,190,125,.28);
+  color:#edca88;
+}
+.ms-film-enquiry-heading::after{
+  content:"REC  ●   PROJECT BRIEF";
+  display:block;
+  margin-left:auto;
+  color:#a9a49a;
+  font:700 8px/1.2 'Manrope',sans-serif;
+  letter-spacing:1.45px;
+  white-space:nowrap;
+}
+.ms-film-enquiry-heading span{
+  font:800 10px/1.4 'Manrope',sans-serif;
+  letter-spacing:1.65px;
+}
+.ms-film-enquiry-heading svg{
+  flex:0 0 auto;
+  width:34px;
+  height:34px;
+  padding:8px;
+  border:1px solid rgba(224,190,125,.32);
+  border-radius:9px;
+  background:linear-gradient(145deg,rgba(224,190,125,.16),rgba(255,255,255,.025));
+}
+.ms-film-enquiry form{gap:14px;margin-top:0}
+.ms-film-enquiry label{
+  gap:7px;
+  color:#d8d4cb;
+  font:700 10px/1.4 'Manrope',sans-serif;
+  letter-spacing:.55px;
+}
+.ms-film-enquiry input,
+.ms-film-enquiry select,
+.ms-film-enquiry textarea{
+  min-height:45px;
+  border:1px solid rgba(214,196,158,.2);
+  border-radius:7px;
+  background:linear-gradient(180deg,#090d13,#0d1118);
+  color:#f6f1e7;
+  padding:12px 13px;
+  font:500 13px/1.5 'Manrope',sans-serif;
+  box-shadow:inset 0 1px 3px rgba(0,0,0,.35);
+  transition:border-color .2s,box-shadow .2s,background .2s;
+}
+.ms-film-enquiry textarea{min-height:92px;resize:vertical}
+.ms-film-enquiry input::placeholder,
+.ms-film-enquiry textarea::placeholder{color:#777b80}
+.ms-film-enquiry input:focus,
+.ms-film-enquiry select:focus,
+.ms-film-enquiry textarea:focus{
+  border-color:#dfb86f;
+  background:#0d121a;
+  box-shadow:0 0 0 3px rgba(223,184,111,.11),inset 0 1px 3px rgba(0,0,0,.25);
+}
+.ms-film-enquiry .ms-enquiry-submit{
+  min-height:49px;
+  border:1px solid rgba(255,231,183,.55);
+  border-radius:8px;
+  background:linear-gradient(105deg,#d3a65d,#f0d49a 48%,#c28d42);
+  color:#17130d;
+  font:800 11px/1.2 'Manrope',sans-serif;
+  letter-spacing:1.15px;
+  box-shadow:0 9px 24px rgba(190,143,69,.2),inset 0 1px 0 rgba(255,255,255,.55);
+  transition:transform .2s,filter .2s,box-shadow .2s;
+}
+.ms-film-enquiry .ms-enquiry-submit:hover:not(:disabled){
+  transform:translateY(-2px);
+  filter:brightness(1.07);
+  box-shadow:0 13px 28px rgba(190,143,69,.28),inset 0 1px 0 rgba(255,255,255,.6);
+}
+.ms-film-enquiry>small{
+  display:block;
+  padding-top:13px;
+  border-top:1px solid rgba(224,190,125,.16);
+  color:#a9a397;
+  font-size:9px;
+  line-height:1.7;
+}
+.ms-film-enquiry .ms-enquiry-success{
+  padding:24px 2px 18px;
+}
+@media(max-width:760px){
+  .ms-film-enquiry{padding:22px 25px;border-radius:12px}
+  .ms-film-enquiry-heading{padding-bottom:14px;margin-bottom:13px}
+  .ms-film-enquiry-heading::after{font-size:7px;letter-spacing:1px}
+  .ms-film-enquiry form{gap:13px}
+  .ms-film-enquiry input,.ms-film-enquiry select,.ms-film-enquiry textarea{font-size:14px;min-height:46px}
+}
+@media(max-width:380px){
+  .ms-film-enquiry{padding:20px 22px}
+  .ms-film-enquiry-heading::after{display:none}
+}
+@media(prefers-reduced-motion:reduce){
+  .ms-film-enquiry input,.ms-film-enquiry select,.ms-film-enquiry textarea,.ms-film-enquiry .ms-enquiry-submit{transition:none}
+}
