@@ -779,13 +779,13 @@
 /* Android Chrome "Desktop site" commonly reports a 761–1100px CSS viewport.
    Keep the desktop composition, readable type and top-led content flow there,
    instead of squeezing everything into a narrow tablet stack with large voids. */
-@media (min-width: 761px) and (max-width: 1100px) {
+@media (min-width: 900px) and (max-width: 1100px) {
   .ms-page {
     align-content: start;
     padding-top: clamp(18px, 2vh, 30px);
     padding-bottom: clamp(18px, 2vh, 30px);
   }
-  .ms-home-page {
+  .ms-page.ms-home-page {
     display: grid;
     grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr);
     align-items: start;
