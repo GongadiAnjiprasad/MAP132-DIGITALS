@@ -888,3 +888,94 @@
     align-items: start;
   }
 }
+
+
+/* Clear active-page feedback: strong contrast in both the header and bottom pager. */
+.ms-nav button{
+  position:relative;
+  min-height:38px;
+  padding:9px 13px;
+  border:1px solid transparent;
+  border-radius:999px;
+  color:#c7c8cc;
+  font-weight:600;
+  transition:color .2s,background .2s,border-color .2s,box-shadow .2s;
+}
+.ms-nav button.active{
+  color:#ffe4ad;
+  font-weight:800;
+  background:linear-gradient(135deg,rgba(232,199,122,.24),rgba(232,199,122,.10));
+  border-color:rgba(245,220,167,.78);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.12),0 0 0 3px rgba(232,199,122,.08),0 5px 18px rgba(0,0,0,.22);
+}
+.ms-nav button.active::before{
+  content:"";
+  width:6px;
+  height:6px;
+  flex:0 0 6px;
+  border-radius:50%;
+  background:#ffe2a1;
+  box-shadow:0 0 9px rgba(255,226,161,.85);
+}
+.ms-nav button:focus-visible,
+.ms-pagination button:focus-visible{
+  outline:2px solid #fff;
+  outline-offset:3px;
+}
+.ms-pagination button{
+  display:grid;
+  place-items:center;
+  width:30px;
+  height:30px;
+  border:1px solid rgba(255,255,255,.22);
+  border-radius:50%;
+  background:rgba(255,255,255,.035);
+  color:#c2c3c7;
+  font-size:10px;
+  font-weight:700;
+  transition:width .2s,height .2s,color .2s,background .2s,border-color .2s,box-shadow .2s;
+}
+.ms-pagination button.active{
+  width:36px;
+  height:36px;
+  border:1px solid #ffe2a1;
+  background:linear-gradient(145deg,#f5dca7,#d6ad68);
+  color:#17130d;
+  font-size:11px;
+  font-weight:900;
+  box-shadow:0 0 0 4px rgba(232,199,122,.13),0 5px 16px rgba(0,0,0,.32);
+}
+.ms-current-label{
+  display:inline-flex;
+  align-items:center;
+  gap:5px;
+  min-height:34px;
+  padding:7px 11px;
+  border:1px solid rgba(232,199,122,.38);
+  border-radius:999px;
+  background:rgba(232,199,122,.09);
+  color:#f0dfbd;
+  font-size:10px;
+  font-weight:700;
+  letter-spacing:.45px;
+}
+.ms-current-label i{color:#f5dca7}
+@media(max-width:760px){
+  .ms-nav{gap:7px}
+  .ms-nav button{min-height:34px;padding:7px 9px;font-size:10px}
+  .ms-nav button.active{padding:7px 10px}
+  .ms-nav button.active::before{width:5px;height:5px;flex-basis:5px}
+  .ms-pagination{gap:4px}
+  .ms-pagination button{width:27px;height:27px;font-size:9px}
+  .ms-pagination button.active{width:32px;height:32px;font-size:10px}
+  .ms-current-label{min-height:30px;padding:6px 8px;font-size:9px}
+}
+@media(max-width:420px){
+  .ms-nav{gap:4px}
+  .ms-nav button{padding:6px 7px;font-size:9px}
+  .ms-nav button.active{padding:6px 8px}
+  .ms-pagination{gap:2px}
+  .ms-pagination button{width:24px;height:24px}
+  .ms-pagination button.active{width:29px;height:29px}
+  .ms-current-label{padding:5px 7px;font-size:8px}
+}
