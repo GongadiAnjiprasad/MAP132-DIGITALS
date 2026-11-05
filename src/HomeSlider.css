@@ -1114,3 +1114,19 @@
     outline-offset: 4px;
   }
 }
+
+
+/* Desktop navigation arrows fade away after inactivity; pointer/keyboard activity reveals them. */
+@media (min-width: 761px) {
+  .ms-controls .ms-arrow {
+    transition: opacity .35s ease, transform .22s ease, background .22s ease, color .22s ease;
+  }
+  .ms-nav-arrows-hidden .ms-controls .ms-arrow {
+    opacity: 0;
+    pointer-events: none;
+  }
+  .ms-nav-arrows-hidden .ms-controls .ms-arrow:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
