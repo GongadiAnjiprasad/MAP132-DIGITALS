@@ -102,6 +102,33 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 
 export default function HomeSlider({ content }: { content: HomeContent }) {
   const [active, setActive] = useState(0);
+  const stageRef = useRef<HTMLElement | null>(null);
+  const [stageHeight, setStageHeight] = useState<number | null>(null);
+  useEffect(() => {
+    const stage = stageRef.current;
+    if (!stage) return;
+    let observer: ResizeObserver | null = null;
+    const update = () => {
+      observer?.disconnect();
+      observer = null;
+      if (window.innerWidth <= 760) {
+        setStageHeight(null);
+        return;
+      }
+      const page = stage.querySelectorAll<HTMLElement>('.ms-page')[active];
+      if (!page) return;
+      const measure = () => setStageHeight(Math.ceil(page.scrollHeight));
+      measure();
+      observer = new ResizeObserver(measure);
+      observer.observe(page);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', update);
+    };
+  }, [active, content.items, content.skills]);
   const [activePreview, setActivePreview] = useState<number | null>(null);
   const [enquirySubmitted, setEnquirySubmitted] = useState(false);
   const [enquiryBusy, setEnquiryBusy] = useState(false);
@@ -206,7 +233,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       </nav>
     </header>
 
-    <main className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointerStart.current = null; }} onClickCapture={onClickCapture} onWheel={onWheel}>
+    <main ref={stageRef} style={stageHeight ? { height: stageHeight + "px" } : undefined} className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointerStart.current = null; }} onClickCapture={onClickCapture} onWheel={onWheel}>
       <div className="ms-track" style={{ transform: `translateX(-${active * 100}%)` }}>
         <section className="ms-page ms-home-page" aria-label="Home">
           <div className="ms-home-copy">

@@ -815,3 +815,18 @@
   .ms-contact-panel input, .ms-contact-panel select, .ms-contact-panel textarea { font-size: 14px; }
   .ms-nav button, .ms-nav a { font-size: 12px; }
 }
+
+
+/* Fluid viewport layout: let the active slide define the stage height.
+   This removes the forced 100svh page box while preserving horizontal slide navigation. */
+.map132-slider-site{height:auto;min-height:100svh;overflow:visible}
+.ms-stage{flex:0 0 auto;height:auto;min-height:0;overflow:hidden}
+.ms-track{height:100%;align-items:flex-start}
+.ms-page{height:auto;min-height:calc(100svh - 162px);overflow:visible;align-content:start}
+.ms-home-page,.ms-contact-page{align-items:start}
+@media(max-width:760px){
+ /* Preserve native in-page touch scrolling on narrow mobile layouts. */
+ .map132-slider-site{height:100svh;min-height:0;overflow:hidden}
+ .ms-stage{height:auto;min-height:0;flex:1 1 auto;overflow:hidden}
+ .ms-page{height:100%;min-height:0;overflow-y:auto;overflow-x:hidden}
+}
