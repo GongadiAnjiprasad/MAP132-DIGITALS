@@ -774,3 +774,20 @@
   .ms-pagination button{width:22px}
   .ms-current-label{font-size:8px}
 }
+
+
+/* Balance unused vertical space across the content pages without changing
+   their visual components. When content exceeds the viewport, pages retain
+   their natural height and scroll normally. */
+.ms-work-page,
+.ms-services-page,
+.ms-studio-page {
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+}
+.ms-work-page > *,
+.ms-services-page > *,
+.ms-studio-page > * {
+  flex: 0 0 auto;
+}
