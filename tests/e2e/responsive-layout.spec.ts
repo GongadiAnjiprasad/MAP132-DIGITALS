@@ -31,7 +31,7 @@ for (const viewport of viewports) {
     expect(homeMetrics.body, `body overflow on Home: ${JSON.stringify(homeMetrics)}`)
       .toBeLessThanOrEqual(viewport.width + 2);
     if (viewport.width > 760 && viewport.width <= 1100) {
-      expect(homeMetrics.homeColumns.trim().split(/\\s+/), `tablet/desktop-mode Home should use one column: ${JSON.stringify(homeMetrics)}`)
+      expect(homeMetrics.homeColumns.trim().split(/\s+/), `tablet/desktop-mode Home should use one column: ${JSON.stringify(homeMetrics)}`)
         .toHaveLength(1);
     }
 
