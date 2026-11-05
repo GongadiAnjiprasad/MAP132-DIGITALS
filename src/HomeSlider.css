@@ -1071,3 +1071,46 @@
   .ms-contact-links{gap:8px}
   .ms-contact-links a{min-height:36px;padding:8px 13px}
 }
+
+
+/* Desktop page navigation: keep the existing bottom pager and reveal clear side arrows. */
+@media (min-width: 761px) {
+  .ms-controls .ms-arrow,
+  .ms-controls .ms-arrow:first-child,
+  .ms-controls .ms-arrow.ms-next {
+    position: fixed;
+    top: 50%;
+    z-index: 30;
+    width: 48px;
+    height: 48px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(245,220,167,.82);
+    border-radius: 50%;
+    background: linear-gradient(145deg, rgba(42,34,22,.96), rgba(8,11,16,.96));
+    color: #f5dca7;
+    box-shadow: 0 8px 26px rgba(0,0,0,.42), 0 0 0 4px rgba(232,199,122,.09);
+    opacity: .94;
+    transform: translateY(-50%);
+    backdrop-filter: blur(8px);
+  }
+  .ms-controls .ms-arrow:first-child { left: clamp(12px, 2vw, 28px); }
+  .ms-controls .ms-arrow.ms-next { right: clamp(12px, 2vw, 28px); }
+  .ms-controls .ms-arrow:hover:not(:disabled) {
+    transform: translateY(-50%) scale(1.08);
+    background: linear-gradient(145deg, #f5dca7, #d6a84f);
+    color: #101114;
+    opacity: 1;
+  }
+  .ms-controls .ms-arrow:active:not(:disabled) {
+    transform: translateY(-50%) scale(.96);
+  }
+  .ms-controls .ms-arrow:disabled {
+    opacity: .24;
+    cursor: default;
+  }
+  .ms-controls .ms-arrow:focus-visible {
+    outline: 3px solid #fff;
+    outline-offset: 4px;
+  }
+}
