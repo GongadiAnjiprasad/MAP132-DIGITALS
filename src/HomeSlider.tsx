@@ -106,13 +106,28 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   const [stageHeight, setStageHeight] = useState<number | null>(null);
   useEffect(() => {
     const stage = stageRef.current;
-    const page = stage?.querySelectorAll<HTMLElement>('.ms-page')[active];
-    if (!page) return;
-    const measure = () => setStageHeight(Math.ceil(page.scrollHeight));
-    measure();
-    const observer = new ResizeObserver(measure);
-    observer.observe(page);
-    return () => observer.disconnect();
+    if (!stage) return;
+    let observer: ResizeObserver | null = null;
+    const update = () => {
+      observer?.disconnect();
+      observer = null;
+      if (window.innerWidth <= 760) {
+        setStageHeight(null);
+        return;
+      }
+      const page = stage.querySelectorAll<HTMLElement>('.ms-page')[active];
+      if (!page) return;
+      const measure = () => setStageHeight(Math.ceil(page.scrollHeight));
+      measure();
+      observer = new ResizeObserver(measure);
+      observer.observe(page);
+    };
+    update();
+    window.addEventListener('resize', update);
+    return () => {
+      observer?.disconnect();
+      window.removeEventListener('resize', update);
+    };
   }, [active, content.items, content.skills]);
   const [activePreview, setActivePreview] = useState<number | null>(null);
   const [enquirySubmitted, setEnquirySubmitted] = useState(false);
