@@ -203,7 +203,6 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       </a>
       <nav className="ms-nav" aria-label="Main navigation">
         {pages.map((page, index) => <button key={page} type="button" className={active === index ? 'active' : ''} onClick={() => goTo(index)}>{page}</button>)}
-        <a href="#workspace" className="ms-workspace"><Film size={14}/> Editor Workspace</a>
       </nav>
     </header>
 
@@ -316,6 +315,6 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       <span className="ms-current-label">{String(active+1).padStart(2,'0')} <i>/</i> {String(pages.length).padStart(2,'0')} · {pages[active]}</span>
       <button type="button" className="ms-arrow ms-next" aria-label="Next page" onClick={() => goTo(active + 1)} disabled={active === pages.length - 1}><ArrowRight size={19}/></button>
     </div>
-    <footer className="ms-footer"><span>© {new Date().getFullYear()} {p.name || 'MAP132 DIGITALS'}</span><span>EVERY FRAME HAS A STORY.</span><a href="#workspace">OPEN EDITOR WORKSPACE <ArrowRight size={12}/></a></footer>
+    <footer className="ms-footer"><span>© {new Date().getFullYear()} MAP132 DIGITALS</span></footer>
   </div>;
 }
