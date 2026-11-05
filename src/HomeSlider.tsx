@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, type PointerEvent, type WheelEvent, type MouseEvent } from 'react';
 import {
   ArrowLeft, ArrowRight, Camera, Check, Film, Instagram, Mail, MessageCircle,
-  Play, Sparkles, Youtube, Facebook, Linkedin, Send, X
+  Play, Sparkles, Youtube, Facebook, Linkedin, Send, X, Sun, Moon
 } from 'lucide-react';
 import DemoShowcase from './DemoShowcase';
 import { api } from './api';
@@ -98,6 +98,20 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 
 export default function HomeSlider({ content }: { content: HomeContent }) {
   const [active, setActive] = useState(0);
+  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
+    try {
+      return window.localStorage.getItem('map132-theme') === 'light' ? 'light' : 'dark';
+    } catch {
+      return 'dark';
+    }
+  });
+  useEffect(() => {
+    try {
+      window.localStorage.setItem('map132-theme', theme);
+    } catch {
+      // The theme still works for this visit when browser storage is unavailable.
+    }
+  }, [theme]);
   const [desktopArrowsVisible, setDesktopArrowsVisible] = useState(true);
   const arrowHideTimer = useRef<number | null>(null);
   useEffect(() => {
@@ -253,7 +267,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     { label: 'Email', href: p.email ? 'mailto:' + p.email : '', icon: <Mail size={16}/> }
   ].filter(link => link.href);
 
-  return <div className={`map132-slider-site ${desktopArrowsVisible ? "" : "ms-nav-arrows-hidden"}`}>
+  return <div data-theme={theme} className={`map132-slider-site ${desktopArrowsVisible ? "" : "ms-nav-arrows-hidden"}`}>
     <header className="ms-header">
       <a className="ms-brand" href="#top" onClick={e => { e.preventDefault(); goTo(0); }}>
         <img src="/resources/logo-removebg-preview.png" alt="MAP132 DIGITALS"/>
@@ -262,6 +276,17 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       <nav ref={navRef} className="ms-nav" aria-label="Main navigation">
         {pages.map((page, index) => <button key={page} type="button" className={active === index ? 'active' : ''} aria-current={active === index ? 'page' : undefined} onClick={() => goTo(index)}>{page}</button>)}
       </nav>
+      <button
+        type="button"
+        className="ms-theme-toggle"
+        aria-label={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+        aria-pressed={theme === 'light'}
+        title={theme === 'dark' ? 'Switch to light theme' : 'Switch to dark theme'}
+        onClick={() => setTheme(current => current === 'dark' ? 'light' : 'dark')}
+      >
+        {theme === 'dark' ? <Sun size={16}/> : <Moon size={16}/>}
+        <span>{theme === 'dark' ? 'Light mode' : 'Dark mode'}</span>
+      </button>
     </header>
 
     <main ref={stageRef} style={stageHeight ? { height: stageHeight + "px" } : undefined} className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointerStart.current = null; }} onClickCapture={onClickCapture} onWheel={onWheel}>
