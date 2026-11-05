@@ -825,7 +825,8 @@
 .ms-page{height:auto;min-height:calc(100svh - 162px);overflow:visible;align-content:start}
 .ms-home-page,.ms-contact-page{align-items:start}
 @media(max-width:760px){
- .map132-slider-site{height:auto;min-height:100svh;overflow:visible}
- .ms-stage{height:auto;min-height:0;flex:0 0 auto}
- .ms-page{min-height:calc(100svh - 143px);height:auto;overflow:visible}
+ /* Preserve native in-page touch scrolling on narrow mobile layouts. */
+ .map132-slider-site{height:100svh;min-height:0;overflow:hidden}
+ .ms-stage{height:auto;min-height:0;flex:1 1 auto;overflow:hidden}
+ .ms-page{height:100%;min-height:0;overflow-y:auto;overflow-x:hidden}
 }
