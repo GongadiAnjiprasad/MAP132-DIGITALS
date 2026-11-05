@@ -177,13 +177,13 @@ test('swiping updates a clearly selected page in both navigation indicators', as
   // by scrolling only the horizontal navigation container, not the page itself.
   const contactButton = page.locator('.ms-nav button.active');
   await dispatchTouchSwipe(page, '.ms-work-page', 'left');
-  await expect(page.locator('.ms-track')).toHaveAttribute('style', /translateX\\(-200%\\)/);
+  await expect(page.locator('.ms-track')).toHaveAttribute('style', /translateX\(-200%\)/);
   await page.waitForTimeout(750);
   await dispatchTouchSwipe(page, '.ms-services-page', 'left');
-  await expect(page.locator('.ms-track')).toHaveAttribute('style', /translateX\\(-300%\\)/);
+  await expect(page.locator('.ms-track')).toHaveAttribute('style', /translateX\(-300%\)/);
   await page.waitForTimeout(750);
   await dispatchTouchSwipe(page, '.ms-studio-page', 'left');
-  await expect(page.locator('.ms-track')).toHaveAttribute('style', /translateX\\(-400%\\)/);
+  await expect(page.locator('.ms-track')).toHaveAttribute('style', /translateX\(-400%\)/);
   await expect(contactButton).toHaveText('Contact');
   await expect.poll(() => page.locator('.ms-nav').evaluate(nav => {
     const button = nav.querySelector<HTMLElement>('button.active');
