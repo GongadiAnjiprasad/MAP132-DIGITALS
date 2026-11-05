@@ -59,7 +59,7 @@ test('Home showcase tiles support page swipe without breaking tile tap-to-previe
   const firstTile = page.locator('.ms-service-tile').first();
   await expect(firstTile).toBeVisible();
 
-  await dispatchTouchSwipe(page, '.ms-service-tile', 'left');
+  await dispatchTouchSwipe(page, '.ms-service-tile:first-child', 'left');
   await expect(track).toHaveAttribute('style', /translateX\(-100%\)/);
 
   // Return Home, then verify a normal tap still opens the selected sample.
