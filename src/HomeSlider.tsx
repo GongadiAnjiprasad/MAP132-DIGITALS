@@ -26,23 +26,19 @@ type HomeContent = {
 const pages = ['Home', 'Selected Work', 'Services', 'Studio', 'Contact'];
 const previewVideos = [
  {src:'https://videos.pexels.com/video-files/27099636/12071805_1920_1080_60fps.mp4',note:'Stock-footage visual study · cinematic atmosphere'},
- {src:'https://videos.pexels.com/video-files/31245302/13345103_1920_1080_50fps.mp4',note:'Stock-footage visual study · wedding celebration'},
- {src:'https://videos.pexels.com/video-files/7424531/7424531-uhd_3840_2160_30fps.mp4',note:'Stock-footage visual study · birthday celebration'},
- {src:'https://videos.pexels.com/video-files/8100337/8100337-uhd_4096_2160_25fps.mp4',note:'Stock-footage visual study · editing workflow'},
- {src:'https://videos.pexels.com/video-files/8100337/8100337-uhd_4096_2160_25fps.mp4',note:'Stock-footage visual study · creator content'},
+ {src:'https://videos.pexels.com/video-files/31245302/13345103_1920_1080_50fps.mp4',note:'Stock-footage visual study · wedding and celebration'},
+ {src:'https://videos.pexels.com/video-files/7424531/7424531-uhd_3840_2160_30fps.mp4',note:'Stock-footage visual study · short-form social content'},
+ {src:'https://videos.pexels.com/video-files/8100337/8100337-uhd_4096_2160_25fps.mp4',note:'Stock-footage visual study · creator and podcast workflow'},
  {src:'https://videos.pexels.com/video-files/27099636/12071805_1920_1080_60fps.mp4',note:'Stock-footage visual study · commercial mood reference'},
- {src:'https://videos.pexels.com/video-files/27099636/12071805_1920_1080_60fps.mp4',note:'Stock-footage visual study · experimental visual reference'},
- {src:'https://videos.pexels.com/video-files/8100337/8100337-uhd_4096_2160_25fps.mp4',note:'Stock-footage visual study · podcast workflow'}
+ {src:'https://videos.pexels.com/video-files/8100337/8100337-uhd_4096_2160_25fps.mp4',note:'Stock-footage visual study · AI and motion workflow'}
 ];
 const serviceCards = [
   { title: 'Cinematic Films', note: 'Trailers · Teasers · Story edits', image: DEMO_SHOWCASE[0].image, number: '01' },
-  { title: 'Wedding & Events', note: 'Highlights · Emotional films', image: DEMO_SHOWCASE[1].image, number: '02' },
-  { title: 'Birthday Films', note: 'Celebrations · Memories', image: DEMO_SHOWCASE[2].image, number: '03' },
-  { title: 'Reels & Shorts', note: 'Hooks · Vertical edits · Social', image: DEMO_SHOWCASE[3].image, number: '04' },
-  { title: 'YouTube Videos', note: 'Creator edits · Long-form stories', image: DEMO_SHOWCASE[4].image, number: '05' },
-  { title: 'Brand Promotions', note: 'Products · Ads · Business films', image: DEMO_SHOWCASE[5].image, number: '06' },
-  { title: 'AI Video Creation', note: 'AI visuals · Concepts · Motion', image: DEMO_SHOWCASE[6].image, number: '07' },
-  { title: 'News & Podcasts', note: 'Interviews · Studio edits · Clips', image: DEMO_SHOWCASE[7].image, number: '08' }
+  { title: 'Wedding & Celebrations', note: 'Weddings · Birthdays · Event highlights', image: DEMO_SHOWCASE[1].image, number: '02' },
+  { title: 'Reels & Shorts', note: 'Hooks · Vertical edits · Social content', image: DEMO_SHOWCASE[3].image, number: '03' },
+  { title: 'YouTube & Podcasts', note: 'Videos · Podcasts · Interviews · News edits', image: DEMO_SHOWCASE[4].image, number: '04' },
+  { title: 'Brand Promotions', note: 'Products · Ads · Business films', image: DEMO_SHOWCASE[5].image, number: '05' },
+  { title: 'AI Video Creation', note: 'AI visuals · Concepts · Motion', image: DEMO_SHOWCASE[6].image, number: '06' }
 ];
 
 const sampleProjects: PortfolioItem[] = DEMO_SHOWCASE.map((item, index) => ({
@@ -248,7 +244,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
 
           </div>
           <div className="ms-home-showcase">
-            <div className="ms-showcase-top"><span>WHAT WE CAN CREATE</span><span>MAP132 / 01—08</span></div>
+            <div className="ms-showcase-top"><span>WHAT WE CAN CREATE</span><span>MAP132 / 01—06</span></div>
             <div className="ms-service-bento">
               {serviceCards.map((card, index) => <button type="button" key={card.title} aria-label={`Play ${card.title} sample video`} title={`Play ${card.title} sample video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onClick={() => setActivePreview(index)} style={{ backgroundImage: `linear-gradient(180deg, #090b0e08 5%, #090b0edb 100%), url("${card.image}")` }}>
                 <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small>
@@ -277,7 +273,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
         <section className="ms-page ms-services-page" aria-label="Services">
           <div className="ms-page-heading"><div><p className="ms-kicker">SERVICES / MADE FOR YOUR STORY</p><h2>One studio.<br/><em>Many ways to tell it.</em></h2></div><p>Choose the format that fits your idea. Every project starts with a clear purpose and a simple conversation.</p></div>
           <div className="ms-services-grid">
-            {serviceCards.map((card, index) => <article className="ms-service-detail" key={card.title}><span>{card.number} / SERVICE</span><div className="ms-service-detail-image" style={{backgroundImage:`linear-gradient(180deg,transparent,#080a0de8),url("${card.image}")`}}/><h3>{card.title}</h3><p>{['Story-led teaser cuts, cinematic trailers and mood-driven short films.','Wedding highlights, event recaps, couple entries and emotional memory films.','Birthday invitations, surprise edits, photo-to-film montages and celebration reels.','Fast hooks, captions, beat cuts and vertical edits for Instagram and YouTube Shorts.','Creator intros, explainers, vlogs, tutorials and polished long-form storytelling.','Product showcases, launch promos, service ads and social campaign videos.','AI-assisted concepts, generated visual sequences and creative motion treatments.','Interview edits, podcast episodes, news packages and short highlight clips.'][index]}</p></article>)}
+            {serviceCards.map((card, index) => <article className="ms-service-detail" key={card.title}><span>{card.number} / SERVICE</span><div className="ms-service-detail-image" style={{backgroundImage:`linear-gradient(180deg,transparent,#080a0de8),url("${card.image}")`}}/><h3>{card.title}</h3><p>{['Story-led teaser cuts, cinematic trailers and mood-driven short films.','Wedding films, birthday invitations, event highlights, couple entries and celebration montages.','Fast hooks, captions, beat cuts and vertical edits for Instagram, YouTube Shorts and social platforms.','YouTube videos, vlogs, tutorials, podcast episodes, interviews, explainers and news packages.','Product showcases, launch promos, service ads and social campaign videos.','AI-assisted concepts, generated visual sequences and creative motion treatments.'][index]}</p></article>)}
           </div>
           <div className="ms-services-note"><Sparkles size={17}/> Also available: motion titles, logo reveals, lyric videos and custom editing support.</div>
           <div className="ms-service-includes"><div><span>EDITING DETAILS</span><b>Story-led cuts</b><p>Structure, pacing and a clear beginning-to-end flow.</p></div><div><span>VISUAL FINISH</span><b>Titles & colour</b><p>Readable typography, colour treatment and clean transitions.</p></div><div><span>SOUND FINISH</span><b>Music & audio</b><p>Dialogue balance, music placement and sound effects where suitable.</p></div><div><span>FINAL FILES</span><b>Platform formats</b><p>Export format and resolution agreed for your intended platform.</p></div></div>
