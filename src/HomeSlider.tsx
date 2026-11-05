@@ -288,7 +288,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
               <label>Service needed<select name="service" required defaultValue=""><option value="" disabled>Choose a service</option>{serviceCards.map(card=><option key={card.title}>{card.title}</option>)}<option>Motion titles / Logo reveal</option><option>Other project</option></select></label>
               <label>Project details<textarea name="details" rows={3} required maxLength={4000} placeholder="Tell us about the video, style and deadline…"/></label>
               {enquiryError&&<p className="ms-enquiry-error" role="alert">{enquiryError}</p>}
-              <button className="ms-primary ms-enquiry-submit" type="submit" disabled={enquiryBusy}>{enquiryBusy?'Sending…':'Send Enquiry'} <Send size={16}/></button>
+              <button className="ms-primary ms-enquiry-submit" type="submit" disabled={enquiryBusy}>{enquiryBusy?'Submitting…':'Submit Enquiry'} <Send size={16}/></button>
             </form>}
             <small>Submitted directly on this website. Your enquiry is saved in the protected Admin Dashboard inbox.</small>
           </div>
