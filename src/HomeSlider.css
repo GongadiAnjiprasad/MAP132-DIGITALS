@@ -1193,3 +1193,54 @@
     transition: none;
   }
 }
+
+
+/* MAP132 desktop arrow lighting: a restrained ambient gold halo with a quick press flash. */
+@media (min-width: 761px) {
+  .ms-controls .ms-arrow {
+    animation: ms-arrow-ambient-glow 4.2s ease-in-out infinite;
+  }
+  .ms-controls .ms-arrow:hover:not(:disabled) {
+    animation: none;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.36),
+      0 10px 30px rgba(0,0,0,.28),
+      0 0 0 5px rgba(232,199,122,.14),
+      0 0 34px rgba(255,220,150,.34),
+      0 0 58px rgba(232,199,122,.16);
+  }
+  .ms-controls .ms-arrow:active:not(:disabled) {
+    animation: ms-arrow-press-flash .34s ease-out;
+  }
+}
+@keyframes ms-arrow-ambient-glow {
+  0%, 100% {
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.22),
+      inset 0 -1px 0 rgba(255,255,255,.045),
+      0 8px 26px rgba(0,0,0,.24),
+      0 0 0 1px rgba(232,199,122,.08),
+      0 0 18px rgba(232,199,122,.10);
+  }
+  50% {
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.26),
+      inset 0 -1px 0 rgba(255,255,255,.05),
+      0 8px 26px rgba(0,0,0,.24),
+      0 0 0 2px rgba(232,199,122,.12),
+      0 0 27px rgba(245,220,167,.22);
+  }
+}
+@keyframes ms-arrow-press-flash {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255,226,161,.34), 0 0 18px rgba(232,199,122,.24);
+  }
+  100% {
+    box-shadow: 0 0 0 7px rgba(232,199,122,0), 0 0 30px rgba(232,199,122,.12);
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ms-controls .ms-arrow {
+    animation: none;
+  }
+}
