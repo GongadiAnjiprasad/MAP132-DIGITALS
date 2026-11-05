@@ -116,7 +116,24 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   const whatsappDigits = p.whatsapp.replace(/\D/g, '');
   const whatsapp = whatsappDigits.length === 10 ? '91' + whatsappDigits : whatsappDigits;
   const whatsappUrl = whatsapp ? 'https://wa.me/' + whatsapp : '';
-  const goTo = (index: number) => setActive(Math.max(0, Math.min(pages.length - 1, index)));
+  const pageRefs = useRef<Array<HTMLElement | null>>([]);
+  const goTo = (index: number) => {
+    const next = Math.max(0, Math.min(pages.length - 1, index));
+    setActive(next);
+    if (window.matchMedia('(max-width: 760px)').matches) pageRefs.current[next]?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  };
+  useEffect(() => {
+    if (!window.matchMedia('(max-width: 760px)').matches) return;
+    const updateActivePage = () => {
+      const marker = window.innerHeight * 0.35;
+      let visible = 0;
+      pageRefs.current.forEach((page, index) => { if (page && page.getBoundingClientRect().top <= marker) visible = index; });
+      setActive(current => current === visible ? current : visible);
+    };
+    window.addEventListener('scroll', updateActivePage, { passive: true });
+    updateActivePage();
+    return () => window.removeEventListener('scroll', updateActivePage);
+  }, []);
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (activePreview !== null) {
@@ -207,7 +224,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
 
     <main className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointerStart.current = null; }} onClickCapture={onClickCapture} onWheel={onWheel}>
       <div className="ms-track" style={{ transform: `translateX(-${active * 100}%)` }}>
-        <section className="ms-page ms-home-page" aria-label="Home">
+        <section ref={el => { pageRefs.current[0] = el; }} className="ms-page ms-home-page" aria-label="Home">
           <div className="ms-home-copy">
             <p className="ms-kicker"><i/> INDEPENDENT VIDEO EDITING STUDIO</p>
             <h1>{p.headline || 'Every frame has a story.'}</h1>
@@ -239,14 +256,14 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
             </section>
         </section>
 
-        <section className="ms-page ms-work-page" aria-label="Selected work">
+        <section ref={el => { pageRefs.current[1] = el; }} className="ms-page ms-work-page" aria-label="Selected work">
           <div className="ms-page-heading"><div><p className="ms-kicker">PORTFOLIO / VISUAL STUDIES</p><h2>Selected <em>work.</em></h2></div><p>Explore sample edits and original projects published through the Admin Dashboard.</p></div>
           <div className="ms-project-grid">{(content.items.length > 0 ? content.items : sampleProjects).map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>
           {content.items.length === 0 && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>Sample portfolio content</b><span>These are reference concepts and moodboard images—not completed client projects. Upload your own edited videos or photos in the Admin Dashboard to replace these examples.</span></p></div>}
           <DemoShowcase/>
         </section>
 
-        <section className="ms-page ms-services-page" aria-label="Services">
+        <section ref={el => { pageRefs.current[2] = el; }} className="ms-page ms-services-page" aria-label="Services">
           <div className="ms-page-heading"><div><p className="ms-kicker">SERVICES / MADE FOR YOUR STORY</p><h2>One studio.<br/><em>Many ways to tell it.</em></h2></div><p>Choose the format that fits your idea. Every project starts with a clear purpose and a simple conversation.</p></div>
           <div className="ms-services-grid">
             {serviceCards.map((card, index) => <article className="ms-service-detail" key={card.title}><span>{card.number} / SERVICE</span><div className="ms-service-detail-image" style={{backgroundImage:`linear-gradient(180deg,transparent,#080a0de8),url("${card.image}")`}}/><h3>{card.title}</h3><p>{['Story-led teaser cuts, cinematic trailers and mood-driven short films.','Wedding highlights, event recaps, couple entries and emotional memory films.','Birthday invitations, surprise edits, photo-to-film montages and celebration reels.','Fast hooks, captions, beat cuts and vertical edits for Instagram and YouTube Shorts.','Creator intros, explainers, vlogs, tutorials and polished long-form storytelling.','Product showcases, launch promos, service ads and social campaign videos.','AI-assisted concepts, generated visual sequences and creative motion treatments.','Interview edits, podcast episodes, news packages and short highlight clips.'][index]}</p></article>)}
@@ -256,7 +273,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
           <div className="ms-service-bottom"><div><b>Have a specific brief?</b><span>Share your footage, reference style and delivery format.</span></div><button type="button" className="ms-primary" onClick={() => goTo(4)}>Discuss your project <ArrowRight size={16}/></button></div>
         </section>
 
-        <section className="ms-page ms-studio-page" aria-label="Studio">
+        <section ref={el => { pageRefs.current[3] = el; }} className="ms-page ms-studio-page" aria-label="Studio">
           <div className="ms-page-heading"><div><p className="ms-kicker">THE MAP132 APPROACH</p><h2>Story first.<br/><em>Details matter.</em></h2></div><p>{p.about || 'We shape raw footage into purposeful visual stories through editing, rhythm, colour, motion and sound.'}</p></div>
           <div className="ms-process-grid">
             {['Brief & references','Rough cut','Visual polish','Final delivery'].map((step,index)=><article key={step}><span>0{index+1}</span><h3>{step}</h3><p>{['Share your footage, target platform, sample style and delivery date.','Select the strongest moments and shape the story before effects.','Add titles, transitions, colour treatment, captions and motion where useful.','Balance dialogue, music and effects, then export in the agreed format.'][index]}</p></article>)}
@@ -274,7 +291,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
           <div className="ms-studio-foot"><span><Camera size={15}/> {p.location || 'India'}</span><span>MAP132 DIGITALS · VIDEO EDITING</span></div>
         </section>
 
-        <section className="ms-page ms-contact-page" aria-label="Contact">
+        <section ref={el => { pageRefs.current[4] = el; }} className="ms-page ms-contact-page" aria-label="Contact">
           <div className="ms-contact-copy"><p className="ms-kicker">LET'S CREATE SOMETHING MEMORABLE</p><h2>Your idea.<br/><em>Our next frame.</em></h2><p>Tell us what you want to create. Share a few details and continue through WhatsApp or email.</p>
             <div className="ms-contact-links">{contactLinks.length > 0 ? contactLinks.map(link => <a key={link.label} href={link.href} target={link.label === 'Email' ? undefined : '_blank'} rel="noreferrer">{link.icon}{link.label}</a>) : <p className="ms-contact-empty">Social and business contact links will appear here after you add them in Admin Dashboard.</p>}</div>
             <div className="ms-contact-steps"><span><b>01</b> Tell us your idea</span><span><b>02</b> Share footage and references</span><span><b>03</b> Confirm scope and timeline</span></div>
