@@ -98,6 +98,29 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 
 export default function HomeSlider({ content }: { content: HomeContent }) {
   const [active, setActive] = useState(0);
+  const [desktopArrowsVisible, setDesktopArrowsVisible] = useState(true);
+  const arrowHideTimer = useRef<number | null>(null);
+  useEffect(() => {
+    if (window.innerWidth <= 760) return;
+    const scheduleHide = () => {
+      if (arrowHideTimer.current !== null) window.clearTimeout(arrowHideTimer.current);
+      arrowHideTimer.current = window.setTimeout(() => setDesktopArrowsVisible(false), 2600);
+    };
+    const revealAndReschedule = () => {
+      setDesktopArrowsVisible(true);
+      scheduleHide();
+    };
+    scheduleHide();
+    window.addEventListener('pointermove', revealAndReschedule, { passive: true });
+    window.addEventListener('pointerdown', revealAndReschedule, { passive: true });
+    window.addEventListener('keydown', revealAndReschedule);
+    return () => {
+      if (arrowHideTimer.current !== null) window.clearTimeout(arrowHideTimer.current);
+      window.removeEventListener('pointermove', revealAndReschedule);
+      window.removeEventListener('pointerdown', revealAndReschedule);
+      window.removeEventListener('keydown', revealAndReschedule);
+    };
+  }, []);
   const stageRef = useRef<HTMLElement | null>(null);
   const navRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
@@ -230,7 +253,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     { label: 'Email', href: p.email ? 'mailto:' + p.email : '', icon: <Mail size={16}/> }
   ].filter(link => link.href);
 
-  return <div className="map132-slider-site">
+  return <div className={`map132-slider-site ${desktopArrowsVisible ? "" : "ms-nav-arrows-hidden"}`}>
     <header className="ms-header">
       <a className="ms-brand" href="#top" onClick={e => { e.preventDefault(); goTo(0); }}>
         <img src="/resources/logo-removebg-preview.png" alt="MAP132 DIGITALS"/>
