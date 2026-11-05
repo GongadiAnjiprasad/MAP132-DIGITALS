@@ -58,7 +58,7 @@ test('page 5 Contact can swipe right back to page 4 Studio', async ({ page }) =>
   await page.locator('.ms-nav').getByRole('button', { name: 'Contact', exact: true }).click();
   await expect(track).toHaveAttribute('style', /translateX\(-400%\)/);
 
-  await dispatchTouchSwipe(page, '.ms-contact-copy', 'right');
+  await dispatchTouchSwipe(page, '.ms-contact-steps', 'right');
 
   await expect(track).toHaveAttribute('style', /translateX\(-300%\)/);
 });
