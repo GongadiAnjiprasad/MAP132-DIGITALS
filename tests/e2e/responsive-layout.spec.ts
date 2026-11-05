@@ -87,3 +87,27 @@ test('Android desktop-site viewport keeps content top-led, readable and balanced
     }
   }
 });
+
+
+test('desktop-site viewport stage follows the active page content height', async ({ page }) => {
+  await page.setViewportSize({ width: 980, height: 800 });
+  await page.goto('/');
+  const measure = () => page.evaluate(() => {
+    const stage = document.querySelector('.ms-stage') as HTMLElement;
+    const active = stage.querySelectorAll<HTMLElement>('.ms-page')[Number(
+      getComputedStyle(document.querySelector('.ms-track')!).transform.match(/matrix\\([^,]+, [^,]+, [^,]+, [^,]+, (-?[\\d.]+)/)?.[1] || 0
+    )] || stage.querySelector('.ms-page') as HTMLElement;
+    return { stage: stage.clientHeight, content: active.scrollHeight };
+  });
+  await expect.poll(async () => {
+    const m = await measure();
+    return Math.abs(m.stage - m.content);
+  }).toBeLessThanOrEqual(3);
+
+  await page.locator('.ms-nav').getByRole('button', { name: 'Contact', exact: true }).click();
+  await expect(page.locator('.ms-film-enquiry form')).toBeVisible();
+  await expect.poll(async () => {
+    const m = await measure();
+    return Math.abs(m.stage - m.content);
+  }).toBeLessThanOrEqual(3);
+});
