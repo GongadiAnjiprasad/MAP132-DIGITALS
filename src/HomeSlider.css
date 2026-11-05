@@ -1130,3 +1130,66 @@
     pointer-events: auto;
   }
 }
+
+
+/* MAP132 glass navigation arrows: translucent, polished and legible over the artwork. */
+@media (min-width: 761px) {
+  .ms-controls .ms-arrow,
+  .ms-controls .ms-arrow:first-child,
+  .ms-controls .ms-arrow.ms-next {
+    border: 1px solid rgba(245, 220, 167, .58);
+    background:
+      linear-gradient(145deg, rgba(255,255,255,.16), rgba(255,255,255,.035) 48%, rgba(9,12,18,.24)),
+      rgba(18, 22, 30, .34);
+    color: #f8e6bd;
+    -webkit-backdrop-filter: blur(18px) saturate(155%);
+    backdrop-filter: blur(18px) saturate(155%);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.22),
+      inset 0 -1px 0 rgba(255,255,255,.045),
+      0 8px 26px rgba(0,0,0,.24),
+      0 0 0 1px rgba(232,199,122,.08),
+      0 0 22px rgba(232,199,122,.10);
+    transition:
+      opacity .35s ease,
+      transform .24s cubic-bezier(.2,.75,.25,1),
+      background .24s ease,
+      border-color .24s ease,
+      color .24s ease,
+      box-shadow .24s ease;
+  }
+  .ms-controls .ms-arrow:hover:not(:disabled) {
+    border-color: rgba(255, 231, 184, .94);
+    background:
+      linear-gradient(145deg, rgba(255,255,255,.28), rgba(232,199,122,.16)),
+      rgba(25, 29, 36, .48);
+    color: #fff1d2;
+    transform: translateY(-50%) scale(1.1);
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.32),
+      0 10px 30px rgba(0,0,0,.28),
+      0 0 0 4px rgba(232,199,122,.11),
+      0 0 28px rgba(232,199,122,.2);
+  }
+  .ms-controls .ms-arrow:active:not(:disabled) {
+    transform: translateY(-50%) scale(.96);
+  }
+  .ms-controls .ms-arrow:focus-visible {
+    opacity: 1;
+    outline: 2px solid rgba(255, 235, 196, .96);
+    outline-offset: 4px;
+    box-shadow:
+      inset 0 1px 0 rgba(255,255,255,.3),
+      0 0 0 7px rgba(232,199,122,.13),
+      0 8px 26px rgba(0,0,0,.28);
+  }
+  .ms-nav-arrows-hidden .ms-controls .ms-arrow:focus-visible {
+    opacity: 1;
+    pointer-events: auto;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .ms-controls .ms-arrow {
+    transition: none;
+  }
+}
