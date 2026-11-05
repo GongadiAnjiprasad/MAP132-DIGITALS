@@ -178,13 +178,13 @@ test('swiping updates a clearly selected page in both navigation indicators', as
     const pager = document.querySelector<HTMLElement>('.ms-pagination button.active');
     if (!header || !pager) throw new Error('Active page indicators are missing');
     return {
-      headerBackground: getComputedStyle(header).backgroundColor,
+      headerBackground: getComputedStyle(header).backgroundImage,
       headerBorder: getComputedStyle(header).borderTopColor,
       pagerBackground: getComputedStyle(pager).backgroundImage,
       pagerText: getComputedStyle(pager).color,
     };
   });
-  expect(styles.headerBackground).not.toBe('rgba(0, 0, 0, 0)');
+  expect(styles.headerBackground).not.toBe('none');
   expect(styles.pagerBackground).not.toBe('none');
   expect(styles.pagerText).toBe('rgb(23, 19, 13)');
 });
