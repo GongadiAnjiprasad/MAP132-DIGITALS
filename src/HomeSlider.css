@@ -561,10 +561,6 @@
     touch-action: pan-y;
   }
   /* Let Contact content grow naturally instead of shrinking the enquiry card to the viewport. */
-  .ms-contact-page {
-    height: max-content;
-    min-height: 100%;
-  }
   .ms-contact-page > * {
     flex: 0 0 auto;
   }
