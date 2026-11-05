@@ -979,3 +979,7 @@
   .ms-pagination button.active{width:29px;height:29px}
   .ms-current-label{padding:5px 7px;font-size:8px}
 }
+
+
+/* Give the final mobile navigation item enough trailing room to centre cleanly. */
+@media (max-width:760px){.ms-nav::after{content:"";display:block;flex:0 0 50vw;height:1px}}

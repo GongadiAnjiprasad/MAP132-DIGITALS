@@ -172,6 +172,30 @@ test('swiping updates a clearly selected page in both navigation indicators', as
   await expect(page.locator('.ms-nav button.active')).toHaveText('Selected Work');
   await expect(page.locator('.ms-nav button.active')).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('.ms-pagination button.active')).toContainText('02');
+  await page.waitForTimeout(750);
+
+  // Advancing to the final page must bring its selected header label into view
+  // by scrolling only the horizontal navigation container, not the page itself.
+  const contactButton = page.locator('.ms-nav button.active');
+  await dispatchTouchSwipe(page, '.ms-work-page', 'left');
+  await expect(page.locator('.ms-track')).toHaveAttribute('style', /translateX\(-200%\)/);
+  await page.waitForTimeout(750);
+  await dispatchTouchSwipe(page, '.ms-services-page', 'left');
+  await expect(page.locator('.ms-track')).toHaveAttribute('style', /translateX\(-300%\)/);
+  await page.waitForTimeout(750);
+  await dispatchTouchSwipe(page, '.ms-studio-page', 'left');
+  await expect(page.locator('.ms-track')).toHaveAttribute('style', /translateX\(-400%\)/);
+  await expect(contactButton).toHaveText('Contact');
+  await expect.poll(() => page.locator('.ms-nav').evaluate(nav => {
+    const button = nav.querySelector<HTMLElement>('button.active');
+    if (!button) return false;
+    const navRect = nav.getBoundingClientRect();
+    const buttonRect = button.getBoundingClientRect();
+    const fullyVisible = buttonRect.left >= navRect.left && buttonRect.right <= navRect.right;
+    const navCenter = navRect.left + navRect.width / 2;
+    const buttonCenter = buttonRect.left + buttonRect.width / 2;
+    return fullyVisible && Math.abs(buttonCenter - navCenter) <= 24;
+  })).toBe(true);
 
   const styles = await page.evaluate(() => {
     const header = document.querySelector<HTMLElement>('.ms-nav button.active');
