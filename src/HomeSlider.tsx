@@ -1,9 +1,10 @@
 import { useEffect, useRef, useState, type PointerEvent, type WheelEvent, type MouseEvent } from 'react';
 import {
-  ArrowLeft, ArrowRight, Camera, Film, Instagram, Mail, MessageCircle,
+  ArrowLeft, ArrowRight, Camera, Check, Film, Instagram, Mail, MessageCircle,
   Play, Sparkles, Youtube, Facebook, Linkedin, Send, X
 } from 'lucide-react';
 import DemoShowcase from './DemoShowcase';
+import { api } from './api';
 import { getHorizontalSwipeDirection } from './swipeGesture';
 import { DEMO_SHOWCASE } from './demoShowcase';
 
@@ -102,6 +103,9 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 export default function HomeSlider({ content }: { content: HomeContent }) {
   const [active, setActive] = useState(0);
   const [activePreview, setActivePreview] = useState<number | null>(null);
+  const [enquirySubmitted, setEnquirySubmitted] = useState(false);
+  const [enquiryBusy, setEnquiryBusy] = useState(false);
+  const [enquiryError, setEnquiryError] = useState('');
   const previewGesture = useRef<{ x: number; y: number; pointerId?: number } | null>(null);
   const changePreview = (direction: number) => setActivePreview(current => current === null ? null : (current + direction + previewVideos.length) % previewVideos.length);
   const pointerStart = useRef<{ x: number; y: number; pointerId: number; atHomeTop: boolean } | null>(null);
@@ -275,15 +279,18 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
             <div className="ms-contact-links">{contactLinks.length > 0 ? contactLinks.map(link => <a key={link.label} href={link.href} target={link.label === 'Email' ? undefined : '_blank'} rel="noreferrer">{link.icon}{link.label}</a>) : <p className="ms-contact-empty">Social and business contact links will appear here after you add them in Admin Dashboard.</p>}</div>
             <div className="ms-contact-steps"><span><b>01</b> Tell us your idea</span><span><b>02</b> Share footage and references</span><span><b>03</b> Confirm scope and timeline</span></div>
           </div>
-          <div className="ms-contact-panel"><span>PROJECT ENQUIRY</span>
-            <form onSubmit={event => {event.preventDefault();const data=new FormData(event.currentTarget);const message='MAP132 DIGITALS — PROJECT ENQUIRY\nName: '+data.get('name')+'\nEmail: '+data.get('email')+'\nPhone: '+data.get('phone')+'\nService: '+data.get('service')+'\nProject: '+data.get('details');if(whatsappUrl)window.open(whatsappUrl+'?text='+encodeURIComponent(message),'_blank','noopener,noreferrer');else if(p.email)window.location.href='mailto:'+p.email+'?subject=MAP132%20DIGITALS%20Enquiry&body='+encodeURIComponent(message);else window.alert('Please add WhatsApp or business email in Admin → Social & contact first.');}}>
-              <label>Your name<input name="name" required placeholder="Your name"/></label>
-              <div className="ms-form-row"><label>Email<input name="email" type="email" required placeholder="you@example.com"/></label><label>Phone<input name="phone" required placeholder="+91…"/></label></div>
+          <div className="ms-contact-panel ms-film-enquiry">
+            <div className="ms-film-enquiry-heading"><span>PROJECT ENQUIRY / FRAME 01</span><Film size={19}/></div>
+            {enquirySubmitted ? <div className="ms-enquiry-success" role="status"><div className="ms-enquiry-success-icon"><Check size={27}/></div><h3>Enquiry received.</h3><p>Your project brief has been saved to the MAP132 DIGITALS enquiry inbox. We’ll review the details and follow up using the contact information you provided.</p><button type="button" className="ms-primary" onClick={() => {setEnquirySubmitted(false);setEnquiryError('');}}>Send another enquiry <ArrowRight size={16}/></button></div> :
+            <form onSubmit={async event => {event.preventDefault();setEnquiryBusy(true);setEnquiryError('');const form=event.currentTarget;const data=new FormData(form);try{await api.post('/api/enquiries',{name:data.get('name'),email:data.get('email'),phone:data.get('phone'),service:data.get('service'),details:data.get('details')});setEnquirySubmitted(true);form.reset();}catch(error){setEnquiryError(error instanceof Error?error.message:'Could not submit enquiry. Please try again.');}finally{setEnquiryBusy(false);}}}>
+              <label>Your name<input name="name" required maxLength={120} placeholder="Your name"/></label>
+              <div className="ms-form-row"><label>Email<input name="email" type="email" required maxLength={254} placeholder="you@example.com"/></label><label>Phone<input name="phone" required maxLength={40} placeholder="+91…"/></label></div>
               <label>Service needed<select name="service">{serviceCards.map(card=><option key={card.title}>{card.title}</option>)}<option>Motion titles / Logo reveal</option><option>Other project</option></select></label>
-              <label>Project details<textarea name="details" rows={3} placeholder="Tell us about the video, style and deadline…"/></label>
-              <button className="ms-primary" type="submit">Send enquiry <ArrowRight size={16}/></button>
-            </form>
-            <small>Your details are prepared for WhatsApp or email; this form does not store submissions.</small>
+              <label>Project details<textarea name="details" rows={3} maxLength={4000} placeholder="Tell us about the video, style and deadline…"/></label>
+              {enquiryError&&<p className="ms-enquiry-error" role="alert">{enquiryError}</p>}
+              <button className="ms-primary ms-enquiry-submit" type="submit" disabled={enquiryBusy}>{enquiryBusy?'Submitting…':'Submit Enquiry'} <Send size={16}/></button>
+            </form>}
+            <small>Submitted directly on this website. Your enquiry is saved in the protected Admin Dashboard inbox.</small>
           </div>
         </section>
       </div>

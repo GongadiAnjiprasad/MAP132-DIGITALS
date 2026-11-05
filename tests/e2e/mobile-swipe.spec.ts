@@ -73,3 +73,29 @@ test('mobile swipe changes the showcase video in the preview modal', async ({ pa
 
   await expect(dialog.locator('h2')).toHaveText('Wedding & Events');
 });
+
+test('cinematic enquiry form submits in-page and shows confirmation without opening external links', async ({ page }) => {
+  page.on('pageerror', error => console.log('ENQUIRY PAGE ERROR:', error.message));
+  await page.route('**/api/enquiries', async route => route.fulfill({
+    status: 201,
+    contentType: 'application/json',
+    body: JSON.stringify({ submitted: true, id: 'e2e-enquiry' }),
+  }));
+  await page.goto('/');
+  await page.locator('.ms-nav').getByRole('button', { name: 'Contact', exact: true }).click();
+  const form = page.locator('.ms-film-enquiry form');
+  await expect(form).toBeVisible();
+  await form.locator('input[name="name"]').fill('Test Client');
+  await form.locator('input[name="email"]').fill('test@example.com');
+  await form.locator('input[name="phone"]').fill('+919999999999');
+  await form.locator('select[name="service"]').selectOption({ label: 'Cinematic Films' });
+  await form.locator('textarea[name="details"]').fill('A cinematic trailer brief for browser testing.');
+  const currentUrl = page.url();
+  const requestPromise = page.waitForRequest(request => request.url().endsWith('/api/enquiries') && request.method() === 'POST');
+  const popupPromise = page.waitForEvent('popup', { timeout: 800 }).catch(() => null);
+  await form.getByRole('button', { name: 'Submit Enquiry' }).click();
+  await requestPromise;
+  await expect(page.locator('.ms-enquiry-success h3')).toHaveText('Enquiry received.');
+  expect(page.url()).toBe(currentUrl);
+  expect(await popupPromise).toBeNull();
+});

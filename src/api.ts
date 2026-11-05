@@ -36,4 +36,4 @@ async function upload(path:string,file:File):Promise<ApiResult>{
   }
   return readResponse(response,'Upload');
 }
-export const api={get:(path:string)=>call('GET',path),post:(path:string,body:unknown)=>call('POST',path,body),put:(path:string,body:unknown)=>call('PUT',path,body),upload};
+export const api={get:(path:string)=>call('GET',path),post:(path:string,body:unknown)=>call('POST',path,body),put:(path:string,body:unknown)=>call('PUT',path,body),delete:(path:string)=>call('DELETE',path),upload};

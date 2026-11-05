@@ -104,13 +104,38 @@ if(path==='/api/resources/sounds'&&method==='GET'){
   return json({count:data.count||0,providerCount:data.count||0,allowedCount:allowed.length,page,nextPage:data.next?page+1:null,previousPage:data.previous?page-1:null,results:allowed.map((sound:any)=>({id:sound.id,title:sound.name,creator:sound.username,license:sound.license,duration:sound.duration,previewUrl:sound.previews?.['preview-hq-mp3']||sound.previews?.['preview-lq-mp3']||'',sourceUrl:sound.url||('https://freesound.org/s/'+sound.id+'/'),tags:sound.tags||[],description:sound.description||''}))});
 }
 if(path==='/api/_healthcheck')return json({message:'Success'});
+if(path==='/api/enquiries'&&method==='POST'){
+   if(!env.MAP132_KV)return json({error:'Enquiry storage is not configured.'},503);
+   let body:any;try{body=await req.json();}catch{return json({error:'Invalid enquiry data.'},400);}
+   const name=String(body.name||'').trim(),email=String(body.email||'').trim(),phone=String(body.phone||'').trim(),service=String(body.service||'').trim(),details=String(body.details||'').trim();
+   if(!name||!email||!phone||!service)return json({error:'Please complete all required fields.'},400);
+   if(name.length>120||email.length>254||phone.length>40||service.length>180||details.length>4000)return json({error:'One or more fields are too long.'},400);
+   if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email))return json({error:'Please enter a valid email address.'},400);
+   const id=Date.now().toString(36)+'-'+crypto.randomUUID();
+   const entry={id,name,email,phone,service,details,createdAt:new Date().toISOString(),status:'new'};
+   await env.MAP132_KV.put('enquiries/'+id,JSON.stringify(entry));
+   return json({submitted:true,id},201);
+ }
 if(path==='/api/portfolio'&&method==='GET'){const content=await read(env);for(const item of content.items||[])if(item.path&&env.MAP132_MEDIA){item.mediaUrl='/media/'+encodeURIComponent(item.path);}return json({content});}
 if(path==='/api/admin/session'&&method==='GET'){const authenticated=await validSession(req,env);return json({authenticated},authenticated?200:401);}
 if(path==='/api/admin/login'&&method==='POST'){let stage='check admin secret';try{if(!env.ADMIN_PASSWORD)return json({error:'Admin password secret is not configured in Cloudflare.'},503);stage='parse login request';let body:any;try{body=await req.json();}catch{return json({error:'Invalid request.'},400);}stage='validate password';if(typeof body.password!=='string'||body.password!==env.ADMIN_PASSWORD)return json({error:'Incorrect admin password.'},401);stage='create session payload';const payload=toBase64Url(encoder.encode(JSON.stringify({exp:Date.now()+8*60*60*1000})));stage='sign session token';const signed=await signature(payload,env.ADMIN_PASSWORD);const token=payload+'.'+signed;stage='create login response';return json({authenticated:true},200,{ 'Set-Cookie':sessionCookie(token,8*60*60) });}catch(error){const detail=error instanceof Error?error.message:'Unknown error';const name=error instanceof Error?error.name:'Error';return json({error:'Admin login failed at stage "'+stage+'" ('+name+'): '+detail},500);}}
 if(path==='/api/admin/logout'&&method==='POST')return json({signedOut:true},200,{'Set-Cookie':sessionCookie('',0)});
 if(!await validSession(req,env))return json({error:'Admin session required.'},401);
 
-if(path==='/api/admin/content'&&method==='PUT'){const body=await req.json() as any;if(!body.profile||!Array.isArray(body.skills)||!Array.isArray(body.items)||body.items.length>100||body.skills.length>80)return json({error:'Invalid portfolio content.'},400);if(!env.MAP132_KV)return json({error:'Cloudflare KV binding MAP132_KV is not configured.'},503);await env.MAP132_KV.put('portfolio/content',JSON.stringify(body));return json({saved:true});}
+if(path==='/api/admin/enquiries'&&method==='GET'){
+   if(!env.MAP132_KV)return json({error:'Enquiry storage is not configured.'},503);
+   const listed=await env.MAP132_KV.list({prefix:'enquiries/',limit:100});
+   const entries=await Promise.all(listed.keys.map(async key=>{const value=await env.MAP132_KV!.get(key.name);if(!value)return null;try{return JSON.parse(value);}catch{return null;}}));
+   return json({enquiries:entries.filter(Boolean).sort((a:any,b:any)=>String(b.createdAt).localeCompare(String(a.createdAt)))});
+ }
+ if(path.startsWith('/api/admin/enquiries/')&&method==='DELETE'){
+   if(!env.MAP132_KV)return json({error:'Enquiry storage is not configured.'},503);
+   const id=decodeURIComponent(path.slice('/api/admin/enquiries/'.length));
+   if(!/^[a-z0-9-]+$/i.test(id))return json({error:'Invalid enquiry id.'},400);
+   await env.MAP132_KV.delete('enquiries/'+id);
+   return json({deleted:true});
+ }
+ if(path==='/api/admin/content'&&method==='PUT'){const body=await req.json() as any;if(!body.profile||!Array.isArray(body.skills)||!Array.isArray(body.items)||body.items.length>100||body.skills.length>80)return json({error:'Invalid portfolio content.'},400);if(!env.MAP132_KV)return json({error:'Cloudflare KV binding MAP132_KV is not configured.'},503);await env.MAP132_KV.put('portfolio/content',JSON.stringify(body));return json({saved:true});}
 if(path==='/api/admin/upload'&&method==='POST'){if(!env.MAP132_MEDIA)return json({error:'Cloudflare R2 media bucket is not configured yet.'},503);const allowed=['video/mp4','image/jpeg','image/png','image/webp'];const contentType=(req.headers.get('Content-Type')||'').split(';')[0].trim().toLowerCase();if(!allowed.includes(contentType))return json({error:'Unsupported media type. Upload MP4, JPG, PNG or WebP.'},400);const maxBytes=90*1024*1024;const declared=Number(req.headers.get('Content-Length')||0);if(declared>maxBytes)return json({error:'File exceeds the 90 MB direct-upload limit. Use a YouTube or Google Drive link for larger videos.'},413);if(!req.body)return json({error:'No file was received.'},400);let filename='media';try{filename=decodeURIComponent(req.headers.get('X-File-Name')||'media');}catch{}const safe=filename.replace(/[^a-zA-Z0-9._-]/g,'-').slice(-90)||'media';const key='portfolio/uploads/'+Date.now()+'-'+crypto.randomUUID()+'-'+safe;await env.MAP132_MEDIA.put(key,req.body,{httpMetadata:{contentType}});return json({path:key});}if(path==='/api/admin/delete-media'&&method==='POST'){if(!env.MAP132_MEDIA)return json({error:'Media bucket is not configured.'},503);const body=await req.json() as any;if(!String(body.path||'').startsWith('portfolio/uploads/'))return json({error:'Invalid path.'},400);await env.MAP132_MEDIA.delete(body.path);return json({deleted:true});}
 if(path.startsWith('/media/')&&method==='GET'&&env.MAP132_MEDIA){const key=decodeURIComponent(path.slice(7)),obj=await env.MAP132_MEDIA.get(key);if(!obj)return new Response('Not found',{status:404});return new Response(obj.body,{headers:{'Content-Type':obj.httpMetadata?.contentType||'application/octet-stream','Cache-Control':'public, max-age=3600'}});}
 return json({error:'Not found'},404);}
