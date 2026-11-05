@@ -36,27 +36,23 @@
 /* MAP132 cinematic font library */
 .font-panel{margin:28px 0;background:linear-gradient(145deg,#171a21,#101217);border:1px solid #4b4030;padding:24px}.font-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}.font-head h2{margin:0}.font-sub{color:var(--muted);font-size:12px;line-height:1.65;margin:9px 0 17px}.font-controls{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.font-controls input{flex:1;min-width:180px;padding:11px;background:#0b0d11;color:white;border:1px solid var(--line)}.font-cats{display:flex;gap:8px;overflow-x:auto;white-space:nowrap;padding:2px 0 8px;scrollbar-width:thin}.font-cat{border-radius:999px;background:#282b32;color:#e5e5e8;border:1px solid #ffffff20;padding:9px 14px;font-size:11px;flex:0 0 auto}.font-cat.active{background:#f4f1eb;color:#17191e;border-color:#f4f1eb}.font-sample-tools{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin:10px 0}.font-sample-tools input{flex:1;min-width:180px;padding:10px;background:#0b0d11;color:white;border:1px solid var(--line)}.font-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:14px}.font-card{border:1px solid var(--line);background:#0b0d11;padding:14px;min-width:0;border-radius:7px}.font-card-top{display:flex;justify-content:space-between;align-items:center;gap:8px}.font-card-name{font-size:12px;font-weight:700}.font-card-tag{font-size:9px;color:var(--gold);letter-spacing:.08em;text-transform:uppercase}.font-preview{font-size:clamp(24px,3.5vw,36px);line-height:1.2;min-height:52px;display:flex;align-items:center;overflow-wrap:anywhere;padding:10px 0 12px;color:#f5eee2}.font-preview.telugu{font-size:clamp(25px,4vw,38px)}.font-card-actions{display:flex;gap:7px;flex-wrap:wrap}.font-card-actions button,.font-card-actions a{font-size:10px;padding:7px 10px}.font-card-actions a{color:var(--gold);border:1px solid #6c593b}.font-card-actions button.saved{background:#d7b477;color:#111;border-color:#d7b477}.font-footnote{font-size:10px;color:#a8a9ad;line-height:1.6;margin-top:14px}.font-empty{color:var(--muted);font-size:12px;padding:18px 0}@media(max-width:600px){.font-panel{padding:16px}.font-grid{grid-template-columns:1fr}.font-controls,.font-sample-tools{flex-direction:column;align-items:stretch}.font-controls input,.font-sample-tools input{width:100%}}
 
-/* MAP132 resource library switcher */
-.resource-switcher{display:flex;gap:12px;align-items:stretch;margin:22px 0 7px}
-.resource-pill{display:flex;align-items:center;gap:12px;min-width:0;flex:1;text-align:left;padding:13px 17px;border-radius:999px;background:linear-gradient(145deg,#171a21,#101217);border:1px solid #45413a;color:var(--ink);cursor:pointer;transition:border-color .18s,background .18s,transform .18s}
-.resource-pill:hover{border-color:#a88a53;transform:translateY(-1px)}
-.resource-pill.active{border:1px solid var(--gold);background:linear-gradient(110deg,#29251d,#17191e);box-shadow:0 0 0 1px #d7b47722,inset 0 0 22px #d7b4770b}
-.resource-pill-icon{display:grid;place-items:center;width:38px;height:38px;flex:0 0 38px;border:1px solid #756344;border-radius:50%;color:var(--gold);font-size:19px;font-weight:700}
-.resource-pill strong,.resource-pill small{display:block}
-.resource-pill strong{font-size:13px;letter-spacing:.02em}
-.resource-pill small{font-size:10px;color:var(--muted);margin-top:3px}
-.resource-pill-arrow{margin-left:auto;color:var(--gold);font-size:15px;opacity:.65}
-.resource-hint{margin:0 0 10px 5px;color:var(--muted);font-size:10px;letter-spacing:.04em}
+/* MAP132 minimal segmented resource switcher */
+.resource-switcher{display:flex;gap:4px;align-items:center;margin:20px 0 12px;padding:4px;background:#17191e;border:1px solid #34363c;border-radius:999px;width:min(100%,520px)}
+.resource-pill{display:flex;align-items:center;justify-content:center;gap:9px;min-width:0;flex:1;text-align:center;padding:11px 16px;border:1px solid transparent;border-radius:999px;background:transparent;color:#c6c7ca;cursor:pointer;transition:background .18s,color .18s,border-color .18s,box-shadow .18s}
+.resource-pill:hover{color:#fff;background:#24262c}
+.resource-pill.active{background:#d7b477;color:#17191e;border-color:#e4c995;box-shadow:0 1px 5px #0005}
+.resource-pill-icon{display:inline-grid;place-items:center;width:auto;height:auto;flex:0 0 auto;border:0;border-radius:0;color:inherit;font-size:17px;font-weight:700;line-height:1}
+.resource-pill strong{display:block;font-size:12px;font-weight:700;letter-spacing:.01em;white-space:nowrap}
+.resource-pill small,.resource-pill-arrow,.resource-hint{display:none}
 .resource-panel{margin-top:12px}
 .resource-panel[hidden]{display:none!important}
-@media(max-width:600px){.resource-switcher{gap:8px}.resource-pill{padding:10px 11px;gap:8px}.resource-pill-icon{width:32px;height:32px;flex-basis:32px;font-size:16px}.resource-pill strong{font-size:11px}.resource-pill small{font-size:9px}.resource-pill-arrow{display:none}}
+@media(max-width:600px){.resource-switcher{width:100%;gap:3px;margin:17px 0 10px;padding:3px}.resource-pill{padding:10px 8px;gap:6px}.resource-pill-icon{font-size:15px}.resource-pill strong{font-size:11px}}
 </style></head><body><main class="shell"><header class="top"><a class="brand" href="index.html">MAP<b>132</b> <span style="font-size:10px;color:#aaa;font-weight:400">DIGITALS</span></a><a class="back" href="index.html">← Back to website</a></header>
 <section class="welcome"><div class="kicker">Private creator area · Workspace</div><h1>Your creative control room.</h1><p>Organise your brand resources, editing references, reusable assets and project links in one place.</p></section>
 <nav class="resource-switcher" aria-label="Choose resource library">
- <button type="button" class="resource-pill active" data-resource-view="sounds" aria-pressed="true"><span class="resource-pill-icon">♫</span><span><strong>Cinematic Sounds</strong><small>Preview · Play · Download</small></span><span class="resource-pill-arrow">↗</span></button>
- <button type="button" class="resource-pill" data-resource-view="fonts" aria-pressed="false"><span class="resource-pill-icon">Aa</span><span><strong>Cinematic Fonts</strong><small>Browse · Preview · Download</small></span><span class="resource-pill-arrow">↗</span></button>
+ <button type="button" class="resource-pill active" data-resource-view="sounds" aria-pressed="true"><span class="resource-pill-icon">♫</span><strong>Cinematic Sounds</strong></button>
+ <button type="button" class="resource-pill" data-resource-view="fonts" aria-pressed="false"><span class="resource-pill-icon">Aa</span><strong>Cinematic Fonts</strong></button>
 </nav>
-<p class="resource-hint">Choose a library to explore its categories and resources.</p>
 <div class="notice"><strong>Storage & privacy note:</strong> This first workspace version saves your resource list in this browser only. It is not yet connected to your 5 TB cloud storage or account login. Do not add confidential client files until secure sign-in and cloud storage are connected.</div>
 
 <section class="sfx-panel resource-panel" id="cinematic-sfx" data-resource-panel="sounds">
