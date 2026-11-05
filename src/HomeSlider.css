@@ -101,7 +101,8 @@
 .ms-current-label{min-width:130px;color:#a4a39d;font-size:9px;letter-spacing:.8px}
 .ms-current-label i{color:var(--ms-gold);font-style:normal}
 .ms-footer{height:32px;flex:0 0 32px;display:flex;align-items:center;justify-content:space-between;gap:12px;padding:0 clamp(20px,5vw,76px);background:#07090d;color:#7e817f;font-size:8px;letter-spacing:1px}
-.ms-footer a{display:flex;align-items:center;gap:7px;color:var(--ms-gold);text-decoration:none}
+.ms-footer .ms-studio-link{display:inline-flex;align-items:center;gap:4px;padding:5px 7px;border:1px solid #b89a6426;border-radius:2px;color:#89816f;text-decoration:none;font-size:7px;letter-spacing:1.2px;opacity:.62;transition:opacity .2s,border-color .2s,color .2s}
+.ms-footer .ms-studio-link:hover,.ms-footer .ms-studio-link:focus-visible{opacity:1;color:var(--ms-gold);border-color:#b89a6480;outline:none}
 @media(max-width:1100px){
  .ms-header{padding:0 24px}.ms-home-page{grid-template-columns:.8fr 1.2fr;gap:20px}.ms-page{padding-left:28px;padding-right:28px}
  .ms-service-bento{grid-template-columns:repeat(2,minmax(0,1fr));grid-template-rows:repeat(4,minmax(76px,1fr))}
