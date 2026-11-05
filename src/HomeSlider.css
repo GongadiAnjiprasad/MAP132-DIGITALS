@@ -552,3 +552,16 @@
 .ms-enquiry-success p{margin:0;color:var(--ms-muted);font-size:12px;line-height:1.75}
 .ms-enquiry-success .ms-primary{min-height:44px;border-radius:3px}
 @media(max-width:640px){.ms-film-enquiry{padding:18px 23px}.ms-film-enquiry::before{left:6px}.ms-film-enquiry::after{right:6px}.ms-film-enquiry-heading span{font-size:8px;letter-spacing:1.4px}}
+
+
+/* Mobile accessibility fix: switch the carousel to a naturally scrolling vertical document. */
+@media(max-width:760px){
+ .map132-slider-site{height:auto!important;min-height:100svh!important;overflow:visible!important;display:flex;flex-direction:column}
+ .ms-header{position:sticky;top:0;z-index:20;flex:0 0 auto;height:auto;min-height:58px}
+ .ms-stage{height:auto!important;min-height:0!important;flex:0 0 auto!important;overflow:visible!important;touch-action:auto!important;overscroll-behavior:auto!important}
+ .ms-track{display:flex!important;flex-direction:column!important;width:100%!important;height:auto!important;flex:0 0 auto!important;transform:none!important;transition:none!important;will-change:auto}
+ .ms-page{display:block!important;width:100%!important;min-width:0!important;max-width:100%!important;height:auto!important;min-height:0!important;flex:0 0 auto!important;overflow:visible!important;overflow-y:visible!important;overflow-x:clip!important;touch-action:pan-y!important;-webkit-overflow-scrolling:touch;scrollbar-width:auto;padding:24px 16px 32px;scroll-margin-top:70px}
+ .ms-home-page{display:flex!important;flex-direction:column;align-items:stretch;gap:22px}
+ .ms-controls{display:none!important}
+ .ms-footer{height:auto;min-height:32px;flex:0 0 auto;padding:10px 14px;flex-wrap:wrap}
+}
