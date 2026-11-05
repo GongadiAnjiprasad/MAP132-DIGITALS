@@ -81,7 +81,7 @@ test('cinematic enquiry form submits in-page and shows confirmation without open
     body: JSON.stringify({ submitted: true, id: 'e2e-enquiry' }),
   }));
   await page.goto('/');
-  await page.getByRole('button', { name: 'Contact', exact: true }).click();
+  await page.locator('.ms-nav').getByRole('button', { name: 'Contact', exact: true }).click();
   const form = page.locator('.ms-film-enquiry form');
   await expect(form).toBeVisible();
   await form.locator('input[name="name"]').fill('Test Client');
