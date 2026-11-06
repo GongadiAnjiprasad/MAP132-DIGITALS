@@ -11,7 +11,7 @@ export default defineConfig({
   projects: [
     {
       name: 'mobile-chromium',
-      testMatch: 'mobile-swipe.spec.ts',
+      testMatch: ['mobile-swipe.spec.ts', 'ambient-service-theme.mobile.spec.ts'],
       use: { ...devices['iPhone 13'], browserName: 'chromium' },
     },
     {
