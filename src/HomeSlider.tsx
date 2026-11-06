@@ -398,6 +398,6 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       <span className="ms-current-label">{String(active+1).padStart(2,'0')} <i>/</i> {String(pages.length).padStart(2,'0')} · {pages[active]}</span>
       <button type="button" className="ms-arrow ms-next" aria-label="Next page" onClick={() => goTo(active + 1)} disabled={active === pages.length - 1}><ArrowRight size={19}/></button>
     </div>
-    <footer className="ms-footer"><span>© {new Date().getFullYear()} MAP132 DIGITALS</span><div className="ms-footer-actions"><button type="button" className="ms-feedback-footer-button" onClick={()=>window.dispatchEvent(new Event("map132-open-feedback"))}>FEEDBACK <span aria-hidden="true">↗</span></button><a className="ms-studio-link" href="/workspace.html" aria-label="Open Editor Workspace" title="Editor Workspace">EDITOR WORKSPACE <span aria-hidden="true">↗</span></a></div></footer>
+    <footer className="ms-footer"><span>© {new Date().getFullYear()} MAP132 DIGITALS</span><a className="ms-studio-link" href="/workspace.html" aria-label="Open Editor Workspace" title="Editor Workspace">EDITOR WORKSPACE <span aria-hidden="true">↗</span></a></footer>
   </div>;
 }
