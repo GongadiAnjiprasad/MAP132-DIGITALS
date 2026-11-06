@@ -7,9 +7,9 @@ test('desktop service-card hover previews the matching ambient accent and resets
   const site = page.locator('.map132-slider-site');
   const cinematic = page.locator('.ms-service-detail[data-service-theme="cinematic"]');
   await cinematic.hover();
-  await expect(site).toHaveCSS('--ms-ambient-accent', '#ffcb78');
+  await expect.poll(async () => (await site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-ambient-accent'))).toLowerCase()).toBe('#ffcb78');
   await page.mouse.move(5, 5);
-  await expect(site).toHaveCSS('--ms-ambient-accent', '#080d18');
+  await expect.poll(async () => (await site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-ambient-accent'))).toLowerCase()).toBe('#080d18');
 });
 
 test('service-card click pins its theme and a second click clears it', async ({ page }) => {
@@ -19,7 +19,7 @@ test('service-card click pins its theme and a second click clears it', async ({ 
   const site = page.locator('.map132-slider-site');
   const ai = page.locator('.ms-service-detail[data-service-theme="ai"]');
   await ai.click();
-  await expect(site).toHaveCSS('--ms-ambient-accent', '#00f2ff');
+  await expect.poll(async () => (await site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-ambient-accent'))).toLowerCase()).toBe('#00f2ff');
   await ai.click();
   await expect(site).toHaveCSS('--ms-ambient-accent', '#080d18');
 });
@@ -30,6 +30,6 @@ test('mobile tap applies service accent without horizontal overflow', async ({ p
   await page.locator('.ms-nav').getByRole('button', { name: 'Services', exact: true }).click();
   const site = page.locator('.map132-slider-site');
   await page.locator('.ms-service-detail[data-service-theme="reels"]').tap();
-  await expect(site).toHaveCSS('--ms-ambient-accent', '#bc13fe');
+  await expect.poll(async () => (await site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-ambient-accent'))).toLowerCase()).toBe('#bc13fe');
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(392);
 });
