@@ -86,7 +86,7 @@ function IndianFestivalAtmosphere() {
           {greeting?.image && (
             <img
               className="ff-greeting-background"
-              src={'data:image/png;base64,' + greeting.image}
+              src={'data:image/jpeg;base64,' + greeting.image}
               alt=""
               aria-hidden="true"
             />
