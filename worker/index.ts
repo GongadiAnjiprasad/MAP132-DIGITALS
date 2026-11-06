@@ -1,4 +1,5 @@
-interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; }
+import { FESTIVAL_CALENDAR, getIndiaDateKey } from '../src/modules/seasonal/festivalCalendar';
+interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string }> }; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
 const json=(body:unknown,status=200,headers:HeadersInit={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...Object.fromEntries(new Headers(headers))}});
 const COOKIE='map132_admin';
@@ -122,6 +123,13 @@ if(path==='/api/resources/fonts'&&method==='GET'){
   await cache.put(cacheKey,response.clone());
   return response;
 }
+if(path==='/api/festival-greeting'&&method==='GET'){
+  const today=getIndiaDateKey();
+  const festival=FESTIVAL_CALENDAR.find(item=>item.date===today);
+  if(!festival)return json({active:false},200,{'Cache-Control':'public, max-age=300, s-maxage=300'});
+  const image=env.MAP132_KV?await env.MAP132_KV.get('festival/greeting/'+today):null;
+  return json({active:true,ready:Boolean(image),image:image||null,festival},200,{'Cache-Control':'public, max-age=30, s-maxage=30'});
+}
 if(path==='/api/_healthcheck')return json({message:'Success'});
 if(path==='/api/feedback'&&method==='POST'){
   if(!env.MAP132_KV)return json({error:'Feedback storage is not configured.'},503);
@@ -190,4 +198,33 @@ if(path==='/api/admin/enquiries'&&method==='GET'){
 if(path==='/api/admin/upload'&&method==='POST'){if(!env.MAP132_MEDIA)return json({error:'Cloudflare R2 media bucket is not configured yet.'},503);const allowed=['video/mp4','image/jpeg','image/png','image/webp'];const contentType=(req.headers.get('Content-Type')||'').split(';')[0].trim().toLowerCase();if(!allowed.includes(contentType))return json({error:'Unsupported media type. Upload MP4, JPG, PNG or WebP.'},400);const maxBytes=90*1024*1024;const declared=Number(req.headers.get('Content-Length')||0);if(declared>maxBytes)return json({error:'File exceeds the 90 MB direct-upload limit. Use a YouTube or Google Drive link for larger videos.'},413);if(!req.body)return json({error:'No file was received.'},400);let filename='media';try{filename=decodeURIComponent(req.headers.get('X-File-Name')||'media');}catch{}const safe=filename.replace(/[^a-zA-Z0-9._-]/g,'-').slice(-90)||'media';const key='portfolio/uploads/'+Date.now()+'-'+crypto.randomUUID()+'-'+safe;await env.MAP132_MEDIA.put(key,req.body,{httpMetadata:{contentType}});return json({path:key});}if(path==='/api/admin/delete-media'&&method==='POST'){if(!env.MAP132_MEDIA)return json({error:'Media bucket is not configured.'},503);const body=await req.json() as any;if(!String(body.path||'').startsWith('portfolio/uploads/'))return json({error:'Invalid path.'},400);await env.MAP132_MEDIA.delete(body.path);return json({deleted:true});}
 if(path.startsWith('/media/')&&method==='GET'&&env.MAP132_MEDIA){const key=decodeURIComponent(path.slice(7)),obj=await env.MAP132_MEDIA.get(key);if(!obj)return new Response('Not found',{status:404});return new Response(obj.body,{headers:{'Content-Type':obj.httpMetadata?.contentType||'application/octet-stream','Cache-Control':'public, max-age=3600'}});}
 return json({error:'Not found'},404);}
-export default {async fetch(req:Request,env:Env){const url=new URL(req.url);if(url.pathname.startsWith('/api/')||url.pathname.startsWith('/media/')){try{return await api(req,env);}catch(error){const detail=error instanceof Error?error.message:'Unknown worker exception';const name=error instanceof Error?error.name:'Error';return json({error:'Worker API exception ('+name+'): '+detail},500,{'Cache-Control':'no-store'});}}try{return await env.ASSETS.fetch(req);}catch(error){return new Response('Website asset service unavailable.',{status:502});}}};
+export default {
+  async fetch(req:Request,env:Env){
+    const url=new URL(req.url);
+    if(url.pathname.startsWith('/api/')||url.pathname.startsWith('/media/')){
+      try{return await api(req,env);}
+      catch(error){
+        const detail=error instanceof Error?error.message:'Unknown worker exception';
+        const name=error instanceof Error?error.name:'Error';
+        return json({error:'Worker API exception ('+name+'): '+detail},500,{'Cache-Control':'no-store'});
+      }
+    }
+    try{return await env.ASSETS.fetch(req);}
+    catch{return new Response('Website asset service unavailable.',{status:502});}
+  },
+  async scheduled(controller:ScheduledController,env:Env){
+    const today=getIndiaDateKey(new Date(controller.scheduledTime));
+    const festival=FESTIVAL_CALENDAR.find(item=>item.date===today);
+    if(!festival||!env.AI||!env.MAP132_KV)return;
+    const key='festival/greeting/'+today;
+    if(await env.MAP132_KV.get(key))return;
+    const prompt='Create a premium, elegant, cinematic festival background image for '+festival.name+
+      ' in India. Theme: '+festival.theme+'. Visual elements: '+festival.emoji+
+      '. Rich layered atmosphere, refined warm lighting, tasteful festive details, sophisticated gold accents, beautiful depth, high-end visual design for a professional video editing studio website. Wide composition with a clean central area for a separately overlaid logo and greeting. Absolutely no text, no letters, no words, no logos, no watermark.';
+    const generated=await env.AI.run('@cf/black-forest-labs/flux-1-schnell',{
+      prompt,steps:4
+    });
+    if(typeof generated?.image!=='string'||!generated.image)throw new Error('Workers AI returned no festival image.');
+    await env.MAP132_KV.put(key,generated.image,{expirationTtl:259200});
+  }
+};
