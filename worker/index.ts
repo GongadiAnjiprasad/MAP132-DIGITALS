@@ -103,6 +103,24 @@ if(path==='/api/resources/sounds'&&method==='GET'){
   const allowed=(data.results||[]).filter((sound:any)=>{const licence=String(sound.license||'').toLowerCase();return licence.includes('creativecommons.org/publicdomain/zero/')||(licence.includes('creativecommons.org/licenses/by/')&&!licence.includes('/by-nc/'));});
   return json({count:data.count||0,providerCount:data.count||0,allowedCount:allowed.length,page,nextPage:data.next?page+1:null,previousPage:data.previous?page-1:null,results:allowed.map((sound:any)=>({id:sound.id,title:sound.name,creator:sound.username,license:sound.license,duration:sound.duration,previewUrl:sound.previews?.['preview-hq-mp3']||sound.previews?.['preview-lq-mp3']||'',sourceUrl:sound.url||('https://freesound.org/s/'+sound.id+'/'),tags:sound.tags||[],description:sound.description||''}))});
 }
+if(path==='/api/resources/fonts'&&method==='GET'){
+  const cacheKey=new Request(new URL('/api/resources/fonts?catalogue=google-v1',url.origin).toString());
+  const cache=caches.default;
+  const cached=await cache.match(cacheKey);
+  if(cached)return cached;
+  const upstream=await fetch('https://fonts.google.com/metadata/fonts',{headers:{'Accept':'application/json','User-Agent':'MAP132-DIGITALS-font-catalogue/1.0'}});
+  if(!upstream.ok)return json({error:'Google Fonts metadata is temporarily unavailable.'},502);
+  const raw=await upstream.text();
+  const start=raw.indexOf('{');
+  if(start<0)return json({error:'Google Fonts returned an unreadable catalogue.'},502);
+  let catalogue:any;try{catalogue=JSON.parse(raw.slice(start));}catch{return json({error:'Google Fonts catalogue could not be parsed.'},502);}
+  const families=Array.isArray(catalogue.familyMetadataList)?catalogue.familyMetadataList:Array.isArray(catalogue.items)?catalogue.items:[];
+  if(!families.length)return json({error:'Google Fonts returned no families.'},502);
+  const fonts=families.map((font:any)=>({family:String(font.family||font.name||'').trim(),category:String(font.category||'sans-serif'),subsets:Array.isArray(font.subsets)?font.subsets:[],lastModified:String(font.lastModified||''),tags:Array.isArray(font.tags)?font.tags:[]})).filter((font:any)=>font.family);
+  const response=json({source:'google-fonts-metadata',count:fonts.length,updatedAt:new Date().toISOString(),fonts},200,{'Cache-Control':'public, max-age=21600, s-maxage=21600'});
+  await cache.put(cacheKey,response.clone());
+  return response;
+}
 if(path==='/api/_healthcheck')return json({message:'Success'});
 if(path==='/api/enquiries'&&method==='POST'){
    if(!env.MAP132_KV)return json({error:'Enquiry storage is not configured.'},503);
