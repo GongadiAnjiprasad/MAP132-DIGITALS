@@ -35,11 +35,15 @@ async function dispatchTouchSwipe(
         y: start.y + (end.y - start.y) * progress,
       }],
     });
+    // Let Chromium process each touch frame before the next CDP event.
+    await new Promise(resolve => setTimeout(resolve, 16));
   }
   await session.send('Input.dispatchTouchEvent', {
     type: 'touchEnd',
     touchPoints: [],
   });
+  // Flush the final pointerup/click sequence before assertions inspect page state.
+  await new Promise(resolve => setTimeout(resolve, 40));
   await session.detach();
 }
 test('mobile horizontal swipe advances the main portfolio page', async ({ page }) => {
