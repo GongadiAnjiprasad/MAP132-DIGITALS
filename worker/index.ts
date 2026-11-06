@@ -222,7 +222,7 @@ export default {
       ' in India. Theme: '+festival.theme+'. Visual elements: '+festival.emoji+
       '. Rich layered atmosphere, refined warm lighting, tasteful festive details, sophisticated gold accents, beautiful depth, high-end visual design for a professional video editing studio website. Wide composition with a clean central area for a separately overlaid logo and greeting. Absolutely no text, no letters, no words, no logos, no watermark.';
     const generated=await env.AI.run('@cf/black-forest-labs/flux-1-schnell',{
-      prompt,steps:4,width:1024,height:1024
+      prompt,steps:4
     });
     if(typeof generated?.image!=='string'||!generated.image)throw new Error('Workers AI returned no festival image.');
     await env.MAP132_KV.put(key,generated.image,{expirationTtl:259200});
