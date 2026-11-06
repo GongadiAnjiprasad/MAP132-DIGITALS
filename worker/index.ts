@@ -128,7 +128,7 @@ if(path==='/api/_healthcheck')return json({message:'Success'});\nif(path==='/api
   const kind=String(body.kind||'').trim(),message=String(body.message||'').trim(),email=String(body.email||'').trim(),rating=Number(body.rating);
   if(!['Suggestion','Report a bug','Request a feature'].includes(kind))return json({error:'Choose a valid feedback type.'},400);
   if(message.length<10||message.length>2000)return json({error:'Message must be between 10 and 2000 characters.'},400);
-  if(email.length>254|| (email&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)))return json({error:'Enter a valid email address.'},400);
+  if(email.length>254|| (email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)))return json({error:'Enter a valid email address.'},400);
   if(!Number.isInteger(rating)||rating<1||rating>5)return json({error:'Choose a rating from 1 to 5.'},400);
   const ip=req.headers.get('CF-Connecting-IP')||'unknown';
   const digest=await crypto.subtle.digest('SHA-256',encoder.encode(ip));
