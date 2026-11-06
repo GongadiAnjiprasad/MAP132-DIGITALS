@@ -188,7 +188,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   const whatsappDigits = p.whatsapp.replace(/\D/g, '');
   const whatsapp = whatsappDigits.length === 10 ? '91' + whatsappDigits : whatsappDigits;
   const whatsappUrl = whatsapp ? 'https://wa.me/' + whatsapp : '';
-  const goTo = (index: number) => setActive(Math.max(0, Math.min(pages.length - 1, index)));
+  const goTo = (index: number) => { window.dispatchEvent(new Event('map132-page-change')); setActive(Math.max(0, Math.min(pages.length - 1, index))); };
   useEffect(() => {
     const onKey = (event: KeyboardEvent) => {
       if (activePreview !== null) {
