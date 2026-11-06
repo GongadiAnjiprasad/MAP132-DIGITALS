@@ -7,6 +7,7 @@ import DemoShowcase from './DemoShowcase';
 import { api } from './api';
 import { getHorizontalSwipeDirection } from './swipeGesture';
 import { DEMO_SHOWCASE } from './demoShowcase';
+import { useAmbientServiceTheme } from './modules/ambient-service-themes/useAmbientServiceTheme';
 
 type PortfolioItem = {
   id: string; title: string; category: string; description: string;
@@ -33,12 +34,12 @@ const previewVideos = [
  {src:'https://videos.pexels.com/video-files/8100337/8100337-uhd_4096_2160_25fps.mp4',note:'Stock-footage visual study · AI and motion workflow'}
 ];
 const serviceCards = [
-  { title: 'Cinematic Films', note: 'Trailers · Teasers · Story edits', image: DEMO_SHOWCASE[0].image, number: '01' },
-  { title: 'Wedding & Celebrations', note: 'Weddings · Birthdays · Event highlights', image: DEMO_SHOWCASE[1].image, number: '02' },
-  { title: 'Reels & Shorts', note: 'Hooks · Vertical edits · Social content', image: DEMO_SHOWCASE[3].image, number: '03' },
-  { title: 'YouTube & Podcasts', note: 'Videos · Podcasts · Interviews · News edits', image: DEMO_SHOWCASE[4].image, number: '04' },
-  { title: 'Brand Promotions', note: 'Products · Ads · Business films', image: DEMO_SHOWCASE[5].image, number: '05' },
-  { title: 'AI Video Creation', note: 'AI visuals · Concepts · Motion', image: DEMO_SHOWCASE[6].image, number: '06' }
+  { title: 'Cinematic Films', note: 'Trailers · Teasers · Story edits', image: DEMO_SHOWCASE[0].image, number: '01', theme: 'cinematic' },
+  { title: 'Wedding & Celebrations', note: 'Weddings · Birthdays · Event highlights', image: DEMO_SHOWCASE[1].image, number: '02', theme: 'celebrations' },
+  { title: 'Reels & Shorts', note: 'Hooks · Vertical edits · Social content', image: DEMO_SHOWCASE[3].image, number: '03', theme: 'reels' },
+  { title: 'YouTube & Podcasts', note: 'Videos · Podcasts · Interviews · News edits', image: DEMO_SHOWCASE[4].image, number: '04', theme: 'youtube' },
+  { title: 'Brand Promotions', note: 'Products · Ads · Business films', image: DEMO_SHOWCASE[5].image, number: '05', theme: 'advertising' },
+  { title: 'AI Video Creation', note: 'AI visuals · Concepts · Motion', image: DEMO_SHOWCASE[6].image, number: '06', theme: 'ai' }
 ];
 
 const sampleProjects: PortfolioItem[] = DEMO_SHOWCASE.map((item, index) => ({
@@ -98,6 +99,7 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 
 export default function HomeSlider({ content }: { content: HomeContent }) {
   const [active, setActive] = useState(0);
+  const ambientTheme = useAmbientServiceTheme();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
       return window.localStorage.getItem('map132-theme') === 'light' ? 'light' : 'dark';
@@ -267,7 +269,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     { label: 'Email', href: p.email ? 'mailto:' + p.email : '', icon: <Mail size={16}/> }
   ].filter(link => link.href);
 
-  return <div data-theme={theme} className={`map132-slider-site ${desktopArrowsVisible ? "" : "ms-nav-arrows-hidden"}`}>
+  return <div data-theme={theme} style={ambientTheme.style} className={`map132-slider-site ${desktopArrowsVisible ? "" : "ms-nav-arrows-hidden"}`}>
     <header className="ms-header">
       <a className="ms-brand" href="#top" onClick={e => { e.preventDefault(); goTo(0); }}>
         <img src="/resources/logo-removebg-preview.png" alt="MAP132 DIGITALS"/>
@@ -306,7 +308,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
           <div className="ms-home-showcase">
             <div className="ms-showcase-top"><span>WHAT WE CAN CREATE</span><span>MAP132 / 01—06</span></div>
             <div className="ms-service-bento">
-              {serviceCards.map((card, index) => <button type="button" key={card.title} aria-label={`Play ${card.title} sample video`} title={`Play ${card.title} sample video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onClick={() => setActivePreview(index)} style={{ backgroundImage: `linear-gradient(180deg, #090b0e08 5%, #090b0edb 100%), url("${card.image}")` }}>
+              {serviceCards.map((card, index) => <button type="button" key={card.title} data-service-theme={card.theme} aria-label={`Play ${card.title} sample video`} title={`Play ${card.title} sample video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={() => { ambientTheme.pin(card.theme); setActivePreview(index); }} style={{ backgroundImage: `linear-gradient(180deg, #090b0e08 5%, #090b0edb 100%), url("${card.image}")` }}>
                 <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small>
               </button>)}
             </div>
@@ -333,7 +335,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
         <section className="ms-page ms-services-page" aria-label="Services">
           <div className="ms-page-heading"><div><p className="ms-kicker">SERVICES / MADE FOR YOUR STORY</p><h2>One studio.<br/><em>Many ways to tell it.</em></h2></div><p>Choose the format that fits your idea. Every project starts with a clear purpose and a simple conversation.</p></div>
           <div className="ms-services-grid">
-            {serviceCards.map((card, index) => <article className="ms-service-detail" key={card.title}><span>{card.number} / SERVICE</span><div className="ms-service-detail-image" style={{backgroundImage:`linear-gradient(180deg,transparent,#080a0de8),url("${card.image}")`}}/><h3>{card.title}</h3><p>{['Story-led teaser cuts, cinematic trailers and mood-driven short films.','Wedding films, birthday invitations, event highlights, couple entries and celebration montages.','Fast hooks, captions, beat cuts and vertical edits for Instagram, YouTube Shorts and social platforms.','YouTube videos, vlogs, tutorials, podcast episodes, interviews, explainers and news packages.','Product showcases, launch promos, service ads and social campaign videos.','AI-assisted concepts, generated visual sequences and creative motion treatments.'][index]}</p></article>)}
+            {serviceCards.map((card, index) => <article className="ms-service-detail" key={card.title} data-service-theme={card.theme} tabIndex={0} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={() => ambientTheme.pin(card.theme)} onKeyDown={event => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); ambientTheme.pin(card.theme); } }}><span>{card.number} / SERVICE</span><div className="ms-service-detail-image" style={{backgroundImage:`linear-gradient(180deg,transparent,#080a0de8),url("${card.image}")`}}/><h3>{card.title}</h3><p>{['Story-led teaser cuts, cinematic trailers and mood-driven short films.','Wedding films, birthday invitations, event highlights, couple entries and celebration montages.','Fast hooks, captions, beat cuts and vertical edits for Instagram, YouTube Shorts and social platforms.','YouTube videos, vlogs, tutorials, podcast episodes, interviews, explainers and news packages.','Product showcases, launch promos, service ads and social campaign videos.','AI-assisted concepts, generated visual sequences and creative motion treatments.'][index]}</p></article>)}
           </div>
           <div className="ms-services-note"><Sparkles size={17}/> Also available: motion titles, logo reveals, lyric videos and custom editing support.</div>
           <div className="ms-service-includes"><div><span>EDITING DETAILS</span><b>Story-led cuts</b><p>Structure, pacing and a clear beginning-to-end flow.</p></div><div><span>VISUAL FINISH</span><b>Titles & colour</b><p>Readable typography, colour treatment and clean transitions.</p></div><div><span>SOUND FINISH</span><b>Music & audio</b><p>Dialogue balance, music placement and sound effects where suitable.</p></div><div><span>FINAL FILES</span><b>Platform formats</b><p>Export format and resolution agreed for your intended platform.</p></div></div>

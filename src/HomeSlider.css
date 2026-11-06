@@ -1349,3 +1349,11 @@
   color: #93601f;
   font-weight: 700;
 }
+
+
+/* Ambient service-theme module: isolated accent token; no global palette replacement. */
+.map132-slider-site{--ms-ambient-accent:#080D18;background:radial-gradient(ellipse at 78% 18%,color-mix(in srgb,var(--ms-ambient-accent) 18%,transparent),transparent 46%),radial-gradient(ellipse at 80% 25%,#252319 0%,#10131a 36%,var(--ms-bg) 75%);transition:background .7s ease}
+.ms-service-tile,.ms-service-detail{transition:border-color .35s ease,box-shadow .45s ease,transform .25s ease}
+.ms-service-tile:hover,.ms-service-tile:focus-visible,.ms-service-detail:hover,.ms-service-detail:focus-visible{border-color:color-mix(in srgb,var(--ms-ambient-accent) 72%,white 8%);box-shadow:0 0 24px color-mix(in srgb,var(--ms-ambient-accent) 22%,transparent)}
+.ms-service-detail{cursor:pointer;outline-offset:3px}
+@media(prefers-reduced-motion:reduce){.map132-slider-site{transition:none}.ms-service-tile,.ms-service-detail{transition:none}}
