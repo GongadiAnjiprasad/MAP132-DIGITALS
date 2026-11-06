@@ -45,7 +45,7 @@ export const FESTIVAL_CAMPAIGN_DAYS: readonly CampaignDay[] = [
 ] as const;
 
 function parseDateKey(key: string): number | null {
-  if (!/^\\d{4}-\\d{2}-\\d{2}$/.test(key)) return null;
+  if (!/^[0-9]{4}-[0-9]{2}-[0-9]{2}$/.test(key)) return null;
   const [year, month, day] = key.split('-').map(Number);
   const timestamp = Date.UTC(year, month - 1, day);
   const check = new Date(timestamp);
