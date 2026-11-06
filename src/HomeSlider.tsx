@@ -7,7 +7,7 @@ import DemoShowcase from './DemoShowcase';
 import { api } from './api';
 import { getHorizontalSwipeDirection } from './swipeGesture';
 import { DEMO_SHOWCASE } from './demoShowcase';
-import { useAmbientServiceTheme } from './modules/ambient-service-themes/useAmbientServiceTheme';
+import { useAmbientServiceTheme, type ServiceThemeKey } from './modules/ambient-service-themes/useAmbientServiceTheme';
 
 type PortfolioItem = {
   id: string; title: string; category: string; description: string;
@@ -181,7 +181,8 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   const [enquiryBusy, setEnquiryBusy] = useState(false);
   const [enquiryError, setEnquiryError] = useState('');
   const previewGesture = useRef<{ x: number; y: number; pointerId?: number } | null>(null);
-  const changePreview = (direction: number) => setActivePreview(current => current === null ? null : (current + direction + previewVideos.length) % previewVideos.length);
+  const changePreview = (direction: number) => { ambientTheme.clearPlayback(); setActivePreview(current => current === null ? null : (current + direction + previewVideos.length) % previewVideos.length); };
+  const closePreview = () => { ambientTheme.clearPlayback(); setActivePreview(null); };
   const pointerStart = useRef<{ x: number; y: number; pointerId: number; atHomeTop: boolean } | null>(null);
   const suppressSwipeClick = useRef(false);
   const wheelTotal = useRef(0);
@@ -196,7 +197,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       if (activePreview !== null) {
         if (event.key === 'ArrowRight') { event.preventDefault(); changePreview(1); }
         if (event.key === 'ArrowLeft') { event.preventDefault(); changePreview(-1); }
-        if (event.key === 'Escape') setActivePreview(null);
+        if (event.key === 'Escape') closePreview();
         return;
       }
       if (event.key === 'ArrowRight') goTo(active + 1);
@@ -382,11 +383,11 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       </div>
     </main>
 
-    {activePreview !== null && <div className="ms-preview-modal" role="dialog" aria-modal="true" aria-label={serviceCards[activePreview].title + ' video preview'} onClick={() => setActivePreview(null)}>
+    {activePreview !== null && <div className="ms-preview-modal" role="dialog" aria-modal="true" aria-label={serviceCards[activePreview].title + ' video preview'} onClick={closePreview}>
       <div className="ms-preview-dialog" onClick={event => event.stopPropagation()} onPointerDown={event => { if (event.pointerType !== 'touch' && event.pointerType !== 'pen' && event.pointerType !== 'mouse') return; if ((event.target as HTMLElement).closest('button, input')) return; event.currentTarget.setPointerCapture(event.pointerId); previewGesture.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId }; }} onPointerUp={event => { const start = previewGesture.current; previewGesture.current = null; if (!start || start.pointerId !== event.pointerId) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; const direction = getHorizontalSwipeDirection(dx, dy, event.pointerType === 'mouse' ? 55 : 42, 1.15); if (direction !== 0) changePreview(direction); }} onPointerCancel={() => { previewGesture.current = null; }} onWheel={event => { if (Math.abs(event.deltaX) < Math.abs(event.deltaY) * 1.15 || Math.abs(event.deltaX) < 2) return; event.preventDefault(); if (wheelLocked.current) return; wheelTotal.current += event.deltaX; if (Math.abs(wheelTotal.current) >= 58) { changePreview(wheelTotal.current > 0 ? 1 : -1); wheelTotal.current = 0; wheelLocked.current = true; window.setTimeout(() => { wheelLocked.current = false; }, 520); } }}>
-        <div className="ms-preview-dialog-head"><div><span>MAP132 DIGITALS / SHOWCASE PREVIEW</span><h2>{serviceCards[activePreview].title}</h2></div><button type="button" className="ms-preview-close" aria-label="Close video" onClick={() => setActivePreview(null)}><X size={22}/></button></div>
+        <div className="ms-preview-dialog-head"><div><span>MAP132 DIGITALS / SHOWCASE PREVIEW</span><h2>{serviceCards[activePreview].title}</h2></div><button type="button" className="ms-preview-close" aria-label="Close video" onClick={closePreview}><X size={22}/></button></div>
         <div className="ms-preview-stage">
-          <video key={activePreview} className="ms-preview-player" src={previewVideos[activePreview].src} controls autoPlay playsInline preload="metadata">Your browser does not support video playback.</video>
+          <video key={activePreview} className="ms-preview-player" src={previewVideos[activePreview].src} controls autoPlay playsInline preload="metadata" onPlay={() => ambientTheme.setPlayback(serviceCards[activePreview].theme as ServiceThemeKey)} onPause={ambientTheme.clearPlayback} onEnded={ambientTheme.clearPlayback}>Your browser does not support video playback.</video>
           <span className="ms-preview-swipe-hint ms-preview-swipe-left" aria-hidden="true"><ArrowLeft size={25}/></span>
           <span className="ms-preview-swipe-hint ms-preview-swipe-right" aria-hidden="true"><ArrowRight size={25}/></span>
         </div>
