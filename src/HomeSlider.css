@@ -1349,3 +1349,9 @@
   color: #93601f;
   font-weight: 700;
 }
+
+/* Position-only adjustment: keep the existing workspace and feedback actions visible below the header. */
+.ms-quick-actions{flex:0 0 auto;display:flex;align-items:center;justify-content:flex-end;gap:12px;flex-wrap:wrap;padding:8px clamp(20px,5vw,76px);background:rgba(8,10,14,.94);border-bottom:1px solid var(--ms-line);}
+.ms-quick-actions .ms-studio-link{display:inline-flex;align-items:center;gap:5px;padding:8px 11px;border:1px solid rgba(232,199,138,.38);border-radius:2px;color:var(--ms-gold2);text-decoration:none;font-size:9px;font-weight:800;letter-spacing:1px;opacity:1;}
+.ms-quick-actions .ms-studio-link:hover,.ms-quick-actions .ms-studio-link:focus-visible{border-color:var(--ms-gold2);color:var(--ms-gold2);outline:none;}
+@media(max-width:760px){.ms-quick-actions{justify-content:center;gap:8px;padding:7px 12px}.ms-quick-actions .ms-studio-link{padding:7px 9px;font-size:8px}.ms-quick-actions .ms-feedback-footer-button{padding:7px 9px;font-size:8px}}
