@@ -7,15 +7,19 @@ keep_vars = true
 binding = "MAP132_KV"
 id = "132f9ac025434a89a7d73a83328e20bf"
 
+[ai]
+binding = "AI"
+
+[triggers]
+crons = ["35,45,55 18 * * *"]
+
 [assets]
 directory = "./dist"
 binding = "ASSETS"
 run_worker_first = ["/api/*", "/media/*"]
 
-
-# Configure these bindings in the Cloudflare Worker dashboard before deployment:
+# Existing dashboard configuration:
 # KV namespace binding: MAP132_KV
 # R2 bucket binding: MAP132_MEDIA
-# Worker secret required for live audio catalogue search: FREESOUND_API_KEY
-# Add it with: npx wrangler secret put FREESOUND_API_KEY
-# Keep the key server-side; never place it in frontend code.
+# Worker secrets: ADMIN_PASSWORD and FREESOUND_API_KEY
+# Workers AI is a native binding; no API key is placed in frontend code.
