@@ -83,7 +83,7 @@ export function getFestivalCampaign(
   const next = upcoming[0];
   if (!next) return null;
   const isFestivalDay = next.daysUntil === 0;
-  const dayNumber = isFestivalDay ? 10 : 10 - next.daysUntil;
+  const dayNumber = isFestivalDay ? 10 : 11 - next.daysUntil;
   return {
     festival: next.festival,
     daysUntil: next.daysUntil,
