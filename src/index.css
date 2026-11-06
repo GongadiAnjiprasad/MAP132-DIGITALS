@@ -1440,3 +1440,54 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-launch{position:fixed;right:22px;bottom:112px;z-index:90;display:flex;align-items:center;gap:9px;padding:13px 17px;border:1px solid #d5aa66;background:#171613;color:#f3f0e9;box-shadow:0 12px 35px #0008;font-size:11px;font-weight:800;letter-spacing:.8px;transition:transform .2s,background .2s}
 .feedback-launch:hover{transform:translateY(-3px);background:#d5aa66;color:#171613}
 @media(max-width:600px){.feedback-launch{right:12px;bottom:calc(92px + env(safe-area-inset-bottom));z-index:999;padding:12px 14px}}
+
+
+/* MAP132 Royal Gold feedback launcher — visual-only enhancement */
+.feedback-launch.royal-feedback-launch{
+  isolation:isolate;position:fixed;right:22px;bottom:112px;z-index:90;
+  width:54px;height:54px;min-width:54px;padding:0;gap:0;overflow:visible;
+  justify-content:center;border:1px solid #e6c779;border-radius:999px;
+  color:#f8e5b0;background:radial-gradient(circle at 35% 25%,#393020 0%,#171613 68%);
+  box-shadow:0 0 0 1px #d5aa6633,0 0 15px #d5aa6680,0 8px 24px #0009;
+  transition:width .42s cubic-bezier(.2,.8,.2,1),padding .42s ease,box-shadow .3s ease,background .3s ease,transform .25s ease;
+  animation:royal-feedback-glow 2.8s ease-in-out infinite;
+}
+.feedback-launch.royal-feedback-launch::before{
+  content:"";position:absolute;inset:-6px;border:1px solid #e5c16c66;border-radius:inherit;
+  box-shadow:0 0 16px #d5aa6655;opacity:.65;pointer-events:none;z-index:-1;
+  transition:inset .42s ease,opacity .3s ease;
+}
+.feedback-launch.royal-feedback-launch .feedback-mark{
+  width:100%;height:100%;display:grid;place-items:center;flex:0 0 100%;
+  font:800 23px/1 Manrope,sans-serif;color:#f0cf82;text-shadow:0 0 10px #e8bd5eaa;
+  transition:flex-basis .42s ease,font-size .3s ease;
+}
+.feedback-launch.royal-feedback-launch .feedback-launch-text{
+  max-width:0;opacity:0;overflow:hidden;white-space:nowrap;
+  font-size:11px;font-weight:800;letter-spacing:.9px;
+  transition:max-width .38s ease,opacity .2s ease .08s;
+}
+.feedback-launch.royal-feedback-launch.is-expanded{
+  width:150px;padding:0 19px;gap:10px;justify-content:flex-start;
+  background:linear-gradient(135deg,#302719,#171613 72%);
+  box-shadow:0 0 0 1px #d5aa6655,0 0 23px #d5aa6699,0 10px 28px #000a;
+}
+.feedback-launch.royal-feedback-launch.is-expanded .feedback-mark{width:22px;height:100%;flex:0 0 22px;font-size:20px}
+.feedback-launch.royal-feedback-launch.is-expanded .feedback-launch-text{max-width:100px;opacity:1}
+.feedback-launch.royal-feedback-launch:hover{
+  transform:translateY(-3px);border-color:#ffe3a0;color:#fff1c9;
+  box-shadow:0 0 0 1px #f1d58a77,0 0 28px #e3b85eaa,0 12px 30px #000a;
+}
+.feedback-launch.royal-feedback-launch:hover::before{inset:-8px;opacity:1}
+@keyframes royal-feedback-glow{
+  0%,100%{box-shadow:0 0 0 1px #d5aa6633,0 0 13px #d5aa6670,0 8px 24px #0009}
+  50%{box-shadow:0 0 0 1px #e8c97866,0 0 21px #d5aa66aa,0 8px 26px #0009}
+}
+@media(max-width:600px){
+  .feedback-launch.royal-feedback-launch{right:12px;bottom:calc(92px + env(safe-area-inset-bottom));z-index:999;width:52px;height:52px;min-width:52px}
+  .feedback-launch.royal-feedback-launch.is-expanded{width:146px;padding:0 17px}
+}
+@media(prefers-reduced-motion:reduce){
+  .feedback-launch.royal-feedback-launch{animation:none;transition:none}
+  .feedback-launch.royal-feedback-launch::before,.feedback-launch.royal-feedback-launch .feedback-mark,.feedback-launch.royal-feedback-launch .feedback-launch-text{transition:none}
+}
