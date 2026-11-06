@@ -1,0 +1,797 @@
+{
+  "version": 2,
+  "updated": "2026-11-06",
+  "fonts": [
+    {
+      "n": "Teko",
+      "c": "tollywood",
+      "s": "Bold title / action",
+      "f": "Teko",
+      "t": "THE FINAL CHAPTER"
+    },
+    {
+      "n": "Oswald",
+      "c": "tollywood",
+      "s": "Drama / poster",
+      "f": "Oswald",
+      "t": "A STORY BEGINS"
+    },
+    {
+      "n": "Anton",
+      "c": "tollywood",
+      "s": "Power title",
+      "f": "Anton",
+      "t": "THE LAST STAND"
+    },
+    {
+      "n": "Cinzel",
+      "c": "tollywood",
+      "s": "Epic / period drama",
+      "f": "Cinzel",
+      "t": "THE LEGEND"
+    },
+    {
+      "n": "Bebas Neue",
+      "c": "hollywood",
+      "s": "Trailer / action",
+      "f": "Bebas Neue",
+      "t": "ONE LAST MISSION"
+    },
+    {
+      "n": "Black Ops One",
+      "c": "hollywood",
+      "s": "War / thriller",
+      "f": "Black Ops One",
+      "t": "OPERATION ZERO"
+    },
+    {
+      "n": "Orbitron",
+      "c": "hollywood",
+      "s": "Sci-fi / futuristic",
+      "f": "Orbitron",
+      "t": "BEYOND TOMORROW"
+    },
+    {
+      "n": "Audiowide",
+      "c": "hollywood",
+      "s": "Tech / sci-fi",
+      "f": "Audiowide",
+      "t": "THE NEXT DIMENSION"
+    },
+    {
+      "n": "Cormorant Garamond",
+      "c": "hollywood",
+      "s": "Prestige / period",
+      "f": "Cormorant Garamond",
+      "t": "A TIMELESS STORY"
+    },
+    {
+      "n": "Special Elite",
+      "c": "hollywood",
+      "s": "Mystery / vintage",
+      "f": "Special Elite",
+      "t": "CLASSIFIED FILES"
+    },
+    {
+      "n": "Dhurjati",
+      "c": "telugu",
+      "s": "Telugu display",
+      "f": "Dhurjati",
+      "t": "ఒక కొత్త కథ"
+    },
+    {
+      "n": "Gurajada",
+      "c": "telugu",
+      "s": "Telugu classic",
+      "f": "Gurajada",
+      "t": "వీర గాథ"
+    },
+    {
+      "n": "Ramabhadra",
+      "c": "telugu",
+      "s": "Telugu title",
+      "f": "Ramabhadra",
+      "t": "అంతిమ పోరాటం"
+    },
+    {
+      "n": "NTR",
+      "c": "telugu",
+      "s": "Telugu bold",
+      "f": "NTR",
+      "t": "సింహ గర్జన"
+    },
+    {
+      "n": "Suranna",
+      "c": "telugu",
+      "s": "Telugu classic",
+      "f": "Suranna",
+      "t": "మహా ప్రస్థానం"
+    },
+    {
+      "n": "Tenali Ramakrishna",
+      "c": "telugu",
+      "s": "Telugu display",
+      "f": "Tenali Ramakrishna",
+      "t": "రాజ్య రహస్యం"
+    },
+    {
+      "n": "Mallanna",
+      "c": "telugu",
+      "s": "Telugu text",
+      "f": "Mallanna",
+      "t": "వేట మొదలైంది"
+    },
+    {
+      "n": "Mandali",
+      "c": "telugu",
+      "s": "Telugu clean",
+      "f": "Mandali",
+      "t": "కొత్త అధ్యాయం"
+    },
+    {
+      "n": "Noto Sans Telugu",
+      "c": "telugu",
+      "s": "Telugu versatile",
+      "f": "Noto Sans Telugu",
+      "t": "తెలుగు సినిమా"
+    },
+    {
+      "n": "Noto Serif Telugu",
+      "c": "telugu",
+      "s": "Telugu cinematic serif",
+      "f": "Noto Serif Telugu",
+      "t": "తెలుగు కథా ప్రపంచం"
+    },
+    {
+      "n": "Ramaraja",
+      "c": "telugu",
+      "s": "Telugu classic",
+      "f": "Ramaraja",
+      "t": "ధర్మ యుద్ధం"
+    },
+    {
+      "n": "Timmana",
+      "c": "telugu",
+      "s": "Telugu display",
+      "f": "Timmana",
+      "t": "విజయం మనదే"
+    },
+    {
+      "n": "Alfa Slab One",
+      "c": "action",
+      "s": "Heavy mass / punch title",
+      "f": "Alfa Slab One",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Archivo Black",
+      "c": "action",
+      "s": "Bold action / poster",
+      "f": "Archivo Black",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Bangers",
+      "c": "action",
+      "s": "Comic action / energetic",
+      "f": "Bangers",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Bowlby One SC",
+      "c": "action",
+      "s": "Mass title / bold display",
+      "f": "Bowlby One SC",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Bungee",
+      "c": "action",
+      "s": "Street / action title",
+      "f": "Bungee",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Bungee Shade",
+      "c": "action",
+      "s": "3D-style display lettering",
+      "f": "Bungee Shade",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Changa One",
+      "c": "action",
+      "s": "Energetic action / comedy",
+      "f": "Changa One",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Concert One",
+      "c": "action",
+      "s": "Bold commercial title",
+      "f": "Concert One",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Days One",
+      "c": "action",
+      "s": "Compact mass title",
+      "f": "Days One",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Dela Gothic One",
+      "c": "action",
+      "s": "Heavy dramatic title",
+      "f": "Dela Gothic One",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Jockey One",
+      "c": "action",
+      "s": "Condensed action title",
+      "f": "Jockey One",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Kanit",
+      "c": "action",
+      "s": "Action / modern poster",
+      "f": "Kanit",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Khand",
+      "c": "action",
+      "s": "Condensed mass title",
+      "f": "Khand",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Lilita One",
+      "c": "action",
+      "s": "Playful commercial title",
+      "f": "Lilita One",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Passion One",
+      "c": "action",
+      "s": "Bold action / impact",
+      "f": "Passion One",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Russo One",
+      "c": "action",
+      "s": "Power / sports title",
+      "f": "Russo One",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Saira Stencil One",
+      "c": "action",
+      "s": "Military / action title",
+      "f": "Saira Stencil One",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Shojumaru",
+      "c": "action",
+      "s": "Martial arts / fantasy",
+      "f": "Shojumaru",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Black Han Sans",
+      "c": "action",
+      "s": "Heavy display title",
+      "f": "Black Han Sans",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Gasoek One",
+      "c": "action",
+      "s": "Ultra-bold display title",
+      "f": "Gasoek One",
+      "t": "NO TURNING BACK"
+    },
+    {
+      "n": "Cinzel Decorative",
+      "c": "epic",
+      "s": "Mythology / fantasy epic",
+      "f": "Cinzel Decorative",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "DM Serif Display",
+      "c": "epic",
+      "s": "Prestige / period drama",
+      "f": "DM Serif Display",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "Graduate",
+      "c": "epic",
+      "s": "Sports / vintage title",
+      "f": "Graduate",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "Grenze Gotisch",
+      "c": "epic",
+      "s": "Gothic / dark fantasy",
+      "f": "Grenze Gotisch",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "Marcellus",
+      "c": "epic",
+      "s": "Royal / historical drama",
+      "f": "Marcellus",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "Playfair Display",
+      "c": "epic",
+      "s": "Romance / period poster",
+      "f": "Playfair Display",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "Ultra",
+      "c": "epic",
+      "s": "Classic cinematic serif",
+      "f": "Ultra",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "Vidaloka",
+      "c": "epic",
+      "s": "Vintage / period title",
+      "f": "Vidaloka",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "Young Serif",
+      "c": "epic",
+      "s": "Literary / prestige drama",
+      "f": "Young Serif",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "Yeseva One",
+      "c": "epic",
+      "s": "Elegant epic title",
+      "f": "Yeseva One",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "IM Fell English SC",
+      "c": "epic",
+      "s": "Historical / antique title",
+      "f": "IM Fell English SC",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "Libre Baskerville",
+      "c": "epic",
+      "s": "Classic drama / editorial",
+      "f": "Libre Baskerville",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "Bodoni Moda",
+      "c": "epic",
+      "s": "Luxury / period title",
+      "f": "Bodoni Moda",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "Cormorant SC",
+      "c": "epic",
+      "s": "Elegant historical title",
+      "f": "Cormorant SC",
+      "t": "THE LEGEND RISES"
+    },
+    {
+      "n": "Kelly Slab",
+      "c": "thriller",
+      "s": "Crime / industrial title",
+      "f": "Kelly Slab",
+      "t": "THE LAST SECRET"
+    },
+    {
+      "n": "Notable",
+      "c": "thriller",
+      "s": "Compact thriller title",
+      "f": "Notable",
+      "t": "THE LAST SECRET"
+    },
+    {
+      "n": "Patua One",
+      "c": "thriller",
+      "s": "Retro mystery / drama",
+      "f": "Patua One",
+      "t": "THE LAST SECRET"
+    },
+    {
+      "n": "Rye",
+      "c": "thriller",
+      "s": "Western / vintage title",
+      "f": "Rye",
+      "t": "THE LAST SECRET"
+    },
+    {
+      "n": "Staatliches",
+      "c": "thriller",
+      "s": "Minimal thriller poster",
+      "f": "Staatliches",
+      "t": "THE LAST SECRET"
+    },
+    {
+      "n": "Unica One",
+      "c": "thriller",
+      "s": "Mystery / suspense title",
+      "f": "Unica One",
+      "t": "THE LAST SECRET"
+    },
+    {
+      "n": "Zilla Slab Highlight",
+      "c": "thriller",
+      "s": "Graphic thriller title",
+      "f": "Zilla Slab Highlight",
+      "t": "THE LAST SECRET"
+    },
+    {
+      "n": "Barlow Condensed",
+      "c": "thriller",
+      "s": "Crime / news title",
+      "f": "Barlow Condensed",
+      "t": "THE LAST SECRET"
+    },
+    {
+      "n": "Roboto Condensed",
+      "c": "thriller",
+      "s": "Documentary / thriller",
+      "f": "Roboto Condensed",
+      "t": "THE LAST SECRET"
+    },
+    {
+      "n": "IBM Plex Mono",
+      "c": "thriller",
+      "s": "Tech mystery / dossier",
+      "f": "IBM Plex Mono",
+      "t": "THE LAST SECRET"
+    },
+    {
+      "n": "Space Mono",
+      "c": "thriller",
+      "s": "Investigative / tech title",
+      "f": "Space Mono",
+      "t": "THE LAST SECRET"
+    },
+    {
+      "n": "Cutive Mono",
+      "c": "thriller",
+      "s": "Typewriter / classified file",
+      "f": "Cutive Mono",
+      "t": "THE LAST SECRET"
+    },
+    {
+      "n": "Fira Sans Condensed",
+      "c": "thriller",
+      "s": "Tight suspense poster",
+      "f": "Fira Sans Condensed",
+      "t": "THE LAST SECRET"
+    },
+    {
+      "n": "Chakra Petch",
+      "c": "scifi",
+      "s": "Futuristic / tech title",
+      "f": "Chakra Petch",
+      "t": "BEYOND THE STARS"
+    },
+    {
+      "n": "Exo 2",
+      "c": "scifi",
+      "s": "Sci-fi / space title",
+      "f": "Exo 2",
+      "t": "BEYOND THE STARS"
+    },
+    {
+      "n": "Gugi",
+      "c": "scifi",
+      "s": "Futuristic display",
+      "f": "Gugi",
+      "t": "BEYOND THE STARS"
+    },
+    {
+      "n": "Iceland",
+      "c": "scifi",
+      "s": "Digital / sci-fi title",
+      "f": "Iceland",
+      "t": "BEYOND THE STARS"
+    },
+    {
+      "n": "Michroma",
+      "c": "scifi",
+      "s": "Space / technology",
+      "f": "Michroma",
+      "t": "BEYOND THE STARS"
+    },
+    {
+      "n": "Monoton",
+      "c": "scifi",
+      "s": "Neon / retro sci-fi",
+      "f": "Monoton",
+      "t": "BEYOND THE STARS"
+    },
+    {
+      "n": "Press Start 2P",
+      "c": "scifi",
+      "s": "Retro gaming / pixel",
+      "f": "Press Start 2P",
+      "t": "BEYOND THE STARS"
+    },
+    {
+      "n": "Rajdhani",
+      "c": "scifi",
+      "s": "Futuristic condensed title",
+      "f": "Rajdhani",
+      "t": "BEYOND THE STARS"
+    },
+    {
+      "n": "Syncopate",
+      "c": "scifi",
+      "s": "Minimal sci-fi poster",
+      "f": "Syncopate",
+      "t": "BEYOND THE STARS"
+    },
+    {
+      "n": "Wallpoet",
+      "c": "scifi",
+      "s": "Digital / terminal title",
+      "f": "Wallpoet",
+      "t": "BEYOND THE STARS"
+    },
+    {
+      "n": "Oxanium",
+      "c": "scifi",
+      "s": "Sci-fi / gaming title",
+      "f": "Oxanium",
+      "t": "BEYOND THE STARS"
+    },
+    {
+      "n": "Tektur",
+      "c": "scifi",
+      "s": "Modern tech / action",
+      "f": "Tektur",
+      "t": "BEYOND THE STARS"
+    },
+    {
+      "n": "Aldrich",
+      "c": "scifi",
+      "s": "Geometric futuristic title",
+      "f": "Aldrich",
+      "t": "BEYOND THE STARS"
+    },
+    {
+      "n": "Allura",
+      "c": "romance",
+      "s": "Elegant romance title",
+      "f": "Allura",
+      "t": "A LOVE STORY"
+    },
+    {
+      "n": "Great Vibes",
+      "c": "romance",
+      "s": "Wedding / love story",
+      "f": "Great Vibes",
+      "t": "A LOVE STORY"
+    },
+    {
+      "n": "Parisienne",
+      "c": "romance",
+      "s": "Romantic handwritten title",
+      "f": "Parisienne",
+      "t": "A LOVE STORY"
+    },
+    {
+      "n": "DM Serif Text",
+      "c": "romance",
+      "s": "Classic romance / drama",
+      "f": "DM Serif Text",
+      "t": "A LOVE STORY"
+    },
+    {
+      "n": "Libre Caslon Display",
+      "c": "romance",
+      "s": "Period romance title",
+      "f": "Libre Caslon Display",
+      "t": "A LOVE STORY"
+    },
+    {
+      "n": "Prata",
+      "c": "romance",
+      "s": "Luxury / romantic drama",
+      "f": "Prata",
+      "t": "A LOVE STORY"
+    },
+    {
+      "n": "Josefin Sans",
+      "c": "romance",
+      "s": "Minimal romance poster",
+      "f": "Josefin Sans",
+      "t": "A LOVE STORY"
+    },
+    {
+      "n": "Raleway",
+      "c": "romance",
+      "s": "Modern drama / title",
+      "f": "Raleway",
+      "t": "A LOVE STORY"
+    },
+    {
+      "n": "Italiana",
+      "c": "romance",
+      "s": "Elegant cinematic serif",
+      "f": "Italiana",
+      "t": "A LOVE STORY"
+    },
+    {
+      "n": "Gilda Display",
+      "c": "romance",
+      "s": "Classic romantic drama",
+      "f": "Gilda Display",
+      "t": "A LOVE STORY"
+    },
+    {
+      "n": "League Spartan",
+      "c": "tollywood",
+      "s": "Bold commercial / mass",
+      "f": "League Spartan",
+      "t": "THE STORY BEGINS"
+    },
+    {
+      "n": "Montserrat",
+      "c": "tollywood",
+      "s": "Modern poster / drama",
+      "f": "Montserrat",
+      "t": "THE STORY BEGINS"
+    },
+    {
+      "n": "Poppins",
+      "c": "tollywood",
+      "s": "Clean title / promo",
+      "f": "Poppins",
+      "t": "THE STORY BEGINS"
+    },
+    {
+      "n": "Roboto Slab",
+      "c": "tollywood",
+      "s": "Strong dramatic title",
+      "f": "Roboto Slab",
+      "t": "THE STORY BEGINS"
+    },
+    {
+      "n": "Archivo Narrow",
+      "c": "tollywood",
+      "s": "Condensed poster title",
+      "f": "Archivo Narrow",
+      "t": "THE STORY BEGINS"
+    },
+    {
+      "n": "Barlow Semi Condensed",
+      "c": "tollywood",
+      "s": "Trailer / title card",
+      "f": "Barlow Semi Condensed",
+      "t": "THE STORY BEGINS"
+    },
+    {
+      "n": "Saira Condensed",
+      "c": "tollywood",
+      "s": "Action / mass title",
+      "f": "Saira Condensed",
+      "t": "THE STORY BEGINS"
+    },
+    {
+      "n": "Fjalla One",
+      "c": "tollywood",
+      "s": "Bold condensed poster",
+      "f": "Fjalla One",
+      "t": "THE STORY BEGINS"
+    },
+    {
+      "n": "Anek Telugu",
+      "c": "telugu",
+      "s": "Modern Telugu display",
+      "f": "Anek Telugu",
+      "t": "వీర విజయం"
+    },
+    {
+      "n": "Tiro Telugu",
+      "c": "telugu",
+      "s": "Classic Telugu serif",
+      "f": "Tiro Telugu",
+      "t": "మహా కథ"
+    },
+    {
+      "n": "Hind Guntur",
+      "c": "telugu",
+      "s": "Clean Telugu title",
+      "f": "Hind Guntur",
+      "t": "కొత్త ప్రపంచం"
+    },
+    {
+      "n": "Baloo Tammudu 2",
+      "c": "telugu",
+      "s": "Expressive Telugu display",
+      "f": "Baloo Tammudu 2",
+      "t": "సింహ స్వప్నం"
+    },
+    {
+      "n": "Racing Sans One",
+      "c": "action",
+      "s": "Speed / sports title",
+      "f": "Racing Sans One",
+      "t": "FULL THROTTLE"
+    },
+    {
+      "n": "Righteous",
+      "c": "hollywood",
+      "s": "Retro cinematic display",
+      "f": "Righteous",
+      "t": "THE GOOD, THE BAD"
+    },
+    {
+      "n": "Forum",
+      "c": "epic",
+      "s": "Classical cinematic serif",
+      "f": "Forum",
+      "t": "THE LAST DYNASTY"
+    },
+    {
+      "n": "Grenze",
+      "c": "epic",
+      "s": "Gothic fantasy title",
+      "f": "Grenze",
+      "t": "DARK LEGACY"
+    },
+    {
+      "n": "Marcellus SC",
+      "c": "epic",
+      "s": "Mythic period title",
+      "f": "Marcellus SC",
+      "t": "RISE OF EMPIRES"
+    },
+    {
+      "n": "Unbounded",
+      "c": "scifi",
+      "s": "Wide futuristic title",
+      "f": "Unbounded",
+      "t": "INFINITE"
+    },
+    {
+      "n": "Bricolage Grotesque",
+      "c": "tollywood",
+      "s": "Expressive modern title",
+      "f": "Bricolage Grotesque",
+      "t": "A NEW BEGINNING"
+    },
+    {
+      "n": "Bowlby One",
+      "c": "action",
+      "s": "Oversized mass title",
+      "f": "Bowlby One",
+      "t": "POWER"
+    },
+    {
+      "n": "Anybody",
+      "c": "action",
+      "s": "Variable bold poster title",
+      "f": "Anybody",
+      "t": "NO LIMITS"
+    }
+  ]
+}
