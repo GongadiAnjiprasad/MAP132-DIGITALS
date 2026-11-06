@@ -33,8 +33,14 @@ test('showcase video playback temporarily overrides the pinned ambient theme and
   await expect(page.getByRole('dialog', { name: 'Cinematic Films video preview' })).toBeVisible();
 
   const dialog = page.locator('.ms-preview-dialog');
-  await dialog.locator('.ms-preview-dialog-head').dispatchEvent('pointerdown', { pointerId: 1, pointerType: 'mouse', clientX: 600, clientY: 180 });
-  await dialog.locator('.ms-preview-dialog-head').dispatchEvent('pointerup', { pointerId: 1, pointerType: 'mouse', clientX: 510, clientY: 180 });
+  const dialogHead = await dialog.locator('.ms-preview-dialog-head').boundingBox();
+  if (!dialogHead) throw new Error('Preview header was not rendered.');
+  const startX = dialogHead.x + dialogHead.width * 0.72;
+  const startY = dialogHead.y + dialogHead.height / 2;
+  await page.mouse.move(startX, startY);
+  await page.mouse.down();
+  await page.mouse.move(startX - 100, startY);
+  await page.mouse.up();
   await expect(dialog.locator('h2')).toHaveText('Wedding & Celebrations');
 
   const player = dialog.locator('video');
