@@ -19,8 +19,8 @@ test('festival campaign advances one creative beat each day', () => {
   const campaign = getFestivalCampaign('2026-11-06');
   assert.equal(campaign?.festival.name, 'Diwali');
   assert.equal(campaign?.daysUntil, 2);
-  assert.equal(campaign?.dayNumber, 8);
-  assert.equal(campaign?.currentDay?.focus, 'BRAND PROMO');
+  assert.equal(campaign?.dayNumber, 9);
+  assert.equal(campaign?.currentDay?.focus, 'FESTIVAL TRAILER');
 });
 
 test('festival day switches to the grand reveal state', () => {
