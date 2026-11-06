@@ -1436,7 +1436,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-inbox-rating{font-size:11px;color:#aaa}
 .feedback-inbox-message{white-space:pre-wrap;overflow-wrap:anywhere;color:#e6e0d5;font-size:13px;line-height:1.7}
 @media(max-width:600px){.feedback-drawer{padding:25px 18px}.feedback-types{grid-template-columns:1fr}.feedback-types button{text-align:left}}
-.ms-footer-actions{display:flex;align-items:center;gap:16px;flex-wrap:wrap}
-.ms-feedback-footer-button{display:inline-flex;align-items:center;gap:7px;padding:8px 10px;border:1px solid rgba(232,199,138,.28);background:transparent;color:#D9AD70;font:800 9px 'DM Sans',sans-serif;letter-spacing:1.2px;cursor:pointer;transition:background .2s,color .2s,border-color .2s}
-.ms-feedback-footer-button:hover{background:#D9AD70;color:#09101b;border-color:#D9AD70}
-@media(max-width:600px){.ms-footer-actions{gap:8px}.ms-feedback-footer-button{padding:7px 8px;font-size:8px}}
+/* Restore the original floating Feedback launcher position. */
+.feedback-launch{position:fixed;right:22px;bottom:112px;z-index:90;display:flex;align-items:center;gap:9px;padding:13px 17px;border:1px solid #d5aa66;background:#171613;color:#f3f0e9;box-shadow:0 12px 35px #0008;font-size:11px;font-weight:800;letter-spacing:.8px;transition:transform .2s,background .2s}
+.feedback-launch:hover{transform:translateY(-3px);background:#d5aa66;color:#171613}
+@media(max-width:600px){.feedback-launch{right:12px;bottom:calc(92px + env(safe-area-inset-bottom));z-index:999;padding:12px 14px}}
