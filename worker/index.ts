@@ -122,7 +122,25 @@ if(path==='/api/resources/fonts'&&method==='GET'){
   await cache.put(cacheKey,response.clone());
   return response;
 }
-if(path==='/api/_healthcheck')return json({message:'Success'});
+if(path==='/api/_healthcheck')return json({message:'Success'});\nif(path==='/api/feedback'&&method==='POST'){
+  if(!env.MAP132_KV)return json({error:'Feedback storage is not configured.'},503);
+  let body:any;try{body=await req.json();}catch{return json({error:'Invalid feedback data.'},400);}
+  const kind=String(body.kind||'').trim(),message=String(body.message||'').trim(),email=String(body.email||'').trim(),rating=Number(body.rating);
+  if(!['Suggestion','Report a bug','Request a feature'].includes(kind))return json({error:'Choose a valid feedback type.'},400);
+  if(message.length<10||message.length>2000)return json({error:'Message must be between 10 and 2000 characters.'},400);
+  if(email.length>254|| (email&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)))return json({error:'Enter a valid email address.'},400);
+  if(!Number.isInteger(rating)||rating<1||rating>5)return json({error:'Choose a rating from 1 to 5.'},400);
+  const ip=req.headers.get('CF-Connecting-IP')||'unknown';
+  const digest=await crypto.subtle.digest('SHA-256',encoder.encode(ip));
+  const rateKey='feedback-rate/'+Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,'0')).join('');
+  const current=Number(await env.MAP132_KV.get(rateKey)||0);
+  if(current>=3)return json({error:'Too many submissions. Please try again later.'},429);
+  await env.MAP132_KV.put(rateKey,String(current+1),{expirationTtl:600});
+  const id=Date.now().toString(36)+'-'+crypto.randomUUID();
+  await env.MAP132_KV.put('feedback/'+id,JSON.stringify({id,kind,rating,message,email,createdAt:new Date().toISOString(),status:'new'}));
+  return json({submitted:true,id},201);
+}
+
 if(path==='/api/enquiries'&&method==='POST'){
    if(!env.MAP132_KV)return json({error:'Enquiry storage is not configured.'},503);
    let body:any;try{body=await req.json();}catch{return json({error:'Invalid enquiry data.'},400);}
@@ -141,6 +159,19 @@ if(path==='/api/admin/login'&&method==='POST'){let stage='check admin secret';tr
 if(path==='/api/admin/logout'&&method==='POST')return json({signedOut:true},200,{'Set-Cookie':sessionCookie('',0)});
 if(!await validSession(req,env))return json({error:'Admin session required.'},401);
 
+if(path==='/api/admin/feedback'&&method==='GET'){
+  if(!env.MAP132_KV)return json({error:'Feedback storage is not configured.'},503);
+  const listed=await env.MAP132_KV.list({prefix:'feedback/',limit:100});
+  const entries=await Promise.all(listed.keys.filter(key=>!key.name.startsWith('feedback-rate/')).map(async key=>{const value=await env.MAP132_KV!.get(key.name);if(!value)return null;try{return JSON.parse(value);}catch{return null;}}));
+  return json({feedback:entries.filter(Boolean).sort((a:any,b:any)=>String(b.createdAt).localeCompare(String(a.createdAt)))});
+}
+if(path.startsWith('/api/admin/feedback/')&&method==='DELETE'){
+  if(!env.MAP132_KV)return json({error:'Feedback storage is not configured.'},503);
+  const id=decodeURIComponent(path.slice('/api/admin/feedback/'.length));
+  if(!/^[a-z0-9-]+$/i.test(id))return json({error:'Invalid feedback id.'},400);
+  await env.MAP132_KV.delete('feedback/'+id);
+  return json({deleted:true});
+}
 if(path==='/api/admin/enquiries'&&method==='GET'){
    if(!env.MAP132_KV)return json({error:'Enquiry storage is not configured.'},503);
    const listed=await env.MAP132_KV.list({prefix:'enquiries/',limit:100});
