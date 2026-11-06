@@ -16,7 +16,7 @@ export default defineConfig({
     },
     {
       name: 'desktop-chromium',
-      testMatch: ['responsive-layout.spec.ts', 'theme-toggle.spec.ts'],
+      testMatch: ['responsive-layout.spec.ts', 'theme-toggle.spec.ts', 'ambient-service-theme.spec.ts'],
       use: { browserName: 'chromium', viewport: { width: 1440, height: 900 } },
     },
   ],
