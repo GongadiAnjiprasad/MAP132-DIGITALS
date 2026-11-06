@@ -104,10 +104,11 @@ if(path==='/api/resources/sounds'&&method==='GET'){
   return json({count:data.count||0,providerCount:data.count||0,allowedCount:allowed.length,page,nextPage:data.next?page+1:null,previousPage:data.previous?page-1:null,results:allowed.map((sound:any)=>({id:sound.id,title:sound.name,creator:sound.username,license:sound.license,duration:sound.duration,previewUrl:sound.previews?.['preview-hq-mp3']||sound.previews?.['preview-lq-mp3']||'',sourceUrl:sound.url||('https://freesound.org/s/'+sound.id+'/'),tags:sound.tags||[],description:sound.description||''}))});
 }
 if(path==='/api/resources/fonts'&&method==='GET'){
+  const forceRefresh=url.searchParams.get('refresh')==='1';
   const cacheKey=new Request(new URL('/api/resources/fonts?catalogue=google-v1',url.origin).toString());
   const cache=caches.default;
   const cached=await cache.match(cacheKey);
-  if(cached)return cached;
+  if(cached&&!forceRefresh)return cached;
   const upstream=await fetch('https://fonts.google.com/metadata/fonts',{headers:{'Accept':'application/json','User-Agent':'MAP132-DIGITALS-font-catalogue/1.0'}});
   if(!upstream.ok)return json({error:'Google Fonts metadata is temporarily unavailable.'},502);
   const raw=await upstream.text();
