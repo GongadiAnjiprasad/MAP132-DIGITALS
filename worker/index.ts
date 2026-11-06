@@ -122,7 +122,8 @@ if(path==='/api/resources/fonts'&&method==='GET'){
   await cache.put(cacheKey,response.clone());
   return response;
 }
-if(path==='/api/_healthcheck')return json({message:'Success'});\nif(path==='/api/feedback'&&method==='POST'){
+if(path==='/api/_healthcheck')return json({message:'Success'});
+if(path==='/api/feedback'&&method==='POST'){
   if(!env.MAP132_KV)return json({error:'Feedback storage is not configured.'},503);
   let body:any;try{body=await req.json();}catch{return json({error:'Invalid feedback data.'},400);}
   const kind=String(body.kind||'').trim(),message=String(body.message||'').trim(),email=String(body.email||'').trim(),rating=Number(body.rating);
