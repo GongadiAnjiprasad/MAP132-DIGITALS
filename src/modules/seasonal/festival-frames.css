@@ -1,4 +1,6 @@
 .ff-launcher {
+  /* Keep the floating campaign card from blocking the site's existing swipe and form interactions. */
+  pointer-events: none;
   position: fixed;
   left: max(18px, env(safe-area-inset-left));
   bottom: max(22px, env(safe-area-inset-bottom));
@@ -14,6 +16,8 @@
   -webkit-backdrop-filter: blur(18px);
   animation: ff-enter .5s cubic-bezier(.2,.8,.2,1) both;
 }
+.ff-launcher button,
+.ff-launcher a { pointer-events: auto; }
 .ff-launcher-top { display:flex; align-items:center; justify-content:space-between; gap:10px; color:#e8c77a; font-size:8px; font-weight:800; letter-spacing:1.8px; }
 .ff-launcher-close { display:grid; place-items:center; width:27px; height:27px; padding:0; border:1px solid rgba(232,199,122,.25); border-radius:50%; background:transparent; color:#d9c9a8; cursor:pointer; }
 .ff-launcher-close:hover { background:rgba(232,199,122,.12); color:#fff; }
