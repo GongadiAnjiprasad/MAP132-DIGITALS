@@ -173,6 +173,13 @@ function PublicSite({ content }: { content: Content }) {
         </>}
         <DemoShowcase onAtmosphereChange={(clip) => setActiveAtmosphere(clip ? getAtmosphere({ id: clip.id, title: clip.title, category: clip.category, description: clip.note, kind: 'video' }) : null)} />
       </section>
+      <section className="cinema-interval" aria-label="Cinematic interval">
+        <div className="cinema-interval-frame">
+          <span className="cinema-interval-kicker">MAP132 DIGITALS · THE STORY CONTINUES</span>
+          <span className="cinema-interval-word">INTERVAL</span>
+          <span className="cinema-interval-subtitle">A pause between moments. A promise of more.</span>
+        </div>
+      </section>
       <section className="services-section" id="services">
         <div className="section-head">
           <div><p className="kicker">WHAT I DO · VIDEO EDITING SERVICES</p><h2>From raw footage<br/><em>to a visual story.</em></h2></div>
@@ -210,6 +217,11 @@ function PublicSite({ content }: { content: Content }) {
       </div>
       <p>Stories crafted frame by frame.</p>
       <div className="footer-navigation"><a href="#services">Services</a><a href="#work">Selected work</a><a href="#contact">Contact</a><a href="#workspace">Editor Workspace <ExternalLink size={12}/></a><span>© {new Date().getFullYear()} MAP132 DIGITALS</span></div>
+      <div className="movie-credits" aria-label="Film credits">
+        <span>DIRECTED BY <strong>Your Story</strong></span>
+        <i aria-hidden="true">✦</i>
+        <span>EDITED BY <strong>MAP132 Studio</strong></span>
+      </div>
     </footer>
   </div>;
 }
