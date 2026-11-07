@@ -50,16 +50,6 @@ const workCategoryCards = [
   { id: 'YouTube Related', description: 'YouTube videos, creator edits and channel content.', pattern: /youtube|podcast|interview|creator|news/i }
 ];
 
-const sampleProjects: PortfolioItem[] = DEMO_SHOWCASE.map((item, index) => ({
-  id: 'sample-' + item.id,
-  title: item.title,
-  category: item.category,
-  description: item.description + ' Sample visual direction only; replace with an original MAP132 edit.',
-  kind: 'image',
-  url: item.image,
-  source: 'other'
-}));
-
 function safeLink(value: string) {
   const raw = value.trim();
   if (!raw) return '';
@@ -108,6 +98,7 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 export default function HomeSlider({ content, feedbackWidget }: { content: HomeContent; feedbackWidget?: ReactNode }) {
   const [active, setActive] = useState(0);
   const [activeProjectCategory, setActiveProjectCategory] = useState<string | null>(null);
+  const [activeProjectPage, setActiveProjectPage] = useState(1);
   const ambientTheme = useAmbientServiceTheme();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
@@ -149,7 +140,6 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   const stageRef = useRef<HTMLElement | null>(null);
   const navRef = useRef<HTMLElement | null>(null);
   const workPageRef = useRef<HTMLElement | null>(null);
-  const selectedWorkShowcaseRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const nav = navRef.current;
     if (!nav || window.innerWidth > 760) return;
@@ -177,21 +167,11 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   const wheelTotal = useRef(0);
   const wheelLocked = useRef(false);
   const selectedWorkItems = activeProjectCategory === null ? [] : content.items.filter(item => activeProjectCategory === 'All Projects' || Boolean(workCategoryCards.find(category => category.id === activeProjectCategory)?.pattern.test(item.category)));
-  const selectedWorkShowcaseItem = activeProjectCategory === null ? null : selectedWorkItems[0] || sampleProjects.find(item => activeProjectCategory === 'All Projects' || Boolean(workCategoryCards.find(category => category.id === activeProjectCategory)?.pattern.test(item.category))) || sampleProjects[0];
-  const selectedWorkGalleryItems = selectedWorkItems.slice(selectedWorkItems.length > 0 ? 1 : 0);
-  const hasPublishedCategoryProject = selectedWorkItems.length > 0;
-  useEffect(() => {
-    if (activeProjectCategory === null || !selectedWorkShowcaseRef.current) return;
-    const showcase = selectedWorkShowcaseRef.current;
-    const page = showcase.closest('.ms-work-page') as HTMLElement | null;
-    if (!page) return;
-    const frame = window.requestAnimationFrame(() => {
-      const top = showcase.getBoundingClientRect().top - page.getBoundingClientRect().top + page.scrollTop - 12;
-      const behavior: ScrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
-      page.scrollTo({ top: Math.max(0, top), behavior });
-    });
-    return () => window.cancelAnimationFrame(frame);
-  }, [activeProjectCategory]);
+  const projectsPerPage = 6;
+  const selectedWorkPageCount = Math.max(1, Math.ceil(selectedWorkItems.length / projectsPerPage));
+  const paginatedWorkItems = selectedWorkItems.slice((activeProjectPage - 1) * projectsPerPage, activeProjectPage * projectsPerPage);
+  const selectWorkCategory = (category: string) => { setActiveProjectCategory(category); setActiveProjectPage(1); };
+  useEffect(() => { if (activeProjectPage > selectedWorkPageCount) setActiveProjectPage(selectedWorkPageCount); }, [activeProjectPage, selectedWorkPageCount]);
   const p = content.profile;
   const whatsappDigits = p.whatsapp.replace(/\D/g, '');
   const whatsapp = whatsappDigits.length === 10 ? '91' + whatsappDigits : whatsappDigits;
@@ -335,32 +315,28 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
           <div className="ms-page-heading"><div><p className="ms-kicker">PORTFOLIO / VISUAL STUDIES</p><h2>Choose your <em>work.</em></h2></div><p>Select the type of video you want to explore. Each category opens its matching projects and creative samples.</p></div>
           <div className="work-category-toolbar">
             <span>EXPLORE BY CATEGORY</span>
-            <button type="button" className={activeProjectCategory === 'All Projects' ? 'all-work-filter active' : 'all-work-filter'} aria-pressed={activeProjectCategory === 'All Projects'} onClick={() => setActiveProjectCategory('All Projects')}>View all projects <ArrowRight size={14}/></button>
+            <button type="button" className={activeProjectCategory === 'All Projects' ? 'all-work-filter active' : 'all-work-filter'} aria-pressed={activeProjectCategory === 'All Projects'} onClick={() => selectWorkCategory('All Projects')}>View all projects <ArrowRight size={14}/></button>
           </div>
-          <div className="work-category-grid" role="group" aria-label="Choose a project category">
-            {workCategoryCards.map((category,index) => {
+          <div className="work-category-tabs" role="group" aria-label="Choose a project category">
+            {workCategoryCards.map(category => {
               const count = content.items.filter(item => category.pattern.test(item.category)).length;
-              return <button type="button" key={category.id} className={activeProjectCategory === category.id ? 'work-category-card active' : 'work-category-card'} aria-pressed={activeProjectCategory === category.id} onClick={() => setActiveProjectCategory(category.id)}>
-                <span className="work-category-number">0{index + 1} / MAP132</span>
-                <strong>{category.id}</strong>
-                <span className="work-category-description">{category.description}</span>
-                <span className="work-category-footer"><small>{count} {count === 1 ? 'PROJECT' : 'PROJECTS'}</small><b>EXPLORE WORK <ArrowRight size={15}/></b></span>
+              return <button type="button" key={category.id} className={activeProjectCategory === category.id ? 'work-category-tab active' : 'work-category-tab'} aria-pressed={activeProjectCategory === category.id} onClick={() => selectWorkCategory(category.id)}>
+                <span>{category.id}</span><small>{count} {count === 1 ? 'PROJECT' : 'PROJECTS'}</small>
               </button>;
             })}
           </div>
-          {activeProjectCategory === null && <div className="ms-work-prompt"><Sparkles size={17}/><span>Choose a category above to see its visual preview and matching projects. All projects appear only when you select “View all projects”.</span></div>}
-          {selectedWorkShowcaseItem && <section ref={selectedWorkShowcaseRef} className="ms-category-showcase" aria-label="Category showcase preview">
-            <div className="ms-category-showcase-copy">
-              <button type="button" className="ms-category-back" onClick={() => { setActiveProjectCategory(null); const page = workPageRef.current; if (page) page.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }}><ArrowLeft size={14}/> Change category</button>
-              <p className="ms-category-showcase-kicker">{activeProjectCategory === 'All Projects' ? 'FEATURED VISUAL DIRECTION' : 'CATEGORY SHOWCASE / ' + activeProjectCategory.toUpperCase()}</p>
-              <h3>{hasPublishedCategoryProject ? selectedWorkShowcaseItem.title : activeProjectCategory === 'All Projects' ? 'Explore the MAP132 visual direction' : activeProjectCategory + ' visual direction'}</h3>
-              <p>{selectedWorkShowcaseItem.description}</p>
-              <div className="ms-category-showcase-tags"><span>STORY & STYLE</span><span>EDITING DIRECTION</span><span>{selectedWorkShowcaseItem.category.toUpperCase()}</span></div>
-              {!hasPublishedCategoryProject && <small className="ms-category-showcase-note">Reference moodboard only · not a completed client project</small>}
-            </div>
-            <div className="ms-category-showcase-media"><ProjectPreview item={selectedWorkShowcaseItem}/><span>{hasPublishedCategoryProject ? 'FEATURED PROJECT' : 'VISUAL STYLE PREVIEW'}</span></div>
-          </section>}
-          {selectedWorkGalleryItems.length > 0 ? <div className="ms-project-grid">{selectedWorkGalleryItems.map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div> : !hasPublishedCategoryProject && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>{activeProjectCategory}</b><span>{activeProjectCategory === 'All Projects' ? 'No published projects yet. This is a visual direction preview, not a completed client project.' : 'No published projects in this category yet. This preview shows the intended visual direction, not a completed client project.'}</span></p></div>}
+          {activeProjectCategory === null && <div className="ms-work-prompt"><Sparkles size={17}/><span>Select a category to display all matching videos here. Switch categories anytime using the tabs above.</span></div>}
+          {activeProjectCategory !== null && <div className="ms-work-results-heading">
+            <div><p className="ms-category-showcase-kicker">{activeProjectCategory === 'All Projects' ? 'COMPLETE PORTFOLIO' : 'CATEGORY GALLERY'}</p><h3>{activeProjectCategory}</h3></div>
+            <span>{selectedWorkItems.length} {selectedWorkItems.length === 1 ? 'PROJECT' : 'PROJECTS'}</span>
+          </div>}
+          {activeProjectCategory !== null && paginatedWorkItems.length > 0 && <div className="ms-project-grid">{paginatedWorkItems.map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>}
+          {activeProjectCategory !== null && selectedWorkItems.length === 0 && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>{activeProjectCategory}</b><span>{activeProjectCategory === 'All Projects' ? 'No published projects yet. Add projects through the workspace to populate this gallery.' : 'No published projects in this category yet. Add matching projects through the workspace to populate this gallery.'}</span></p></div>}
+          {activeProjectCategory !== null && selectedWorkItems.length > projectsPerPage && <nav className="ms-work-pagination" aria-label="Project gallery pages">
+            <button type="button" onClick={() => setActiveProjectPage(page => Math.max(1, page - 1))} disabled={activeProjectPage === 1}><ArrowLeft size={14}/> Previous</button>
+            <span>Page {activeProjectPage} of {selectedWorkPageCount}</span>
+            <button type="button" onClick={() => setActiveProjectPage(page => Math.min(selectedWorkPageCount, page + 1))} disabled={activeProjectPage === selectedWorkPageCount}>Next <ArrowRight size={14}/></button>
+          </nav>}
         </section>
 
         <section className="ms-page ms-services-page" aria-label="Services">
