@@ -182,7 +182,11 @@ test('admin can publish a work review after explicitly confirming client permiss
   await page.goto('/#admin');
   await page.getByPlaceholder('Enter your password').fill('test-admin-password');
   await page.getByRole('button', { name: /Secure sign in/ }).click();
-  await page.getByRole('button', { name: 'Work Feedback' }).click();
+  // Wait for the authenticated dashboard shell before interacting with its animated sidebar.
+  await expect(page.locator('.admin-shell')).toBeVisible();
+  const feedbackTab = page.locator('.admin-nav').filter({ hasText: 'Work Feedback' });
+  await expect(feedbackTab).toBeVisible();
+  await feedbackTab.click({ force: true });
   const review = page.locator('.feedback-inbox-item').filter({ hasText: 'Excellent editing and storytelling.' });
   await expect(review.getByText('Permission not yet confirmed')).toBeVisible();
   const publish = review.getByRole('button', { name: 'Confirm permission & publish' });
