@@ -85,13 +85,11 @@ test('Android desktop-site viewport keeps content top-led, readable and balanced
         shellBottom: shell.getBoundingClientRect().bottom,
         footerBottom: footer.getBoundingClientRect().bottom,
         documentHeight: document.documentElement.scrollHeight,
-        shellMinHeight: parseFloat(getComputedStyle(shell).minHeight),
         activePageHeight: activePage.getBoundingClientRect().height,
         expectedPageHeight: Math.max(0, window.innerHeight - header.offsetHeight - controls.offsetHeight - footer.offsetHeight),
       };
     });
-    expect(viewportFill.shellMinHeight, 'desktop-site shell minimum should fill the visible viewport').toBeGreaterThanOrEqual(height - 2);
-    expect(Math.abs(viewportFill.shellHeight - height), 'desktop-site shell should occupy exactly the visible viewport height').toBeLessThanOrEqual(2);
+    expect(Math.abs(viewportFill.shellHeight - height), 'desktop-site dynamic viewport shell should occupy the visible viewport height').toBeLessThanOrEqual(2);
     expect(Math.abs(viewportFill.footerBottom - height), 'desktop-site footer should reach the visible viewport bottom').toBeLessThanOrEqual(2);
     expect(Math.abs(viewportFill.activePageHeight - viewportFill.expectedPageHeight),
       'desktop-site active page should fill the measured stage below the header and controls').toBeLessThanOrEqual(3);

@@ -150,43 +150,6 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
     const maxScroll = nav.scrollWidth - nav.clientWidth;
     nav.scrollTo({ left: Math.max(0, Math.min(targetLeft, maxScroll)), behavior: 'smooth' });
   }, [active]);
-  const [stageHeight, setStageHeight] = useState<number | null>(null);
-  useEffect(() => {
-    const stage = stageRef.current;
-    if (!stage) return;
-    let observer: ResizeObserver | null = null;
-    const update = () => {
-      observer?.disconnect();
-      observer = null;
-      if (window.innerWidth <= 760) {
-        setStageHeight(null);
-        return;
-      }
-      const page = stage.querySelectorAll<HTMLElement>('.ms-page')[active];
-      if (!page) return;
-      const measure = () => {
-        const header = stage.parentElement?.querySelector<HTMLElement>('.ms-header');
-        const controls = stage.parentElement?.querySelector<HTMLElement>('.ms-controls');
-        const footer = stage.parentElement?.querySelector<HTMLElement>('.ms-footer');
-        const reserved = (header?.getBoundingClientRect().height || 0)
-          + (controls?.getBoundingClientRect().height || 0)
-          + (footer?.getBoundingClientRect().height || 0);
-        const viewportStage = Math.max(0, window.innerHeight - reserved);
-        // Keep the shell viewport-bound. Each page already scrolls internally;
-        // expanding the stage to page.scrollHeight pushes the footer below the viewport.
-        setStageHeight(Math.ceil(viewportStage));
-      };
-      measure();
-      observer = new ResizeObserver(measure);
-      observer.observe(page);
-    };
-    update();
-    window.addEventListener('resize', update);
-    return () => {
-      observer?.disconnect();
-      window.removeEventListener('resize', update);
-    };
-  }, [active, content.items, content.skills]);
   const [activePreview, setActivePreview] = useState<number | null>(null);
   const [enquirySubmitted, setEnquirySubmitted] = useState(false);
   const [enquiryBusy, setEnquiryBusy] = useState(false);
@@ -307,7 +270,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       </button>
     </header>
 
-    <main ref={stageRef} style={stageHeight ? { height: stageHeight + "px" } : undefined} className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointerStart.current = null; }} onClickCapture={onClickCapture} onWheel={onWheel}>
+    <main ref={stageRef} className="ms-stage" aria-label="MAP132 DIGITALS portfolio slider" onPointerDown={onPointerDown} onPointerUp={onPointerUp} onPointerCancel={() => { pointerStart.current = null; }} onClickCapture={onClickCapture} onWheel={onWheel}>
       <div className="ms-track" style={{ transform: `translateX(-${active * 100}%)` }}>
         <section className="ms-page ms-home-page" aria-label="Home">
           <div className="ms-home-copy">
