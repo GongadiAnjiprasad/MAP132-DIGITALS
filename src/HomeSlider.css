@@ -1357,3 +1357,19 @@
 .ms-service-tile:hover,.ms-service-tile:focus-visible,.ms-service-detail:hover,.ms-service-detail:focus-visible{border-color:color-mix(in srgb,var(--ms-ambient-accent) 72%,white 8%);box-shadow:0 0 24px color-mix(in srgb,var(--ms-ambient-accent) 22%,transparent)}
 .ms-service-detail{cursor:pointer;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.map132-slider-site{transition:none}.ms-service-tile,.ms-service-detail{transition:none}}
+
+
+/* Android Chrome "Desktop site": fill the physical viewport on touch devices
+   while keeping the natural-height desktop layout on ordinary pointer devices.
+   The stage may still grow beyond the viewport when a page has longer content. */
+@media (min-width: 761px) and (max-width: 1100px) and (any-pointer: coarse) {
+  .map132-slider-site {
+    min-height: 100svh;
+  }
+  .ms-stage {
+    flex: 1 0 auto;
+  }
+  .ms-page {
+    min-height: 100%;
+  }
+}
