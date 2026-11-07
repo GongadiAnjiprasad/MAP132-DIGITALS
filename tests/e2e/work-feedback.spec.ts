@@ -69,7 +69,8 @@ test('feedback drawer inherits each active service theme accent', async ({ page 
     const formAccent = await dialog.evaluate(element =>
       getComputedStyle(element).getPropertyValue('--feedback-accent').trim()
     );
-    expect(formAccent.toLowerCase()).toBe(theme.accent.toLowerCase());
+    // Feedback always uses the fixed MAP132 brand champagne-gold, not the active genre accent.
+    expect(formAccent.toLowerCase()).toBe('#ffb45b');
     await dialog.getByRole('button', { name: 'Close feedback' }).click();
   }
 });
