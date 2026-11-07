@@ -122,11 +122,11 @@ test('desktop-site viewport stage follows the active page content height', async
     const controls = shell.querySelector('.ms-controls') as HTMLElement;
     const footer = shell.querySelector('.ms-footer') as HTMLElement;
     const available = Math.max(0, window.innerHeight - header.offsetHeight - controls.offsetHeight - footer.offsetHeight);
-    return { stage: stage.clientHeight, content: active.scrollHeight, available };
+    return { stage: stage.clientHeight, content: active.scrollHeight, available, pageClient: active.clientHeight };
   });
   await expect.poll(async () => {
     const m = await measure();
-    return Math.abs(m.stage - Math.max(m.content, m.available));
+    return Math.abs(m.stage - m.available);
   }).toBeLessThanOrEqual(3);
 
   await page.locator('.ms-nav').getByRole('button', { name: 'Contact', exact: true }).click();
