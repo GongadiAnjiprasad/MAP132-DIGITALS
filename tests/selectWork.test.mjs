@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 
 const home = readFileSync(new URL('../src/HomeSlider.tsx', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+const homeCss = readFileSync(new URL('../src/HomeSlider.css', import.meta.url), 'utf8');
 
 test('Select Work presents the six clear service categories', () => {
   for (const label of ['Cinematic Trailers','Wedding / B’Day','Advertisements','AI Services','Insta Reels','YouTube Related']) {
@@ -38,4 +39,15 @@ test('Selected Work does not repeat the separate demo video showcase', () => {
   assert.doesNotMatch(home, /import DemoShowcase/);
   assert.doesNotMatch(home, /<DemoShowcase\b/);
   assert.doesNotMatch(home, /function demoClipTheme/);
+});
+
+
+test('Selected Work always has a category-aware visual showcase and avoids repeating its lead project', () => {
+  assert.match(home, /const selectedWorkShowcaseItem = selectedWorkItems\[0\] \|\| sampleProjects\.find/);
+  assert.match(home, /const selectedWorkGalleryItems = selectedWorkItems\.slice/);
+  assert.match(home, /aria-label="Category showcase preview"/);
+  assert.match(home, /Reference moodboard only · not a completed client project/);
+  assert.match(home, /No published project yet\. The showcase above gives a visual direction/);
+  assert.match(homeCss, /\.ms-category-showcase\{display:grid/);
+  assert.match(homeCss, /@media\(max-width:760px\)\{\.ms-category-showcase/);
 });
