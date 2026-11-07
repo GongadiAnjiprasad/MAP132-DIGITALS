@@ -164,11 +164,11 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   const [enquiryBusy, setEnquiryBusy] = useState(false);
   const [enquiryError, setEnquiryError] = useState('');
   const previewGesture = useRef<{ x: number; y: number; pointerId?: number } | null>(null);
-  const changePreview = (direction: number) => { ambientTheme.clearPlayback(); setActivePreview(current => current === null ? null : (current + direction + previewVideos.length) % previewVideos.length); };
-  const closePreview = () => { ambientTheme.clearPlayback(); setActivePreview(null); };
+  const changePreview = (direction: number) => { ambientTheme.clearPlayback('preview-modal'); setActivePreview(current => current === null ? null : (current + direction + previewVideos.length) % previewVideos.length); };
+  const closePreview = () => { ambientTheme.clearPlayback('preview-modal'); setActivePreview(null); };
   // Modal unmount can race the media element's pause event; clear playback accent on close too.
   useEffect(() => {
-    if (activePreview === null) ambientTheme.clearPlayback();
+    if (activePreview === null) ambientTheme.clearPlayback('preview-modal');
   }, [activePreview, ambientTheme.clearPlayback]);
   const pointerStart = useRef<{ x: number; y: number; pointerId: number; atHomeTop: boolean } | null>(null);
   const suppressSwipeClick = useRef(false);
@@ -317,7 +317,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
           <div className="ms-page-heading"><div><p className="ms-kicker">PORTFOLIO / VISUAL STUDIES</p><h2>Selected <em>work.</em></h2></div><p>Explore sample edits and original projects published through the Admin Dashboard.</p></div>
           <div className="ms-project-grid">{(content.items.length > 0 ? content.items : sampleProjects).map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>
           {content.items.length === 0 && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>Sample portfolio content</b><span>These are reference concepts and moodboard images—not completed client projects. Upload your own edited videos or photos in the Admin Dashboard to replace these examples.</span></p></div>}
-          <DemoShowcase onAtmosphereChange={clip => clip ? ambientTheme.setPlayback(demoClipTheme(clip.category)) : ambientTheme.clearPlayback()} />
+          <DemoShowcase onAtmosphereChange={(clip, sourceId) => clip ? ambientTheme.setPlayback(demoClipTheme(clip.category), 'demo-showcase:' + clip.id) : ambientTheme.clearPlayback(sourceId ? 'demo-showcase:' + sourceId : 'demo-showcase')} />
         </section>
 
         <section className="ms-page ms-services-page" aria-label="Services">
@@ -374,7 +374,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       <div className="ms-preview-dialog" onClick={event => event.stopPropagation()} onPointerDown={event => { if (event.pointerType !== 'touch' && event.pointerType !== 'pen' && event.pointerType !== 'mouse') return; if ((event.target as HTMLElement).closest('button, input')) return; event.currentTarget.setPointerCapture(event.pointerId); previewGesture.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId }; }} onPointerUp={event => { const start = previewGesture.current; previewGesture.current = null; if (!start || start.pointerId !== event.pointerId) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; const direction = getHorizontalSwipeDirection(dx, dy, event.pointerType === 'mouse' ? 55 : 42, 1.15); if (direction !== 0) changePreview(direction); }} onPointerCancel={() => { previewGesture.current = null; }} onWheel={event => { if (Math.abs(event.deltaX) < Math.abs(event.deltaY) * 1.15 || Math.abs(event.deltaX) < 2) return; event.preventDefault(); if (wheelLocked.current) return; wheelTotal.current += event.deltaX; if (Math.abs(wheelTotal.current) >= 58) { changePreview(wheelTotal.current > 0 ? 1 : -1); wheelTotal.current = 0; wheelLocked.current = true; window.setTimeout(() => { wheelLocked.current = false; }, 520); } }}>
         <div className="ms-preview-dialog-head"><div><span>MAP132 DIGITALS / SHOWCASE PREVIEW</span><h2>{serviceCards[activePreview].title}</h2></div><button type="button" className="ms-preview-close" aria-label="Close video" onClick={closePreview}><X size={22}/></button></div>
         <div className="ms-preview-stage">
-          <video key={activePreview} className="ms-preview-player" src={previewVideos[activePreview].src} controls autoPlay playsInline preload="metadata" onPlay={() => ambientTheme.setPlayback(serviceCards[activePreview].theme as ServiceThemeKey)} onPause={ambientTheme.clearPlayback} onEnded={ambientTheme.clearPlayback}>Your browser does not support video playback.</video>
+          <video key={activePreview} className="ms-preview-player" src={previewVideos[activePreview].src} controls autoPlay playsInline preload="metadata" onPlay={() => ambientTheme.setPlayback(serviceCards[activePreview].theme as ServiceThemeKey, 'preview-modal')} onPause={() => ambientTheme.clearPlayback('preview-modal')} onEnded={() => ambientTheme.clearPlayback('preview-modal')} onEnded={ambientTheme.clearPlayback}>Your browser does not support video playback.</video>
           <span className="ms-preview-swipe-hint ms-preview-swipe-left" aria-hidden="true"><ArrowLeft size={25}/></span>
           <span className="ms-preview-swipe-hint ms-preview-swipe-right" aria-hidden="true"><ArrowRight size={25}/></span>
         </div>
