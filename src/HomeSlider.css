@@ -1417,7 +1417,10 @@
 .map132-slider-site .ms-header,
 .map132-slider-site .ms-page,
 .map132-slider-site .ms-controls,
-.map132-slider-site .ms-footer,
+.map132-slider-site .ms-footer {
+  position: relative;
+  isolation: isolate;
+}
 .map132-slider-site .ms-preview-modal {
   isolation: isolate;
 }
