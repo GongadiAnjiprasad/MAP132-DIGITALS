@@ -7,9 +7,13 @@ async function installAudioMocks(page: import('@playwright/test').Page, hasAudio
       frequencyBinCount = 512;
       smoothingTimeConstant = 0.72;
       connect() {}
+      sample = 0;
       getByteFrequencyData(data: Uint8Array) {
+        this.sample += 1;
         data.fill(0);
-        data.fill(240, 1, 7);
+        // Repeating bass transients emulate boom/impact events for the pulse regression.
+        const bassLevel = this.sample % 7 === 1 ? 255 : 55;
+        data.fill(bassLevel, 1, 7);
         data.fill(150, 7, 30);
         data.fill(90, 30, 90);
       }
@@ -59,6 +63,7 @@ test('desktop audio drives the gold and teal wave layers and pause calms them', 
   const site = page.locator('.map132-slider-site');
   await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-bass-scale')))).toBeGreaterThan(1);
   await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-wave-opacity')))).toBeGreaterThan(.34);
+  await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-impact')))).toBeGreaterThan(.1);
   const waveLayer = page.locator('.ms-page').nth(1);
   await expect.poll(() => waveLayer.evaluate(element => getComputedStyle(element, '::after').backgroundImage.includes('data:image/svg+xml'))).toBe(true);
   await stopMockPlayback(video);
@@ -76,6 +81,7 @@ test('mobile audio-reactive waves stay within the viewport and reset on pause', 
   await startMockPlayback(video);
   const site = page.locator('.map132-slider-site');
   await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-bass-scale')))).toBeGreaterThan(1);
+  await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-impact')))).toBeGreaterThan(.1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(392);
   await stopMockPlayback(video);
   await expect.poll(() => site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-audio-wave-opacity').trim())).toBe('.34');
