@@ -4,6 +4,15 @@ test('desktop service-card hover previews the matching ambient accent and resets
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   await page.locator('.ms-nav').getByRole('button', { name: 'Services', exact: true }).click();
+  const track = page.locator('.ms-track');
+  // Let the page-slider transition settle before moving the pointer onto the card.
+  await track.evaluate(element => new Promise<void>(resolve => {
+    const activeTransform = element.getAnimations().some(animation => animation.playState === 'running');
+    if (!activeTransform) { resolve(); return; }
+    element.addEventListener('transitionend', event => {
+      if (event.target === element && (event as TransitionEvent).propertyName === 'transform') resolve();
+    }, { once: true });
+  }));
   const site = page.locator('.map132-slider-site');
   const cinematic = page.locator('.ms-service-detail[data-service-theme="cinematic"]');
   await cinematic.hover();
