@@ -3,7 +3,6 @@ import {
   ArrowLeft, ArrowRight, Camera, Check, Film, Instagram, Mail, MessageCircle,
   Play, Sparkles, Youtube, Facebook, Linkedin, Send, X, Sun, Moon
 } from 'lucide-react';
-import DemoShowcase from './DemoShowcase';
 import { api } from './api';
 import { getHorizontalSwipeDirection } from './swipeGesture';
 import { DEMO_SHOWCASE } from './demoShowcase';
@@ -41,15 +40,6 @@ const serviceCards = [
   { title: 'Brand Promotions', note: 'Products · Ads · Business films', image: DEMO_SHOWCASE[5].image, number: '05', theme: 'advertising' },
   { title: 'AI Video Creation', note: 'AI visuals · Concepts · Motion', image: DEMO_SHOWCASE[6].image, number: '06', theme: 'ai' }
 ];
-
-function demoClipTheme(category: string): ServiceThemeKey {
-  if (/wedding|birthday|celebration|event/i.test(category)) return 'celebrations';
-  if (/youtube|podcast|interview/i.test(category)) return 'youtube';
-  if (/reel|short/i.test(category)) return 'reels';
-  if (/advert|brand|commercial/i.test(category)) return 'advertising';
-  if (/ai|futur/i.test(category)) return 'ai';
-  return 'cinematic';
-}
 
 const workCategoryCards = [
   { id: 'Cinematic Trailers', description: 'Movie-style edits, teasers and dramatic visual stories.', pattern: /cinematic|film|trailer/i },
@@ -344,7 +334,6 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
           </div>
           {selectedWorkItems.length > 0 ? <div className="ms-project-grid">{selectedWorkItems.map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div> : <div className="ms-sample-banner"><Sparkles size={18}/><p><b>{activeProjectCategory}</b><span>No project has been published in this category yet. Please check back soon.</span></p></div>}
           {content.items.length === 0 && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>Sample portfolio content</b><span>These are reference concepts and moodboard images—not completed client projects. Upload your own edited videos or photos in the Admin Dashboard to replace these examples.</span></p></div>}
-          <DemoShowcase onAtmosphereChange={(clip, sourceId) => clip ? ambientTheme.setPlayback(demoClipTheme(clip.category), 'demo-showcase:' + clip.id) : ambientTheme.clearPlayback(sourceId ? 'demo-showcase:' + sourceId : 'demo-showcase')} />
         </section>
 
         <section className="ms-page ms-services-page" aria-label="Services">
