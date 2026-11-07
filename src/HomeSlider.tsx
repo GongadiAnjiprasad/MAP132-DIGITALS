@@ -8,6 +8,7 @@ import { api } from './api';
 import { getHorizontalSwipeDirection } from './swipeGesture';
 import { DEMO_SHOWCASE } from './demoShowcase';
 import { useAmbientServiceTheme, type ServiceThemeKey } from './modules/ambient-service-themes/useAmbientServiceTheme';
+import { useAudioReactiveWaves } from './modules/audio-reactive-waves/useAudioReactiveWaves';
 
 type PortfolioItem = {
   id: string; title: string; category: string; description: string;
@@ -109,6 +110,7 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 export default function HomeSlider({ content }: { content: HomeContent }) {
   const [active, setActive] = useState(0);
   const ambientTheme = useAmbientServiceTheme();
+  useAudioReactiveWaves();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
       return window.localStorage.getItem('map132-theme') === 'light' ? 'light' : 'dark';

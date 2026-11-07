@@ -1450,3 +1450,52 @@
     transition: none;
   }
 }
+
+
+/* Audio-reactive cinematic ribbons: deep navy, teal and restrained champagne gold. */
+.map132-slider-site {
+  --ms-audio-active: 0;
+  --ms-audio-bass-scale: 1;
+  --ms-audio-wave-opacity: 0;
+  --ms-audio-wave-y: 0px;
+  --ms-audio-high-glow: 0;
+}
+.map132-slider-site .ms-page::after,
+.map132-slider-site .ms-preview-modal::after {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: -2%;
+  pointer-events: none;
+  opacity: var(--ms-audio-wave-opacity);
+  transform: translate3d(0, var(--ms-audio-wave-y), 0) scale(var(--ms-audio-bass-scale));
+  transform-origin: center;
+  mix-blend-mode: screen;
+  background-image:
+    radial-gradient(ellipse at 18% 82%, rgba(38, 177, 191, .2), transparent 38%),
+    radial-gradient(ellipse at 84% 18%, rgba(218, 174, 105, .2), transparent 40%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 1440 900' preserveAspectRatio='none'%3E%3Cg fill='none' stroke-linecap='round'%3E%3Cpath d='M-80 610 C170 420 290 800 520 610 S860 420 1080 600 S1330 780 1520 560' stroke='%2337C3CC' stroke-width='3' opacity='.65'/%3E%3Cpath d='M-80 650 C170 460 290 840 520 650 S860 460 1080 640 S1330 820 1520 600' stroke='%23E6BD7B' stroke-width='2' opacity='.8'/%3E%3Cpath d='M-80 700 C170 510 290 890 520 700 S860 510 1080 690 S1330 870 1520 650' stroke='%2378D8D5' stroke-width='1.5' opacity='.42'/%3E%3Cpath d='M-80 240 C170 420 290 60 520 240 S860 420 1080 250 S1330 80 1520 280' stroke='%23DDB878' stroke-width='1.5' opacity='.32'/%3E%3C/g%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: cover, cover, 100% 100%;
+  filter: drop-shadow(0 0 18px rgba(44, 180, 194, .18)) drop-shadow(0 0 24px rgba(218, 174, 105, var(--ms-audio-high-glow)));
+  animation: ms-audio-ribbon-drift 18s ease-in-out infinite alternate;
+  transition: opacity .38s ease;
+}
+.map132-slider-site[data-theme="light"] .ms-page::after,
+.map132-slider-site[data-theme="light"] .ms-preview-modal::after {
+  mix-blend-mode: multiply;
+  opacity: calc(var(--ms-audio-wave-opacity) * .48);
+}
+@keyframes ms-audio-ribbon-drift {
+  from { background-position: 0 0, 0 0, 0% 0%; }
+  to { background-position: 2% -1%, -2% 1%, 2% 0%; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .map132-slider-site .ms-page::after,
+  .map132-slider-site .ms-preview-modal::after {
+    animation: none;
+    transform: none;
+    transition: opacity .2s linear;
+  }
+}
