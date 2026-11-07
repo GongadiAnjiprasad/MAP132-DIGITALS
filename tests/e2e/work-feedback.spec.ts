@@ -88,7 +88,9 @@ test('feedback drawer uses the MAP132 cinematic studio design system', async ({ 
     const submit = element.querySelector('.feedback-submit');
     const rule = element.querySelector('.feedback-parchment-rule');
     return {
-      background: getComputedStyle(element).backgroundImage,\n      backdropFilter: getComputedStyle(element).backdropFilter,\n      borderRadius: getComputedStyle(input!).borderRadius,
+      background: getComputedStyle(element).backgroundImage,
+      backdropFilter: getComputedStyle(element).backdropFilter,
+      borderRadius: getComputedStyle(input!).borderRadius,
       headingFont: getComputedStyle(heading!).fontFamily,
       inputBackground: getComputedStyle(input!).backgroundColor,
       submitBackground: getComputedStyle(submit!).backgroundImage,
