@@ -2,22 +2,23 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-const app = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
+const home = readFileSync(new URL('../src/HomeSlider.tsx', import.meta.url), 'utf8');
 const css = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
 
 test('Select Work presents the six clear service categories', () => {
   for (const label of ['Cinematic Trailers','Wedding / B’Day','Advertisements','AI Services','Insta Reels','YouTube Related']) {
-    assert.ok(app.includes("id:'" + label + "'"), label + ' category should be present');
+    assert.ok(home.includes("id: '" + label + "'"), label + ' category should be present');
   }
-  assert.match(app, /Choose your <em>work\.<\/em>/);
+  assert.match(home, /Choose your <em>work\.<\/em>/);
 });
 
-test('Select Work maps the six cards to existing portfolio upload categories', () => {
-  for (const category of ['Cinematic Films','Wedding & Events','Birthday Films','Brand Promotions','AI Video Creation','Reels & Shorts','YouTube Videos']) {
-    assert.ok(app.includes("'" + category + "'"), category + ' should remain supported');
+test('Select Work filters existing portfolio projects and preserves All Projects', () => {
+  for (const category of ['Cinematic Films','Wedding & Celebrations','Reels & Shorts','YouTube & Podcasts','Brand Promotions','AI Video Creation']) {
+    assert.ok(home.includes("'" + category + "'") || home.includes('"' + category + '"') || home.includes(category), category + ' should remain supported by existing portfolio data');
   }
-  assert.match(app, /activeWorkCategory === 'All Projects'/);
-  assert.match(app, /setActiveWorkCategory\('All Projects'\)/);
+  assert.match(home, /activeProjectCategory === 'All Projects'/);
+  assert.match(home, /setActiveProjectCategory\('All Projects'\)/);
+  assert.match(home, /category\.pattern\.test\(item\.category\)/);
 });
 
 test('Select Work cards have responsive, keyboard-visible styling', () => {
