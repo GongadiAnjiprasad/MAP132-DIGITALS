@@ -51,6 +51,15 @@ function demoClipTheme(category: string): ServiceThemeKey {
   return 'cinematic';
 }
 
+const workCategoryCards = [
+  { id: 'Cinematic Trailers', description: 'Movie-style edits, teasers and dramatic visual stories.', pattern: /cinematic|film|trailer/i },
+  { id: 'Wedding / B’Day', description: 'Wedding highlights, birthday films and special moments.', pattern: /wedding|birthday|celebration|event/i },
+  { id: 'Advertisements', description: 'Brand promotions, product showcases and ad films.', pattern: /brand|advert|commercial|product/i },
+  { id: 'AI Services', description: 'AI-powered visuals, generated scenes and creative edits.', pattern: /ai|artificial|futur/i },
+  { id: 'Insta Reels', description: 'Vertical reels, short-form edits and social-first videos.', pattern: /reel|short|instagram/i },
+  { id: 'YouTube Related', description: 'YouTube videos, creator edits and channel content.', pattern: /youtube|podcast|interview|creator|news/i }
+];
+
 const sampleProjects: PortfolioItem[] = DEMO_SHOWCASE.map((item, index) => ({
   id: 'sample-' + item.id,
   title: item.title,
@@ -108,6 +117,7 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 
 export default function HomeSlider({ content, feedbackWidget }: { content: HomeContent; feedbackWidget?: ReactNode }) {
   const [active, setActive] = useState(0);
+  const [activeProjectCategory, setActiveProjectCategory] = useState('All Projects');
   const ambientTheme = useAmbientServiceTheme();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
@@ -174,6 +184,8 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   const suppressSwipeClick = useRef(false);
   const wheelTotal = useRef(0);
   const wheelLocked = useRef(false);
+  const allProjects = content.items.length > 0 ? content.items : sampleProjects;
+  const selectedWorkItems = allProjects.filter(item => activeProjectCategory === 'All Projects' || Boolean(workCategoryCards.find(category => category.id === activeProjectCategory)?.pattern.test(item.category)));
   const p = content.profile;
   const whatsappDigits = p.whatsapp.replace(/\D/g, '');
   const whatsapp = whatsappDigits.length === 10 ? '91' + whatsappDigits : whatsappDigits;
@@ -314,8 +326,24 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
         </section>
 
         <section className="ms-page ms-work-page" aria-label="Selected work">
-          <div className="ms-page-heading"><div><p className="ms-kicker">PORTFOLIO / VISUAL STUDIES</p><h2>Selected <em>work.</em></h2></div><p>Explore sample edits and original projects published through the Admin Dashboard.</p></div>
-          <div className="ms-project-grid">{(content.items.length > 0 ? content.items : sampleProjects).map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>
+          <div className="ms-page-heading"><div><p className="ms-kicker">PORTFOLIO / VISUAL STUDIES</p><h2>Choose your <em>work.</em></h2></div><p>Select the type of video you want to explore. Each category opens its matching projects and creative samples.</p></div>
+          <div className="work-category-toolbar">
+            <span>EXPLORE BY CATEGORY</span>
+            <button type="button" className={activeProjectCategory === 'All Projects' ? 'all-work-filter active' : 'all-work-filter'} aria-pressed={activeProjectCategory === 'All Projects'} onClick={() => setActiveProjectCategory('All Projects')}>All Projects <ArrowRight size={14}/></button>
+          </div>
+          <div className="work-category-grid" role="group" aria-label="Choose a project category">
+            {workCategoryCards.map((category,index) => {
+              const count = allProjects.filter(item => category.pattern.test(item.category)).length;
+              return <button type="button" key={category.id} className={activeProjectCategory === category.id ? 'work-category-card active' : 'work-category-card'} aria-pressed={activeProjectCategory === category.id} onClick={() => setActiveProjectCategory(category.id)}>
+                <span className="work-category-number">0{index + 1} / MAP132</span>
+                <strong>{category.id}</strong>
+                <span className="work-category-description">{category.description}</span>
+                <span className="work-category-footer"><small>{count} {count === 1 ? 'PROJECT' : 'PROJECTS'}</small><b>EXPLORE WORK <ArrowRight size={15}/></b></span>
+              </button>;
+            })}
+          </div>
+          <div className="work-results-heading"><span>{activeProjectCategory === 'All Projects' ? 'ALL SELECTED PROJECTS' : activeProjectCategory.toUpperCase()}</span><small>{selectedWorkItems.length} {selectedWorkItems.length === 1 ? 'PROJECT' : 'PROJECTS'}</small></div>
+          {selectedWorkItems.length > 0 ? <div className="ms-project-grid">{selectedWorkItems.map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div> : <div className="ms-sample-banner"><Sparkles size={18}/><p><b>{activeProjectCategory}</b><span>No project has been published in this category yet. Please check back soon.</span></p></div>}
           {content.items.length === 0 && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>Sample portfolio content</b><span>These are reference concepts and moodboard images—not completed client projects. Upload your own edited videos or photos in the Admin Dashboard to replace these examples.</span></p></div>}
           <DemoShowcase onAtmosphereChange={(clip, sourceId) => clip ? ambientTheme.setPlayback(demoClipTheme(clip.category), 'demo-showcase:' + clip.id) : ambientTheme.clearPlayback(sourceId ? 'demo-showcase:' + sourceId : 'demo-showcase')} />
         </section>
