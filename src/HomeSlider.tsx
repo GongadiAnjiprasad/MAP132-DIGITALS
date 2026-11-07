@@ -176,6 +176,9 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   const wheelLocked = useRef(false);
   const allProjects = content.items.length > 0 ? content.items : sampleProjects;
   const selectedWorkItems = allProjects.filter(item => activeProjectCategory === 'All Projects' || Boolean(workCategoryCards.find(category => category.id === activeProjectCategory)?.pattern.test(item.category)));
+  const selectedWorkShowcaseItem = selectedWorkItems[0] || sampleProjects.find(item => activeProjectCategory === 'All Projects' || Boolean(workCategoryCards.find(category => category.id === activeProjectCategory)?.pattern.test(item.category))) || sampleProjects[0];
+  const selectedWorkGalleryItems = selectedWorkItems.slice(selectedWorkItems.length > 0 ? 1 : 0);
+  const hasPublishedCategoryProject = selectedWorkItems.length > 0 && content.items.length > 0;
   const p = content.profile;
   const whatsappDigits = p.whatsapp.replace(/\D/g, '');
   const whatsapp = whatsappDigits.length === 10 ? '91' + whatsappDigits : whatsappDigits;
@@ -332,7 +335,17 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
               </button>;
             })}
           </div>
-          {selectedWorkItems.length > 0 ? <div className="ms-project-grid">{selectedWorkItems.map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div> : <div className="ms-sample-banner"><Sparkles size={18}/><p><b>{activeProjectCategory}</b><span>No project has been published in this category yet. Please check back soon.</span></p></div>}
+          {selectedWorkShowcaseItem && <section className="ms-category-showcase" aria-label="Category showcase preview">
+            <div className="ms-category-showcase-copy">
+              <p className="ms-category-showcase-kicker">{activeProjectCategory === 'All Projects' ? 'FEATURED VISUAL DIRECTION' : 'CATEGORY SHOWCASE / ' + activeProjectCategory.toUpperCase()}</p>
+              <h3>{hasPublishedCategoryProject ? selectedWorkShowcaseItem.title : activeProjectCategory === 'All Projects' ? 'Explore the MAP132 visual direction' : activeProjectCategory + ' visual direction'}</h3>
+              <p>{selectedWorkShowcaseItem.description}</p>
+              <div className="ms-category-showcase-tags"><span>STORY & STYLE</span><span>EDITING DIRECTION</span><span>{selectedWorkShowcaseItem.category.toUpperCase()}</span></div>
+              {!hasPublishedCategoryProject && <small className="ms-category-showcase-note">Reference moodboard only · not a completed client project</small>}
+            </div>
+            <div className="ms-category-showcase-media"><ProjectPreview item={selectedWorkShowcaseItem}/><span>{hasPublishedCategoryProject ? 'FEATURED PROJECT' : 'VISUAL STYLE PREVIEW'}</span></div>
+          </section>}
+          {selectedWorkGalleryItems.length > 0 ? <div className="ms-project-grid">{selectedWorkGalleryItems.map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div> : !hasPublishedCategoryProject && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>{activeProjectCategory}</b><span>No published project yet. The showcase above gives a visual direction while this category is being built.</span></p></div>}
           {content.items.length === 0 && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>Sample portfolio content</b><span>These are reference concepts and moodboard images—not completed client projects. Upload your own edited videos or photos in the Admin Dashboard to replace these examples.</span></p></div>}
         </section>
 
