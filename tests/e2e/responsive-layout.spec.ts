@@ -74,6 +74,21 @@ test('Android desktop-site viewport keeps content top-led, readable and balanced
     });
     expect(home.columns, 'desktop-site Home should retain a balanced two-column composition').toBe(2);
     expect(home.alignContent).toBe('start');
+    const viewportFill = await page.evaluate(() => {
+      const shell = document.querySelector('.map132-slider-site') as HTMLElement;
+      const activePage = document.querySelector('.ms-page') as HTMLElement;
+      const header = document.querySelector('.ms-header') as HTMLElement;
+      const controls = document.querySelector('.ms-controls') as HTMLElement;
+      const footer = document.querySelector('.ms-footer') as HTMLElement;
+      return {
+        shellMinHeight: parseFloat(getComputedStyle(shell).minHeight),
+        activePageMinHeight: parseFloat(getComputedStyle(activePage).minHeight),
+        expectedPageMinHeight: Math.max(0, window.innerHeight - header.offsetHeight - controls.offsetHeight - footer.offsetHeight),
+      };
+    });
+    expect(viewportFill.shellMinHeight, 'desktop-site shell should fill the visible viewport').toBeGreaterThanOrEqual(height - 2);
+    expect(Math.abs(viewportFill.activePageMinHeight - viewportFill.expectedPageMinHeight),
+      'desktop-site active page should reserve the space below short content').toBeLessThanOrEqual(3);
     expect(home.headingSize).toBeGreaterThanOrEqual(48);
     expect(home.introSize).toBeGreaterThanOrEqual(14);
 
