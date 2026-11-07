@@ -54,3 +54,27 @@ test('showcase video playback temporarily overrides the pinned ambient theme and
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect.poll(async () => (await site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-ambient-accent'))).toLowerCase()).toBe('#ffcb78');
 });
+
+
+test('DemoShowcase video playback activates the page-wide cinematic atmosphere and pause resets it', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const site = page.locator('.map132-slider-site');
+  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
+  const player = page.locator('.studio-reel-media video').first();
+  await expect(player).toHaveCount(1);
+  await player.evaluate(video => video.dispatchEvent(new Event('play')));
+  await expect.poll(async () => (await site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-ambient-accent'))).toLowerCase()).toBe('#ffcb78');
+
+  for (const selector of ['.ms-header', '.ms-page', '.ms-controls', '.ms-footer']) {
+    await expect.poll(async () => page.locator(selector).first().evaluate(element => {
+      const style = getComputedStyle(element);
+      const glow = getComputedStyle(element, '::before');
+      return style.isolation === 'isolate' && glow.position === 'absolute' && glow.zIndex === '-1' && glow.backgroundImage.includes('radial-gradient');
+    })).toBe(true);
+  }
+  expect(await player.evaluate(video => getComputedStyle(video).filter)).toBe('none');
+  await player.evaluate(video => video.dispatchEvent(new Event('pause')));
+  await expect.poll(async () => (await site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-ambient-accent'))).toLowerCase()).toBe('#080d18');
+});
+

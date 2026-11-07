@@ -1411,3 +1411,42 @@
     align-content: start;
   }
 }
+
+
+/* Playback atmosphere sits above each page surface but behind all text and media. */
+.map132-slider-site .ms-header,
+.map132-slider-site .ms-page,
+.map132-slider-site .ms-controls,
+.map132-slider-site .ms-footer {
+  position: relative;
+  isolation: isolate;
+}
+.map132-slider-site .ms-preview-modal {
+  isolation: isolate;
+}
+.map132-slider-site .ms-header::before,
+.map132-slider-site .ms-page::before,
+.map132-slider-site .ms-controls::before,
+.map132-slider-site .ms-footer::before,
+.map132-slider-site .ms-preview-modal::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  background:
+    radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--ms-ambient-accent) 36%, transparent), transparent 72%),
+    radial-gradient(ellipse at 4% 92%, color-mix(in srgb, var(--ms-ambient-accent) 19%, transparent), transparent 48%),
+    radial-gradient(ellipse at 96% 8%, color-mix(in srgb, var(--ms-ambient-accent) 19%, transparent), transparent 48%);
+  opacity: .95;
+  transition: opacity .65s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .map132-slider-site .ms-header::before,
+  .map132-slider-site .ms-page::before,
+  .map132-slider-site .ms-controls::before,
+  .map132-slider-site .ms-footer::before,
+  .map132-slider-site .ms-preview-modal::before {
+    transition: none;
+  }
+}
