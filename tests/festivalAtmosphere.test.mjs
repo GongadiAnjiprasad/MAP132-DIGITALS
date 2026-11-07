@@ -11,3 +11,8 @@ test('pre-festival ambience remains visible without taking over the site', () =>
   assert.match(css, /88%\s*\{\s*opacity:\s*\.72;\s*\}/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
+
+test('festival greeting is visual-only while its close control remains interactive', () => {
+  assert.match(css, /\.ff-greeting\s*\{[^}]*pointer-events:\s*none/s);
+  assert.match(css, /\.ff-greeting-close\s*\{[^}]*pointer-events:\s*auto/s);
+});
