@@ -2166,3 +2166,109 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .map132-slider-site[data-theme="light"] .feedback-close { color: #34445e; border-color: rgba(47,68,104,.25); }
 .map132-slider-site[data-theme="light"] .feedback-seal-success .feedback-seal-eyebrow,
 .map132-slider-site[data-theme="light"] .feedback-seal-success .feedback-seal-signoff { color: color-mix(in srgb, var(--feedback-accent) 76%, #243b5b); }
+
+
+/* MAP132 Holographic Glass finish — restrained iridescence, not a gaming/neon panel. */
+.feedback-scrim {
+  background: rgba(3, 8, 19, .76);
+  backdrop-filter: blur(18px) saturate(1.25);
+}
+.feedback-drawer {
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--feedback-accent) 46%, rgba(190, 214, 255, .28));
+  border-left: 1px solid color-mix(in srgb, var(--feedback-accent) 64%, rgba(190, 214, 255, .3));
+  background:
+    radial-gradient(ellipse at 8% 0%, color-mix(in srgb, var(--feedback-accent) 19%, transparent), transparent 38%),
+    radial-gradient(ellipse at 100% 82%, rgba(91, 109, 202, .17), transparent 48%),
+    linear-gradient(138deg, rgba(37, 55, 84, .88), rgba(14, 25, 45, .91) 48%, rgba(8, 16, 31, .96));
+  backdrop-filter: blur(28px) saturate(1.45);
+  box-shadow:
+    -24px 0 78px rgba(0, 0, 0, .48),
+    0 0 42px color-mix(in srgb, var(--feedback-accent) 13%, transparent),
+    inset 0 1px rgba(255,255,255,.16),
+    inset 1px 0 rgba(255,255,255,.08);
+  animation: feedback-glass-arrive .48s cubic-bezier(.2,.75,.25,1) both;
+}
+.feedback-drawer::before {
+  inset: 10px;
+  z-index: -1;
+  border: 1px solid rgba(218, 231, 255, .13);
+  border-radius: inherit;
+  background: linear-gradient(132deg, rgba(255,255,255,.055), transparent 34%, rgba(137,170,255,.035) 72%, transparent);
+  box-shadow: inset 0 0 38px rgba(132, 164, 225, .07);
+}
+.feedback-drawer::after {
+  height: 2px;
+  opacity: .88;
+  background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--feedback-accent) 72%, #fff) 28%, rgba(255,255,255,.9) 50%, color-mix(in srgb, var(--feedback-accent) 72%, #a6b9ff) 72%, transparent);
+  filter: drop-shadow(0 0 8px color-mix(in srgb, var(--feedback-accent) 50%, transparent));
+}
+.feedback-parchment-rule {
+  border-bottom-color: rgba(199, 218, 248, .19);
+}
+.feedback-drawer-head h2 {
+  text-shadow: 0 2px 22px rgba(0,0,0,.18);
+}
+.feedback-drawer textarea,
+.feedback-drawer input,
+.feedback-drawer select {
+  border-color: rgba(196, 216, 247, .2);
+  border-radius: 10px;
+  background: rgba(5, 14, 29, .48);
+  box-shadow: inset 0 1px rgba(255,255,255,.055), 0 5px 18px rgba(0,0,0,.08);
+  backdrop-filter: blur(12px);
+}
+.feedback-drawer textarea:focus,
+.feedback-drawer input:focus,
+.feedback-drawer select:focus {
+  background: rgba(7, 17, 34, .68);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--feedback-accent) 23%, transparent), 0 0 24px color-mix(in srgb, var(--feedback-accent) 11%, transparent), inset 0 1px rgba(255,255,255,.08);
+}
+.feedback-close {
+  border-radius: 12px;
+  background: rgba(255,255,255,.065);
+  backdrop-filter: blur(12px);
+}
+.feedback-stars button.active {
+  text-shadow: 0 0 15px color-mix(in srgb, var(--feedback-accent) 55%, transparent);
+}
+.feedback-submit {
+  border-radius: 12px;
+  background: linear-gradient(112deg, color-mix(in srgb, var(--feedback-accent) 82%, #fff), color-mix(in srgb, var(--feedback-accent) 92%, #dce7ff) 55%, color-mix(in srgb, var(--feedback-accent) 72%, #b9c9ff));
+  box-shadow: 0 8px 26px color-mix(in srgb, var(--feedback-accent) 19%, transparent), inset 0 1px rgba(255,255,255,.65), inset 0 -1px rgba(5,15,30,.12);
+}
+.feedback-seal-ring {
+  backdrop-filter: blur(12px);
+}
+.feedback-seal-wax {
+  border-radius: 50%;
+  backdrop-filter: blur(18px);
+}
+.feedback-seal-close { border-radius: 12px; }
+@keyframes feedback-glass-arrive {
+  from { opacity: 0; transform: translate3d(18px, 0, 0) scale(.985); }
+  to { opacity: 1; transform: translate3d(0, 0, 0) scale(1); }
+}
+.map132-slider-site[data-theme="light"] .feedback-drawer {
+  border-color: color-mix(in srgb, var(--feedback-accent) 42%, rgba(77, 103, 151, .2));
+  background:
+    radial-gradient(ellipse at 8% 0%, color-mix(in srgb, var(--feedback-accent) 14%, transparent), transparent 40%),
+    linear-gradient(138deg, rgba(255,255,255,.92), rgba(235,242,253,.91) 58%, rgba(225,234,248,.94));
+  backdrop-filter: blur(28px) saturate(1.35);
+  box-shadow: -24px 0 70px rgba(27,40,65,.16), 0 0 36px color-mix(in srgb, var(--feedback-accent) 10%, transparent), inset 0 1px rgba(255,255,255,.85);
+}
+.map132-slider-site[data-theme="light"] .feedback-drawer::before {
+  border-color: rgba(70, 94, 137, .15);
+  background: linear-gradient(132deg, rgba(255,255,255,.42), transparent 40%, rgba(130,157,207,.06));
+}
+.map132-slider-site[data-theme="light"] .feedback-drawer textarea,
+.map132-slider-site[data-theme="light"] .feedback-drawer input,
+.map132-slider-site[data-theme="light"] .feedback-drawer select {
+  background: rgba(255,255,255,.56);
+  border-color: rgba(76, 99, 139, .2);
+  backdrop-filter: blur(12px);
+}
+@media (prefers-reduced-motion: reduce) {
+  .feedback-drawer { animation: none; }
+}
