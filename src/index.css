@@ -2331,3 +2331,5 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-studio .feedback-stars button.active{color:#e8bd7a;opacity:1;text-shadow:0 0 14px #e8bd7a70}
 .feedback-studio .feedback-stars button:focus-visible{outline:2px solid #e8bd7a;outline-offset:3px}
 @media(max-width:360px){.feedback-category-icon{width:48px;height:48px}}
+
+.feedback-public-consent{display:flex;align-items:flex-start;gap:10px;margin:14px 0;color:var(--brand-amber,#E8BD7A);font-size:12px;line-height:1.5}.feedback-public-consent input{accent-color:#E8BD7A;margin-top:2px;flex:0 0 auto}.feedback-publish-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px}.feedback-publish-row .gold-button{min-height:38px;padding:8px 14px;font-size:12px}.feedback-publish-row .gold-button:disabled{opacity:.45;cursor:not-allowed}
