@@ -858,13 +858,12 @@
 }
 
 
-/* Natural-height layout at every desktop/tablet CSS viewport, including Android Chrome Desktop site.
-   The active-slide ResizeObserver sets .ms-stage to the selected page's measured content height.
-   Do not keep a viewport-sized minimum on the shell or individual slides. */
+/* Desktop-site viewport fill: short pages should extend to the bottom of the visible screen.
+   The active-slide ResizeObserver still expands the stage when page content is taller. */
 @media (min-width: 761px) {
   .map132-slider-site {
     height: auto;
-    min-height: 0;
+    min-height: 100svh;
     overflow: visible;
   }
   .ms-stage {
@@ -874,12 +873,12 @@
     overflow: hidden;
   }
   .ms-track {
-    height: 100%;
+    height: auto;
     align-items: flex-start;
   }
   .ms-page {
     height: auto;
-    min-height: 0;
+    min-height: max(0px, calc(100svh - 166px));
     overflow: visible;
     align-content: start;
   }
