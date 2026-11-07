@@ -36,5 +36,5 @@ export function useAmbientServiceTheme() {
   const clearPlayback = useCallback((source?: string) => {
     setPlaybackState(current => source && current?.source !== source ? current : null);
   }, []);
-  return { style, preview, clearPreview, pin, setPlayback, clearPlayback };
+  return { style, preview, clearPreview, pin, setPlayback, clearPlayback, isPlaying: playback !== null };
 }

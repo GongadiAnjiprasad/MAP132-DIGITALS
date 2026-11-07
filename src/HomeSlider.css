@@ -1351,12 +1351,14 @@
 }
 
 
-/* Ambient service-theme module: isolated accent token; no global palette replacement. */
-.map132-slider-site{--ms-ambient-accent:#080D18;background:radial-gradient(ellipse at 78% 18%,color-mix(in srgb,var(--ms-ambient-accent) 18%,transparent),transparent 46%),radial-gradient(ellipse at 80% 25%,#252319 0%,#10131a 36%,var(--ms-bg) 75%);transition:background .7s ease}
+/* Genre accents stay on service cards and active video players, never the whole site. */
+.map132-slider-site{--ms-ambient-accent:#080D18}
 .ms-service-tile,.ms-service-detail{transition:border-color .35s ease,box-shadow .45s ease,transform .25s ease}
 .ms-service-tile:hover,.ms-service-tile:focus-visible,.ms-service-detail:hover,.ms-service-detail:focus-visible{border-color:color-mix(in srgb,var(--ms-ambient-accent) 72%,white 8%);box-shadow:0 0 24px color-mix(in srgb,var(--ms-ambient-accent) 22%,transparent)}
 .ms-service-detail{cursor:pointer;outline-offset:3px}
-@media(prefers-reduced-motion:reduce){.map132-slider-site{transition:none}.ms-service-tile,.ms-service-detail{transition:none}}
+.map132-slider-site[data-ambient-playback="true"] .ms-preview-player,
+.map132-slider-site[data-ambient-playback="true"] .studio-reel-media{box-shadow:0 0 0 1px color-mix(in srgb,var(--ms-ambient-accent) 70%,transparent),0 0 34px color-mix(in srgb,var(--ms-ambient-accent) 34%,transparent);transition:box-shadow .45s ease}
+@media(prefers-reduced-motion:reduce){.ms-service-tile,.ms-service-detail,.ms-preview-player,.studio-reel-media{transition:none}}
 
 /* Android Chrome Desktop-site: keep the stage fixed between the header and footer. */
 @media (min-width: 761px) {
@@ -1413,42 +1415,20 @@
 }
 
 
-/* Playback atmosphere sits above each page surface but behind all text and media. */
-.map132-slider-site .ms-header,
-.map132-slider-site .ms-page,
-.map132-slider-site .ms-controls,
-.map132-slider-site .ms-footer {
-  position: relative;
-  isolation: isolate;
-}
-.map132-slider-site .ms-preview-modal {
-  isolation: isolate;
-}
-.map132-slider-site .ms-header::before,
-.map132-slider-site .ms-page::before,
-.map132-slider-site .ms-controls::before,
-.map132-slider-site .ms-footer::before,
-.map132-slider-site .ms-preview-modal::before {
+/* Playback glow is confined to the video preview/player, not site-wide sections. */
+.map132-slider-site .ms-preview-modal { isolation: isolate; }
+.map132-slider-site[data-ambient-playback="true"] .ms-preview-modal::before {
   content: "";
   position: absolute;
   z-index: -1;
   inset: 0;
   pointer-events: none;
-  background:
-    radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--ms-ambient-accent) 36%, transparent), transparent 72%),
-    radial-gradient(ellipse at 4% 92%, color-mix(in srgb, var(--ms-ambient-accent) 19%, transparent), transparent 48%),
-    radial-gradient(ellipse at 96% 8%, color-mix(in srgb, var(--ms-ambient-accent) 19%, transparent), transparent 48%);
+  background: radial-gradient(ellipse at 50% 42%, color-mix(in srgb, var(--ms-ambient-accent) 24%, transparent), transparent 72%);
   opacity: .95;
-  transition: opacity .65s ease;
+  transition: opacity .45s ease;
 }
 @media (prefers-reduced-motion: reduce) {
-  .map132-slider-site .ms-header::before,
-  .map132-slider-site .ms-page::before,
-  .map132-slider-site .ms-controls::before,
-  .map132-slider-site .ms-footer::before,
-  .map132-slider-site .ms-preview-modal::before {
-    transition: none;
-  }
+  .map132-slider-site .ms-preview-modal::before { transition: none; }
 }
 
 /* MAP132 typography audit refinement — preserve the existing type system and layout. */
