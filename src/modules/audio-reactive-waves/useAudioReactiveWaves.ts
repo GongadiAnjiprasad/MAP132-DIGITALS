@@ -96,7 +96,7 @@ export function useAudioReactiveWaves() {
           return;
         }
         const audioAnalyser = audioContext.createAnalyser();
-        audioAnalyser.fftSize = 256;
+        audioAnalyser.fftSize = 1024;
         audioAnalyser.smoothingTimeConstant = 0.72;
         if (stream.getAudioTracks().length) {
           // If the source clip already carries audio, analyze its captured track.
@@ -108,7 +108,7 @@ export function useAudioReactiveWaves() {
           const theme = video.dataset.audioTheme || 'cinematic';
           const baseHz = theme === 'celebrations' ? 196 : theme === 'reels' ? 82 : theme === 'youtube' ? 110 : theme === 'advertising' ? 146 : theme === 'ai' ? 164 : 55;
           const output = audioContext.createGain();
-          output.gain.value = 0.028;
+          output.gain.value = 0.045;
           output.connect(audioAnalyser);
           audioAnalyser.connect(audioContext.destination);
           const fundamental = audioContext.createOscillator();
