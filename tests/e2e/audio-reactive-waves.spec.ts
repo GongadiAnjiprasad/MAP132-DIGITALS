@@ -3,8 +3,8 @@ import { test, expect } from '@playwright/test';
 async function installAudioMocks(page: import('@playwright/test').Page, hasAudioTrack = true) {
   await page.addInitScript(({ hasAudioTrack }) => {
     class FakeAnalyser {
-      fftSize = 256;
-      frequencyBinCount = 128;
+      fftSize = 1024;
+      frequencyBinCount = 512;
       smoothingTimeConstant = 0.72;
       getByteFrequencyData(data: Uint8Array) {
         data.fill(0);
