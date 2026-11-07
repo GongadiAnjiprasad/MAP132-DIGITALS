@@ -15,7 +15,7 @@ test('Select Work explains all six categories and keeps All Projects available',
   await expect(chooser).toBeVisible();
 
   for (const category of categories) {
-    await expect(chooser.getByRole('button', { name: new RegExp(category.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')) })).toBeVisible();
+    await expect(chooser.getByRole('button', { name: category, exact: false })).toBeVisible();
   }
 
   const wedding = chooser.getByRole('button', { name: /Wedding \/ B’Day/ });
