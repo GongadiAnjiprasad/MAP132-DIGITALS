@@ -26,3 +26,9 @@ test('Select Work cards have responsive, keyboard-visible styling', () => {
   assert.match(css, /@media\(max-width:950px\)\{\.work-category-grid\{grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
   assert.match(css, /\.work-category-card:focus-visible/);
 });
+
+test('Select Work does not render a redundant All Selected Projects results heading', () => {
+  assert.doesNotMatch(home, /work-results-heading|ALL SELECTED PROJECTS/);
+  assert.match(home, /selectedWorkItems\.map\(item =>/);
+  assert.match(home, /setActiveProjectCategory\('All Projects'\)/);
+});
