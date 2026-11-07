@@ -133,6 +133,7 @@ test('website experience feedback submits separately without requiring a service
   const dialog = page.getByRole('dialog');
   await dialog.getByRole('button', { name: /Website Experience/ }).click();
   await dialog.getByRole('button', { name: 'Mobile experience' }).click();
+  await dialog.getByRole('button', { name: '5 stars' }).click();
   await dialog.getByLabel('YOUR FEEDBACK').fill('The site looks cinematic and is easy to explore on mobile.');
   await dialog.getByRole('button', { name: /Send feedback/ }).click();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
