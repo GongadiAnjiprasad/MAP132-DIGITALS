@@ -13,7 +13,7 @@ function formatDuration(seconds: number) {
   const mins = Math.floor(seconds / 60), secs = Math.floor(seconds % 60);
   return 'RUNTIME ' + String(mins).padStart(2,'0') + ':' + String(secs).padStart(2,'0');
 }
-export default function DemoShowcase({ onAtmosphereChange }: { onAtmosphereChange: (clip: { id: string; title: string; category: string; note: string } | null) => void }) {
+export default function DemoShowcase({ onAtmosphereChange }: { onAtmosphereChange: (clip: { id: string; title: string; category: string; note: string } | null, sourceId?: string) => void }) {
   const [activeCategory,setActiveCategory] = useState('All Studies');
   const [durations,setDurations] = useState<Record<string,number>>({});
   const visible = activeCategory === 'All Studies' ? clips : clips.filter(clip => clip.category === activeCategory);
@@ -34,7 +34,7 @@ export default function DemoShowcase({ onAtmosphereChange }: { onAtmosphereChang
     <div className="studio-reel-toolbar"><div><span>01 — CREATIVE STUDIES</span><p>Explore the styles and formats we work towards.</p></div><div className="studio-reel-filters" aria-label="Filter visual studies">{categories.map(category=><button type="button" key={category} className={activeCategory===category?'active':''} aria-pressed={activeCategory===category} onClick={()=>setActiveCategory(category)}>{category}</button>)}</div></div>
     <div className="studio-reel-grid">
       {visible.map((clip,index)=><article className={'studio-reel-card'+(index===0&&activeCategory==='All Studies'?' featured':'')} key={clip.id}>
-        <div className="studio-reel-media"><video controls playsInline preload="metadata" poster={clip.poster} onLoadedMetadata={e=>{const media=e.currentTarget;const duration=media?.duration;if(typeof duration==="number"&&Number.isFinite(duration)){setDurations(prev=>({...prev,[clip.id]:duration}));}}} onPlay={e=>{document.querySelectorAll('video').forEach(v=>{if(v!==e.currentTarget)v.pause();});onAtmosphereChange(clip);}} onPause={()=>onAtmosphereChange(null)} onEnded={()=>onAtmosphereChange(null)}><source src={clip.video} type="video/mp4"/>Your browser does not support video playback.</video><span className="studio-reel-number">{clip.number}</span><span className="studio-reel-runtime">{formatDuration(durations[clip.id]||0)}</span></div>
+        <div className="studio-reel-media"><video controls playsInline preload="metadata" poster={clip.poster} onLoadedMetadata={e=>{const media=e.currentTarget;const duration=media?.duration;if(typeof duration==="number"&&Number.isFinite(duration)){setDurations(prev=>({...prev,[clip.id]:duration}));}}} onPlay={e=>{document.querySelectorAll('video').forEach(v=>{if(v!==e.currentTarget)v.pause();});onAtmosphereChange(clip);}} onPause={()=>onAtmosphereChange(null,clip.id)} onEnded={()=>onAtmosphereChange(null,clip.id)}><source src={clip.video} type="video/mp4"/>Your browser does not support video playback.</video><span className="studio-reel-number">{clip.number}</span><span className="studio-reel-runtime">{formatDuration(durations[clip.id]||0)}</span></div>
         <div className="studio-reel-card-copy"><div><span>{clip.tag}</span><h4>{clip.title}</h4><p>{clip.note}</p></div><a href={clip.source} target="_blank" rel="noreferrer">SOURCE ↗</a></div>
       </article>)}
     </div>
