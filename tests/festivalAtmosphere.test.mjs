@@ -11,3 +11,9 @@ test('pre-festival ambience remains visible without taking over the site', () =>
   assert.match(css, /88%\s*\{\s*opacity:\s*\.72;\s*\}/);
   assert.match(css, /prefers-reduced-motion:\s*reduce/);
 });
+
+test('festival greeting stays click-through and keeps its dismiss control in the original top corner while the greeting stays click-through', () => {
+  assert.match(css, /\.ff-greeting\s*\{[^}]*pointer-events:\s*none/s);
+  assert.match(css, /\.ff-greeting-close\s*\{[^}]*top:\s*12px;\s*left:\s*12px/);
+  assert.match(css, /\.ff-greeting-close\s*\{[^}]*pointer-events:\s*auto/s);
+});
