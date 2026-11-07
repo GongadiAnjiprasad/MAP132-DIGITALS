@@ -159,5 +159,6 @@ test('Studio displays only reviews returned by the public reviews endpoint', asy
   await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Studio', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Client reviews' })).toBeVisible();
   await expect(page.getByText('Excellent storytelling and polished editing.')).toBeVisible();
-  await expect(page.getByText('Cinematic Trailers')).toBeVisible();
+  const reviews = page.getByRole('region', { name: 'Client reviews' });
+  await expect(reviews.getByText('Cinematic Trailers', { exact: true })).toBeVisible();
 });
