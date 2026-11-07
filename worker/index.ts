@@ -136,7 +136,7 @@ if(path==='/api/feedback'&&method==='POST'){
   let body:any;try{body=await req.json();}catch{return json({error:'Invalid feedback data.'},400);}
   const service=String(body.service||'').trim(),message=String(body.message||'').trim(),email=String(body.email||'').trim(),rating=Number(body.rating);
   if(!['Cinematic Trailers','Wedding / B’Day','Advertisements','AI Services','Insta Reels','YouTube Related','Overall Studio Experience'].includes(service))return json({error:'Choose the MAP132 service you are reviewing.'},400);
-  if(message.length<10||message.length>2000)return json({error:'Message must be between 10 and 2000 characters.'},400);
+  if(message.length<1||message.length>2000)return json({error:'Enter feedback between 1 and 2000 characters.'},400);
   if(email.length>254|| (email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)))return json({error:'Enter a valid email address.'},400);
   if(!Number.isInteger(rating)||rating<1||rating>5)return json({error:'Choose a rating from 1 to 5.'},400);
   const ip=req.headers.get('CF-Connecting-IP')||'unknown';

@@ -12,7 +12,7 @@ test('mobile work feedback remains usable and submits a service-specific rating'
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
   await dialog.getByLabel('WHICH SERVICE ARE YOU REVIEWING?').selectOption('Wedding / B’Day');
-  await dialog.getByLabel('WHAT DID YOU LIKE — OR WHAT CAN WE IMPROVE?').fill('Beautiful storytelling and lovely music choice.');
+  await dialog.getByLabel('WHAT DID YOU LIKE — OR WHAT CAN WE IMPROVE?').fill('Super');
   await dialog.getByRole('button', { name: /Seal & send feedback/ }).tap();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload.service).toBe('Wedding / B’Day');

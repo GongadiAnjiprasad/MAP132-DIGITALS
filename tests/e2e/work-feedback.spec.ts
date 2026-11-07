@@ -25,11 +25,20 @@ test('work feedback form collects a service rating and seals the submitted revie
   });
 });
 
-test('work feedback requires a service selection and a useful comment', async ({ page }) => {
+test('work feedback starts disabled and enables for a one-word review only after service selection', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Give feedback' }).click();
   const dialog = page.getByRole('dialog');
   await expect(dialog.getByRole('button', { name: /Seal & send feedback/ })).toBeDisabled();
-  await expect(dialog.getByLabel('WHICH SERVICE ARE YOU REVIEWING?')).toHaveAttribute('required', '');
-  await expect(dialog.getByLabel('WHAT DID YOU LIKE — OR WHAT CAN WE IMPROVE?')).toHaveAttribute('minlength', '10');
+  const service = dialog.getByLabel('WHICH SERVICE ARE YOU REVIEWING?');
+  const message = dialog.getByLabel('WHAT DID YOU LIKE — OR WHAT CAN WE IMPROVE?');
+  const submit = dialog.getByRole('button', { name: /Seal & send feedback/ });
+  await expect(service).toHaveAttribute('required', '');
+  await expect(message).toHaveAttribute('minlength', '1');
+  await service.selectOption('Overall Studio Experience');
+  await expect(submit).toBeDisabled();
+  await message.fill('Super');
+  await expect(submit).toBeEnabled();
+  await message.fill('   ');
+  await expect(submit).toBeDisabled();
 });
