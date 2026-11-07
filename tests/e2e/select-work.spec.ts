@@ -14,6 +14,8 @@ test('Select Work explains all six categories and keeps All Projects available',
   await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
   const chooser = page.getByRole('group', { name: 'Choose a project category' });
   await expect(chooser).toBeVisible();
+  await expect(page.locator('.demo-showcase')).toHaveCount(0);
+  await expect(page.locator('.ms-service-tile')).toHaveCount(6);
 
   for (const category of categories) {
     await expect(chooser.getByRole('button', { name: category, exact: false })).toBeVisible();
