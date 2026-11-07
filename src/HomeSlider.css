@@ -869,15 +869,15 @@
   .ms-stage {
     height: auto;
     min-height: 0;
-    flex: 0 0 auto;
+    flex: 1 0 auto;
     overflow: hidden;
   }
   .ms-track {
-    height: auto;
+    height: 100%;
     align-items: flex-start;
   }
   .ms-page {
-    height: auto;
+    height: 100%;
     min-height: max(0px, calc(100svh - 166px));
     overflow: visible;
     align-content: start;
