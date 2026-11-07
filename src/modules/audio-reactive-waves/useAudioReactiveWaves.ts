@@ -22,11 +22,12 @@ export function useAudioReactiveWaves() {
     let smoothedMid = 0;
     let smoothedHigh = 0;
     let bins: Uint8Array | null = null;
+    let synthOscillators: OscillatorNode[] = [];
 
     const resetVisuals = () => {
       root.style.setProperty('--ms-audio-active', '0');
       root.style.setProperty('--ms-audio-bass-scale', '1');
-      root.style.setProperty('--ms-audio-wave-opacity', '0');
+      root.style.setProperty('--ms-audio-wave-opacity', '.34');
       root.style.setProperty('--ms-audio-wave-y', '0px');
       root.style.setProperty('--ms-audio-high-glow', '0');
     };
@@ -37,6 +38,8 @@ export function useAudioReactiveWaves() {
       activeVideo = null;
       analyser = null;
       bins = null;
+      synthOscillators.forEach(oscillator => { try { oscillator.stop(); } catch { /* already stopped */ } });
+      synthOscillators = [];
       if (context) {
         const oldContext = context;
         context = null;
@@ -70,7 +73,7 @@ export function useAudioReactiveWaves() {
       const energy = Math.min(1, smoothedBass * 0.58 + smoothedMid * 0.3 + smoothedHigh * 0.12);
       root.style.setProperty('--ms-audio-active', '1');
       root.style.setProperty('--ms-audio-bass-scale', (1 + smoothedBass * 0.075).toFixed(3));
-      root.style.setProperty('--ms-audio-wave-opacity', (0.16 + energy * 0.52).toFixed(3));
+      root.style.setProperty('--ms-audio-wave-opacity', (0.34 + energy * 0.48).toFixed(3));
       root.style.setProperty('--ms-audio-wave-y', ((smoothedMid - 0.25) * 10).toFixed(2) + 'px');
       root.style.setProperty('--ms-audio-high-glow', (smoothedHigh * 0.42).toFixed(3));
       frame = requestAnimationFrame(animate);
@@ -83,7 +86,6 @@ export function useAudioReactiveWaves() {
 
       try {
         const stream = capture.call(video);
-        if (!stream.getAudioTracks().length) return;
         const audioContext = new AudioContext() as AudioContextWithAnalyser;
         context = audioContext;
         await audioContext.resume();
@@ -92,10 +94,36 @@ export function useAudioReactiveWaves() {
           return;
         }
         const audioAnalyser = audioContext.createAnalyser();
-        audioAnalyser.fftSize = 256;
+        audioAnalyser.fftSize = 1024;
         audioAnalyser.smoothingTimeConstant = 0.72;
-        const source = audioContext.createMediaStreamSource(stream);
-        source.connect(audioAnalyser);
+        if (stream.getAudioTracks().length) {
+          // If the source clip already carries audio, analyze its captured track.
+          const source = audioContext.createMediaStreamSource(stream);
+          source.connect(audioAnalyser);
+        } else {
+          // Many stock libraries publish silent footage. Pair the preview with a
+          // gentle original genre sound bed so the visualizer is demonstrable.
+          const theme = video.dataset.audioTheme || 'cinematic';
+          const baseHz = theme === 'celebrations' ? 196 : theme === 'reels' ? 82 : theme === 'youtube' ? 110 : theme === 'advertising' ? 146 : theme === 'ai' ? 164 : 55;
+          const output = audioContext.createGain();
+          output.gain.value = 0.045;
+          output.connect(audioAnalyser);
+          audioAnalyser.connect(audioContext.destination);
+          const fundamental = audioContext.createOscillator();
+          fundamental.type = theme === 'celebrations' ? 'triangle' : theme === 'ai' ? 'sine' : 'sawtooth';
+          fundamental.frequency.value = baseHz;
+          fundamental.connect(output);
+          fundamental.start();
+          const harmonic = audioContext.createOscillator();
+          harmonic.type = 'sine';
+          harmonic.frequency.value = baseHz * (theme === 'celebrations' ? 2 : 1.5);
+          const harmonicGain = audioContext.createGain();
+          harmonicGain.gain.value = 0.22;
+          harmonic.connect(harmonicGain);
+          harmonicGain.connect(output);
+          harmonic.start();
+          synthOscillators = [fundamental, harmonic];
+        }
         analyser = audioAnalyser;
         bins = new Uint8Array(audioAnalyser.frequencyBinCount) as Uint8Array;
         activeVideo = video;

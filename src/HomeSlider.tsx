@@ -27,12 +27,12 @@ type HomeContent = {
 
 const pages = ['Home', 'Selected Work', 'Services', 'Studio', 'Contact'];
 const previewVideos = [
- {src:'https://videos.pexels.com/video-files/27099636/12071805_1920_1080_60fps.mp4',note:'Stock-footage visual study · cinematic atmosphere'},
- {src:'https://videos.pexels.com/video-files/31245302/13345103_1920_1080_50fps.mp4',note:'Stock-footage visual study · wedding and celebration'},
- {src:'https://videos.pexels.com/video-files/7424531/7424531-uhd_3840_2160_30fps.mp4',note:'Stock-footage visual study · short-form social content'},
- {src:'https://videos.pexels.com/video-files/8100337/8100337-uhd_4096_2160_25fps.mp4',note:'Stock-footage visual study · creator and podcast workflow'},
- {src:'https://videos.pexels.com/video-files/27099636/12071805_1920_1080_60fps.mp4',note:'Stock-footage visual study · commercial mood reference'},
- {src:'https://videos.pexels.com/video-files/8100337/8100337-uhd_4096_2160_25fps.mp4',note:'Stock-footage visual study · AI and motion workflow'}
+ {src:'https://videos.pexels.com/video-files/11867212/11867212-hd_1080_1920_30fps.mp4',note:'Pexels stock footage · cinematic city-night sequence · paired with a low cinematic sound bed'},
+ {src:'https://videos.pexels.com/video-files/8915065/8915065-uhd_3840_2160_25fps.mp4',note:'Pexels stock footage · wedding celebration moments · paired with a warm celebration sound bed'},
+ {src:'https://videos.pexels.com/video-files/20711709/20711709-uhd_2160_3840_24fps.mp4',note:'Pexels stock footage · vertical street-market reel · paired with a rhythmic short-form sound bed'},
+ {src:'https://videos.pexels.com/video-files/6892735/6892735-uhd_2160_4096_25fps.mp4',note:'Pexels stock footage · podcast studio recording · paired with a soft creator ambience sound bed'},
+ {src:'https://videos.pexels.com/video-files/12433101/12433101-uhd_3840_2160_30fps.mp4',note:'Pexels stock footage · product-vlog commercial direction · paired with a bright promo sound bed'},
+ {src:'https://videos.pexels.com/video-files/18069701/18069701-uhd_3840_2160_24fps.mp4',note:'Pexels stock footage · AI concept visualization · paired with an ambient futuristic sound bed'}
 ];
 const serviceCards = [
   { title: 'Cinematic Films', note: 'Trailers · Teasers · Story edits', image: DEMO_SHOWCASE[0].image, number: '01', theme: 'cinematic' },
@@ -376,12 +376,12 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       <div className="ms-preview-dialog" onClick={event => event.stopPropagation()} onPointerDown={event => { if (event.pointerType !== 'touch' && event.pointerType !== 'pen' && event.pointerType !== 'mouse') return; if ((event.target as HTMLElement).closest('button, input')) return; event.currentTarget.setPointerCapture(event.pointerId); previewGesture.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId }; }} onPointerUp={event => { const start = previewGesture.current; previewGesture.current = null; if (!start || start.pointerId !== event.pointerId) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; const direction = getHorizontalSwipeDirection(dx, dy, event.pointerType === 'mouse' ? 55 : 42, 1.15); if (direction !== 0) changePreview(direction); }} onPointerCancel={() => { previewGesture.current = null; }} onWheel={event => { if (Math.abs(event.deltaX) < Math.abs(event.deltaY) * 1.15 || Math.abs(event.deltaX) < 2) return; event.preventDefault(); if (wheelLocked.current) return; wheelTotal.current += event.deltaX; if (Math.abs(wheelTotal.current) >= 58) { changePreview(wheelTotal.current > 0 ? 1 : -1); wheelTotal.current = 0; wheelLocked.current = true; window.setTimeout(() => { wheelLocked.current = false; }, 520); } }}>
         <div className="ms-preview-dialog-head"><div><span>MAP132 DIGITALS / SHOWCASE PREVIEW</span><h2>{serviceCards[activePreview].title}</h2></div><button type="button" className="ms-preview-close" aria-label="Close video" onClick={closePreview}><X size={22}/></button></div>
         <div className="ms-preview-stage">
-          <video key={activePreview} className="ms-preview-player" src={previewVideos[activePreview].src} controls autoPlay playsInline preload="metadata" onPlay={() => ambientTheme.setPlayback(serviceCards[activePreview].theme as ServiceThemeKey, 'preview-modal')} onPause={() => ambientTheme.clearPlayback('preview-modal')} onEnded={() => ambientTheme.clearPlayback('preview-modal')}>Your browser does not support video playback.</video>
+          <video key={activePreview} className="ms-preview-player" src={previewVideos[activePreview].src} data-audio-theme={serviceCards[activePreview].theme} controls autoPlay playsInline preload="metadata" onPlay={() => ambientTheme.setPlayback(serviceCards[activePreview].theme as ServiceThemeKey, 'preview-modal')} onPause={() => ambientTheme.clearPlayback('preview-modal')} onEnded={() => ambientTheme.clearPlayback('preview-modal')}>Your browser does not support video playback.</video>
           <span className="ms-preview-swipe-hint ms-preview-swipe-left" aria-hidden="true"><ArrowLeft size={25}/></span>
           <span className="ms-preview-swipe-hint ms-preview-swipe-right" aria-hidden="true"><ArrowRight size={25}/></span>
         </div>
         <div className="ms-preview-count">{String(activePreview + 1).padStart(2, '0')} / {String(previewVideos.length).padStart(2, '0')}</div>
-        <p className="ms-preview-disclaimer">{previewVideos[activePreview].note}. Swipe left/right for more videos · Reference footage only — not a commissioned MAP132 client project.</p>
+        <p className="ms-preview-disclaimer">{previewVideos[activePreview].note}. Swipe left/right for more videos · Reference footage only — not a commissioned MAP132 client project. If a stock clip is silent, a subtle original browser-generated genre sound bed accompanies playback for the audio-reactive waves.</p>
       </div>
     </div>}
     <div className="ms-controls">
