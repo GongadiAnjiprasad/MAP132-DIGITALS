@@ -1582,3 +1582,38 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 @keyframes feedback-seal-shine{0%{transform:translateX(-150%) rotate(12deg);opacity:0}20%{opacity:.9}100%{transform:translateX(150%) rotate(12deg);opacity:0}}
 @media(max-width:600px){.feedback-seal-success{min-height:62vh;padding:12px 4px 22px}.feedback-seal-stage{width:170px;height:170px}.feedback-seal-wax{width:130px;height:130px}.feedback-seal-wax img{width:68px;height:68px}}
 @media(prefers-reduced-motion:reduce){.feedback-seal-wax,.feedback-seal-glint{animation:none}.feedback-seal-wax{transform:none}.feedback-seal-glint{display:none}}
+
+/* MAP132 seal refinement: recessed, pressed-in logo impression */
+.feedback-seal-wax{
+  background:
+    radial-gradient(ellipse at 31% 21%,#d17b62 0,#ad493b 25%,transparent 52%),
+    radial-gradient(ellipse at 72% 82%,#4c1519 0,transparent 58%),
+    radial-gradient(circle at 45% 42%,#96352d 0,#70221f 68%,#4b1718 100%);
+  box-shadow:
+    inset 0 2px 5px #f8c6a077,
+    inset 0 -10px 18px #310d14aa,
+    inset 2px 2px 5px #e59a7a55,
+    0 5px 0 #54201e,
+    0 9px 13px #48201955;
+}
+.feedback-seal-wax img{
+  filter:
+    grayscale(1) sepia(.28) brightness(.48) contrast(1.35)
+    drop-shadow(1px 1px 0 #e4a184)
+    drop-shadow(-1px -1px 0 #3e1015);
+  mix-blend-mode:soft-light;
+  opacity:.92;
+}
+.feedback-seal-wax::after{
+  content:"";
+  position:absolute;
+  inset:17px;
+  border-radius:inherit;
+  pointer-events:none;
+  background:radial-gradient(ellipse at 35% 24%,#f4b18a22,transparent 48%);
+  box-shadow:inset 0 1px 3px #310d1477,inset 0 -1px 2px #f0b18a33;
+}
+.feedback-seal-glint{mix-blend-mode:screen;opacity:.62}
+@media(prefers-reduced-motion:reduce){
+  .feedback-seal-wax img{transition:none}
+}
