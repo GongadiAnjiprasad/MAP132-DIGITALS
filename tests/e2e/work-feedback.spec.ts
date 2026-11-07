@@ -17,6 +17,7 @@ test('work feedback form collects a service rating and seals the submitted revie
   await dialog.getByRole('button', { name: '4 stars' }).click();
   await dialog.getByLabel('YOUR FEEDBACK').fill('The pacing and colour grading were excellent.');
   await dialog.getByLabel('EMAIL (OPTIONAL)').fill('client@example.com');
+  await dialog.getByLabel(/I agree that MAP132 DIGITALS may display my service review publicly/).check();
   await dialog.getByRole('button', { name: /Send feedback/ }).click();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload).toEqual({
@@ -25,6 +26,7 @@ test('work feedback form collects a service rating and seals the submitted revie
     rating: 4,
     message: 'The pacing and colour grading were excellent.',
     email: 'client@example.com',
+    publicConsent: true,
     aspects: [],
   });
 });
@@ -145,6 +147,18 @@ test('website experience feedback submits separately without requiring a service
     rating: 5,
     message: 'The site looks cinematic and is easy to explore on mobile.',
     email: '',
+    publicConsent: false,
     aspects: ['Mobile experience'],
   });
+});
+
+
+test('Studio displays only reviews returned by the public reviews endpoint', async ({ page }) => {
+  await page.route('**/api/reviews', route => route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({reviews:[{id:'review-1',service:'Cinematic Trailers',rating:5,message:'Excellent storytelling and polished editing.',createdAt:'2026-11-07T12:00:00.000Z'}]})}));
+  await page.goto('/');
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Studio', exact: true }).click();
+  await expect(page.getByRole('region', { name: 'Client reviews' })).toBeVisible();
+  await expect(page.getByText('Excellent storytelling and polished editing.')).toBeVisible();
+  const reviews = page.getByRole('region', { name: 'Client reviews' });
+  await expect(reviews.getByText('Cinematic Trailers', { exact: true })).toBeVisible();
 });

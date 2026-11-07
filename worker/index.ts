@@ -151,7 +151,7 @@ if(path==='/api/feedback'&&method==='POST'){
   if(current>=3)return json({error:'Too many submissions. Please try again later.'},429);
   await env.MAP132_KV.put(rateKey,String(current+1),{expirationTtl:600});
   const id=Date.now().toString(36)+'-'+crypto.randomUUID();
-  await env.MAP132_KV.put('feedback/'+id,JSON.stringify({id,kind,service:service||undefined,aspects,rating,message,email,createdAt:new Date().toISOString(),status:'new'}));
+  await env.MAP132_KV.put('feedback/'+id,JSON.stringify({id,kind,service:service||undefined,aspects,rating,message,email,publicConsent:kind==='Work feedback'&&body.publicConsent===true,published:false,createdAt:new Date().toISOString(),status:'new'}));
   return json({submitted:true,id},201);
 }
 
@@ -167,6 +167,7 @@ if(path==='/api/enquiries'&&method==='POST'){
    await env.MAP132_KV.put('enquiries/'+id,JSON.stringify(entry));
    return json({submitted:true,id},201);
  }
+if(path==='/api/reviews'&&method==='GET'){if(!env.MAP132_KV)return json({reviews:[]});const listed=await env.MAP132_KV.list({prefix:'feedback/',limit:100});const entries=await Promise.all(listed.keys.filter(key=>!key.name.startsWith('feedback-rate/')).map(async key=>{const value=await env.MAP132_KV!.get(key.name);if(!value)return null;try{return JSON.parse(value);}catch{return null;}}));const reviews=entries.filter((item:any)=>item&&item.kind==='Work feedback'&&item.publicConsent===true&&item.published===true).map((item:any)=>({id:item.id,service:item.service||'Video Editing',rating:item.rating,message:item.message,createdAt:item.createdAt})).sort((a:any,b:any)=>String(b.createdAt).localeCompare(String(a.createdAt)));return json({reviews});}
 if(path==='/api/portfolio'&&method==='GET'){const content=await read(env);for(const item of content.items||[])if(item.path&&env.MAP132_MEDIA){item.mediaUrl='/media/'+encodeURIComponent(item.path);}return json({content});}
 if(path==='/api/admin/session'&&method==='GET'){const authenticated=await validSession(req,env);return json({authenticated},authenticated?200:401);}
 if(path==='/api/admin/login'&&method==='POST'){let stage='check admin secret';try{if(!env.ADMIN_PASSWORD)return json({error:'Admin password secret is not configured in Cloudflare.'},503);stage='parse login request';let body:any;try{body=await req.json();}catch{return json({error:'Invalid request.'},400);}stage='validate password';if(typeof body.password!=='string'||body.password!==env.ADMIN_PASSWORD)return json({error:'Incorrect admin password.'},401);stage='create session payload';const payload=toBase64Url(encoder.encode(JSON.stringify({exp:Date.now()+8*60*60*1000})));stage='sign session token';const signed=await signature(payload,env.ADMIN_PASSWORD);const token=payload+'.'+signed;stage='create login response';return json({authenticated:true},200,{ 'Set-Cookie':sessionCookie(token,8*60*60) });}catch(error){const detail=error instanceof Error?error.message:'Unknown error';const name=error instanceof Error?error.name:'Error';return json({error:'Admin login failed at stage "'+stage+'" ('+name+'): '+detail},500);}}
@@ -179,6 +180,7 @@ if(path==='/api/admin/feedback'&&method==='GET'){
   const entries=await Promise.all(listed.keys.filter(key=>!key.name.startsWith('feedback-rate/')).map(async key=>{const value=await env.MAP132_KV!.get(key.name);if(!value)return null;try{return JSON.parse(value);}catch{return null;}}));
   return json({feedback:entries.filter(Boolean).sort((a:any,b:any)=>String(b.createdAt).localeCompare(String(a.createdAt)))});
 }
+if(path.startsWith('/api/admin/feedback/')&&method==='POST'){if(!env.MAP132_KV)return json({error:'Feedback storage is not configured.'},503);const parts=path.split('/').filter(Boolean),id=decodeURIComponent(parts[3]||''),action=parts[4];if(!/^[a-z0-9-]+$/i.test(id)||!['publish','unpublish'].includes(action))return json({error:'Invalid feedback publication action.'},400);const key='feedback/'+id,value=await env.MAP132_KV.get(key);if(!value)return json({error:'Feedback entry not found.'},404);let item:any;try{item=JSON.parse(value);}catch{return json({error:'Feedback entry is invalid.'},500);}if(action==='publish'&&(item.kind!=='Work feedback'||item.publicConsent!==true))return json({error:'This review does not have permission for public display.'},403);item.published=action==='publish';item.publishedAt=item.published?new Date().toISOString():null;await env.MAP132_KV.put(key,JSON.stringify(item));return json({published:item.published});}
 if(path.startsWith('/api/admin/feedback/')&&method==='DELETE'){
   if(!env.MAP132_KV)return json({error:'Feedback storage is not configured.'},503);
   const id=decodeURIComponent(path.slice('/api/admin/feedback/'.length));
