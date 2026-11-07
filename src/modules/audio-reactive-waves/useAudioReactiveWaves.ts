@@ -23,7 +23,6 @@ export function useAudioReactiveWaves() {
     let smoothedHigh = 0;
     let bins: Uint8Array | null = null;
     let synthOscillators: OscillatorNode[] = [];
-    let synthGain: GainNode | null = null;
 
     const resetVisuals = () => {
       root.style.setProperty('--ms-audio-active', '0');
@@ -41,7 +40,6 @@ export function useAudioReactiveWaves() {
       bins = null;
       synthOscillators.forEach(oscillator => { try { oscillator.stop(); } catch { /* already stopped */ } });
       synthOscillators = [];
-      synthGain = null;
       if (context) {
         const oldContext = context;
         context = null;
@@ -125,7 +123,6 @@ export function useAudioReactiveWaves() {
           harmonicGain.connect(output);
           harmonic.start();
           synthOscillators = [fundamental, harmonic];
-          synthGain = output;
         }
         analyser = audioAnalyser;
         bins = new Uint8Array(audioAnalyser.frequencyBinCount) as Uint8Array;
