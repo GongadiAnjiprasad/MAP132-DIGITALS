@@ -1775,3 +1775,54 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 @media (prefers-reduced-motion:reduce) {
   .services-section .service-card, .work-card, .studio-reel-card { transition:none !important; }
 }
+
+
+/* Feedback drawer scaling guard: keep the seal/submit control inside the parchment frame. */
+.feedback-drawer,
+.feedback-drawer form,
+.feedback-drawer form > * {
+  min-width: 0;
+  box-sizing: border-box;
+}
+.feedback-drawer form {
+  width: 100%;
+  max-width: 100%;
+}
+.feedback-drawer .feedback-submit {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: clamp(46px, 6vh, 52px);
+  margin: 18px 0 0;
+  padding: 12px clamp(10px, 3vw, 18px);
+  box-sizing: border-box;
+  align-self: stretch;
+  flex-wrap: wrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  text-align: center;
+  line-height: 1.35;
+  box-shadow: 0 3px 0 #80501f, 0 5px 12px #5c321d20, inset 0 1px #ffffff99;
+}
+.feedback-drawer .feedback-submit svg {
+  flex: 0 0 auto;
+}
+.feedback-drawer .feedback-submit:hover:not(:disabled) {
+  transform: translateY(-1px);
+}
+@media (max-width: 600px) {
+  .feedback-drawer {
+    width: 100%;
+    max-width: 100vw;
+    padding-left: clamp(16px, 5vw, 20px);
+    padding-right: clamp(16px, 5vw, 20px);
+  }
+  .feedback-drawer .feedback-submit {
+    min-height: 46px;
+    margin-top: 16px;
+    padding-inline: 10px;
+    font-size: clamp(11px, 3.2vw, 12px);
+    letter-spacing: .35px;
+  }
+}
