@@ -183,6 +183,10 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
   const previewGesture = useRef<{ x: number; y: number; pointerId?: number } | null>(null);
   const changePreview = (direction: number) => { ambientTheme.clearPlayback(); setActivePreview(current => current === null ? null : (current + direction + previewVideos.length) % previewVideos.length); };
   const closePreview = () => { ambientTheme.clearPlayback(); setActivePreview(null); };
+  // Modal unmount can race the media element's pause event; clear playback accent on close too.
+  useEffect(() => {
+    if (activePreview === null) ambientTheme.clearPlayback();
+  }, [activePreview, ambientTheme.clearPlayback]);
   const pointerStart = useRef<{ x: number; y: number; pointerId: number; atHomeTop: boolean } | null>(null);
   const suppressSwipeClick = useRef(false);
   const wheelTotal = useRef(0);
