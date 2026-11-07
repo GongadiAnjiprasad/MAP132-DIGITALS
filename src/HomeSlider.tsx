@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState, type PointerEvent, type WheelEvent, type MouseEvent } from 'react';
+import { useEffect, useRef, useState, type PointerEvent, type WheelEvent, type MouseEvent, type ReactNode } from 'react';
 import {
   ArrowLeft, ArrowRight, Camera, Check, Film, Instagram, Mail, MessageCircle,
   Play, Sparkles, Youtube, Facebook, Linkedin, Send, X, Sun, Moon
@@ -106,7 +106,7 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
   return <div className="ms-project-empty"><Play size={24}/><span>PROJECT PREVIEW</span></div>;
 }
 
-export default function HomeSlider({ content }: { content: HomeContent }) {
+export default function HomeSlider({ content, feedbackWidget }: { content: HomeContent; feedbackWidget?: ReactNode }) {
   const [active, setActive] = useState(0);
   const ambientTheme = useAmbientServiceTheme();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
@@ -389,5 +389,6 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
       <button type="button" className="ms-arrow ms-next" aria-label="Next page" onClick={() => goTo(active + 1)} disabled={active === pages.length - 1}><ArrowRight size={19}/></button>
     </div>
     <footer className="ms-footer"><span>© {new Date().getFullYear()} MAP132 DIGITALS</span><a className="ms-studio-link" href="/workspace.html" aria-label="Open Editor Workspace" title="Editor Workspace">EDITOR WORKSPACE <span aria-hidden="true">↗</span></a></footer>
+    {feedbackWidget}
   </div>;
 }

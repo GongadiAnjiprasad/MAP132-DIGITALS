@@ -42,3 +42,34 @@ test('work feedback starts disabled and enables for a one-word review only after
   await message.fill('   ');
   await expect(submit).toBeDisabled();
 });
+
+
+test('feedback drawer inherits each active service theme accent', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const themes = [
+    { service: 'Cinematic Films', accent: '#FFCB78' },
+    { service: 'Wedding & Celebrations', accent: '#FFB45B' },
+    { service: 'Brand Promotions', accent: '#FFFFFF' },
+    { service: 'AI Video Creation', accent: '#00F2FF' },
+    { service: 'Reels & Shorts', accent: '#BC13FE' },
+    { service: 'YouTube & Podcasts', accent: '#FF0000' },
+  ];
+
+  for (const theme of themes) {
+    await page.getByRole('button', { name: `Play ${theme.service} sample video` }).click();
+    await page.getByRole('button', { name: 'Close video' }).click();
+    await page.getByRole('button', { name: 'Give feedback' }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    const inheritedAccent = await dialog.evaluate(element =>
+      getComputedStyle(element).getPropertyValue('--ms-ambient-accent').trim()
+    );
+    expect(inheritedAccent.toLowerCase()).toBe(theme.accent.toLowerCase());
+    const formAccent = await dialog.evaluate(element =>
+      getComputedStyle(element).getPropertyValue('--feedback-accent').trim()
+    );
+    expect(formAccent.toLowerCase()).toBe(theme.accent.toLowerCase());
+    await dialog.getByRole('button', { name: 'Close feedback' }).click();
+  }
+});
