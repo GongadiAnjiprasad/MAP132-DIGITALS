@@ -1488,3 +1488,40 @@
 .ms-category-showcase{scroll-margin-top:14px}
 @media(max-width:760px){.ms-work-prompt{align-items:flex-start;margin-bottom:18px;padding:12px;font-size:11px}.ms-category-back{min-height:36px}}
 @media(prefers-reduced-motion:reduce){.ms-work-prompt,.ms-category-back{transition:none}}
+
+
+/* Same-page Selected Work gallery: compact category tabs stay available while visitors browse projects. */
+.ms-work-page .work-category-tabs{
+  position:sticky;top:0;z-index:8;display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;
+  padding:10px 2px 12px;margin:0 0 18px;background:linear-gradient(180deg,var(--ms-page-bg, #0b1019) 78%,transparent);
+  scrollbar-width:thin;scrollbar-color:var(--ms-gold) transparent;
+}
+.ms-work-page .work-category-tab{
+  flex:0 0 auto;display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-height:48px;padding:9px 13px;
+  border:1px solid var(--ms-line);border-radius:999px;background:rgba(17,24,36,.94);color:var(--ms-text);
+  cursor:pointer;transition:border-color .2s,background .2s,color .2s;
+}
+.ms-work-page .work-category-tab span{font-size:10px;font-weight:800;white-space:nowrap}
+.ms-work-page .work-category-tab small{color:var(--ms-muted);font-size:8px;letter-spacing:.8px}
+.ms-work-page .work-category-tab:hover,.ms-work-page .work-category-tab:focus-visible,.ms-work-page .work-category-tab.active{
+  border-color:var(--ms-gold);background:rgba(232,189,122,.14);color:var(--ms-text);outline-offset:3px
+}
+.ms-work-page .work-category-tab.active small{color:var(--ms-gold)}
+.ms-work-results-heading{display:flex;align-items:end;justify-content:space-between;gap:12px;margin:18px 0 16px}
+.ms-work-results-heading h3{margin:0;color:var(--ms-text);font:800 clamp(21px,2.5vw,30px)/1.15 'Manrope',sans-serif}
+.ms-work-results-heading>span{color:var(--ms-muted);font-size:9px;font-weight:800;letter-spacing:1px}
+.ms-work-pagination{display:flex;align-items:center;justify-content:center;gap:18px;margin:24px 0 8px}
+.ms-work-pagination button{display:inline-flex;align-items:center;gap:7px;min-height:38px;padding:8px 12px;border:1px solid var(--ms-line);border-radius:5px;background:transparent;color:var(--ms-text);font-size:10px;font-weight:700;cursor:pointer}
+.ms-work-pagination button:hover:not(:disabled),.ms-work-pagination button:focus-visible{border-color:var(--ms-gold);color:var(--ms-gold)}
+.ms-work-pagination button:disabled{opacity:.38;cursor:not-allowed}
+.ms-work-pagination>span{color:var(--ms-muted);font-size:10px;font-weight:700}
+.map132-slider-site[data-theme="light"] .ms-work-page .work-category-tab{background:rgba(255,253,248,.96);color:#29251f}
+.map132-slider-site[data-theme="light"] .ms-work-page .work-category-tab.active{background:rgba(232,189,122,.2);border-color:#a87536}
+@media(max-width:760px){
+  .ms-work-page .work-category-tabs{gap:7px;margin-left:-2px;margin-right:-2px;padding:8px 2px 11px}
+  .ms-work-page .work-category-tab{min-height:44px;padding:8px 11px}
+  .ms-work-page .work-category-tab span{font-size:9px}
+  .ms-work-results-heading{margin:14px 0 12px}
+  .ms-work-pagination{gap:10px}
+}
+@media(prefers-reduced-motion:reduce){.ms-work-page .work-category-tab{transition:none}}
