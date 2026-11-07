@@ -156,7 +156,7 @@ test('website experience feedback submits separately without requiring a service
 test('Studio displays only reviews returned by the public reviews endpoint', async ({ page }) => {
   await page.route('**/api/reviews', route => route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({reviews:[{id:'review-1',service:'Cinematic Trailers',rating:5,message:'Excellent storytelling and polished editing.',createdAt:'2026-11-07T12:00:00.000Z'}]})}));
   await page.goto('/');
-  await page.getByRole('button', { name: 'Studio', exact: true }).click();
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Studio', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Client reviews' })).toBeVisible();
   await expect(page.getByText('Excellent storytelling and polished editing.')).toBeVisible();
   await expect(page.getByText('Cinematic Trailers')).toBeVisible();
