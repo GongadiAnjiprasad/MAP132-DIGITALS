@@ -39,6 +39,14 @@ const defaults: Content = {
   items: []
 };
 const categories = ['Cinematic Films','Wedding & Events','Birthday Films','Reels & Shorts','YouTube Videos','Brand Promotions','AI Video Creation','Other Projects'];
+const workCategories = [
+  { id:'Cinematic Trailers', description:'Movie-style edits, teasers and dramatic visual stories.', filters:['Cinematic Films'] },
+  { id:'Wedding / B’Day', description:'Wedding highlights, birthday films and special moments.', filters:['Wedding & Events','Birthday Films'] },
+  { id:'Advertisements', description:'Brand promotions, product showcases and ad films.', filters:['Brand Promotions'] },
+  { id:'AI Services', description:'AI-powered visuals, generated scenes and creative edits.', filters:['AI Video Creation'] },
+  { id:'Insta Reels', description:'Vertical reels, short-form edits and social-first videos.', filters:['Reels & Shorts'] },
+  { id:'YouTube Related', description:'YouTube videos, creator edits and channel content.', filters:['YouTube Videos'] }
+];
 function safeLink(value: string) {
   if (!value) return '';
   try { const url = new URL(value); return ['https:','http:'].includes(url.protocol) ? url.href : ''; } catch { return ''; }
@@ -128,6 +136,7 @@ function PublicSite({ content }: { content: Content }) {
   const p = content.profile;
   const wa = p.whatsapp.replace(/[^\d]/g, '');
   const whatsappUrl = wa ? 'https://wa.me/' + wa : '';
+  const selectedWorkItems = content.items.filter(item => activeWorkCategory === 'All Projects' || Boolean(workCategories.find(category => category.id === activeWorkCategory)?.filters.includes(item.category)));
   return <div className="site" data-atmosphere={activeAtmosphere || undefined}>
     <IndianFestivalAtmosphere />
     <WebsiteIntro />
@@ -163,14 +172,28 @@ function PublicSite({ content }: { content: Content }) {
         </div>
         <div className="approach-footer"><span>01 — DISCOVER</span><i></i><span>02 — DESIGN</span><i></i><span>03 — EDIT</span><i></i><span>04 — REFINE</span><a href="#contact">BUILD SOMETHING WITH US <ArrowRight size={14}/></a></div>
       </section>
-      <section className="work-section" id="work"><div className="section-head"><div><p className="kicker">SELECTED PROJECTS</p><h2>Work that <em>speaks.</em></h2></div><p>Choose a category to explore the relevant video work and creative samples.</p></div>
-        {content.items.length>0&&<>
-          <div className="portfolio-category-filters" aria-label="Filter portfolio by category">
-            {['All Projects',...categories].map(category=><button type="button" key={category} className={activeWorkCategory===category?'active':''} aria-pressed={activeWorkCategory===category} onClick={()=>setActiveWorkCategory(category)}>{category}</button>)}
-          </div>
-          <div className="work-grid">{content.items.filter(item=>activeWorkCategory==='All Projects'||item.category===activeWorkCategory).map(item=><article className="work-card" key={item.id}><div className="media-frame"><PortfolioMedia item={item} onAtmosphereChange={setActiveAtmosphere}/><span className="media-category">{item.category}</span></div><div className="work-caption"><div><h3>{item.title}</h3><p>{item.description}</p></div><ArrowDownRight size={20}/></div></article>)}</div>
-          {content.items.filter(item=>activeWorkCategory==='All Projects'||item.category===activeWorkCategory).length===0&&<div className="portfolio-empty-category"><b>{activeWorkCategory}</b><p>No original project has been published in this category yet. Check back soon.</p></div>}
-        </>}
+      <section className="work-section" id="work">
+        <div className="section-head">
+          <div><p className="kicker">SELECTED PROJECTS</p><h2>Choose your <em>work.</em></h2></div>
+          <p>Select the type of video you want to explore. Each category opens its matching projects and creative samples.</p>
+        </div>
+        <div className="work-category-toolbar">
+          <span>EXPLORE BY CATEGORY</span>
+          <button type="button" className={activeWorkCategory==='All Projects'?'all-work-filter active':'all-work-filter'} aria-pressed={activeWorkCategory==='All Projects'} onClick={()=>setActiveWorkCategory('All Projects')}>All Projects <ArrowRight size={14}/></button>
+        </div>
+        <div className="work-category-grid" role="group" aria-label="Choose a project category">
+          {workCategories.map((category,index)=>{
+            const count=content.items.filter(item=>category.filters.includes(item.category)).length;
+            return <button type="button" key={category.id} className={activeWorkCategory===category.id?'work-category-card active':'work-category-card'} aria-pressed={activeWorkCategory===category.id} onClick={()=>setActiveWorkCategory(category.id)}>
+              <span className="work-category-number">0{index+1} / MAP132</span>
+              <strong>{category.id}</strong>
+              <span className="work-category-description">{category.description}</span>
+              <span className="work-category-footer"><small>{count} {count===1?'PROJECT':'PROJECTS'}</small><b>EXPLORE WORK <ArrowDownRight size={15}/></b></span>
+            </button>;
+          })}
+        </div>
+        <div className="work-results-heading"><span>{activeWorkCategory==='All Projects'?'ALL SELECTED PROJECTS':activeWorkCategory.toUpperCase()}</span><small>{selectedWorkItems.length} {selectedWorkItems.length===1?'PROJECT':'PROJECTS'}</small></div>
+        {selectedWorkItems.length>0?<div className="work-grid">{selectedWorkItems.map(item=><article className="work-card" key={item.id}><div className="media-frame"><PortfolioMedia item={item} onAtmosphereChange={setActiveAtmosphere}/><span className="media-category">{item.category}</span></div><div className="work-caption"><div><h3>{item.title}</h3><p>{item.description}</p></div><ArrowDownRight size={20}/></div></article>)}</div>:<div className="portfolio-empty-category"><b>{activeWorkCategory==='All Projects'?'New work is on the way':activeWorkCategory}</b><p>{activeWorkCategory==='All Projects'?'Published projects will appear here. Choose a category above to explore its work.':'No project has been published in this category yet. Please check back soon.'}</p></div>}
         <DemoShowcase onAtmosphereChange={(clip) => setActiveAtmosphere(clip ? getAtmosphere({ id: clip.id, title: clip.title, category: clip.category, description: clip.note, kind: 'video' }) : null)} />
       </section>
       <section className="cinema-interval" aria-label="Cinematic interval">
