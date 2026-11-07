@@ -257,7 +257,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     { label: 'Email', href: p.email ? 'mailto:' + p.email : '', icon: <Mail size={16}/> }
   ].filter(link => link.href);
 
-  return <div data-theme={theme} style={ambientTheme.style} className={`map132-slider-site ${desktopArrowsVisible ? "" : "ms-nav-arrows-hidden"}`}>
+  return <div data-theme={theme} data-ambient-playback={ambientTheme.isPlaying ? "true" : "false"} style={ambientTheme.style} className={`map132-slider-site ${desktopArrowsVisible ? "" : "ms-nav-arrows-hidden"}`}>
     <header className="ms-header">
       <a className="ms-brand" href="#top" onClick={e => { e.preventDefault(); goTo(0); }}>
         <img src="/resources/logo-removebg-preview.png" alt="MAP132 DIGITALS"/>
