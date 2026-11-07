@@ -19,3 +19,22 @@ test('mobile work feedback remains usable and submits a service-specific rating'
   expect(payload.rating).toBe(5);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(392);
 });
+
+test('feedback seal button stays inside the parchment frame at narrow mobile and desktop widths', async ({ page }) => {
+  for (const width of [320, 360, 390, 430, 1440]) {
+    await page.setViewportSize({ width, height: width < 600 ? 780 : 900 });
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Give feedback' }).click();
+    const dialog = page.getByRole('dialog');
+    const submit = dialog.getByRole('button', { name: /Seal & send feedback/ });
+    const drawer = await dialog.boundingBox();
+    const button = await submit.boundingBox();
+    expect(drawer, `drawer at ${width}px`).not.toBeNull();
+    expect(button, `submit button at ${width}px`).not.toBeNull();
+    expect(button!.x).toBeGreaterThanOrEqual(drawer!.x + 8);
+    expect(button!.x + button!.width).toBeLessThanOrEqual(drawer!.x + drawer!.width - 8);
+    expect(button!.width).toBeGreaterThan(0);
+    await page.getByRole('button', { name: 'Give feedback' }).evaluate(() => {});
+    await page.keyboard.press('Escape');
+  }
+});
