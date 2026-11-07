@@ -21,7 +21,7 @@ export function useAudioReactiveWaves() {
     let smoothedBass = 0;
     let smoothedMid = 0;
     let smoothedHigh = 0;
-    let bins: Uint8Array<ArrayBuffer> | null = null;
+    let bins: Uint8Array | null = null;
 
     const resetVisuals = () => {
       root.style.setProperty('--ms-audio-active', '0');
@@ -46,7 +46,7 @@ export function useAudioReactiveWaves() {
       resetVisuals();
     };
 
-    const average = (data: Uint8Array<ArrayBuffer>, start: number, end: number) => {
+    const average = (data: Uint8Array, start: number, end: number) => {
       const limit = Math.min(end, data.length);
       if (limit <= start) return 0;
       let total = 0;
@@ -97,7 +97,7 @@ export function useAudioReactiveWaves() {
         const source = audioContext.createMediaStreamSource(stream);
         source.connect(audioAnalyser);
         analyser = audioAnalyser;
-        bins = new Uint8Array(audioAnalyser.frequencyBinCount) as Uint8Array<ArrayBuffer>;
+        bins = new Uint8Array(audioAnalyser.frequencyBinCount) as Uint8Array;
         activeVideo = video;
         frame = requestAnimationFrame(animate);
       } catch {
