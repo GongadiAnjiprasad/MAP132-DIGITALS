@@ -6,6 +6,7 @@ async function installAudioMocks(page: import('@playwright/test').Page, hasAudio
       fftSize = 1024;
       frequencyBinCount = 512;
       smoothingTimeConstant = 0.72;
+      connect() {}
       getByteFrequencyData(data: Uint8Array) {
         data.fill(0);
         data.fill(240, 1, 7);
