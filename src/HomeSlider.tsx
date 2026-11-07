@@ -27,12 +27,12 @@ type HomeContent = {
 
 const pages = ['Home', 'Selected Work', 'Services', 'Studio', 'Contact'];
 const previewVideos = [
- {src:'https://videos.pexels.com/video-files/27099636/12071805_1920_1080_60fps.mp4',note:'Stock-footage visual study · cinematic atmosphere'},
- {src:'https://videos.pexels.com/video-files/31245302/13345103_1920_1080_50fps.mp4',note:'Stock-footage visual study · wedding and celebration'},
- {src:'https://videos.pexels.com/video-files/7424531/7424531-uhd_3840_2160_30fps.mp4',note:'Stock-footage visual study · short-form social content'},
- {src:'https://videos.pexels.com/video-files/8100337/8100337-uhd_4096_2160_25fps.mp4',note:'Stock-footage visual study · creator and podcast workflow'},
- {src:'https://videos.pexels.com/video-files/27099636/12071805_1920_1080_60fps.mp4',note:'Stock-footage visual study · commercial mood reference'},
- {src:'https://videos.pexels.com/video-files/8100337/8100337-uhd_4096_2160_25fps.mp4',note:'Stock-footage visual study · AI and motion workflow'}
+ {src:'https://videos.pexels.com/video-files/11867212/11867212-hd_1080_1920_30fps.mp4',note:'Pexels stock footage · cinematic city-night sequence · paired with a low cinematic sound bed'},
+ {src:'https://videos.pexels.com/video-files/8915065/8915065-uhd_3840_2160_25fps.mp4',note:'Pexels stock footage · wedding celebration moments · paired with a warm celebration sound bed'},
+ {src:'https://videos.pexels.com/video-files/20711709/20711709-uhd_2160_3840_24fps.mp4',note:'Pexels stock footage · vertical street-market reel · paired with a rhythmic short-form sound bed'},
+ {src:'https://videos.pexels.com/video-files/6892735/6892735-uhd_2160_4096_25fps.mp4',note:'Pexels stock footage · podcast studio recording · paired with a soft creator ambience sound bed'},
+ {src:'https://videos.pexels.com/video-files/12433101/12433101-uhd_3840_2160_30fps.mp4',note:'Pexels stock footage · product-vlog commercial direction · paired with a bright promo sound bed'},
+ {src:'https://videos.pexels.com/video-files/18069701/18069701-uhd_3840_2160_24fps.mp4',note:'Pexels stock footage · AI concept visualization · paired with an ambient futuristic sound bed'}
 ];
 const serviceCards = [
   { title: 'Cinematic Films', note: 'Trailers · Teasers · Story edits', image: DEMO_SHOWCASE[0].image, number: '01', theme: 'cinematic' },
