@@ -1510,3 +1510,26 @@
 .map132-slider-site { --ms-audio-wave-opacity: .34; }
 .map132-slider-site[data-theme="light"] .ms-page::after,
 .map132-slider-site[data-theme="light"] .ms-preview-modal::after { opacity: calc(var(--ms-audio-wave-opacity, .34) * .72); }
+
+
+/* Fourth concept reference: layered navy ribbons with MAP132 champagne-gold + teal lighting.
+   Transient-impact variable makes boom/impact peaks visibly pulse rather than merely breathe. */
+.map132-slider-site {
+  --ms-audio-impact: 0;
+  --ms-audio-wave-opacity: .38;
+}
+.map132-slider-site .ms-page::after,
+.map132-slider-site .ms-preview-modal::after {
+  transform: translate3d(0, var(--ms-audio-wave-y, 0px), 0)
+    scale(calc(var(--ms-audio-bass-scale, 1) + var(--ms-audio-impact, 0) * .22));
+  opacity: calc(var(--ms-audio-wave-opacity, .38) + var(--ms-audio-impact, 0) * .24);
+  filter:
+    drop-shadow(0 0 15px rgba(44, 180, 194, calc(.24 + var(--ms-audio-high-glow, 0) * .35)))
+    drop-shadow(0 0 23px rgba(218, 174, 105, calc(.16 + var(--ms-audio-impact, 0) * .58)));
+}
+.map132-slider-site[data-theme="light"] .ms-page::after,
+.map132-slider-site[data-theme="light"] .ms-preview-modal::after {
+  opacity: calc((var(--ms-audio-wave-opacity, .38) + var(--ms-audio-impact, 0) * .24) * .72);
+  filter: drop-shadow(0 0 12px rgba(44, 180, 194, .24))
+          drop-shadow(0 0 16px rgba(218, 174, 105, calc(.12 + var(--ms-audio-impact, 0) * .3)));
+}

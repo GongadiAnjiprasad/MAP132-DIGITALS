@@ -21,6 +21,8 @@ export function useAudioReactiveWaves() {
     let smoothedBass = 0;
     let smoothedMid = 0;
     let smoothedHigh = 0;
+    let previousBassRaw = 0;
+    let impactPulse = 0;
     let bins: Uint8Array | null = null;
     let synthOscillators: OscillatorNode[] = [];
 
@@ -30,6 +32,7 @@ export function useAudioReactiveWaves() {
       root.style.setProperty('--ms-audio-wave-opacity', '.34');
       root.style.setProperty('--ms-audio-wave-y', '0px');
       root.style.setProperty('--ms-audio-high-glow', '0');
+      root.style.setProperty('--ms-audio-impact', '0');
     };
 
     const stop = () => {
@@ -46,6 +49,7 @@ export function useAudioReactiveWaves() {
         void oldContext.close().catch(() => undefined);
       }
       smoothedBass = smoothedMid = smoothedHigh = 0;
+      previousBassRaw = impactPulse = 0;
       resetVisuals();
     };
 
@@ -66,16 +70,22 @@ export function useAudioReactiveWaves() {
       const bass = average(bins, 1, 7);
       const mid = average(bins, 7, 30);
       const high = average(bins, 30, 90);
+      // Detect sudden low-frequency rises (boom/impact moments), not just average loudness.
+      const bassRise = Math.max(0, bass - previousBassRaw);
+      const impactHit = bass > 0.2 && bassRise > 0.11 ? Math.min(1, bassRise * 3.2 + bass * 0.22) : 0;
+      previousBassRaw = bass;
+      impactPulse = Math.max(impactHit, impactPulse * 0.91);
       smoothedBass += (bass - smoothedBass) * 0.34;
       smoothedMid += (mid - smoothedMid) * 0.22;
       smoothedHigh += (high - smoothedHigh) * 0.28;
 
       const energy = Math.min(1, smoothedBass * 0.58 + smoothedMid * 0.3 + smoothedHigh * 0.12);
       root.style.setProperty('--ms-audio-active', '1');
-      root.style.setProperty('--ms-audio-bass-scale', (1 + smoothedBass * 0.075).toFixed(3));
-      root.style.setProperty('--ms-audio-wave-opacity', (0.34 + energy * 0.48).toFixed(3));
+      root.style.setProperty('--ms-audio-bass-scale', (1 + smoothedBass * 0.14 + impactPulse * 0.2).toFixed(3));
+      root.style.setProperty('--ms-audio-wave-opacity', Math.min(0.94, 0.38 + energy * 0.38 + impactPulse * 0.32).toFixed(3));
       root.style.setProperty('--ms-audio-wave-y', ((smoothedMid - 0.25) * 10).toFixed(2) + 'px');
-      root.style.setProperty('--ms-audio-high-glow', (smoothedHigh * 0.42).toFixed(3));
+      root.style.setProperty('--ms-audio-high-glow', Math.min(0.9, smoothedHigh * 0.5 + impactPulse * 0.72).toFixed(3));
+      root.style.setProperty('--ms-audio-impact', impactPulse.toFixed(3));
       frame = requestAnimationFrame(animate);
     };
 
