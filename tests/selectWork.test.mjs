@@ -51,3 +51,10 @@ test('Category tabs and pagination remain usable on mobile and respect reduced m
   assert.ok(homeCss.includes('@media(prefers-reduced-motion:reduce)'));
   assert.ok(home.includes('aria-label="Project gallery pages"'));
 });
+
+
+test('All six category choices are arranged in a three-column, two-row grid', () => {
+  assert.ok(homeCss.includes('grid-template-columns: repeat(3, minmax(0, 1fr))'));
+  assert.ok(homeCss.includes('.ms-work-page .work-category-tabs'));
+  assert.ok(homeCss.includes('overflow: visible'));
+});
