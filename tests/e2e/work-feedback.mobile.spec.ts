@@ -11,9 +11,10 @@ test('mobile work feedback remains usable and submits a service-specific rating'
   await page.getByRole('button', { name: 'Give feedback' }).tap();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
+  await dialog.getByRole('button', { name: /Video Editing Services/ }).tap();
   await dialog.getByLabel('WHICH SERVICE ARE YOU REVIEWING?').selectOption('Wedding / B’Day');
-  await dialog.getByLabel('WHAT DID YOU LIKE — OR WHAT CAN WE IMPROVE?').fill('Super');
-  await dialog.getByRole('button', { name: /Seal & send feedback/ }).tap();
+  await dialog.getByLabel('YOUR FEEDBACK').fill('Super');
+  await dialog.getByRole('button', { name: /Send feedback/g }).tap();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload.service).toBe('Wedding / B’Day');
   expect(payload.rating).toBe(5);
@@ -26,7 +27,7 @@ test('feedback seal button stays inside the parchment frame at narrow mobile and
     await page.goto('/');
     await page.getByRole('button', { name: 'Give feedback' }).click();
     const dialog = page.getByRole('dialog');
-    const submit = dialog.getByRole('button', { name: /Seal & send feedback/ });
+    const submit = dialog.getByRole('button', { name: /Send feedback/g });
     const drawer = await dialog.boundingBox();
     const button = await submit.boundingBox();
     expect(drawer, `drawer at ${width}px`).not.toBeNull();
