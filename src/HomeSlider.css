@@ -862,7 +862,7 @@
    The active-slide ResizeObserver still expands the stage when page content is taller. */
 @media (min-width: 761px) {
   .map132-slider-site {
-    height: auto;
+    height: 100svh;
     min-height: 100svh;
     overflow: visible;
   }
