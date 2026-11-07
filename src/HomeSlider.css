@@ -325,7 +325,7 @@
 .ms-contact-panel input,.ms-contact-panel select,.ms-contact-panel textarea{font-size:clamp(12px,1vw,14px)}
 .ms-controls{flex:0 0 auto;min-height:54px}
 .ms-footer{flex:0 0 auto;min-height:32px}
-@media(max-width:1100px){
+@media(max-width:899px){
  .ms-home-page{grid-template-columns:minmax(0,1fr);align-items:start}
  .ms-page{padding:clamp(16px,2.6vh,28px) clamp(16px,3vw,32px)}
  .ms-project-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
@@ -1356,3 +1356,8 @@
 .ms-service-tile:hover,.ms-service-tile:focus-visible,.ms-service-detail:hover,.ms-service-detail:focus-visible{border-color:color-mix(in srgb,var(--ms-ambient-accent) 72%,white 8%);box-shadow:0 0 24px color-mix(in srgb,var(--ms-ambient-accent) 22%,transparent)}
 .ms-service-detail{cursor:pointer;outline-offset:3px}
 @media(prefers-reduced-motion:reduce){.map132-slider-site{transition:none}.ms-service-tile,.ms-service-detail{transition:none}}
+
+/* Android Chrome Desktop-site: keep the stage fixed between the header and footer. */
+@media (min-width: 761px) {
+  .ms-stage { flex: 0 0 auto; min-height: 0; }
+}
