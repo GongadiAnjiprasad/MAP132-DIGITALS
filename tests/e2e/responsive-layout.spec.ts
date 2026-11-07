@@ -81,14 +81,20 @@ test('Android desktop-site viewport keeps content top-led, readable and balanced
       const controls = document.querySelector('.ms-controls') as HTMLElement;
       const footer = document.querySelector('.ms-footer') as HTMLElement;
       return {
+        shellHeight: shell.getBoundingClientRect().height,
+        shellBottom: shell.getBoundingClientRect().bottom,
+        footerBottom: footer.getBoundingClientRect().bottom,
+        documentHeight: document.documentElement.scrollHeight,
         shellMinHeight: parseFloat(getComputedStyle(shell).minHeight),
-        activePageMinHeight: parseFloat(getComputedStyle(activePage).minHeight),
-        expectedPageMinHeight: Math.max(0, window.innerHeight - header.offsetHeight - controls.offsetHeight - footer.offsetHeight),
+        activePageHeight: activePage.getBoundingClientRect().height,
+        expectedPageHeight: Math.max(0, window.innerHeight - header.offsetHeight - controls.offsetHeight - footer.offsetHeight),
       };
     });
-    expect(viewportFill.shellMinHeight, 'desktop-site shell should fill the visible viewport').toBeGreaterThanOrEqual(height - 2);
-    expect(Math.abs(viewportFill.activePageMinHeight - viewportFill.expectedPageMinHeight),
-      'desktop-site active page should reserve the space below short content').toBeLessThanOrEqual(3);
+    expect(viewportFill.shellMinHeight, 'desktop-site shell minimum should fill the visible viewport').toBeGreaterThanOrEqual(height - 2);
+    expect(Math.abs(viewportFill.shellHeight - height), 'desktop-site shell should occupy exactly the visible viewport height').toBeLessThanOrEqual(2);
+    expect(Math.abs(viewportFill.footerBottom - height), 'desktop-site footer should reach the visible viewport bottom').toBeLessThanOrEqual(2);
+    expect(Math.abs(viewportFill.activePageHeight - viewportFill.expectedPageHeight),
+      'desktop-site active page should fill the measured stage below the header and controls').toBeLessThanOrEqual(3);
     expect(home.headingSize).toBeGreaterThanOrEqual(48);
     expect(home.introSize).toBeGreaterThanOrEqual(14);
 
@@ -104,24 +110,32 @@ test('Android desktop-site viewport keeps content top-led, readable and balanced
 });
 
 
-test('desktop-site viewport stage follows the active page content height', async ({ page }) => {
+test('desktop-site viewport stage stays fixed while active page content scrolls internally', async ({ page }) => {
   await page.setViewportSize({ width: 980, height: 800 });
   await page.goto('/');
   const measure = () => page.evaluate(() => {
     const stage = document.querySelector('.ms-stage') as HTMLElement;
     const activeIndex = Array.from(document.querySelectorAll('.ms-nav button')).findIndex(button => button.classList.contains('active'));
     const active = stage.querySelectorAll<HTMLElement>('.ms-page')[Math.max(0, activeIndex)];
-    return { stage: stage.clientHeight, content: active.scrollHeight };
+    const shell = document.querySelector('.map132-slider-site') as HTMLElement;
+    const header = shell.querySelector('.ms-header') as HTMLElement;
+    const controls = shell.querySelector('.ms-controls') as HTMLElement;
+    const footer = shell.querySelector('.ms-footer') as HTMLElement;
+    const available = Math.max(0, window.innerHeight - header.offsetHeight - controls.offsetHeight - footer.offsetHeight);
+    return { stage: stage.clientHeight, content: active.scrollHeight, pageClient: active.clientHeight, available };
   });
   await expect.poll(async () => {
     const m = await measure();
-    return Math.abs(m.stage - m.content);
+    return Math.abs(m.stage - m.available);
   }).toBeLessThanOrEqual(3);
 
   await page.locator('.ms-nav').getByRole('button', { name: 'Contact', exact: true }).click();
   await expect(page.locator('.ms-film-enquiry form')).toBeVisible();
   await expect.poll(async () => {
     const m = await measure();
-    return Math.abs(m.stage - m.content);
+    return Math.abs(m.stage - m.available);
   }).toBeLessThanOrEqual(3);
+  const contactMetrics = await measure();
+  expect(Math.abs(contactMetrics.pageClient - contactMetrics.stage),
+    'active page should fill the fixed stage while retaining its own scrollable content').toBeLessThanOrEqual(2);
 });
