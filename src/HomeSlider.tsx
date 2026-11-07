@@ -342,7 +342,6 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
               </button>;
             })}
           </div>
-          <div className="work-results-heading"><span>{activeProjectCategory === 'All Projects' ? 'ALL SELECTED PROJECTS' : activeProjectCategory.toUpperCase()}</span><small>{selectedWorkItems.length} {selectedWorkItems.length === 1 ? 'PROJECT' : 'PROJECTS'}</small></div>
           {selectedWorkItems.length > 0 ? <div className="ms-project-grid">{selectedWorkItems.map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div> : <div className="ms-sample-banner"><Sparkles size={18}/><p><b>{activeProjectCategory}</b><span>No project has been published in this category yet. Please check back soon.</span></p></div>}
           {content.items.length === 0 && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>Sample portfolio content</b><span>These are reference concepts and moodboard images—not completed client projects. Upload your own edited videos or photos in the Admin Dashboard to replace these examples.</span></p></div>}
           <DemoShowcase onAtmosphereChange={(clip, sourceId) => clip ? ambientTheme.setPlayback(demoClipTheme(clip.category), 'demo-showcase:' + clip.id) : ambientTheme.clearPlayback(sourceId ? 'demo-showcase:' + sourceId : 'demo-showcase')} />
