@@ -88,7 +88,7 @@ test('feedback drawer uses the MAP132 cinematic studio design system', async ({ 
     const submit = element.querySelector('.feedback-submit');
     const rule = element.querySelector('.feedback-parchment-rule');
     return {
-      background: getComputedStyle(element).backgroundImage,
+      background: getComputedStyle(element).backgroundImage,\n      backdropFilter: getComputedStyle(element).backdropFilter,\n      borderRadius: getComputedStyle(input!).borderRadius,
       headingFont: getComputedStyle(heading!).fontFamily,
       inputBackground: getComputedStyle(input!).backgroundColor,
       submitBackground: getComputedStyle(submit!).backgroundImage,
@@ -97,7 +97,7 @@ test('feedback drawer uses the MAP132 cinematic studio design system', async ({ 
     };
   });
 
-  expect(design.background).toContain('radial-gradient');
+  expect(design.background).toContain('radial-gradient');\n  expect(design.backdropFilter).toContain('blur');\n  expect(design.borderRadius).not.toBe('0px');
   expect(design.headingFont.toLowerCase()).toContain('manrope');
   expect(design.inputBackground).not.toBe('rgba(0, 0, 0, 0)');
   expect(design.submitBackground).toContain('linear-gradient');
