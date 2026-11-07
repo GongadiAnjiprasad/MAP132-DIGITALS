@@ -22,7 +22,7 @@ export function useAmbientServiceTheme() {
   const [previewKey, setPreviewKey] = useState<ServiceThemeKey | null>(null);
   const [pinnedKey, setPinnedKey] = useState<ServiceThemeKey | null>(null);
   const [playback, setPlaybackState] = useState<{ key: ServiceThemeKey; source: string } | null>(null);
-  const activeKey = playback?.key || previewKey || pinnedKey;
+  const activeKey = playback?.key || pinnedKey || previewKey;
   const style = useMemo<CSSProperties>(() => ({
     '--ms-ambient-accent': resolveServiceAccent(activeKey),
   } as CSSProperties), [activeKey]);
