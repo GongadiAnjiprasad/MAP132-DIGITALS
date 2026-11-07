@@ -9,54 +9,41 @@ const categories = [
   'YouTube Related',
 ];
 
-test('Selected Work starts with category choices instead of an all-project video wall', async ({ page }) => {
+test('Selected Work keeps category tabs visible and starts without an arbitrary all-project gallery', async ({ page }) => {
   await page.goto('/');
   await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
-  const chooser = page.getByRole('group', { name: 'Choose a project category' });
-  await expect(chooser).toBeVisible();
-  await expect(page.locator('.demo-showcase')).toHaveCount(0);
-  await expect(page.locator('.ms-service-tile')).toHaveCount(6);
-  await expect(page.locator('.ms-category-showcase')).toHaveCount(0);
+  const tabs = page.getByRole('group', { name: 'Choose a project category' });
+  await expect(tabs).toBeVisible();
   await expect(page.locator('.ms-project-grid')).toHaveCount(0);
-  await expect(page.locator('.ms-work-prompt')).toContainText('Choose a category above');
-  const allProjects = page.getByRole('button', { name: /View all projects/ });
-  await expect(allProjects).toHaveAttribute('aria-pressed', 'false');
-
+  await expect(page.locator('.ms-work-prompt')).toContainText('Select a category');
   for (const category of categories) {
-    await expect(chooser.getByRole('button', { name: category, exact: false })).toBeVisible();
+    await expect(tabs.getByRole('button', { name: new RegExp(category) })).toBeVisible();
   }
 });
 
-test('Selecting a category navigates to one matching preview and lets visitors change category', async ({ page }) => {
+test('Selecting a category updates the same page and keeps all category tabs available', async ({ page }) => {
   await page.goto('/');
   await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
-  const chooser = page.getByRole('group', { name: 'Choose a project category' });
-  const wedding = chooser.getByRole('button', { name: /Wedding \/ B’Day/ });
+  const tabs = page.getByRole('group', { name: 'Choose a project category' });
+  const wedding = tabs.getByRole('button', { name: /Wedding \/ B’Day/ });
   await wedding.click();
   await expect(wedding).toHaveAttribute('aria-pressed', 'true');
-  const showcase = page.getByRole('region', { name: 'Category showcase preview' });
-  await expect(showcase).toBeVisible();
-  await expect(page.locator('.ms-category-showcase-media img')).toBeVisible();
-  await expect(page.locator('.ms-category-showcase-copy')).toContainText('Wedding / B’Day');
-  await expect.poll(() => page.locator('.ms-work-page').evaluate(element => element.scrollTop)).toBeGreaterThan(0);
-  await expect(page.locator('.ms-project-grid')).toHaveCount(0);
+  await expect(page.locator('.ms-work-results-heading h3')).toHaveText('Wedding / B’Day');
+  await expect(tabs).toBeVisible();
+  await expect(page.locator('.ms-work-prompt')).toHaveCount(0);
   await expect(page.locator('.ms-sample-banner')).toContainText('No published projects in this category yet');
-
-  await page.getByRole('button', { name: /Change category/ }).click();
-  await expect(page.locator('.ms-category-showcase')).toHaveCount(0);
-  await expect(page.locator('.ms-work-prompt')).toBeVisible();
-  await expect.poll(() => page.locator('.ms-work-page').evaluate(element => element.scrollTop)).toBe(0);
+  await tabs.getByRole('button', { name: /AI Services/ }).click();
+  await expect(tabs.getByRole('button', { name: /AI Services/ })).toHaveAttribute('aria-pressed', 'true');
+  await expect(page.locator('.ms-work-results-heading h3')).toHaveText('AI Services');
+  await expect(tabs).toBeVisible();
 });
 
-test('All Projects is opt-in and does not create a gallery from sample moodboards', async ({ page }) => {
+test('All Projects is an explicit tab choice and empty results are labelled honestly', async ({ page }) => {
   await page.goto('/');
   await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
   const allProjects = page.getByRole('button', { name: /View all projects/ });
   await allProjects.click();
   await expect(allProjects).toHaveAttribute('aria-pressed', 'true');
-  await expect(page.getByRole('region', { name: 'Category showcase preview' })).toBeVisible();
-  await expect(page.locator('.ms-category-showcase-media img')).toBeVisible();
-  await expect(page.locator('.ms-project-grid')).toHaveCount(0);
+  await expect(page.locator('.ms-work-results-heading h3')).toHaveText('All Projects');
   await expect(page.locator('.ms-sample-banner')).toContainText('No published projects yet');
-  await expect.poll(() => page.locator('.ms-work-page').evaluate(element => element.scrollTop)).toBeGreaterThan(0);
 });
