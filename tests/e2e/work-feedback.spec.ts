@@ -43,6 +43,8 @@ test('work feedback starts disabled and enables for a one-word review only after
   await service.selectOption('Overall Studio Experience');
   await expect(submit).toBeDisabled();
   await message.fill('Super');
+  await expect(submit).toBeDisabled();
+  await dialog.getByRole('button', { name: '4 stars' }).click();
   await expect(submit).toBeEnabled();
   await message.fill('   ');
   await expect(submit).toBeDisabled();
