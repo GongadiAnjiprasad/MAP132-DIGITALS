@@ -42,6 +42,15 @@ const serviceCards = [
   { title: 'AI Video Creation', note: 'AI visuals · Concepts · Motion', image: DEMO_SHOWCASE[6].image, number: '06', theme: 'ai' }
 ];
 
+function demoClipTheme(category: string): ServiceThemeKey {
+  if (/wedding|birthday|celebration|event/i.test(category)) return 'celebrations';
+  if (/youtube|podcast|interview/i.test(category)) return 'youtube';
+  if (/reel|short/i.test(category)) return 'reels';
+  if (/advert|brand|commercial/i.test(category)) return 'advertising';
+  if (/ai|futur/i.test(category)) return 'ai';
+  return 'cinematic';
+}
+
 const sampleProjects: PortfolioItem[] = DEMO_SHOWCASE.map((item, index) => ({
   id: 'sample-' + item.id,
   title: item.title,
@@ -308,7 +317,7 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
           <div className="ms-page-heading"><div><p className="ms-kicker">PORTFOLIO / VISUAL STUDIES</p><h2>Selected <em>work.</em></h2></div><p>Explore sample edits and original projects published through the Admin Dashboard.</p></div>
           <div className="ms-project-grid">{(content.items.length > 0 ? content.items : sampleProjects).map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div>
           {content.items.length === 0 && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>Sample portfolio content</b><span>These are reference concepts and moodboard images—not completed client projects. Upload your own edited videos or photos in the Admin Dashboard to replace these examples.</span></p></div>}
-          <DemoShowcase/>
+          <DemoShowcase onAtmosphereChange={clip => clip ? ambientTheme.setPlayback(demoClipTheme(clip.category)) : ambientTheme.clearPlayback()} />
         </section>
 
         <section className="ms-page ms-services-page" aria-label="Services">
