@@ -34,7 +34,6 @@ test('feedback seal button stays inside the parchment frame at narrow mobile and
     expect(button!.x).toBeGreaterThanOrEqual(drawer!.x + 8);
     expect(button!.x + button!.width).toBeLessThanOrEqual(drawer!.x + drawer!.width - 8);
     expect(button!.width).toBeGreaterThan(0);
-    await page.getByRole('button', { name: 'Give feedback' }).evaluate(() => {});
-    await page.keyboard.press('Escape');
+    await dialog.getByRole('button', { name: 'Close feedback' }).click();
   }
 });
