@@ -1536,12 +1536,12 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-types button.selected{border-color:#8d5c2d;background:#d8bd8d;color:#382417;box-shadow:inset 0 0 0 1px #fff7}
 .feedback-stars button{color:#b49a71;text-shadow:0 1px #fff8}
 .feedback-stars button.active{color:#a56c23;text-shadow:0 1px #fff8}
-.feedback-drawer textarea,.feedback-drawer input{
+.feedback-drawer textarea,.feedback-drawer input,.feedback-drawer select{
   background:#fbf3e3;border:1px solid #b99a70;color:#342417;
   font:13px/1.65 Georgia,'Times New Roman',serif;box-shadow:inset 0 2px 7px #7b552015;
 }
 .feedback-drawer textarea::placeholder,.feedback-drawer input::placeholder{color:#9b876c}
-.feedback-drawer textarea:focus,.feedback-drawer input:focus{border-color:#8b5c2d;box-shadow:0 0 0 2px #b68a4c2b}
+.feedback-drawer textarea:focus,.feedback-drawer input:focus,.feedback-drawer select:focus{border-color:#8b5c2d;box-shadow:0 0 0 2px #b68a4c2b}
 .feedback-count,.feedback-privacy{color:#806d55}
 .feedback-submit{
   position:relative;justify-content:center;min-height:52px;margin-top:20px;
