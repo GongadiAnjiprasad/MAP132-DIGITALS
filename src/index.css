@@ -1682,28 +1682,3 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   .site[data-atmosphere]{background-attachment:scroll}
   .site[data-atmosphere] .studio-reel-media{transition:none}
 }
-
-
-/* Page-wide cinematic atmosphere: blend into section backgrounds, never over media/content. */
-.site[data-atmosphere] .nav,
-.site[data-atmosphere] main > section,
-.site[data-atmosphere] .site-footer,
-.site[data-atmosphere] > footer {
-  background-color: rgba(var(--atmosphere-rgb), .24);
-  background-blend-mode: screen;
-  transition: background-color .65s ease;
-}
-.site[data-atmosphere] .work-section,
-.site[data-atmosphere] .approach-section,
-.site[data-atmosphere] .services-section,
-.site[data-atmosphere] .contact-section {
-  background-blend-mode: screen;
-}
-@media (prefers-reduced-motion: reduce) {
-  .site[data-atmosphere] .nav,
-  .site[data-atmosphere] main > section,
-  .site[data-atmosphere] .site-footer,
-  .site[data-atmosphere] > footer {
-    transition: none;
-  }
-}
