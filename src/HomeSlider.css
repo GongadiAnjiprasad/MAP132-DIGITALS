@@ -1456,6 +1456,7 @@
 .map132-slider-site :is(p, li) { text-wrap: pretty; }
 .map132-slider-site :is(.ms-intro, .ms-page-heading > p, .ms-project-card p, .ms-service-detail p, .ms-process-grid p, .ms-contact-copy > p:not(.ms-kicker)) { line-height: 1.7; }
 .map132-slider-site .ms-skill-list span { line-height: 1.45; }
+.map132-slider-site .ms-contact-panel label { line-height: 1.4; }
 .map132-slider-site :is(.ms-primary, .ms-text-button, .ms-nav button, .ms-nav a, .ms-contact-links a, .ms-contact-panel input, .ms-contact-panel select, .ms-contact-panel textarea) { line-height: 1.4; }
 @media (min-width: 761px) {
   .map132-slider-site .ms-brand small { font-size: 9px; letter-spacing: 1.35px; }
