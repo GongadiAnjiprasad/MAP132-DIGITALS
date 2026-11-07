@@ -30,7 +30,7 @@ test('Select Work cards have responsive, keyboard-visible styling', () => {
 
 test('Select Work does not render a redundant All Selected Projects results heading', () => {
   assert.doesNotMatch(home, /work-results-heading|ALL SELECTED PROJECTS/);
-  assert.match(home, /selectedWorkItems\.map\(item =>/);
+  assert.match(home, /selectedWorkGalleryItems\.map\(item =>/);
   assert.match(home, /setActiveProjectCategory\('All Projects'\)/);
 });
 
