@@ -1617,3 +1617,29 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 @media(prefers-reduced-motion:reduce){
   .feedback-seal-wax img{transition:none}
 }
+
+
+/* Adaptive Cinematic Atmosphere — restrained, positive genre lighting */
+.site[data-atmosphere="action"]{--atmosphere-rgb:255,91,66}
+.site[data-atmosphere="romance"]{--atmosphere-rgb:255,190,126}
+.site[data-atmosphere="thriller"]{--atmosphere-rgb:92,145,155}
+.site[data-atmosphere="scifi"]{--atmosphere-rgb:104,151,255}
+.site[data-atmosphere="emotional"]{--atmosphere-rgb:190,151,176}
+.site[data-atmosphere="premium"]{--atmosphere-rgb:222,183,112}
+.site[data-atmosphere] .work-section{
+  background-image:
+    radial-gradient(ellipse at 50% 0%,rgba(var(--atmosphere-rgb),.17),transparent 58%),
+    linear-gradient(145deg,#0c1222,#131a2c 55%,#0b1020);
+  transition:background-image .7s ease;
+}
+.site[data-atmosphere] .media-frame{
+  box-shadow:0 0 0 1px rgba(var(--atmosphere-rgb),.34),0 12px 44px rgba(var(--atmosphere-rgb),.16);
+  transition:box-shadow .65s ease;
+}
+.site[data-atmosphere] .media-category{
+  border:1px solid rgba(var(--atmosphere-rgb),.45);
+  box-shadow:0 3px 18px rgba(var(--atmosphere-rgb),.16);
+}
+@media(prefers-reduced-motion:reduce){
+  .site[data-atmosphere] .work-section,.site[data-atmosphere] .media-frame{transition:none}
+}
