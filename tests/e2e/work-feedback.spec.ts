@@ -73,3 +73,34 @@ test('feedback drawer inherits each active service theme accent', async ({ page 
     await dialog.getByRole('button', { name: 'Close feedback' }).click();
   }
 });
+
+
+test('feedback drawer uses the MAP132 cinematic studio design system', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Give feedback' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+
+  const design = await dialog.evaluate(element => {
+    const heading = element.querySelector('.feedback-drawer-head h2');
+    const input = element.querySelector('#feedback-service');
+    const submit = element.querySelector('.feedback-submit');
+    const rule = element.querySelector('.feedback-parchment-rule');
+    return {
+      background: getComputedStyle(element).backgroundImage,
+      headingFont: getComputedStyle(heading!).fontFamily,
+      inputBackground: getComputedStyle(input!).backgroundColor,
+      submitBackground: getComputedStyle(submit!).backgroundImage,
+      ruleFont: getComputedStyle(rule!).fontFamily,
+      accent: getComputedStyle(element).getPropertyValue('--feedback-accent').trim(),
+    };
+  });
+
+  expect(design.background).toContain('radial-gradient');
+  expect(design.headingFont.toLowerCase()).toContain('manrope');
+  expect(design.inputBackground).not.toBe('rgba(0, 0, 0, 0)');
+  expect(design.submitBackground).toContain('linear-gradient');
+  expect(design.ruleFont.toLowerCase()).toContain('dm sans');
+  expect(design.accent).not.toBe('');
+});
