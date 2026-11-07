@@ -110,7 +110,7 @@ test('Android desktop-site viewport keeps content top-led, readable and balanced
 });
 
 
-test('desktop-site viewport stage follows the active page content height', async ({ page }) => {
+test('desktop-site viewport stage stays fixed while active page content scrolls internally', async ({ page }) => {
   await page.setViewportSize({ width: 980, height: 800 });
   await page.goto('/');
   const measure = () => page.evaluate(() => {
@@ -122,7 +122,7 @@ test('desktop-site viewport stage follows the active page content height', async
     const controls = shell.querySelector('.ms-controls') as HTMLElement;
     const footer = shell.querySelector('.ms-footer') as HTMLElement;
     const available = Math.max(0, window.innerHeight - header.offsetHeight - controls.offsetHeight - footer.offsetHeight);
-    return { stage: stage.clientHeight, content: active.scrollHeight, available, pageClient: active.clientHeight };
+    return { stage: stage.clientHeight, content: active.scrollHeight, pageClient: active.clientHeight, available };
   });
   await expect.poll(async () => {
     const m = await measure();
@@ -133,6 +133,9 @@ test('desktop-site viewport stage follows the active page content height', async
   await expect(page.locator('.ms-film-enquiry form')).toBeVisible();
   await expect.poll(async () => {
     const m = await measure();
-    return Math.abs(m.stage - Math.max(m.content, m.available));
+    return Math.abs(m.stage - m.available);
   }).toBeLessThanOrEqual(3);
+  const contactMetrics = await measure();
+  expect(Math.abs(contactMetrics.pageClient - contactMetrics.stage),
+    'active page should fill the fixed stage while retaining its own scrollable content').toBeLessThanOrEqual(2);
 });
