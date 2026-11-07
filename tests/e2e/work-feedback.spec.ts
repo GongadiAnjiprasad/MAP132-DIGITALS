@@ -181,9 +181,14 @@ test('admin can publish a work review after explicitly confirming client permiss
   page.on('dialog', dialog => dialog.accept());
   await page.goto('/#admin');
   await page.getByPlaceholder('Enter your password').fill('test-admin-password');
+  const loginResponse = page.waitForResponse(response =>
+    response.url().includes('/api/admin/login') && response.request().method() === 'POST'
+  );
   await page.getByRole('button', { name: /Secure sign in/ }).click();
-  // Wait for the authenticated dashboard shell before interacting with its animated sidebar.
-  await expect(page.locator('.admin-shell')).toBeVisible();
+  const loginResult = await loginResponse;
+  expect(loginResult.status()).toBe(200);
+  // Synchronize on the actual authenticated dashboard after the login request resolves.
+  await expect(page.locator('.admin-shell')).toBeVisible({ timeout: 15000 });
   const feedbackTab = page.locator('.admin-nav').filter({ hasText: 'Work Feedback' });
   await expect(feedbackTab).toBeVisible();
   await feedbackTab.click({ force: true });
