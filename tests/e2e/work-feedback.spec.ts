@@ -162,3 +162,31 @@ test('Studio displays only reviews returned by the public reviews endpoint', asy
   const reviews = page.getByRole('region', { name: 'Client reviews' });
   await expect(reviews.getByText('Cinematic Trailers', { exact: true })).toBeVisible();
 });
+
+
+test('admin can publish a work review after explicitly confirming client permission', async ({ page }) => {
+  await page.route('**/api/admin/session', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true }) }));
+  await page.route('**/api/portfolio', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ content: {} }) }));
+  await page.route('**/api/admin/feedback', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ feedback: [{
+    id: 'private-review-1', kind: 'Work feedback', service: 'Cinematic Trailers', rating: 5,
+    message: 'Excellent editing and storytelling.', email: 'client@example.com',
+    createdAt: '2026-11-08T00:00:00.000Z', status: 'new', publicConsent: false, published: false,
+  }] }) }));
+  let publicationRequest: any = null;
+  await page.route('**/api/admin/feedback/private-review-1/publish-with-consent', async route => {
+    publicationRequest = { method: route.request().method(), body: route.request().postDataJSON() };
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ published: true, publicConsent: true, consentSource: 'admin-confirmed' }) });
+  });
+  page.on('dialog', dialog => dialog.accept());
+  await page.goto('/#admin');
+  await page.getByRole('button', { name: 'Work Feedback' }).click();
+  const review = page.locator('.feedback-inbox-item').filter({ hasText: 'Excellent editing and storytelling.' });
+  await expect(review.getByText('Permission not yet confirmed')).toBeVisible();
+  const publish = review.getByRole('button', { name: 'Confirm permission & publish' });
+  await expect(publish).toBeEnabled();
+  await publish.click();
+  expect(publicationRequest).toEqual({ method: 'POST', body: {} });
+  await expect(review.getByText('Permission confirmed by admin')).toBeVisible();
+  await expect(review.getByText('Published', { exact: false })).toBeVisible();
+  await expect(review.getByRole('button', { name: 'Unpublish' })).toBeVisible();
+});
