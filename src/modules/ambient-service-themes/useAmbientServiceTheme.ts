@@ -21,8 +21,8 @@ export function resolveServiceAccent(key: string | null | undefined): string {
 export function useAmbientServiceTheme() {
   const [previewKey, setPreviewKey] = useState<ServiceThemeKey | null>(null);
   const [pinnedKey, setPinnedKey] = useState<ServiceThemeKey | null>(null);
-  const [playbackKey, setPlaybackKey] = useState<ServiceThemeKey | null>(null);
-  const activeKey = playbackKey || previewKey || pinnedKey;
+  const [playback, setPlaybackState] = useState<{ key: ServiceThemeKey; source: string } | null>(null);
+  const activeKey = playback?.key || previewKey || pinnedKey;
   const style = useMemo<CSSProperties>(() => ({
     '--ms-ambient-accent': resolveServiceAccent(activeKey),
   } as CSSProperties), [activeKey]);
@@ -32,7 +32,9 @@ export function useAmbientServiceTheme() {
     setPinnedKey(current => current === key ? null : key);
     setPreviewKey(null);
   }, []);
-  const setPlayback = useCallback((key: ServiceThemeKey) => setPlaybackKey(key), []);
-  const clearPlayback = useCallback(() => setPlaybackKey(null), []);
+  const setPlayback = useCallback((key: ServiceThemeKey, source = 'default') => setPlaybackState({ key, source }), []);
+  const clearPlayback = useCallback((source?: string) => {
+    setPlaybackState(current => source && current?.source !== source ? current : null);
+  }, []);
   return { style, preview, clearPreview, pin, setPlayback, clearPlayback };
 }
