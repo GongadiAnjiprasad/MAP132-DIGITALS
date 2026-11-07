@@ -81,12 +81,18 @@ test('Android desktop-site viewport keeps content top-led, readable and balanced
       const controls = document.querySelector('.ms-controls') as HTMLElement;
       const footer = document.querySelector('.ms-footer') as HTMLElement;
       return {
+        shellHeight: shell.getBoundingClientRect().height,
+        shellBottom: shell.getBoundingClientRect().bottom,
+        footerBottom: footer.getBoundingClientRect().bottom,
+        documentHeight: document.documentElement.scrollHeight,
         shellMinHeight: parseFloat(getComputedStyle(shell).minHeight),
         activePageMinHeight: parseFloat(getComputedStyle(activePage).minHeight),
         expectedPageMinHeight: Math.max(0, window.innerHeight - header.offsetHeight - controls.offsetHeight - footer.offsetHeight),
       };
     });
-    expect(viewportFill.shellMinHeight, 'desktop-site shell should fill the visible viewport').toBeGreaterThanOrEqual(height - 2);
+    expect(viewportFill.shellMinHeight, 'desktop-site shell minimum should fill the visible viewport').toBeGreaterThanOrEqual(height - 2);
+    expect(Math.abs(viewportFill.shellHeight - height), 'desktop-site shell should occupy exactly the visible viewport height').toBeLessThanOrEqual(2);
+    expect(Math.abs(viewportFill.footerBottom - height), 'desktop-site footer should reach the visible viewport bottom').toBeLessThanOrEqual(2);
     expect(Math.abs(viewportFill.activePageMinHeight - viewportFill.expectedPageMinHeight),
       'desktop-site active page should reserve the space below short content').toBeLessThanOrEqual(3);
     expect(home.headingSize).toBeGreaterThanOrEqual(48);
