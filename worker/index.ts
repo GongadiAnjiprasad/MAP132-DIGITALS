@@ -134,11 +134,16 @@ if(path==='/api/_healthcheck')return json({message:'Success'});
 if(path==='/api/feedback'&&method==='POST'){
   if(!env.MAP132_KV)return json({error:'Feedback storage is not configured.'},503);
   let body:any;try{body=await req.json();}catch{return json({error:'Invalid feedback data.'},400);}
+  const kind=body.kind==='Website Experience'?'Website Experience':'Work feedback';
   const service=String(body.service||'').trim(),message=String(body.message||'').trim(),email=String(body.email||'').trim(),rating=Number(body.rating);
-  if(!['Cinematic Trailers','Wedding / B’Day','Advertisements','AI Services','Insta Reels','YouTube Related','Overall Studio Experience'].includes(service))return json({error:'Choose the MAP132 service you are reviewing.'},400);
+  const allowedServices=['Cinematic Trailers','Wedding / B’Day','Advertisements','AI Services','Insta Reels','YouTube Related','Overall Studio Experience'];
+  if(kind==='Work feedback'&&!allowedServices.includes(service))return json({error:'Choose the MAP132 service you are reviewing.'},400);
+  if(kind==='Website Experience'&&service)return json({error:'Website feedback must not include a service selection.'},400);
   if(message.length<1||message.length>2000)return json({error:'Enter feedback between 1 and 2000 characters.'},400);
-  if(email.length>254|| (email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)))return json({error:'Enter a valid email address.'},400);
+  if(email.length>254|| (email&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)))return json({error:'Enter a valid email address.'},400);
   if(!Number.isInteger(rating)||rating<1||rating>5)return json({error:'Choose a rating from 1 to 5.'},400);
+  const aspects=Array.isArray(body.aspects)?body.aspects.filter((x:any)=>typeof x==='string').slice(0,8).map((x:string)=>x.slice(0,80)):[];
+  if(kind==='Work feedback'&&Array.isArray(body.aspects)&&body.aspects.length)return json({error:'Service feedback cannot include website aspects.'},400);
   const ip=req.headers.get('CF-Connecting-IP')||'unknown';
   const digest=await crypto.subtle.digest('SHA-256',encoder.encode(ip));
   const rateKey='feedback-rate/'+Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -146,7 +151,7 @@ if(path==='/api/feedback'&&method==='POST'){
   if(current>=3)return json({error:'Too many submissions. Please try again later.'},429);
   await env.MAP132_KV.put(rateKey,String(current+1),{expirationTtl:600});
   const id=Date.now().toString(36)+'-'+crypto.randomUUID();
-  await env.MAP132_KV.put('feedback/'+id,JSON.stringify({id,kind:'Work feedback',service,rating,message,email,createdAt:new Date().toISOString(),status:'new'}));
+  await env.MAP132_KV.put('feedback/'+id,JSON.stringify({id,kind,service:service||undefined,aspects,rating,message,email,createdAt:new Date().toISOString(),status:'new'}));
   return json({submitted:true,id},201);
 }
 
