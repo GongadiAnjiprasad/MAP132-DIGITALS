@@ -171,7 +171,7 @@ function PublicSite({ content }: { content: Content }) {
           <div className="work-grid">{content.items.filter(item=>activeWorkCategory==='All Projects'||item.category===activeWorkCategory).map(item=><article className="work-card" key={item.id}><div className="media-frame"><PortfolioMedia item={item} onAtmosphereChange={setActiveAtmosphere}/><span className="media-category">{item.category}</span></div><div className="work-caption"><div><h3>{item.title}</h3><p>{item.description}</p></div><ArrowDownRight size={20}/></div></article>)}</div>
           {content.items.filter(item=>activeWorkCategory==='All Projects'||item.category===activeWorkCategory).length===0&&<div className="portfolio-empty-category"><b>{activeWorkCategory}</b><p>No original project has been published in this category yet. Check back soon.</p></div>}
         </>}
-        <DemoShowcase />
+        <DemoShowcase onAtmosphereChange={(clip) => setActiveAtmosphere(clip ? getAtmosphere({ id: clip.id, title: clip.title, category: clip.category, description: clip.note, kind: 'video' }) : null)} />
       </section>
       <section className="services-section" id="services">
         <div className="section-head">
