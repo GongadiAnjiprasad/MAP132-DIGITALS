@@ -140,7 +140,7 @@ if(path==='/api/feedback'&&method==='POST'){
   if(kind==='Work feedback'&&!allowedServices.includes(service))return json({error:'Choose the MAP132 service you are reviewing.'},400);
   if(kind==='Website Experience'&&service)return json({error:'Website feedback must not include a service selection.'},400);
   if(message.length<1||message.length>2000)return json({error:'Enter feedback between 1 and 2000 characters.'},400);
-  if(email.length>254|| (email&&!/^[^\\s@]+@[^\\s@]+\\.[^\\s@]+$/.test(email)))return json({error:'Enter a valid email address.'},400);
+  if(email.length>254|| (email&&!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)))return json({error:'Enter a valid email address.'},400);
   if(!Number.isInteger(rating)||rating<1||rating>5)return json({error:'Choose a rating from 1 to 5.'},400);
   const aspects=Array.isArray(body.aspects)?body.aspects.filter((x:any)=>typeof x==='string').slice(0,8).map((x:string)=>x.slice(0,80)):[];
   if(kind==='Work feedback'&&Array.isArray(body.aspects)&&body.aspects.length)return json({error:'Service feedback cannot include website aspects.'},400);
