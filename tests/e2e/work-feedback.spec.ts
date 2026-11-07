@@ -44,7 +44,7 @@ test('work feedback starts disabled and enables for a one-word review only after
 });
 
 
-test('feedback drawer inherits each active service theme accent', async ({ page }) => {
+test('feedback drawer stays on the MAP132 brand accent across all service themes', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   const themes = [
@@ -66,10 +66,15 @@ test('feedback drawer inherits each active service theme accent', async ({ page 
       getComputedStyle(element).getPropertyValue('--ms-ambient-accent').trim()
     );
     expect(inheritedAccent.toLowerCase()).toBe(theme.accent.toLowerCase());
-    const formAccent = await dialog.evaluate(element =>
-      getComputedStyle(element).getPropertyValue('--feedback-accent').trim()
-    );
-    expect(formAccent.toLowerCase()).toBe(theme.accent.toLowerCase());
+    const accents = await dialog.evaluate(element => {
+      const styles = getComputedStyle(element);
+      return {
+        form: styles.getPropertyValue('--feedback-accent').trim(),
+        brand: styles.getPropertyValue('--brand-amber').trim(),
+      };
+    });
+    // Feedback follows the effective MAP132 brand token, never the active genre accent.
+    expect(accents.form.toLowerCase()).toBe(accents.brand.toLowerCase());
     await dialog.getByRole('button', { name: 'Close feedback' }).click();
   }
 });
