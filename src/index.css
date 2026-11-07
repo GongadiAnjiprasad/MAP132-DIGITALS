@@ -1424,7 +1424,9 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-stars button{border:0;background:transparent;color:#67635d;font-size:27px;padding:0 3px}
 .feedback-stars button.active{color:#d5aa66}
 .feedback-drawer textarea,.feedback-drawer input{width:100%;padding:13px 14px;background:#0d0f12;border:1px solid #ffffff2b;color:#f3f0e9;outline:none;font-size:12px}
-.feedback-drawer textarea:focus,.feedback-drawer input:focus{border-color:#d5aa66}
+.feedback-drawer select{width:100%;padding:13px 14px;background:#0d0f12;border:1px solid #ffffff2b;color:#f3f0e9;outline:none;font-size:12px}
+.feedback-drawer select:focus{border-color:#d5aa66}
+.feedback-drawer textarea:focus,.feedback-drawer input:focus,.feedback-drawer select:focus{border-color:#d5aa66}
 .feedback-count{text-align:right;color:#777;font-size:10px;margin-top:5px}
 .feedback-submit{width:100%;margin-top:18px;padding:14px 18px;border:0;background:#d5aa66;color:#171613;font-size:12px;font-weight:800;display:flex;align-items:center;justify-content:center;gap:10px}
 .feedback-submit:disabled{opacity:.55;cursor:not-allowed}
