@@ -1499,3 +1499,14 @@
     transition: opacity .2s linear;
   }
 }
+
+
+/* Visibility/layering correction: keep the cinematic ribbons above page backgrounds and below readable content. */
+.map132-slider-site .ms-page { position: relative; isolation: isolate; }
+.map132-slider-site .ms-page::after,
+.map132-slider-site .ms-preview-modal::after { z-index: 0; opacity: var(--ms-audio-wave-opacity, .34); }
+.map132-slider-site .ms-page > *,
+.map132-slider-site .ms-preview-modal > * { position: relative; z-index: 1; }
+.map132-slider-site { --ms-audio-wave-opacity: .34; }
+.map132-slider-site[data-theme="light"] .ms-page::after,
+.map132-slider-site[data-theme="light"] .ms-preview-modal::after { opacity: calc(var(--ms-audio-wave-opacity, .34) * .72); }
