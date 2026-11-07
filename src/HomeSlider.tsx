@@ -50,16 +50,6 @@ const workCategoryCards = [
   { id: 'YouTube Related', description: 'YouTube videos, creator edits and channel content.', pattern: /youtube|podcast|interview|creator|news/i }
 ];
 
-const sampleProjects: PortfolioItem[] = DEMO_SHOWCASE.map((item, index) => ({
-  id: 'sample-' + item.id,
-  title: item.title,
-  category: item.category,
-  description: item.description + ' Sample visual direction only; replace with an original MAP132 edit.',
-  kind: 'image',
-  url: item.image,
-  source: 'other'
-}));
-
 function safeLink(value: string) {
   const raw = value.trim();
   if (!raw) return '';
