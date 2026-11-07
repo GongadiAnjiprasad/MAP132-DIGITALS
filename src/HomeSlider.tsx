@@ -172,7 +172,9 @@ export default function HomeSlider({ content }: { content: HomeContent }) {
           + (controls?.getBoundingClientRect().height || 0)
           + (footer?.getBoundingClientRect().height || 0);
         const viewportStage = Math.max(0, window.innerHeight - reserved);
-        setStageHeight(Math.ceil(Math.max(page.scrollHeight, viewportStage)));
+        // Keep the shell viewport-bound. Each page already scrolls internally;
+        // expanding the stage to page.scrollHeight pushes the footer below the viewport.
+        setStageHeight(Math.ceil(viewportStage));
       };
       measure();
       observer = new ResizeObserver(measure);
