@@ -165,7 +165,8 @@ test('Studio displays only reviews returned by the public reviews endpoint', asy
 
 
 test('admin can publish a work review after explicitly confirming client permission', async ({ page }) => {
-  await page.route('**/api/admin/session', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true }) }));
+  await page.route('**/api/admin/session', route => route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: 'Not signed in' }) }));
+  await page.route('**/api/admin/login', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true }) }));
   await page.route('**/api/portfolio', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ content: {} }) }));
   await page.route('**/api/admin/feedback', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ feedback: [{
     id: 'private-review-1', kind: 'Work feedback', service: 'Cinematic Trailers', rating: 5,
@@ -179,6 +180,8 @@ test('admin can publish a work review after explicitly confirming client permiss
   });
   page.on('dialog', dialog => dialog.accept());
   await page.goto('/#admin');
+  await page.getByPlaceholder('Enter your password').fill('test-admin-password');
+  await page.getByRole('button', { name: /Secure sign in/ }).click();
   await page.getByRole('button', { name: 'Work Feedback' }).click();
   const review = page.locator('.feedback-inbox-item').filter({ hasText: 'Excellent editing and storytelling.' });
   await expect(review.getByText('Permission not yet confirmed')).toBeVisible();
