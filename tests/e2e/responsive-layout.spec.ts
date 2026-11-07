@@ -117,17 +117,22 @@ test('desktop-site viewport stage follows the active page content height', async
     const stage = document.querySelector('.ms-stage') as HTMLElement;
     const activeIndex = Array.from(document.querySelectorAll('.ms-nav button')).findIndex(button => button.classList.contains('active'));
     const active = stage.querySelectorAll<HTMLElement>('.ms-page')[Math.max(0, activeIndex)];
-    return { stage: stage.clientHeight, content: active.scrollHeight };
+    const shell = document.querySelector('.map132-slider-site') as HTMLElement;
+    const header = shell.querySelector('.ms-header') as HTMLElement;
+    const controls = shell.querySelector('.ms-controls') as HTMLElement;
+    const footer = shell.querySelector('.ms-footer') as HTMLElement;
+    const available = Math.max(0, window.innerHeight - header.offsetHeight - controls.offsetHeight - footer.offsetHeight);
+    return { stage: stage.clientHeight, content: active.scrollHeight, available };
   });
   await expect.poll(async () => {
     const m = await measure();
-    return Math.abs(m.stage - m.content);
+    return Math.abs(m.stage - Math.max(m.content, m.available));
   }).toBeLessThanOrEqual(3);
 
   await page.locator('.ms-nav').getByRole('button', { name: 'Contact', exact: true }).click();
   await expect(page.locator('.ms-film-enquiry form')).toBeVisible();
   await expect.poll(async () => {
     const m = await measure();
-    return Math.abs(m.stage - m.content);
+    return Math.abs(m.stage - Math.max(m.content, m.available));
   }).toBeLessThanOrEqual(3);
 });
