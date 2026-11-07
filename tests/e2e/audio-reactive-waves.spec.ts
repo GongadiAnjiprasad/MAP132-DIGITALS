@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-async function installAudioMocks(page: import('@playwright/test').Page) {
+async function installAudioMocks(page: import('@playwright/test').Page, hasAudioTrack = true) {
   await page.addInitScript(() => {
     class FakeAnalyser {
       fftSize = 256;
@@ -24,7 +24,7 @@ async function installAudioMocks(page: import('@playwright/test').Page) {
     });
     Object.defineProperty(HTMLMediaElement.prototype, 'captureStream', {
       configurable: true,
-      value() { return { getAudioTracks: () => [{}] }; }
+      value() { return { getAudioTracks: () => ${hasAudioTrack ? '[{}]' : '[]'} }; }
     });
   });
 }
@@ -59,7 +59,7 @@ test('desktop audio drives the gold and teal wave layers and pause calms them', 
   await expect.poll(() => waveLayer.evaluate(element => getComputedStyle(element, '::after').backgroundImage.includes('data:image/svg+xml'))).toBe(true);
   await stopMockPlayback(video);
   await expect.poll(() => site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-audio-bass-scale').trim())).toBe('1');
-  await expect.poll(() => site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-audio-wave-opacity').trim())).toBe('0');
+  await expect.poll(() => site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-audio-wave-opacity').trim())).toBe('.34');
 });
 
 test('mobile audio-reactive waves stay within the viewport and reset on pause', async ({ page }) => {
@@ -75,4 +75,19 @@ test('mobile audio-reactive waves stay within the viewport and reset on pause', 
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(392);
   await stopMockPlayback(video);
   await expect.poll(() => site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-audio-wave-opacity').trim())).toBe('0');
+});
+
+test('silent demo clip receives the original genre sound bed and keeps waves visible', async ({ page }) => {
+  await installAudioMocks(page, false);
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).tap();
+  const video = page.locator('.studio-reel-media video').first();
+  await expect(video).toHaveCount(1);
+  await startMockPlayback(video);
+  const site = page.locator('.map132-slider-site');
+  await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-wave-opacity')))).toBeGreaterThan(.34);
+  await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-bass-scale')))).toBeGreaterThan(1);
+  await stopMockPlayback(video);
+  await expect.poll(() => site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-audio-wave-opacity').trim())).toBe('.34');
 });
