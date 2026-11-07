@@ -54,3 +54,22 @@ test('showcase video playback temporarily overrides the pinned ambient theme and
   await expect(page.getByRole('dialog')).toHaveCount(0);
   await expect.poll(async () => (await site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-ambient-accent'))).toLowerCase()).toBe('#ffcb78');
 });
+
+
+test('video playback visibly blends the active accent across every site surface without tinting the player', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const site = page.locator('.map132-slider-site');
+  await page.locator('.ms-service-tile[data-service-theme="cinematic"]').click();
+  const player = page.locator('.ms-preview-player');
+  await player.evaluate(video => video.dispatchEvent(new Event('play')));
+  await expect.poll(async () => (await site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-ambient-accent'))).toLowerCase()).toBe('#ffcb78');
+
+  for (const selector of ['.ms-header', '.ms-page', '.ms-controls', '.ms-footer', '.ms-preview-modal']) {
+    await expect.poll(async () => page.locator(selector).first().evaluate(element => getComputedStyle(element).backgroundBlendMode)).toBe('screen');
+  }
+  expect(await player.evaluate(video => getComputedStyle(video).filter)).toBe('none');
+
+  await player.evaluate(video => video.dispatchEvent(new Event('pause')));
+  await expect.poll(async () => (await site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-ambient-accent'))).toLowerCase()).toBe('#ffcb78');
+});
