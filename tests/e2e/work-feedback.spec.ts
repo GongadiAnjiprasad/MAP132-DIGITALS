@@ -17,13 +17,15 @@ test('work feedback form collects a service rating and seals the submitted revie
   await dialog.getByRole('button', { name: '4 stars' }).click();
   await dialog.getByLabel('WHAT DID YOU LIKE — OR WHAT CAN WE IMPROVE?').fill('The pacing and colour grading were excellent.');
   await dialog.getByLabel('EMAIL (OPTIONAL)').fill('client@example.com');
-  await dialog.getByRole('button', { name: /Seal & send feedback/ }).click();
+  await dialog.getByRole('button', { name: /Send feedback/ }).click();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload).toEqual({
+    kind: 'Work feedback',
     service: 'Cinematic Trailers',
     rating: 4,
     message: 'The pacing and colour grading were excellent.',
     email: 'client@example.com',
+    aspects: [],
   });
 });
 
