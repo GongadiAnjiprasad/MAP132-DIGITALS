@@ -1411,3 +1411,28 @@
     align-content: start;
   }
 }
+
+
+/* Playback atmosphere is applied to page surfaces, not the video pixels. */
+.map132-slider-site .ms-header,
+.map132-slider-site .ms-page,
+.map132-slider-site .ms-controls,
+.map132-slider-site .ms-footer {
+  background-color: color-mix(in srgb, var(--ms-ambient-accent) 18%, transparent);
+  background-blend-mode: screen;
+  transition: background-color .65s ease;
+}
+.map132-slider-site .ms-preview-modal {
+  background-color: color-mix(in srgb, var(--ms-ambient-accent) 16%, transparent);
+  background-blend-mode: screen;
+  transition: background-color .65s ease;
+}
+@media (prefers-reduced-motion: reduce) {
+  .map132-slider-site .ms-header,
+  .map132-slider-site .ms-page,
+  .map132-slider-site .ms-controls,
+  .map132-slider-site .ms-footer,
+  .map132-slider-site .ms-preview-modal {
+    transition: none;
+  }
+}
