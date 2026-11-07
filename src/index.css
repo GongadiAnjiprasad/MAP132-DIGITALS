@@ -1831,7 +1831,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 
 /* Feedback form inherits the active service accent from the shared site theme root. */
 .feedback-drawer {
-  --feedback-accent: var(--ms-ambient-accent, #D5AA66);
+  --feedback-accent: var(--brand-amber, #FFB45B);
   border-left-color: var(--feedback-accent);
   box-shadow:
     -24px 0 90px #000b,
@@ -1911,7 +1911,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   backdrop-filter: blur(14px) saturate(1.18);
 }
 .feedback-drawer {
-  --feedback-accent: var(--ms-ambient-accent, #00F2FF);
+  --feedback-accent: var(--brand-amber, #FFB45B);
   width: min(520px, 100%);
   padding: 30px clamp(20px, 4vw, 38px) 34px;
   color: #F2F5FF;
