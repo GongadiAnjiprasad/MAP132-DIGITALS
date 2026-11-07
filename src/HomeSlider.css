@@ -1477,3 +1477,14 @@
 .map132-slider-site[data-theme="light"] .ms-category-showcase-copy>p:not(.ms-category-showcase-kicker),.map132-slider-site[data-theme="light"] .ms-category-showcase-note{color:#66615a}
 @media(max-width:760px){.ms-category-showcase{grid-template-columns:minmax(0,1fr);gap:14px;margin:16px 0;padding:14px;border-radius:14px}.ms-category-showcase-copy h3{font-size:22px}.ms-category-showcase-media{min-height:150px;aspect-ratio:16/9}.ms-category-showcase-tags{margin-top:12px}}
 @media(prefers-reduced-motion:reduce){.ms-category-showcase,.ms-category-showcase-media{scroll-behavior:auto}}
+
+
+/* Selected Work UX: guide visitors from category choice to the matching preview. */
+.ms-work-prompt{display:flex;align-items:center;gap:11px;margin:0 0 24px;padding:15px 17px;border:1px solid var(--ms-line);border-radius:10px;background:rgba(232,189,122,.055);color:var(--ms-muted);font-size:12px;line-height:1.6}
+.ms-work-prompt svg{flex:0 0 auto;color:var(--ms-gold)}
+.ms-category-back{display:inline-flex;align-items:center;gap:7px;margin:0 0 14px;padding:7px 10px;border:1px solid var(--ms-line);border-radius:5px;background:transparent;color:var(--ms-muted);font-size:10px;font-weight:700;cursor:pointer;transition:border-color .2s,color .2s,background .2s}
+.ms-category-back:hover,.ms-category-back:focus-visible{border-color:var(--ms-gold);background:rgba(232,189,122,.08);color:var(--ms-text)}
+.ms-category-back:focus-visible{outline:2px solid var(--ms-gold);outline-offset:3px}
+.ms-category-showcase{scroll-margin-top:14px}
+@media(max-width:760px){.ms-work-prompt{align-items:flex-start;margin-bottom:18px;padding:12px;font-size:11px}.ms-category-back{min-height:36px}}
+@media(prefers-reduced-motion:reduce){.ms-work-prompt,.ms-category-back{transition:none}}

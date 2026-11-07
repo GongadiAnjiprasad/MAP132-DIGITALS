@@ -45,7 +45,7 @@ const workCategoryCards = [
   { id: 'Cinematic Trailers', description: 'Movie-style edits, teasers and dramatic visual stories.', pattern: /cinematic|film|trailer/i },
   { id: 'Wedding / B’Day', description: 'Wedding highlights, birthday films and special moments.', pattern: /wedding|birthday|celebration|event/i },
   { id: 'Advertisements', description: 'Brand promotions, product showcases and ad films.', pattern: /brand|advert|commercial|product/i },
-  { id: 'AI Services', description: 'AI-powered visuals, generated scenes and creative edits.', pattern: /ai|artificial|futur/i },
+  { id: 'AI Services', description: 'AI-powered visuals, generated scenes and creative edits.', pattern: /\bai\b|artificial|futur/i },
   { id: 'Insta Reels', description: 'Vertical reels, short-form edits and social-first videos.', pattern: /reel|short|instagram/i },
   { id: 'YouTube Related', description: 'YouTube videos, creator edits and channel content.', pattern: /youtube|podcast|interview|creator|news/i }
 ];
@@ -107,7 +107,7 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 
 export default function HomeSlider({ content, feedbackWidget }: { content: HomeContent; feedbackWidget?: ReactNode }) {
   const [active, setActive] = useState(0);
-  const [activeProjectCategory, setActiveProjectCategory] = useState('All Projects');
+  const [activeProjectCategory, setActiveProjectCategory] = useState<string | null>(null);
   const ambientTheme = useAmbientServiceTheme();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
@@ -148,6 +148,8 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   }, []);
   const stageRef = useRef<HTMLElement | null>(null);
   const navRef = useRef<HTMLElement | null>(null);
+  const workPageRef = useRef<HTMLElement | null>(null);
+  const selectedWorkShowcaseRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
     const nav = navRef.current;
     if (!nav || window.innerWidth > 760) return;
@@ -174,11 +176,22 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   const suppressSwipeClick = useRef(false);
   const wheelTotal = useRef(0);
   const wheelLocked = useRef(false);
-  const allProjects = content.items.length > 0 ? content.items : sampleProjects;
-  const selectedWorkItems = allProjects.filter(item => activeProjectCategory === 'All Projects' || Boolean(workCategoryCards.find(category => category.id === activeProjectCategory)?.pattern.test(item.category)));
-  const selectedWorkShowcaseItem = selectedWorkItems[0] || sampleProjects.find(item => activeProjectCategory === 'All Projects' || Boolean(workCategoryCards.find(category => category.id === activeProjectCategory)?.pattern.test(item.category))) || sampleProjects[0];
+  const selectedWorkItems = activeProjectCategory === null ? [] : content.items.filter(item => activeProjectCategory === 'All Projects' || Boolean(workCategoryCards.find(category => category.id === activeProjectCategory)?.pattern.test(item.category)));
+  const selectedWorkShowcaseItem = activeProjectCategory === null ? null : selectedWorkItems[0] || sampleProjects.find(item => activeProjectCategory === 'All Projects' || Boolean(workCategoryCards.find(category => category.id === activeProjectCategory)?.pattern.test(item.category))) || sampleProjects[0];
   const selectedWorkGalleryItems = selectedWorkItems.slice(selectedWorkItems.length > 0 ? 1 : 0);
-  const hasPublishedCategoryProject = selectedWorkItems.length > 0 && content.items.length > 0;
+  const hasPublishedCategoryProject = selectedWorkItems.length > 0;
+  useEffect(() => {
+    if (activeProjectCategory === null || !selectedWorkShowcaseRef.current) return;
+    const showcase = selectedWorkShowcaseRef.current;
+    const page = showcase.closest('.ms-work-page') as HTMLElement | null;
+    if (!page) return;
+    const frame = window.requestAnimationFrame(() => {
+      const top = showcase.getBoundingClientRect().top - page.getBoundingClientRect().top + page.scrollTop - 12;
+      const behavior: ScrollBehavior = window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth';
+      page.scrollTo({ top: Math.max(0, top), behavior });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [activeProjectCategory]);
   const p = content.profile;
   const whatsappDigits = p.whatsapp.replace(/\D/g, '');
   const whatsapp = whatsappDigits.length === 10 ? '91' + whatsappDigits : whatsappDigits;
@@ -318,15 +331,15 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
             </section>
         </section>
 
-        <section className="ms-page ms-work-page" aria-label="Selected work">
+        <section ref={workPageRef} className="ms-page ms-work-page" aria-label="Selected work">
           <div className="ms-page-heading"><div><p className="ms-kicker">PORTFOLIO / VISUAL STUDIES</p><h2>Choose your <em>work.</em></h2></div><p>Select the type of video you want to explore. Each category opens its matching projects and creative samples.</p></div>
           <div className="work-category-toolbar">
             <span>EXPLORE BY CATEGORY</span>
-            <button type="button" className={activeProjectCategory === 'All Projects' ? 'all-work-filter active' : 'all-work-filter'} aria-pressed={activeProjectCategory === 'All Projects'} onClick={() => setActiveProjectCategory('All Projects')}>All Projects <ArrowRight size={14}/></button>
+            <button type="button" className={activeProjectCategory === 'All Projects' ? 'all-work-filter active' : 'all-work-filter'} aria-pressed={activeProjectCategory === 'All Projects'} onClick={() => setActiveProjectCategory('All Projects')}>View all projects <ArrowRight size={14}/></button>
           </div>
           <div className="work-category-grid" role="group" aria-label="Choose a project category">
             {workCategoryCards.map((category,index) => {
-              const count = allProjects.filter(item => category.pattern.test(item.category)).length;
+              const count = content.items.filter(item => category.pattern.test(item.category)).length;
               return <button type="button" key={category.id} className={activeProjectCategory === category.id ? 'work-category-card active' : 'work-category-card'} aria-pressed={activeProjectCategory === category.id} onClick={() => setActiveProjectCategory(category.id)}>
                 <span className="work-category-number">0{index + 1} / MAP132</span>
                 <strong>{category.id}</strong>
@@ -335,8 +348,10 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
               </button>;
             })}
           </div>
-          {selectedWorkShowcaseItem && <section className="ms-category-showcase" aria-label="Category showcase preview">
+          {activeProjectCategory === null && <div className="ms-work-prompt"><Sparkles size={17}/><span>Choose a category above to see its visual preview and matching projects. All projects appear only when you select “View all projects”.</span></div>}
+          {selectedWorkShowcaseItem && <section ref={selectedWorkShowcaseRef} className="ms-category-showcase" aria-label="Category showcase preview">
             <div className="ms-category-showcase-copy">
+              <button type="button" className="ms-category-back" onClick={() => { setActiveProjectCategory(null); const page = workPageRef.current; if (page) page.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' }); }}><ArrowLeft size={14}/> Change category</button>
               <p className="ms-category-showcase-kicker">{activeProjectCategory === 'All Projects' ? 'FEATURED VISUAL DIRECTION' : 'CATEGORY SHOWCASE / ' + activeProjectCategory.toUpperCase()}</p>
               <h3>{hasPublishedCategoryProject ? selectedWorkShowcaseItem.title : activeProjectCategory === 'All Projects' ? 'Explore the MAP132 visual direction' : activeProjectCategory + ' visual direction'}</h3>
               <p>{selectedWorkShowcaseItem.description}</p>
@@ -345,8 +360,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
             </div>
             <div className="ms-category-showcase-media"><ProjectPreview item={selectedWorkShowcaseItem}/><span>{hasPublishedCategoryProject ? 'FEATURED PROJECT' : 'VISUAL STYLE PREVIEW'}</span></div>
           </section>}
-          {selectedWorkGalleryItems.length > 0 ? <div className="ms-project-grid">{selectedWorkGalleryItems.map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div> : !hasPublishedCategoryProject && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>{activeProjectCategory}</b><span>No published project yet. The showcase above gives a visual direction while this category is being built.</span></p></div>}
-          {content.items.length === 0 && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>Sample portfolio content</b><span>These are reference concepts and moodboard images—not completed client projects. Upload your own edited videos or photos in the Admin Dashboard to replace these examples.</span></p></div>}
+          {selectedWorkGalleryItems.length > 0 ? <div className="ms-project-grid">{selectedWorkGalleryItems.map(item => <article className="ms-project-card" key={item.id}><div className="ms-project-frame"><ProjectPreview item={item}/><span>{item.category}</span></div><h3>{item.title}</h3><p>{item.description}</p></article>)}</div> : !hasPublishedCategoryProject && <div className="ms-sample-banner"><Sparkles size={18}/><p><b>{activeProjectCategory}</b><span>{activeProjectCategory === 'All Projects' ? 'No published projects yet. This is a visual direction preview, not a completed client project.' : 'No published projects in this category yet. This preview shows the intended visual direction, not a completed client project.'}</span></p></div>}
         </section>
 
         <section className="ms-page ms-services-page" aria-label="Services">
