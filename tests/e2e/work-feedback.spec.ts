@@ -10,7 +10,9 @@ test('work feedback form collects a service rating and seals the submitted revie
   await page.goto('/');
   await page.getByRole('button', { name: 'Give feedback' }).click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog.getByRole('heading', { name: 'Review our work.' })).toBeVisible();
+  await expect(dialog.getByRole('heading', { name: /Your voice/ })).toBeVisible();
+  await expect(dialog.getByRole('img', { name: 'MAP132 DIGITALS' })).toBeVisible();
+  await dialog.getByRole('button', { name: /Video Editing Services/ }).click();
   await dialog.getByLabel('WHICH SERVICE ARE YOU REVIEWING?').selectOption('Cinematic Trailers');
   await dialog.getByRole('button', { name: '4 stars' }).click();
   await dialog.getByLabel('WHAT DID YOU LIKE — OR WHAT CAN WE IMPROVE?').fill('The pacing and colour grading were excellent.');
@@ -29,10 +31,11 @@ test('work feedback starts disabled and enables for a one-word review only after
   await page.goto('/');
   await page.getByRole('button', { name: 'Give feedback' }).click();
   const dialog = page.getByRole('dialog');
-  await expect(dialog.getByRole('button', { name: /Seal & send feedback/ })).toBeDisabled();
+  await expect(dialog.getByRole('button', { name: /Send feedback/ })).toBeDisabled();
+  await dialog.getByRole('button', { name: /Video Editing Services/ }).click();
   const service = dialog.getByLabel('WHICH SERVICE ARE YOU REVIEWING?');
   const message = dialog.getByLabel('WHAT DID YOU LIKE — OR WHAT CAN WE IMPROVE?');
-  const submit = dialog.getByRole('button', { name: /Seal & send feedback/ });
+  const submit = dialog.getByRole('button', { name: /Send feedback/ });
   await expect(service).toHaveAttribute('required', '');
   await expect(message).toHaveAttribute('minlength', '1');
   await service.selectOption('Overall Studio Experience');
@@ -89,17 +92,17 @@ test('feedback drawer uses the MAP132 cinematic studio design system', async ({ 
 
   const design = await dialog.evaluate(element => {
     const heading = element.querySelector('.feedback-drawer-head h2');
-    const input = element.querySelector('#feedback-service');
+    const input = element.querySelector('.feedback-category-grid button');
     const submit = element.querySelector('.feedback-submit');
-    const rule = element.querySelector('.feedback-parchment-rule');
+    const brand = element.querySelector('.feedback-studio-brand img');
     return {
       background: getComputedStyle(element).backgroundImage,
       backdropFilter: getComputedStyle(element).backdropFilter,
-      borderRadius: getComputedStyle(input!).borderRadius,
+      borderRadius: getComputedStyle(element).borderRadius,
       headingFont: getComputedStyle(heading!).fontFamily,
       inputBackground: getComputedStyle(input!).backgroundColor,
       submitBackground: getComputedStyle(submit!).backgroundImage,
-      ruleFont: getComputedStyle(rule!).fontFamily,
+      logoAlt: brand?.getAttribute('alt') || '',
       accent: getComputedStyle(element).getPropertyValue('--feedback-accent').trim(),
     };
   });
@@ -110,6 +113,33 @@ test('feedback drawer uses the MAP132 cinematic studio design system', async ({ 
   expect(design.headingFont.toLowerCase()).toContain('manrope');
   expect(design.inputBackground).not.toBe('rgba(0, 0, 0, 0)');
   expect(design.submitBackground).toContain('linear-gradient');
-  expect(design.ruleFont.toLowerCase()).toContain('dm sans');
+  expect(design.logoAlt).toBe('MAP132 DIGITALS');
   expect(design.accent).not.toBe('');
+});
+
+test('website experience feedback submits separately without requiring a service', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  let payload: any = null;
+  await page.route('**/api/feedback', async route => {
+    payload = route.request().postDataJSON();
+    await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ submitted: true, id: 'website-experience-feedback' }) });
+  });
+  await page.goto('/');
+  const launcher = page.getByRole('button', { name: 'Give feedback' });
+  await expect(launcher.locator('.feedback-mark')).toHaveText('F');
+  await launcher.click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByRole('button', { name: /Website Experience/ }).click();
+  await dialog.getByRole('button', { name: 'Mobile experience' }).click();
+  await dialog.getByLabel('YOUR FEEDBACK').fill('The site looks cinematic and is easy to explore on mobile.');
+  await dialog.getByRole('button', { name: /Send feedback/ }).click();
+  await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
+  expect(payload).toEqual({
+    kind: 'Website Experience',
+    service: '',
+    rating: 5,
+    message: 'The site looks cinematic and is easy to explore on mobile.',
+    email: '',
+    aspects: ['Mobile experience'],
+  });
 });
