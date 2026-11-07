@@ -11,6 +11,7 @@ const categories = [
 
 test('Select Work explains all six categories and keeps All Projects available', async ({ page }) => {
   await page.goto('/');
+  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
   const chooser = page.getByRole('group', { name: 'Choose a project category' });
   await expect(chooser).toBeVisible();
 
