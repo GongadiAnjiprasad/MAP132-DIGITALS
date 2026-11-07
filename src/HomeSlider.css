@@ -1361,3 +1361,13 @@
 @media (min-width: 761px) {
   .ms-stage { flex: 0 0 auto; min-height: 0; }
 }
+
+/* Desktop-site pages scroll inside the fixed viewport stage; the footer stays visible. */
+@media (min-width: 761px) {
+  .ms-page {
+    min-height: max(0px, calc(100svh - 158px));
+    overflow-y: auto;
+    overflow-x: hidden;
+    scrollbar-width: thin;
+  }
+}
