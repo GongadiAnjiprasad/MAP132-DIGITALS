@@ -15,7 +15,7 @@ test('work feedback form collects a service rating and seals the submitted revie
   await dialog.getByRole('button', { name: /Video Editing Services/ }).click();
   await dialog.getByLabel('WHICH SERVICE ARE YOU REVIEWING?').selectOption('Cinematic Trailers');
   await dialog.getByRole('button', { name: '4 stars' }).click();
-  await dialog.getByLabel('WHAT DID YOU LIKE — OR WHAT CAN WE IMPROVE?').fill('The pacing and colour grading were excellent.');
+  await dialog.getByLabel('YOUR FEEDBACK').fill('The pacing and colour grading were excellent.');
   await dialog.getByLabel('EMAIL (OPTIONAL)').fill('client@example.com');
   await dialog.getByRole('button', { name: /Send feedback/ }).click();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
@@ -36,7 +36,7 @@ test('work feedback starts disabled and enables for a one-word review only after
   await expect(dialog.getByRole('button', { name: /Send feedback/ })).toBeDisabled();
   await dialog.getByRole('button', { name: /Video Editing Services/ }).click();
   const service = dialog.getByLabel('WHICH SERVICE ARE YOU REVIEWING?');
-  const message = dialog.getByLabel('WHAT DID YOU LIKE — OR WHAT CAN WE IMPROVE?');
+  const message = dialog.getByLabel('YOUR FEEDBACK');
   const submit = dialog.getByRole('button', { name: /Send feedback/ });
   await expect(service).toHaveAttribute('required', '');
   await expect(message).toHaveAttribute('minlength', '1');
@@ -94,7 +94,7 @@ test('feedback drawer uses the MAP132 cinematic studio design system', async ({ 
 
   const design = await dialog.evaluate(element => {
     const heading = element.querySelector('.feedback-drawer-head h2');
-    const input = element.querySelector('.feedback-category-grid button');
+    const input = element.querySelector('textarea');
     const submit = element.querySelector('.feedback-submit');
     const brand = element.querySelector('.feedback-studio-brand img');
     return {
