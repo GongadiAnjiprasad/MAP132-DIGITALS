@@ -1827,3 +1827,29 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
     letter-spacing: .35px;
   }
 }
+
+
+/* Desktop feedback form: keep email and seal action aligned inside the parchment frame. */
+.feedback-drawer {
+  box-sizing: border-box;
+  width: min(540px, 100%);
+  max-width: 100%;
+}
+.feedback-drawer form > input,
+.feedback-drawer form > select,
+.feedback-drawer form > textarea {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+}
+.feedback-drawer .feedback-submit {
+  width: 100%;
+  max-width: 100%;
+  margin: 18px 0 0;
+  box-sizing: border-box;
+}
+@media (max-width: 600px) {
+  .feedback-drawer .feedback-submit { margin-top: 16px; }
+}

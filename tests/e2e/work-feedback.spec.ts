@@ -42,3 +42,22 @@ test('work feedback starts disabled and enables for a one-word review only after
   await message.fill('   ');
   await expect(submit).toBeDisabled();
 });
+
+
+test('desktop feedback email and seal action stay inside the parchment drawer', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Give feedback' }).click();
+  const dialog = page.getByRole('dialog');
+  const drawer = await dialog.boundingBox();
+  const email = await dialog.getByLabel('EMAIL (OPTIONAL)').boundingBox();
+  const submit = await dialog.getByRole('button', { name: /Seal & send feedback/ }).boundingBox();
+  expect(drawer).not.toBeNull();
+  expect(email).not.toBeNull();
+  expect(submit).not.toBeNull();
+  const inset = 12;
+  for (const control of [email!, submit!]) {
+    expect(control.x).toBeGreaterThanOrEqual(drawer!.x + inset);
+    expect(control.x + control.width).toBeLessThanOrEqual(drawer!.x + drawer!.width - inset);
+  }
+});
