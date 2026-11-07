@@ -64,6 +64,9 @@ test('desktop audio drives the gold and teal wave layers and pause calms them', 
   await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-bass-scale')))).toBeGreaterThan(1);
   await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-wave-opacity')))).toBeGreaterThan(.34);
   await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-impact')))).toBeGreaterThan(.1);
+  const frameWave = await video.evaluate(element => getComputedStyle(element.parentElement!, '::after'));
+  expect(frameWave.backgroundImage).toContain('data:image/svg+xml');
+  await expect.poll(() => video.evaluate(element => Number(getComputedStyle(element.parentElement!, '::after').opacity))).toBeGreaterThan(.1);
   const waveLayer = page.locator('.ms-page').nth(1);
   await expect.poll(() => waveLayer.evaluate(element => getComputedStyle(element, '::after').backgroundImage.includes('data:image/svg+xml'))).toBe(true);
   await stopMockPlayback(video);
@@ -82,6 +85,7 @@ test('mobile audio-reactive waves stay within the viewport and reset on pause', 
   const site = page.locator('.map132-slider-site');
   await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-bass-scale')))).toBeGreaterThan(1);
   await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-impact')))).toBeGreaterThan(.1);
+  await expect.poll(() => video.evaluate(element => Number(getComputedStyle(element.parentElement!, '::after').opacity))).toBeGreaterThan(.1);
   expect(await page.evaluate(() => document.documentElement.scrollWidth)).toBeLessThanOrEqual(392);
   await stopMockPlayback(video);
   await expect.poll(() => site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-audio-wave-opacity').trim())).toBe('.34');
@@ -100,4 +104,21 @@ test('silent demo clip receives the original genre sound bed and keeps waves vis
   await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-bass-scale')))).toBeGreaterThan(1);
   await stopMockPlayback(video);
   await expect.poll(() => site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-audio-wave-opacity').trim())).toBe('.34');
+});
+
+
+test('preview-modal video shows the same audio-reactive wave frame while playing', async ({ page }) => {
+  await installAudioMocks(page);
+  await page.setViewportSize({ width: 1280, height: 800 });
+  await page.goto('/');
+  await page.locator('.ms-service-tile').first().click();
+  const video = page.locator('.ms-preview-player');
+  await expect(video).toHaveCount(1);
+  await startMockPlayback(video);
+  const site = page.locator('.map132-slider-site');
+  await expect.poll(() => site.evaluate(element => Number(getComputedStyle(element).getPropertyValue('--ms-audio-impact')))).toBeGreaterThan(.1);
+  const stage = page.locator('.ms-preview-stage');
+  await expect.poll(() => stage.evaluate(element => getComputedStyle(element, '::after').backgroundImage.includes('data:image/svg+xml'))).toBe(true);
+  await expect.poll(() => stage.evaluate(element => Number(getComputedStyle(element, '::after').opacity))).toBeGreaterThan(.1);
+  await stopMockPlayback(video);
 });
