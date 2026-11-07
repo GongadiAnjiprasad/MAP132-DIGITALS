@@ -32,3 +32,10 @@ test('Select Work does not render a redundant All Selected Projects results head
   assert.match(home, /selectedWorkItems\.map\(item =>/);
   assert.match(home, /setActiveProjectCategory\('All Projects'\)/);
 });
+
+
+test('Selected Work does not repeat the separate demo video showcase', () => {
+  assert.doesNotMatch(home, /import DemoShowcase/);
+  assert.doesNotMatch(home, /<DemoShowcase\b/);
+  assert.doesNotMatch(home, /function demoClipTheme/);
+});
