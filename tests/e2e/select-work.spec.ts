@@ -47,3 +47,25 @@ test('All Projects is an explicit tab choice and empty results are labelled hone
   await expect(page.locator('.ms-work-results-heading h3')).toHaveText('All Projects');
   await expect(page.locator('.ms-sample-banner')).toContainText('No published projects yet');
 });
+
+
+test('Category chooser displays six tabs in a stable three-column by two-row grid without horizontal tab scrolling', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
+  const tabs = page.getByRole('group', { name: 'Choose a project category' });
+  const buttons = tabs.getByRole('button');
+  await expect(buttons).toHaveCount(6);
+  const boxes = await buttons.evaluateAll(elements => elements.map(element => {
+    const rect = element.getBoundingClientRect();
+    return { x: rect.x, y: rect.y, width: rect.width, height: rect.height };
+  }));
+  expect(boxes[0].y).toBeCloseTo(boxes[1].y, 0);
+  expect(boxes[1].y).toBeCloseTo(boxes[2].y, 0);
+  expect(boxes[3].y).toBeGreaterThan(boxes[0].y);
+  expect(boxes[3].y).toBeCloseTo(boxes[4].y, 0);
+  expect(boxes[4].y).toBeCloseTo(boxes[5].y, 0);
+  expect(boxes[0].x).toBeLessThan(boxes[1].x);
+  expect(boxes[1].x).toBeLessThan(boxes[2].x);
+  expect(await tabs.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBeTruthy();
+});

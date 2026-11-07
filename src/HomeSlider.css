@@ -1525,3 +1525,48 @@
   .ms-work-pagination{gap:10px}
 }
 @media(prefers-reduced-motion:reduce){.ms-work-page .work-category-tab{transition:none}}
+
+
+/* Selected Work category chooser: show all six categories in a tidy 3 × 2 grid. */
+.ms-work-page .work-category-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 9px;
+  overflow: visible;
+  padding: 10px 0 12px;
+  margin: 0 0 18px;
+  background: none;
+  scrollbar-width: none;
+}
+.ms-work-page .work-category-tab {
+  width: 100%;
+  min-width: 0;
+  min-height: 56px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  white-space: normal;
+  padding: 9px 7px;
+  border-radius: 10px;
+}
+.ms-work-page .work-category-tab span {
+  white-space: normal;
+  line-height: 1.25;
+  overflow-wrap: anywhere;
+}
+.ms-work-page .work-category-tab small { line-height: 1.2; }
+@media (max-width: 760px) {
+  .ms-work-page .work-category-tabs {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 7px;
+    margin: 0 0 16px;
+    padding: 8px 0 10px;
+  }
+  .ms-work-page .work-category-tab {
+    min-height: 52px;
+    padding: 8px 5px;
+    border-radius: 9px;
+  }
+  .ms-work-page .work-category-tab span { font-size: 9px; }
+  .ms-work-page .work-category-tab small { font-size: 7px; letter-spacing: .45px; }
+}
