@@ -215,3 +215,20 @@ test('swiping updates a clearly selected page in both navigation indicators', as
     element => getComputedStyle(element).color,
   )).toBe('rgb(23, 19, 13)');
 });
+
+test('Explore category tabs allow horizontal page swipe while category taps still work', async ({ page }) => {
+  await page.goto('/');
+  const track = page.locator('.ms-track');
+  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
+  const firstCategory = page.locator('.work-category-tab').first();
+  await expect(firstCategory).toBeVisible();
+
+  // A finger swipe that begins directly on an Explore category chip must still navigate pages.
+  await dispatchTouchSwipe(page, '.work-category-tab:first-child', 'left');
+  await expect(track).toHaveAttribute('style', /translateX\(-200%\)/);
+
+  // Returning and tapping the same chip must continue to select the category normally.
+  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
+  await firstCategory.click();
+  await expect(firstCategory).toHaveAttribute('aria-pressed', 'true');
+});
