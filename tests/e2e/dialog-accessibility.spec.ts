@@ -60,4 +60,29 @@ for (const viewport of viewports) {
     await expect(dialog).toBeHidden();
     await expect(trigger).toBeFocused();
   });
+
+  test('showcase video preview contains keyboard focus and restores its service trigger at ' + viewport.name, async ({ page }) => {
+    await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.route('https://videos.pexels.com/**', route => route.abort());
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Services', exact: true }).click();
+
+    const trigger = page.getByRole('button', { name: 'Play Cinematic Films sample video' });
+    await expect(trigger).toBeVisible();
+    await trigger.click();
+    const dialog = page.getByRole('dialog', { name: 'Cinematic Films video preview' });
+    const close = dialog.getByRole('button', { name: 'Close video' });
+    await expect(dialog).toBeVisible();
+    await expect(close).toBeFocused();
+
+    const video = dialog.locator('video[controls]');
+    await page.keyboard.press('Shift+Tab');
+    await expect(video).toBeFocused();
+    await page.keyboard.press('Tab');
+    await expect(close).toBeFocused();
+
+    await page.keyboard.press('Escape');
+    await expect(dialog).toBeHidden();
+    await expect(trigger).toBeFocused();
+  });
 }
