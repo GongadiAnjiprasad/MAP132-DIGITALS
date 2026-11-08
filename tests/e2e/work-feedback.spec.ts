@@ -189,9 +189,13 @@ test('admin can publish a work review after explicitly confirming client permiss
   expect(loginResult.status()).toBe(200);
   // Synchronize on the actual authenticated dashboard after the login request resolves.
   await expect(page.locator('.admin-shell')).toBeVisible({ timeout: 15000 });
-  const feedbackTab = page.locator('.admin-nav').filter({ hasText: 'Work Feedback' });
-  await expect(feedbackTab).toBeVisible();
-  await feedbackTab.click({ force: true });
+  // The shell can appear before its authenticated sidebar has finished mounting.
+  const sidebar = page.locator('.admin-side');
+  await expect(sidebar).toBeVisible({ timeout: 15000 });
+  await expect(sidebar.locator('button.admin-nav')).toHaveCount(7, { timeout: 15000 });
+  const feedbackTab = sidebar.getByRole('button', { name: /Work Feedback/ });
+  await expect(feedbackTab).toBeVisible({ timeout: 15000 });
+  await feedbackTab.click();
   const review = page.locator('.feedback-inbox-item').filter({ hasText: 'Excellent editing and storytelling.' });
   await expect(review.getByText('Permission not yet confirmed')).toBeVisible();
   const publish = review.getByRole('button', { name: 'Confirm permission & publish' });
