@@ -33,7 +33,8 @@ for (const viewport of viewports) {
 
   test('workspace preview dialog traps focus and restores its trigger at ' + viewport.name, async ({ page }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
-    await page.addInitScript(() => {
+    await page.goto('/#workspace');
+    await page.evaluate(() => {
       localStorage.setItem('map132-private-workspace-resources', JSON.stringify([{
         id: 'keyboard-test-image',
         title: 'Keyboard test image',
@@ -50,7 +51,8 @@ for (const viewport of viewports) {
       }]));
     });
     await page.route('https://example.com/**', route => route.abort());
-    await page.goto('/#workspace');
+    await page.reload();
+    await expect(page.getByText('Keyboard test image', { exact: true })).toBeVisible();
 
     const trigger = page.getByRole('button', { name: 'Open preview' }).first();
     await expect(trigger).toBeVisible();
@@ -75,7 +77,7 @@ for (const viewport of viewports) {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
     await page.route('https://videos.pexels.com/**', route => route.abort());
     await page.goto('/');
-    await page.getByRole('button', { name: 'Services', exact: true }).click();
+    await page.locator('.ms-nav').getByRole('button', { name: 'Services', exact: true }).click();
 
     const trigger = page.getByRole('button', { name: 'Play Cinematic Films sample video' });
     await expect(trigger).toBeVisible();
