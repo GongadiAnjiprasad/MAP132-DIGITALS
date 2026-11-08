@@ -25,7 +25,7 @@ test('logo uploads are restricted to authenticated admin sessions and supported 
   assert.match(worker, /validWebp/);
 });
 
-test('public portfolio API resolves the saved logo from R2 and falls back to the original asset', () => {
+test('public portfolio API resolves the saved logo from R2 and falls back to the selected MAP logo', () => {
   assert.match(worker, /content\.logoUrl=content\.logoPath&&env\.MAP132_MEDIA\?/);
   assert.match(worker, /portfolio\/logos\//);
   assert.match(worker, /resources\/logo-removebg-preview\.png/);
