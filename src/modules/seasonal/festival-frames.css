@@ -3,52 +3,70 @@
   pointer-events: none; opacity: .48;
 }
 .festival-atmosphere span {
-  position: absolute; top: -8%; color: #e8c77a;
+  position: absolute; top: -8%; color: #d5aa66;
   font-size: clamp(16px, 2.4vw, 30px);
-  text-shadow: 0 0 16px currentColor, 0 0 28px currentColor;
+  text-shadow: 0 0 14px currentColor, 0 0 26px currentColor;
   animation: festival-drift linear infinite;
 }
 .festival-snow span { color: #d9e9f6; }
-.festival-sun span { color: #f3ca78; }
+.festival-sun span { color: #e8bd7a; }
 @keyframes festival-drift {
   0% { transform: translate3d(0,-4vh,0) rotate(0deg); opacity: 0; }
   12% { opacity: .88; }
   88% { opacity: .72; }
   100% { transform: translate3d(22px,110vh,0) rotate(180deg); opacity: 0; }
 }
+
+/* Festival wishes use MAP132's charcoal, warm-gold cinematic brand palette. */
 .ff-greeting {
   position: fixed; z-index: 1000; top: max(14px, env(safe-area-inset-top));
   left: 50%; width: min(720px, calc(100vw - 24px)); min-height: 340px;
   overflow: hidden; transform: translateX(-50%);
-  border: 1px solid rgba(232,199,122,.68); border-radius: 16px;
-  color: #fff8e9;
-  background: radial-gradient(ellipse at 50% 35%, rgba(171,111,48,.36), transparent 62%), linear-gradient(135deg, #10131c, #302218 58%, #11131b);
-  box-shadow: 0 22px 70px rgba(0,0,0,.42), 0 0 28px rgba(232,199,122,.14);
+  border: 1px solid rgba(213,170,102,.62); border-radius: 16px;
+  color: #f3f0e9;
+  background:
+    radial-gradient(ellipse at 78% 18%, rgba(213,170,102,.19), transparent 42%),
+    radial-gradient(ellipse at 12% 88%, rgba(142,105,59,.13), transparent 48%),
+    linear-gradient(135deg, #101113 0%, #1c1d1f 54%, #29231b 100%);
+  box-shadow: 0 22px 70px rgba(0,0,0,.48), 0 0 30px rgba(213,170,102,.12);
   isolation: isolate; pointer-events: none; animation: ff-greeting-enter .55s cubic-bezier(.2,.8,.2,1) both;
+}
+.ff-greeting::before {
+  content: ''; position: absolute; inset: 0; z-index: -1; pointer-events: none;
+  background:
+    linear-gradient(rgba(255,255,255,.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.025) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: linear-gradient(115deg, transparent 4%, #000 48%, transparent 100%);
 }
 .ff-greeting-background, .ff-greeting-shade {
   position: absolute; inset: 0; width: 100%; height: 100%;
 }
-.ff-greeting-background { z-index: -2; object-fit: cover; opacity: .62; }
-.ff-greeting-shade { z-index: -1; background: linear-gradient(180deg, rgba(8,10,16,.52), rgba(8,10,16,.82)); }
+.ff-greeting-background { z-index: -2; object-fit: cover; opacity: .22; filter: saturate(.58) contrast(1.08); }
+.ff-greeting-shade {
+  z-index: -1;
+  background:
+    radial-gradient(ellipse at 76% 16%, rgba(213,170,102,.16), transparent 46%),
+    linear-gradient(180deg, rgba(16,17,19,.72), rgba(16,17,19,.9));
+}
 .ff-greeting-close {
   position: absolute; z-index: 2; top: 12px; left: 12px;
   display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px;
-  border: 1px solid rgba(255,255,255,.32); border-radius: 30px;
-  color: #fff; background: rgba(8,10,16,.45); font-size: 11px; cursor: pointer;
+  border: 1px solid rgba(213,170,102,.42); border-radius: 30px;
+  color: #f3f0e9; background: rgba(16,17,19,.72); font-size: 11px; cursor: pointer;
   pointer-events: auto;
 }
-.ff-greeting-close:hover { background: rgba(8,10,16,.8); }
+.ff-greeting-close:hover { border-color: #d5aa66; background: rgba(16,17,19,.92); }
 .ff-greeting-content {
   display: flex; min-height: 340px; flex-direction: column; align-items: center;
   justify-content: center; padding: 38px 28px 26px; text-align: center;
 }
-.ff-greeting-kicker { margin: 0 0 10px; color: #f1d59c; font-size: 9px; font-weight: 800; letter-spacing: 2.8px; }
-.ff-greeting-logo { width: min(180px, 38vw); max-height: 76px; object-fit: contain; filter: drop-shadow(0 4px 18px rgba(232,199,122,.28)); }
-.ff-greeting-brand { margin: 4px 0 13px; color: #f3d89e; font-size: 10px; font-weight: 800; letter-spacing: 2px; }
-.ff-greeting h2 { margin: 0; color: #fff5df; font: 800 clamp(26px, 5vw, 42px)/1.1 Manrope, sans-serif; letter-spacing: -.7px; text-shadow: 0 3px 18px rgba(0,0,0,.35); }
-.ff-greeting-message { max-width: 520px; margin: 13px 0 18px; color: #f0e6d5; font-size: clamp(12px, 2vw, 15px); line-height: 1.65; }
-.ff-greeting-signoff { color: #e8c77a; font-size: 8px; font-weight: 800; letter-spacing: 1.7px; }
+.ff-greeting-kicker { margin: 0 0 10px; color: #d5aa66; font-size: 9px; font-weight: 800; letter-spacing: 2.8px; }
+.ff-greeting-logo { width: min(180px, 38vw); max-height: 76px; object-fit: contain; mix-blend-mode: screen; filter: drop-shadow(0 4px 18px rgba(213,170,102,.22)); }
+.ff-greeting-brand { margin: 4px 0 13px; color: #e8bd7a; font-size: 10px; font-weight: 800; letter-spacing: 2px; }
+.ff-greeting h2 { margin: 0; color: #f3f0e9; font: 800 clamp(26px, 5vw, 42px)/1.1 Manrope, sans-serif; letter-spacing: -.7px; text-shadow: 0 3px 18px rgba(0,0,0,.42); }
+.ff-greeting-message { max-width: 520px; margin: 13px 0 18px; color: #d6d0c5; font-size: clamp(12px, 2vw, 15px); line-height: 1.65; }
+.ff-greeting-signoff { color: #d5aa66; font-size: 8px; font-weight: 800; letter-spacing: 1.7px; }
 @keyframes ff-greeting-enter {
   from { opacity: 0; transform: translate(-50%, -12px) scale(.985); }
   to { opacity: 1; transform: translate(-50%, 0) scale(1); }
