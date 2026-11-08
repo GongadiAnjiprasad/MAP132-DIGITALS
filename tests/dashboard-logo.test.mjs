@@ -27,15 +27,15 @@ test('logo uploads are restricted to authenticated admin sessions and supported 
   assert.match(worker, /validWebp/);
 });
 
-test('public portfolio API resolves uploaded logos and falls back to the official Logo.png worker asset and uses the SVG brand default', () => {
+test('public portfolio API resolves uploaded logos and falls back to the official Logo.png worker asset and uses the PNG brand default', () => {
   assert.match(worker, /content\.logoUrl=content\.logoPath&&env\.MAP132_MEDIA\?/);
   assert.match(worker, /portfolio\/logos\//);
   assert.match(worker, /resources\/Logo\.png/);
-  assert.match(app, /const DEFAULT_BRAND_LOGO = '\/resources\/Logo\.svg'/);
+  assert.match(app, /const DEFAULT_BRAND_LOGO = '\/resources\/Logo\.png'/);
 });
 
-test('the public header uses the official SVG logo and feedback widget uses the configured brand default', () => {
-  assert.match(slider, /content\.logoUrl \|\| '\/resources\/Logo\.svg'/);
+test('the public header uses the official PNG logo and feedback widget uses the configured brand default', () => {
+  assert.match(slider, /content\.logoUrl \|\| '\/resources\/Logo\.png'/);
   assert.match(app, /FeedbackWidget\(\{ logoUrl = DEFAULT_BRAND_LOGO \}/);
   assert.match(app, /<FeedbackWidget logoUrl=\{DEFAULT_BRAND_LOGO\}/);
   assert.match(app, /logoUrl:DEFAULT_BRAND_LOGO/);
@@ -44,8 +44,8 @@ test('the public header uses the official SVG logo and feedback widget uses the 
 
 test('the official Logo.png logo is used for browser icons and social metadata', () => {
   assert.match(app, /const absoluteLogo=new URL\(DEFAULT_BRAND_LOGO,window\.location\.origin\)\.href/);
-  assert.match(app, /icon\.href=absoluteLogo;icon\.type='image\/png'/);
+  assert.match(app, /icon\.href='\/favicon\.svg';icon\.type='image\/svg\+xml'/);
   assert.match(app, /apple\.href=absoluteLogo/);
   assert.match(app, /item\.logo=\{'@type':'ImageObject',url:absoluteLogo\}/);
-  assert.match(html, /href="\/favicon\.svg"/);
+  assert.match(html, /rel="icon" type="image\/svg\+xml" href="\/favicon\.svg"/);
 });
