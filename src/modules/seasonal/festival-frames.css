@@ -1,6 +1,6 @@
 .festival-atmosphere {
   position: fixed; inset: 0; z-index: 1; overflow: hidden;
-  pointer-events: none; opacity: .42;
+  pointer-events: none; opacity: .48;
 }
 .festival-atmosphere span {
   position: absolute; top: -8%; color: #d5aa66;
