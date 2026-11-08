@@ -17,7 +17,7 @@ type Item = {
   kind: 'video' | 'image' | 'link'; url?: string; path?: string;
   mediaUrl?: string; source?: 'upload' | 'youtube' | 'drive' | 'other';
 };
-const DEFAULT_BRAND_LOGO = '/resources/Logo.png';
+const DEFAULT_BRAND_LOGO = '/resources/Logo.svg';
 type Content = {
   logoPath?: string;
   logoUrl?: string;
@@ -118,7 +118,7 @@ function TitleMotionStudio(){
   }catch(e){setMessage(e instanceof Error?e.message:'Could not render intro.')}finally{cancelAnimationFrame(raf);if(audio)await audio.close().catch(()=>{});setBusy(false)}
  }
  return <section className="motion-lab logo-intro-builder"><div className="motion-lab-head"><div><p className="kicker">PRIVATE STUDIO TOOL · 5.5 SECOND EXPORT</p><h2>Logo <em>intro builder.</em></h2><p>Choose a visual treatment and export the original MAP132 logo with original synthesized sound. Rendering happens on this device.</p></div><span className="lab-stamp">MAP132<br/>INTRO / 01</span></div>
- <div className="motion-lab-grid"><div className="title-preview"><small>LIVE LOGO PREVIEW</small><img src="/resources/Logo.png" alt="MAP132 logo preview"/><i>MAP132 / VIDEO EDITING</i><span className="preview-time">00:00:05:15</span></div>
+ <div className="motion-lab-grid"><div className="title-preview"><small>LIVE LOGO PREVIEW</small><img src="/resources/Logo.svg" alt="MAP132 logo preview"/><i>MAP132 / VIDEO EDITING</i><span className="preview-time">00:00:05:15</span></div>
  <div className="motion-controls"><span className="control-label">INTRO STYLE</span><div className="style-choices intro-style-choices">{styles.map((x,i)=><button type="button" key={x} className={style===x?'chosen':''} onClick={()=>setStyle(x)}><b>0{i+1}</b><span>{x}</span></button>)}</div>
  <div className="intro-export-options"><label>ASPECT RATIO<select value={ratio} onChange={e=>setRatio(e.target.value)}><option>16:9</option><option>9:16</option><option>1:1</option></select></label><label>RESOLUTION<select value={quality} onChange={e=>setQuality(e.target.value)}><option>720p</option><option>1080p</option><option>4K</option></select></label></div>
  <button className="gold-button render-title" onClick={render} disabled={busy}><Film size={17}/>{busy?'Rendering…':'Render & download logo intro'} <ArrowDownRight size={17}/></button><p className="render-note">{message||'5.5 seconds · 16:9 / 9:16 / 1:1 · 720p / 1080p / 4K · WebM + original sound'}</p></div></div></section>;
