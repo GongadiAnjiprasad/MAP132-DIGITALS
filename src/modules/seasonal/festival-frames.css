@@ -62,7 +62,7 @@
   justify-content: center; padding: 38px 28px 26px; text-align: center;
 }
 .ff-greeting-kicker { margin: 0 0 10px; color: #d5aa66; font-size: 9px; font-weight: 800; letter-spacing: 2.8px; }
-.ff-greeting-logo { width: min(180px, 38vw); max-height: 76px; object-fit: contain; filter: drop-shadow(0 4px 18px rgba(213,170,102,.22)); }
+.ff-greeting-logo { width: min(180px, 38vw); max-height: 76px; object-fit: contain; mix-blend-mode: screen; filter: drop-shadow(0 4px 18px rgba(213,170,102,.22)); }
 .ff-greeting-brand { margin: 4px 0 13px; color: #e8bd7a; font-size: 10px; font-weight: 800; letter-spacing: 2px; }
 .ff-greeting h2 { margin: 0; color: #f3f0e9; font: 800 clamp(26px, 5vw, 42px)/1.1 Manrope, sans-serif; letter-spacing: -.7px; text-shadow: 0 3px 18px rgba(0,0,0,.42); }
 .ff-greeting-message { max-width: 520px; margin: 13px 0 18px; color: #d6d0c5; font-size: clamp(12px, 2vw, 15px); line-height: 1.65; }
