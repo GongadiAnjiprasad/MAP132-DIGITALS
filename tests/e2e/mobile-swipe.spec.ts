@@ -231,7 +231,7 @@ test('Explore category tabs allow horizontal page swipe while category taps stil
 
   // Returning and tapping the same chip must continue to select the category normally.
   await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
-  await expect(track).toHaveAttribute('style', /translateX\(-200%\)/);
+  await expect(track).toHaveAttribute('style', /translateX\(-100%\)/);
   await page.waitForTimeout(750);
   await firstCategory.click();
   await expect(firstCategory).toHaveAttribute('aria-pressed', 'true');
