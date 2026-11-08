@@ -229,3 +229,40 @@ test('homepage feedback tabs show only matching live reviews and refresh on focu
   await expect(feed.getByText('No published feedback in this category yet.')).toBeVisible();
   expect(calls).toBeGreaterThanOrEqual(2);
 });
+
+
+test('feedback form controls stay aligned and the message field keeps a visible border on desktop and mobile', async ({ page }) => {
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }, { width: 320, height: 740 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Give feedback' }).click();
+    const dialog = page.getByRole('dialog');
+    const message = dialog.getByLabel('YOUR FEEDBACK');
+    const email = dialog.getByLabel('EMAIL (OPTIONAL)');
+    const consent = dialog.locator('.feedback-public-consent');
+    const submit = dialog.getByRole('button', { name: /Send feedback/ });
+    const bounds = await Promise.all([
+      dialog.boundingBox(), message.boundingBox(), email.boundingBox(),
+      consent.boundingBox(), submit.boundingBox(),
+    ]);
+    expect(bounds.every(Boolean)).toBeTruthy();
+    const [drawerBox, messageBox, emailBox, consentBox, submitBox] = bounds;
+    const inset = 10;
+    for (const control of [messageBox!, emailBox!, consentBox!, submitBox!]) {
+      expect(control.x).toBeGreaterThanOrEqual(drawerBox!.x + inset);
+      expect(control.x + control.width).toBeLessThanOrEqual(drawerBox!.x + drawerBox!.width - inset);
+    }
+    expect(messageBox!.y).toBeLessThan(emailBox!.y);
+    expect(emailBox!.y).toBeLessThan(consentBox!.y);
+    expect(consentBox!.y).toBeLessThan(submitBox!.y);
+    expect(submitBox!.y - (consentBox!.y + consentBox!.height)).toBeLessThanOrEqual(16);
+    const textareaStyle = await message.evaluate(element => {
+      const style = getComputedStyle(element);
+      return { borderWidth: style.borderTopWidth, borderStyle: style.borderTopStyle, boxSizing: style.boxSizing };
+    });
+    expect(textareaStyle.borderWidth).not.toBe('0px');
+    expect(textareaStyle.borderStyle).toBe('solid');
+    expect(textareaStyle.boxSizing).toBe('border-box');
+    await page.getByRole('button', { name: 'Close feedback' }).click();
+  }
+});
