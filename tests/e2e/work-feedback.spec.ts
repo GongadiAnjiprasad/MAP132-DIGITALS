@@ -195,7 +195,8 @@ test('admin feedback inbox does not require manual approval for legacy entries',
   await expect(page.locator('.login-screen')).toHaveCount(0, { timeout: 15000 });
   const sidebar = page.locator('.admin-shell .admin-side');
   await expect(sidebar).toBeVisible({ timeout: 15000 });
-  await expect(sidebar.locator('button.admin-nav')).toHaveCount(7, { timeout: 15000 });
+  await expect(sidebar.locator('button.admin-nav')).toHaveCount(8, { timeout: 15000 });
+  await expect(sidebar.getByRole('button', { name: /Website Logo/ })).toBeVisible();
   const feedbackTab = sidebar.getByRole('button', { name: /Customer Feedback/ });
   await expect(feedbackTab).toBeVisible({ timeout: 15000 });
   await feedbackTab.click();
