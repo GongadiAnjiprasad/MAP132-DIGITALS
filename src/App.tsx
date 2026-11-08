@@ -127,7 +127,7 @@ function WebsiteIntro(){
   return null;
 }
 function PublicSite({ content }: { content: Content }) {
-  const logoUrl = DEFAULT_BRAND_LOGO;
+  const logoUrl = content.logoUrl || DEFAULT_BRAND_LOGO;
   const [activeSkill,setActiveSkill] = useState(0);
   const [activeWorkCategory,setActiveWorkCategory] = useState('All Projects');
   const [activeAtmosphere,setActiveAtmosphere] = useState<Atmosphere | null>(null);
@@ -135,7 +135,7 @@ function PublicSite({ content }: { content: Content }) {
   const wa = p.whatsapp.replace(/[^\d]/g, '');
   const whatsappUrl = wa ? 'https://wa.me/' + wa : '';
   return <div className="site" data-atmosphere={activeAtmosphere || undefined}>
-    <IndianFestivalAtmosphere />
+    <IndianFestivalAtmosphere logoUrl={logoUrl} />
     <WebsiteIntro />
     <header className="nav">
       <a className="wordmark" href="#top"><BrandLogo src={logoUrl}/></a>
@@ -574,7 +574,7 @@ function AdminApp() {
   const [source,setSource] = useState<'youtube'|'drive'|'other'>('youtube');
   const [uploading,setUploading] = useState(false);
   useEffect(()=>{ api.get('/api/admin/session').then(()=>setLoggedIn(true)).catch(()=>setLoggedIn(false)).finally(()=>setChecking(false)); },[]);
-  useEffect(()=>{ if(loggedIn) api.get('/api/portfolio').then(r=>{const incoming=r.data.content||{};setContent({...defaults,...incoming,logoPath:'',logoUrl:DEFAULT_BRAND_LOGO,profile:{...defaults.profile,...(incoming.profile||{}),youtube:(incoming.profile?.youtube||'').trim()||defaults.profile.youtube},skills:Array.isArray(incoming.skills)?incoming.skills:defaults.skills,items:Array.isArray(incoming.items)?incoming.items:[],resources:Array.isArray(incoming.resources)?incoming.resources:[]});}).catch(()=>setError('Could not load portfolio content.')); },[loggedIn]);
+  useEffect(()=>{ if(loggedIn) api.get('/api/portfolio').then(r=>{const incoming=r.data.content||{};setContent({...defaults,...incoming,logoUrl:incoming.logoUrl||DEFAULT_BRAND_LOGO,profile:{...defaults.profile,...(incoming.profile||{}),youtube:(incoming.profile?.youtube||'').trim()||defaults.profile.youtube},skills:Array.isArray(incoming.skills)?incoming.skills:defaults.skills,items:Array.isArray(incoming.items)?incoming.items:[],resources:Array.isArray(incoming.resources)?incoming.resources:[]});}).catch(()=>setError('Could not load portfolio content.')); },[loggedIn]);
   useEffect(()=>{if(loggedIn&&tab==='enquiries')api.get('/api/admin/enquiries').then(r=>setEnquiries(r.data.enquiries||[])).catch(error=>setError(error instanceof Error?error.message:'Could not load enquiries.'));},[loggedIn,tab]);
   useEffect(()=>{if(loggedIn&&tab==='feedback')api.get('/api/admin/feedback').then(r=>setFeedback(r.data.feedback||[])).catch(error=>setError(error instanceof Error?error.message:'Could not load feedback.'));},[loggedIn,tab]);
   async function login(e:React.FormEvent){e.preventDefault();setError('');try{await api.post('/api/admin/login',{password});setLoggedIn(true);setPassword('');}catch(error){setError(error instanceof Error?error.message:'Could not sign in. Please try again.');}}
@@ -620,9 +620,9 @@ export default function App() {
     window.addEventListener('hashchange', syncRoute);
     return () => window.removeEventListener('hashchange', syncRoute);
   },[]);
-  useEffect(()=>{if(!isAdmin&&!isWorkspace)api.get('/api/portfolio').then(r=>setContent({...defaults,...(r.data.content||{}),logoPath:'',logoUrl:DEFAULT_BRAND_LOGO})).catch(()=>{}).finally(()=>setLoading(false));},[isAdmin,isWorkspace]);
-  useEffect(()=>{if(isAdmin||isWorkspace)return;const absoluteLogo=new URL(DEFAULT_BRAND_LOGO,window.location.origin).href;let icon=document.querySelector<HTMLLinkElement>('link[rel="icon"]');if(!icon){icon=document.createElement('link');icon.rel='icon';document.head.appendChild(icon);}icon.href='/favicon.svg';icon.type='image/svg+xml';let apple=document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');if(!apple){apple=document.createElement('link');apple.rel='apple-touch-icon';document.head.appendChild(apple);}apple.href=absoluteLogo;const setMeta=(selector:string,attribute:'property'|'name',key:string,value:string)=>{let element=document.querySelector<HTMLMetaElement>(selector);if(!element){element=document.createElement('meta');element.setAttribute(attribute,key);document.head.appendChild(element);}element.content=value;};setMeta('meta[property="og:image"]','property','og:image',absoluteLogo);setMeta('meta[name="twitter:image"]','name','twitter:image',absoluteLogo);setMeta('meta[name="twitter:card"]','name','twitter:card','summary_large_image');const structured=document.querySelector<HTMLScriptElement>('script[type="application/ld+json"]');if(structured){try{const data=JSON.parse(structured.textContent||'{}');for(const item of data['@graph']||[]){if(item['@type']==='Organization')item.logo={'@type':'ImageObject',url:absoluteLogo};}structured.textContent=JSON.stringify(data);}catch{}}},[isAdmin,isWorkspace]);
+  useEffect(()=>{if(!isAdmin&&!isWorkspace)api.get('/api/portfolio').then(r=>setContent({...defaults,...(r.data.content||{}),logoUrl:r.data.content?.logoUrl||DEFAULT_BRAND_LOGO})).catch(()=>{}).finally(()=>setLoading(false));},[isAdmin,isWorkspace]);
+  useEffect(()=>{if(isAdmin||isWorkspace)return;const absoluteLogo=new URL(content.logoUrl||DEFAULT_BRAND_LOGO,window.location.origin).href;let icon=document.querySelector<HTMLLinkElement>('link[rel="icon"]');if(!icon){icon=document.createElement('link');icon.rel='icon';document.head.appendChild(icon);}icon.href=content.logoUrl||DEFAULT_BRAND_LOGO;icon.type=/\.jpe?g(?:[?#]|$)/i.test(icon.href)?'image/jpeg':/\.webp(?:[?#]|$)/i.test(icon.href)?'image/webp':'image/png';let apple=document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');if(!apple){apple=document.createElement('link');apple.rel='apple-touch-icon';document.head.appendChild(apple);}apple.href=absoluteLogo;const setMeta=(selector:string,attribute:'property'|'name',key:string,value:string)=>{let element=document.querySelector<HTMLMetaElement>(selector);if(!element){element=document.createElement('meta');element.setAttribute(attribute,key);document.head.appendChild(element);}element.content=value;};setMeta('meta[property="og:image"]','property','og:image',absoluteLogo);setMeta('meta[name="twitter:image"]','name','twitter:image',absoluteLogo);setMeta('meta[name="twitter:card"]','name','twitter:card','summary_large_image');const structured=document.querySelector<HTMLScriptElement>('script[type="application/ld+json"]');if(structured){try{const data=JSON.parse(structured.textContent||'{}');for(const item of data['@graph']||[]){if(item['@type']==='Organization')item.logo={'@type':'ImageObject',url:absoluteLogo};}structured.textContent=JSON.stringify(data);}catch{}}},[isAdmin,isWorkspace,content.logoUrl]);
   if(isWorkspace)return <WorkspaceStandalone/>;
   if(isAdmin)return <AdminApp/>;
-  return loading?<div className="site-loading">Preparing the next frame…</div>:<><IndianFestivalAtmosphere/><HomeSlider content={{...content,logoPath:'',logoUrl:DEFAULT_BRAND_LOGO}} feedbackWidget={<FeedbackWidget logoUrl={DEFAULT_BRAND_LOGO}/>}/></>;
+  return loading?<div className="site-loading">Preparing the next frame…</div>:<><IndianFestivalAtmosphere logoUrl={content.logoUrl||DEFAULT_BRAND_LOGO}/><HomeSlider content={content} feedbackWidget={<FeedbackWidget logoUrl={content.logoUrl||DEFAULT_BRAND_LOGO}/>}/></>;
 }

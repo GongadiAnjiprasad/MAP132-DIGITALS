@@ -10,7 +10,7 @@ type GreetingResponse = {
   festival?: { name: string; message: string; emoji: string; theme: string };
 };
 
-function IndianFestivalAtmosphere() {
+function IndianFestivalAtmosphere({ logoUrl = '/resources/Logo.png' }: { logoUrl?: string }) {
   const [todayKey, setTodayKey] = useState(() => getIndiaDateKey());
   const [greeting, setGreeting] = useState<GreetingResponse | null>(null);
   const [dismissed, setDismissed] = useState(false);
@@ -109,7 +109,7 @@ function IndianFestivalAtmosphere() {
           </button>
           <div className="ff-greeting-content">
             <p className="ff-greeting-kicker">WARM WISHES FROM</p>
-            <img className="ff-greeting-logo" src="/resources/Logo.png" alt="MAP132 DIGITALS" />
+            <img className="ff-greeting-logo" src={logoUrl} alt="MAP132 DIGITALS" />
             <p className="ff-greeting-brand">MAP132 DIGITALS</p>
             <h2>Happy {festival.name}!</h2>
             <p className="ff-greeting-message">{festival.message}</p>
