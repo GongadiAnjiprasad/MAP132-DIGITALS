@@ -17,7 +17,7 @@ test('work feedback form collects a service rating and seals the submitted revie
   await dialog.getByRole('button', { name: '4 stars' }).click();
   await dialog.getByLabel('YOUR FEEDBACK').fill('The pacing and colour grading were excellent.');
   await dialog.getByLabel('EMAIL (OPTIONAL)').fill('client@example.com');
-  await dialog.getByLabel(/I agree that MAP132 DIGITALS may display my service review publicly/).check();
+  await dialog.getByLabel(/I understand my feedback may be displayed publicly/).check();
   await dialog.getByRole('button', { name: /Send feedback/ }).click();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload).toEqual({
@@ -47,6 +47,8 @@ test('work feedback starts disabled and enables for a one-word review only after
   await message.fill('Super');
   await expect(submit).toBeDisabled();
   await dialog.getByRole('button', { name: '4 stars' }).click();
+  await expect(submit).toBeDisabled();
+  await dialog.getByLabel(/I understand my feedback may be displayed publicly/).check();
   await expect(submit).toBeEnabled();
   await message.fill('   ');
   await expect(submit).toBeDisabled();
@@ -139,6 +141,7 @@ test('website experience feedback submits separately without requiring a service
   await dialog.getByRole('button', { name: 'Mobile experience' }).click();
   await dialog.getByRole('button', { name: '5 stars' }).click();
   await dialog.getByLabel('YOUR FEEDBACK').fill('The site looks cinematic and is easy to explore on mobile.');
+  await dialog.getByLabel(/I understand my feedback may be displayed publicly/).check();
   await dialog.getByRole('button', { name: /Send feedback/ }).click();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload).toEqual({
@@ -147,7 +150,7 @@ test('website experience feedback submits separately without requiring a service
     rating: 5,
     message: 'The site looks cinematic and is easy to explore on mobile.',
     email: '',
-    publicConsent: false,
+    publicConsent: true,
     aspects: ['Mobile experience'],
   });
 });
@@ -197,12 +200,31 @@ test('admin can publish a work review after explicitly confirming client permiss
   await expect(feedbackTab).toBeVisible({ timeout: 15000 });
   await feedbackTab.click();
   const review = page.locator('.feedback-inbox-item').filter({ hasText: 'Excellent editing and storytelling.' });
-  await expect(review.getByText('Permission not yet confirmed')).toBeVisible();
-  const publish = review.getByRole('button', { name: 'Confirm permission & publish' });
-  await expect(publish).toBeEnabled();
-  await publish.click();
-  expect(publicationRequest).toEqual({ method: 'POST', body: {} });
-  await expect(review.getByText('Permission confirmed by admin')).toBeVisible();
-  await expect(review.getByText('Published', { exact: false })).toBeVisible();
-  await expect(review.getByRole('button', { name: 'Unpublish' })).toBeVisible();
+  await expect(review.getByText('OLDER ENTRY', { exact: true })).toBeVisible();
+  await expect(review.getByRole('button', { name: /publish/i })).toHaveCount(0);
+  await expect(review.getByRole('button', { name: /delete feedback/i })).toHaveCount(0);
+});
+
+
+test('homepage feedback tabs show only matching live reviews and refresh on focus', async ({ page }) => {
+  let calls = 0;
+  await page.route('**/api/reviews', async route => {
+    calls += 1;
+    const reviews = calls === 1 ? [] : [{
+      id: 'live-service-review', kind: 'Work feedback', service: 'Cinematic Trailers',
+      rating: 5, message: 'Mee service super undhi', response: 'Maa feedback share chesinanduku chala thanks!',
+      createdAt: '2026-11-08T00:00:00.000Z'
+    }];
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ reviews }) });
+  });
+  await page.goto('/');
+  const feed = page.getByRole('region', { name: 'Client feedback feed' });
+  await expect(feed).toBeVisible();
+  await feed.getByRole('button', { name: 'Video Editing Service' }).click();
+  await page.evaluate(() => window.dispatchEvent(new Event('focus')));
+  await expect(feed.getByText('Mee service super undhi')).toBeVisible();
+  await expect(feed.getByText('Maa feedback share chesinanduku chala thanks!')).toBeVisible();
+  await feed.getByRole('button', { name: 'Website Experience' }).click();
+  await expect(feed.getByText('No published feedback in this category yet.')).toBeVisible();
+  expect(calls).toBeGreaterThanOrEqual(2);
 });
