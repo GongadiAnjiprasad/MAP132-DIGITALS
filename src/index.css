@@ -2346,3 +2346,107 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .logo-settings-actions .quiet-link { border: 0; background: transparent; color: #D8C9B7; cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 4px; }
 .logo-settings-actions button:disabled { cursor: not-allowed; opacity: .55; }
 @media (max-width: 600px) { .logo-settings-preview { min-height: 170px; padding: 18px; } .logo-settings-actions { align-items: stretch; flex-direction: column; } }
+
+
+/* MAP132 Feedback Studio: consistent control sizing, visible textarea border and compact consent/action spacing. */
+.feedback-studio,
+.feedback-studio form,
+.feedback-studio form > * {
+  min-width: 0;
+  box-sizing: border-box;
+}
+.feedback-studio form {
+  width: 100%;
+  max-width: 100%;
+}
+.feedback-studio #feedback-message,
+.feedback-studio #feedback-email,
+.feedback-studio #feedback-service {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  box-sizing: border-box;
+  border: 1px solid rgba(232, 189, 122, .58);
+  border-radius: 9px;
+  outline: none;
+}
+.feedback-studio #feedback-message {
+  min-height: 112px;
+  padding: 13px 14px;
+  line-height: 1.6;
+  resize: vertical;
+  overflow-wrap: anywhere;
+}
+.feedback-studio #feedback-message:focus,
+.feedback-studio #feedback-email:focus,
+.feedback-studio #feedback-service:focus {
+  border-color: #e8bd7a;
+  box-shadow: 0 0 0 2px rgba(232, 189, 122, .18);
+}
+.feedback-studio .feedback-public-consent {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  width: 100%;
+  min-width: 0;
+  margin: 10px 0 6px;
+  color: #c9c4ba;
+  font-size: 11px;
+  line-height: 1.5;
+  box-sizing: border-box;
+}
+.feedback-studio .feedback-public-consent input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  min-width: 16px;
+  flex: 0 0 16px;
+  margin: 1px 0 0;
+  padding: 0;
+  accent-color: #e8bd7a;
+}
+.feedback-studio .feedback-submit {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  min-height: 48px;
+  margin: 6px 0 0;
+  padding: 12px 16px;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+  box-sizing: border-box;
+  white-space: normal;
+  line-height: 1.35;
+}
+.feedback-studio .feedback-submit-hint {
+  margin: 7px 0 0;
+}
+.feedback-studio .feedback-privacy {
+  margin: 12px 0 0;
+  line-height: 1.55;
+}
+@media (max-width: 600px) {
+  .feedback-studio {
+    width: 100%;
+    max-width: 100%;
+    padding: 19px 16px;
+  }
+  .feedback-studio #feedback-message {
+    min-height: 104px;
+    padding: 12px;
+    font-size: 13px;
+  }
+  .feedback-studio .feedback-public-consent {
+    gap: 9px;
+    margin: 9px 0 5px;
+    font-size: 10.5px;
+  }
+  .feedback-studio .feedback-submit {
+    min-height: 46px;
+    margin-top: 5px;
+    padding: 11px 12px;
+    font-size: 12px;
+  }
+}
