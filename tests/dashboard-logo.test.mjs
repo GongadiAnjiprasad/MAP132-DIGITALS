@@ -28,11 +28,11 @@ test('logo uploads are restricted to authenticated admin sessions and supported 
 test('public portfolio API resolves the saved logo from R2 and falls back to the existing myLogo asset', () => {
   assert.match(worker, /content\.logoUrl=content\.logoPath&&env\.MAP132_MEDIA\?/);
   assert.match(worker, /portfolio\/logos\//);
-  assert.match(worker, /resources\/myLogo-removebg-preview\.png/);
+  assert.match(worker, /resources\/MAPlogo\.png/);
 });
 
 test('the public header and feedback widget use the saved logo URL', () => {
-  assert.match(slider, /content\.logoUrl \|\| '\/resources\/myLogo-removebg-preview\.png'/);
+  assert.match(slider, /content\.logoUrl \|\| '\/resources\/MAPlogo\.png'/);
   assert.match(app, /FeedbackWidget\(\{ logoUrl = DEFAULT_BRAND_LOGO \}/);
   assert.match(app, /<FeedbackWidget logoUrl=\{/);
 });
