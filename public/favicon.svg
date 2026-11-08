@@ -1,7 +1,4 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
   <rect width="512" height="512" rx="104" fill="#080B12"/>
-  <rect x="18" y="18" width="476" height="476" rx="88" fill="none" stroke="#C79A54" stroke-width="8"/>
-  <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FFF0BF"/><stop offset=".48" stop-color="#C79A54"/><stop offset="1" stop-color="#8C5D24"/></linearGradient></defs>
-  <text x="256" y="274" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="124" font-weight="900" letter-spacing="-8" fill="url(#g)">MAP</text>
-  <text x="256" y="384" text-anchor="middle" font-family="Arial,Helvetica,sans-serif" font-size="116" font-weight="900" letter-spacing="-5" fill="url(#g)">132</text>
+  <image href="/resources/Firefly%20remove%20background.png" x="36" y="36" width="440" height="440" preserveAspectRatio="xMidYMid meet"/>
 </svg>

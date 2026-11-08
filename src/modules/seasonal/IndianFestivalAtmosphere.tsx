@@ -109,7 +109,7 @@ function IndianFestivalAtmosphere() {
           </button>
           <div className="ff-greeting-content">
             <p className="ff-greeting-kicker">WARM WISHES FROM</p>
-            <img className="ff-greeting-logo" src="/resources/MAPlogo.png" alt="MAP132 DIGITALS" />
+            <img className="ff-greeting-logo" src="/resources/Firefly%20remove%20background.png" alt="MAP132 DIGITALS" />
             <p className="ff-greeting-brand">MAP132 DIGITALS</p>
             <h2>Happy {festival.name}!</h2>
             <p className="ff-greeting-message">{festival.message}</p>
