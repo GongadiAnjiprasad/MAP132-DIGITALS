@@ -162,3 +162,47 @@ test('Studio displays only reviews returned by the public reviews endpoint', asy
   const reviews = page.getByRole('region', { name: 'Client reviews' });
   await expect(reviews.getByText('Cinematic Trailers', { exact: true })).toBeVisible();
 });
+
+
+test('admin can publish a work review after explicitly confirming client permission', async ({ page }) => {
+  await page.route('**/api/admin/session', route => route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: 'Not signed in' }) }));
+  await page.route('**/api/admin/login', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true }) }));
+  await page.route('**/api/portfolio', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ content: {} }) }));
+  await page.route('**/api/admin/feedback', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ feedback: [{
+    id: 'private-review-1', kind: 'Work feedback', service: 'Cinematic Trailers', rating: 5,
+    message: 'Excellent editing and storytelling.', email: 'client@example.com',
+    createdAt: '2026-11-08T00:00:00.000Z', status: 'new', publicConsent: false, published: false,
+  }] }) }));
+  let publicationRequest: any = null;
+  await page.route('**/api/admin/feedback/private-review-1/publish-with-consent', async route => {
+    publicationRequest = { method: route.request().method(), body: route.request().postDataJSON() };
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ published: true, publicConsent: true, consentSource: 'admin-confirmed' }) });
+  });
+  page.on('dialog', dialog => dialog.accept());
+  await page.goto('/#admin');
+  await page.getByPlaceholder('Enter your password').fill('test-admin-password');
+  const loginResponse = page.waitForResponse(response =>
+    response.url().includes('/api/admin/login') && response.request().method() === 'POST'
+  );
+  await page.getByRole('button', { name: /Secure sign in/ }).click();
+  const loginResult = await loginResponse;
+  expect(loginResult.status()).toBe(200);
+  // Wait until the login screen has been removed from the React tree, then
+  // synchronize against the authenticated dashboard's own sidebar.
+  await expect(page.locator('.login-screen')).toHaveCount(0, { timeout: 15000 });
+  const sidebar = page.locator('.admin-shell .admin-side');
+  await expect(sidebar).toBeVisible({ timeout: 15000 });
+  await expect(sidebar.locator('button.admin-nav')).toHaveCount(7, { timeout: 15000 });
+  const feedbackTab = sidebar.getByRole('button', { name: /Work Feedback/ });
+  await expect(feedbackTab).toBeVisible({ timeout: 15000 });
+  await feedbackTab.click();
+  const review = page.locator('.feedback-inbox-item').filter({ hasText: 'Excellent editing and storytelling.' });
+  await expect(review.getByText('Permission not yet confirmed')).toBeVisible();
+  const publish = review.getByRole('button', { name: 'Confirm permission & publish' });
+  await expect(publish).toBeEnabled();
+  await publish.click();
+  expect(publicationRequest).toEqual({ method: 'POST', body: {} });
+  await expect(review.getByText('Permission confirmed by admin')).toBeVisible();
+  await expect(review.getByText('Published', { exact: false })).toBeVisible();
+  await expect(review.getByRole('button', { name: 'Unpublish' })).toBeVisible();
+});
