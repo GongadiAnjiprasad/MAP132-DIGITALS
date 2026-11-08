@@ -187,10 +187,10 @@ test('admin can publish a work review after explicitly confirming client permiss
   await page.getByRole('button', { name: /Secure sign in/ }).click();
   const loginResult = await loginResponse;
   expect(loginResult.status()).toBe(200);
-  // Synchronize on the actual authenticated dashboard after the login request resolves.
-  await expect(page.locator('.admin-shell')).toBeVisible({ timeout: 15000 });
-  // The shell can appear before its authenticated sidebar has finished mounting.
-  const sidebar = page.locator('.admin-side');
+  // Wait until the login screen has been removed from the React tree, then
+  // synchronize against the authenticated dashboard's own sidebar.
+  await expect(page.locator('.login-screen')).toHaveCount(0, { timeout: 15000 });
+  const sidebar = page.locator('.admin-shell .admin-side');
   await expect(sidebar).toBeVisible({ timeout: 15000 });
   await expect(sidebar.locator('button.admin-nav')).toHaveCount(7, { timeout: 15000 });
   const feedbackTab = sidebar.getByRole('button', { name: /Work Feedback/ });
