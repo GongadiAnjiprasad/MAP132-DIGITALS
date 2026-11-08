@@ -212,7 +212,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     const target = event.target as HTMLElement;
     // Keep native interaction/vertical scrolling for controls, but allow horizontal page swipes
     // from the Contact page's non-interactive areas (page 5 must swipe back to page 4).
-    if (target.closest('input, textarea, select, video, iframe, button:not(.ms-service-tile), a')) return;
+    if (target.closest('input, textarea, select, video, iframe, button:not(.ms-service-tile):not(.work-category-tab):not(.all-work-filter), a')) return;
     const page = target.closest('.ms-page') as HTMLElement | null;
     // Do not capture touch pointers: native vertical scrolling must remain available inside each page.
     pointerStart.current = {
