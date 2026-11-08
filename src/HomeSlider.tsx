@@ -13,7 +13,7 @@ type PortfolioItem = {
   kind: 'video' | 'image' | 'link'; url?: string; mediaUrl?: string;
   source?: 'upload' | 'youtube' | 'drive' | 'other';
 };
-type PublicReview = {id:string;service:string;rating:number;message:string;createdAt:string};
+type PublicReview = {id:string;kind:'Website Experience'|'Work feedback';service:string;rating:number;message:string;response?:string;responseType?:string;createdAt:string};
 type HomeContent = {
   profile: {
     name: string; headline: string; intro: string; about: string; location: string;
@@ -101,7 +101,18 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   const [activeProjectCategory, setActiveProjectCategory] = useState<string | null>(null);
   const [activeProjectPage, setActiveProjectPage] = useState(1);
   const [publicReviews,setPublicReviews] = useState<PublicReview[]>([]);
-  useEffect(()=>{api.get('/api/reviews').then(r=>setPublicReviews(Array.isArray(r.data.reviews)?r.data.reviews:[])).catch(()=>setPublicReviews([]));},[]);
+  const [reviewCategory,setReviewCategory] = useState<'Website Experience'|'Video Editing Service'>('Video Editing Service');
+  useEffect(()=>{
+    let active=true;
+    const refresh=()=>{if(document.visibilityState==='hidden')return;api.get('/api/reviews').then(r=>{if(active)setPublicReviews(Array.isArray(r.data.reviews)?r.data.reviews:[]);}).catch(()=>{});};
+    refresh();
+    const timer=window.setInterval(refresh,30000);
+    const onFocus=()=>refresh();
+    document.addEventListener('visibilitychange',onFocus);
+    window.addEventListener('focus',onFocus);
+    return()=>{active=false;window.clearInterval(timer);document.removeEventListener('visibilitychange',onFocus);window.removeEventListener('focus',onFocus);};
+  },[]);
+  const visibleHomeReviews=publicReviews.filter(review=>review.kind==='Website Experience'?reviewCategory==='Website Experience':reviewCategory==='Video Editing Service');
   const ambientTheme = useAmbientServiceTheme();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
@@ -303,14 +314,21 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
             </div>
             <p className="ms-showcase-foot">Tap any showcase tile to play its sample video here — no page navigation.</p>
           </div>
-            <section className="ms-home-review-feed" aria-label="Client feedback demo feed">
-              <div className="ms-review-feed-heading"><div><span>CLIENT LOVE / FEEDBACK FEED</span><b>Kind words. Creative stories.</b></div><span className="ms-demo-label">DEMO REVIEWS</span></div>
-              <div className="ms-review-feed-grid">
-                <article className="ms-review-card"><div className="ms-review-stars" aria-label="Five stars">★★★★★</div><p>“The teaser felt cinematic and captured the mood we wanted. Every shot flowed beautifully.”</p><div className="ms-review-by"><span>W</span><div><b>Wedding Teaser</b><small>Sample review · Demo content</small></div></div></article>
-                <article className="ms-review-card"><div className="ms-review-stars" aria-label="Five stars">★★★★★</div><p>“The reel was crisp, engaging and perfectly paced for social media. Loved the final look.”</p><div className="ms-review-by"><span>B</span><div><b>Brand Reel</b><small>Sample review · Demo content</small></div></div></article>
-                <article className="ms-review-card"><div className="ms-review-stars" aria-label="Five stars">★★★★★</div><p>“The storytelling and sound design gave our video a polished, professional finish.”</p><div className="ms-review-by"><span>Y</span><div><b>YouTube Edit</b><small>Sample review · Demo content</small></div></div></article>
+            <section className="ms-home-review-feed ms-live-feedback-feed" aria-label="Client feedback feed">
+              <div className="ms-review-feed-heading"><div><span>CLIENT LOVE / FEEDBACK FEED</span><b>Kind words. Creative stories.</b></div><span className="ms-live-label"><i/> LIVE REVIEWS</span></div>
+              <div className="ms-review-tabs" role="group" aria-label="Feedback category">
+                <button type="button" className={reviewCategory==='Website Experience'?'active':''} aria-pressed={reviewCategory==='Website Experience'} onClick={()=>setReviewCategory('Website Experience')}>Website Experience</button>
+                <button type="button" className={reviewCategory==='Video Editing Service'?'active':''} aria-pressed={reviewCategory==='Video Editing Service'} onClick={()=>setReviewCategory('Video Editing Service')}>Video Editing Service</button>
               </div>
-              <div className="ms-review-feed-foot"><span>Illustrative sample feedback — replace with verified client reviews before public promotion.</span><button type="button" onClick={() => goTo(4)}>Share your project <ArrowRight size={15}/></button></div>
+              {visibleHomeReviews.length>0?<div className="ms-review-feed-grid">
+                {visibleHomeReviews.slice(0,3).map(review=><article className="ms-review-card ms-live-review-card" key={review.id}>
+                  <div className="ms-review-stars" aria-label={review.rating+' out of 5 stars'}>{'★'.repeat(Math.max(0,Math.min(5,review.rating)))}</div>
+                  <p>“{review.message}”</p>
+                  <div className="ms-review-by"><span>{review.kind==='Website Experience'?'W':'M'}</span><div><b>{review.service}</b><small>Verified customer feedback</small></div></div>
+                  {review.response&&<div className="ms-brand-reply"><span>MAP132 DIGITALS REPLY</span><p>{review.response}</p></div>}
+                </article>)}
+              </div>:<div className="ms-review-empty"><b>No published feedback in this category yet.</b><span>Share your genuine experience and help us improve.</span></div>}
+              <div className="ms-review-feed-foot"><span>{visibleHomeReviews.length} published {visibleHomeReviews.length===1?'review':'reviews'} · refreshes automatically</span><button type="button" onClick={()=>window.dispatchEvent(new Event('map132-open-feedback'))}>Share feedback <ArrowRight size={15}/></button></div>
             </section>
         </section>
 

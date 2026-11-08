@@ -1,4 +1,5 @@
 import { FESTIVAL_CALENDAR, getIndiaDateKey } from '../src/modules/seasonal/festivalCalendar';
+import { createFeedbackResponse } from './feedback';
 interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string }> }; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
 const json=(body:unknown,status=200,headers:HeadersInit={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...Object.fromEntries(new Headers(headers))}});
@@ -144,6 +145,8 @@ if(path==='/api/feedback'&&method==='POST'){
   if(!Number.isInteger(rating)||rating<1||rating>5)return json({error:'Choose a rating from 1 to 5.'},400);
   const aspects=Array.isArray(body.aspects)?body.aspects.filter((x:any)=>typeof x==='string').slice(0,8).map((x:string)=>x.slice(0,80)):[];
   if(kind==='Work feedback'&&Array.isArray(body.aspects)&&body.aspects.length)return json({error:'Service feedback cannot include website aspects.'},400);
+  if(body.publicConsent!==true)return json({error:'Please confirm that you understand your feedback may be displayed publicly. Your email will remain private.'},400);
+  const reply=createFeedbackResponse(message,rating);
   const ip=req.headers.get('CF-Connecting-IP')||'unknown';
   const digest=await crypto.subtle.digest('SHA-256',encoder.encode(ip));
   const rateKey='feedback-rate/'+Array.from(new Uint8Array(digest)).map(x=>x.toString(16).padStart(2,'0')).join('');
@@ -151,8 +154,10 @@ if(path==='/api/feedback'&&method==='POST'){
   if(current>=3)return json({error:'Too many submissions. Please try again later.'},429);
   await env.MAP132_KV.put(rateKey,String(current+1),{expirationTtl:600});
   const id=Date.now().toString(36)+'-'+crypto.randomUUID();
-  await env.MAP132_KV.put('feedback/'+id,JSON.stringify({id,kind,service:service||undefined,aspects,rating,message,email,publicConsent:kind==='Work feedback'&&body.publicConsent===true,published:false,createdAt:new Date().toISOString(),status:'new'}));
-  return json({submitted:true,id},201);
+  const createdAt=new Date().toISOString();
+  const entry={id,kind,service:service||undefined,aspects,rating,message,email,publicConsent:true,consentSource:'client',consentRecordedAt:createdAt,published:reply.publishable,publishedAt:reply.publishable?createdAt:null,responseType:reply.type,responseLanguage:reply.language,response:reply.reply,createdAt,status:reply.publishable?'published':reply.type};
+  await env.MAP132_KV.put('feedback/'+id,JSON.stringify(entry));
+  return json({submitted:true,id,reply:reply.reply,responseType:reply.type,responseLanguage:reply.language,published:reply.publishable},201);
 }
 
 if(path==='/api/enquiries'&&method==='POST'){
@@ -167,7 +172,7 @@ if(path==='/api/enquiries'&&method==='POST'){
    await env.MAP132_KV.put('enquiries/'+id,JSON.stringify(entry));
    return json({submitted:true,id},201);
  }
-if(path==='/api/reviews'&&method==='GET'){if(!env.MAP132_KV)return json({reviews:[]});const listed=await env.MAP132_KV.list({prefix:'feedback/',limit:100});const entries=await Promise.all(listed.keys.filter(key=>!key.name.startsWith('feedback-rate/')).map(async key=>{const value=await env.MAP132_KV!.get(key.name);if(!value)return null;try{return JSON.parse(value);}catch{return null;}}));const reviews=entries.filter((item:any)=>item&&item.kind==='Work feedback'&&item.publicConsent===true&&item.published===true).map((item:any)=>({id:item.id,service:item.service||'Video Editing',rating:item.rating,message:item.message,createdAt:item.createdAt})).sort((a:any,b:any)=>String(b.createdAt).localeCompare(String(a.createdAt)));return json({reviews});}
+if(path==='/api/reviews'&&method==='GET'){if(!env.MAP132_KV)return json({reviews:[]});const listed=await env.MAP132_KV.list({prefix:'feedback/',limit:100});const entries=await Promise.all(listed.keys.filter(key=>!key.name.startsWith('feedback-rate/')).map(async key=>{const value=await env.MAP132_KV!.get(key.name);if(!value)return null;try{return JSON.parse(value);}catch{return null;}}));const reviews=entries.filter((item:any)=>item&&['Website Experience','Work feedback'].includes(item.kind)&&item.publicConsent===true&&item.responseType!=='enquiry').map((item:any)=>({id:item.id,kind:item.kind,service:item.kind==='Website Experience'?'Website Experience':item.service||'Video Editing',rating:item.rating,message:item.message,response:item.response||'',responseType:item.responseType||'general',createdAt:item.createdAt})).sort((a:any,b:any)=>String(b.createdAt).localeCompare(String(a.createdAt)));return json({reviews});}
 if(path==='/api/portfolio'&&method==='GET'){const content=await read(env);for(const item of content.items||[])if(item.path&&env.MAP132_MEDIA){item.mediaUrl='/media/'+encodeURIComponent(item.path);}return json({content});}
 if(path==='/api/admin/session'&&method==='GET'){const authenticated=await validSession(req,env);return json({authenticated},authenticated?200:401);}
 if(path==='/api/admin/login'&&method==='POST'){let stage='check admin secret';try{if(!env.ADMIN_PASSWORD)return json({error:'Admin password secret is not configured in Cloudflare.'},503);stage='parse login request';let body:any;try{body=await req.json();}catch{return json({error:'Invalid request.'},400);}stage='validate password';if(typeof body.password!=='string'||body.password!==env.ADMIN_PASSWORD)return json({error:'Incorrect admin password.'},401);stage='create session payload';const payload=toBase64Url(encoder.encode(JSON.stringify({exp:Date.now()+8*60*60*1000})));stage='sign session token';const signed=await signature(payload,env.ADMIN_PASSWORD);const token=payload+'.'+signed;stage='create login response';return json({authenticated:true},200,{ 'Set-Cookie':sessionCookie(token,8*60*60) });}catch(error){const detail=error instanceof Error?error.message:'Unknown error';const name=error instanceof Error?error.name:'Error';return json({error:'Admin login failed at stage "'+stage+'" ('+name+'): '+detail},500);}}
