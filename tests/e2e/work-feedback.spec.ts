@@ -196,7 +196,7 @@ test('admin feedback inbox does not require manual approval for legacy entries',
   const sidebar = page.locator('.admin-shell .admin-side');
   await expect(sidebar).toBeVisible({ timeout: 15000 });
   await expect(sidebar.locator('button.admin-nav')).toHaveCount(7, { timeout: 15000 });
-  const feedbackTab = sidebar.getByRole('button', { name: /Work Feedback/ });
+  const feedbackTab = sidebar.getByRole('button', { name: /Customer Feedback/ });
   await expect(feedbackTab).toBeVisible({ timeout: 15000 });
   await feedbackTab.click();
   const review = page.locator('.feedback-inbox-item').filter({ hasText: 'Excellent editing and storytelling.' });
