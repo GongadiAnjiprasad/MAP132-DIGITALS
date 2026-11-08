@@ -258,11 +258,27 @@ test('feedback form controls stay aligned and the message field keeps a visible 
     expect(submitBox!.y - (consentBox!.y + consentBox!.height)).toBeLessThanOrEqual(16);
     const textareaStyle = await message.evaluate(element => {
       const style = getComputedStyle(element);
-      return { borderWidth: style.borderTopWidth, borderStyle: style.borderTopStyle, boxSizing: style.boxSizing };
+      const drawer = element.closest('.feedback-studio')!;
+      const drawerStyle = getComputedStyle(drawer);
+      const field = element.getBoundingClientRect();
+      const panel = drawer.getBoundingClientRect();
+      return {
+        borderWidth: style.borderTopWidth,
+        borderStyle: style.borderTopStyle,
+        boxSizing: style.boxSizing,
+        marginTop: parseFloat(style.marginTop),
+        insetLeft: field.left - panel.left,
+        insetRight: panel.right - field.right,
+        paddingLeft: parseFloat(drawerStyle.paddingLeft),
+        paddingRight: parseFloat(drawerStyle.paddingRight),
+      };
     });
     expect(textareaStyle.borderWidth).not.toBe('0px');
     expect(textareaStyle.borderStyle).toBe('solid');
     expect(textareaStyle.boxSizing).toBe('border-box');
+    expect(textareaStyle.marginTop).toBeLessThan(0);
+    expect(textareaStyle.insetLeft).toBeGreaterThanOrEqual(textareaStyle.paddingLeft - 1);
+    expect(textareaStyle.insetRight).toBeGreaterThanOrEqual(textareaStyle.paddingRight - 1);
     await page.getByRole('button', { name: 'Close feedback' }).click();
   }
 });

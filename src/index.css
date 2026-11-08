@@ -2450,3 +2450,19 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
     font-size: 12px;
   }
 }
+
+
+/* Keep the feedback textarea slightly higher and safely inset inside the studio frame. */
+.feedback-studio #feedback-message {
+  width: calc(100% - 6px) !important;
+  max-width: calc(100% - 6px) !important;
+  margin: -4px 3px 0 !important;
+  box-sizing: border-box !important;
+}
+@media (max-width: 600px) {
+  .feedback-studio #feedback-message {
+    width: calc(100% - 6px) !important;
+    max-width: calc(100% - 6px) !important;
+    margin-top: -4px !important;
+  }
+}
