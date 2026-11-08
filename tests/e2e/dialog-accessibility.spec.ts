@@ -36,6 +36,7 @@ for (const viewport of viewports) {
     await page.goto('/#workspace');
     await page.getByRole('button', { name: 'Add resource' }).click();
     await page.getByLabel('Resource title').fill('Keyboard test image');
+    await page.getByLabel('Resource type').selectOption('image');
     await page.getByLabel('Original resource page').fill('https://example.com/resource');
     await page.getByLabel('Direct preview media URL (MP3 / MP4 / image)').fill('https://example.com/preview.png');
     await page.getByLabel('Licence notes').fill('Test-only preview resource; no download or external action.');
