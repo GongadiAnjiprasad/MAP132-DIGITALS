@@ -27,7 +27,6 @@ test('homepage exposes the approved Anji and MAP132 brand aliases', () => {
   for (const node of [...websiteNodes, ...organizationNodes]) {
     assert.deepEqual(node.alternateName, expectedAliases);
   }
-  assert.match(html, /MAP132 DIGITALS by Anji/);
 });
 
 test('homepage keeps its existing production canonical URL and Google indexing directives', () => {

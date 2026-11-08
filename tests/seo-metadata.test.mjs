@@ -2,10 +2,14 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-test('homepage exposes descriptive MAP132 brand SEO metadata', async () => {
+test('homepage exposes MAP132 brand SEO metadata without hosting-provider branding', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  assert.match(html, /<title>MAP132 DIGITALS by Anji \| Cinematic Video Editing, Trailers &amp; Reels<\/title>/);
-  assert.match(html, /name="description" content="MAP132 DIGITALS by Anji Gongadi offers cinematic video editing for trailers, weddings, birthdays, brands, AI videos, Instagram Reels and YouTube content\."\s*\/>/);
+  assert.match(html, /<title>MAP132 DIGITALS \| Cinematic Video Editing Studio<\/title>/);
+  assert.match(html, /name="description" content="MAP132 DIGITALS — cinematic video editing for trailers, wedding and birthday films, advertisements, AI services, Instagram Reels and YouTube content\."\s*\/>/);
+  assert.match(html, /property="og:title" content="MAP132 DIGITALS \| Cinematic Video Editing Studio"/);
+  assert.match(html, /name="twitter:title" content="MAP132 DIGITALS \| Cinematic Video Editing Studio"/);
+  assert.match(html, /name="application-name" content="MAP132 DIGITALS"/);
+  assert.match(html, /rel="icon" type="image\/svg\+xml" href="\/favicon\.svg"/);
   assert.match(html, /name="robots" content="index, follow/);
   assert.match(html, /rel="canonical" href="https:\/\/map132-digitals\.anji-gongadi\.workers\.dev\/"\s*\/>/);
 });
