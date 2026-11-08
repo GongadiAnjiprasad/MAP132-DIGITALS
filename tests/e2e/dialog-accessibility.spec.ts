@@ -33,14 +33,24 @@ for (const viewport of viewports) {
 
   test('workspace preview dialog traps focus and restores its trigger at ' + viewport.name, async ({ page }) => {
     await page.setViewportSize({ width: viewport.width, height: viewport.height });
+    await page.addInitScript(() => {
+      localStorage.setItem('map132-private-workspace-resources', JSON.stringify([{
+        id: 'keyboard-test-image',
+        title: 'Keyboard test image',
+        category: 'Music & BGM',
+        detail: 'Local-only image fixture for dialog accessibility checks.',
+        href: 'https://example.com/resource',
+        provider: 'Playwright fixture',
+        licence: 'Test fixture only; no download or external action.',
+        tags: ['test'],
+        compatibility: 'Browser preview',
+        kind: 'image',
+        previewUrl: 'https://example.com/preview.png',
+        downloadUrl: ''
+      }]));
+    });
+    await page.route('https://example.com/**', route => route.abort());
     await page.goto('/#workspace');
-    await page.getByRole('button', { name: 'Add resource' }).click();
-    await page.getByLabel('Resource title').fill('Keyboard test image');
-    await page.getByLabel('Resource type').selectOption('image');
-    await page.getByLabel('Original resource page').fill('https://example.com/resource');
-    await page.getByLabel('Direct preview media URL (MP3 / MP4 / image)').fill('https://example.com/preview.png');
-    await page.getByLabel('Licence notes').fill('Test-only preview resource; no download or external action.');
-    await page.getByRole('button', { name: 'Save to library' }).click();
 
     const trigger = page.getByRole('button', { name: 'Open preview' }).first();
     await expect(trigger).toBeVisible();
