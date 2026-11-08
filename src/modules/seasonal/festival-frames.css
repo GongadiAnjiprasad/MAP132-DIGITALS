@@ -12,8 +12,8 @@
 .festival-sun span { color: #e8bd7a; }
 @keyframes festival-drift {
   0% { transform: translate3d(0,-4vh,0) rotate(0deg); opacity: 0; }
-  12% { opacity: .82; }
-  88% { opacity: .68; }
+  12% { opacity: .88; }
+  88% { opacity: .72; }
   100% { transform: translate3d(22px,110vh,0) rotate(180deg); opacity: 0; }
 }
 
