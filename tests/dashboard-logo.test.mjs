@@ -21,7 +21,9 @@ test('logo uploads are restricted to authenticated admin sessions and supported 
   assert.match(worker, /\/api\/admin\/upload-logo/);
   assert.match(worker, /image\/png','image\/jpeg','image\/webp/);
   assert.match(worker, /5\*1024\*1024/);
-  assert.match(worker, /portfolio\/logos\//);\n  assert.match(worker, /MAP132_KV!\.put\(key,bytes,\{metadata:\{contentType\}\}\)/);\n  assert.match(worker, /getWithMetadata\(key,\{type:'arrayBuffer'\}\)/);
+  assert.match(worker, /portfolio\/logos\//);
+  assert.match(worker, /MAP132_KV!\.put\(key,bytes,\{metadata:\{contentType\}\}\)/);
+  assert.match(worker, /getWithMetadata\(key,\{type:'arrayBuffer'\}\)/);
   assert.match(worker, /validPng/);
   assert.match(worker, /validJpeg/);
   assert.match(worker, /validWebp/);
@@ -38,7 +40,8 @@ test('the public header uses the official PNG logo and feedback widget uses the 
   assert.match(slider, /content\.logoUrl \|\| '\/resources\/Logo\.png'/);
   assert.match(app, /FeedbackWidget\(\{ logoUrl = DEFAULT_BRAND_LOGO \}/);
   assert.match(app, /<FeedbackWidget logoUrl=\{DEFAULT_BRAND_LOGO\}/);
-  assert.match(app, /logoUrl=\{content\.logoUrl\|\|DEFAULT_BRAND_LOGO\}/);\n  assert.match(app, /const logoUrl = content\.logoUrl \|\| DEFAULT_BRAND_LOGO/);
+  assert.match(app, /logoUrl=\{content\.logoUrl\|\|DEFAULT_BRAND_LOGO\}/);
+  assert.match(app, /const logoUrl = content\.logoUrl \|\| DEFAULT_BRAND_LOGO/);
   assert.ok(app.includes(officialLogo));
 });
 
