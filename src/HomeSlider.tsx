@@ -285,7 +285,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   return <div data-theme={theme} data-ambient-playback={ambientTheme.isPlaying ? "true" : "false"} style={ambientTheme.style} className={`map132-slider-site ${desktopArrowsVisible ? "" : "ms-nav-arrows-hidden"}`}>
     <header className="ms-header">
       <a className="ms-brand" href="#top" onClick={e => { e.preventDefault(); goTo(0); }}>
-        <img src={content.logoUrl || '/resources/Logo.png'} alt="MAP132 DIGITALS"/>
+        <img src={content.logoUrl || '/resources/Logo.svg'} alt="MAP132 DIGITALS"/>
         <span><b>MAP132</b><small>DIGITALS · VIDEO EDITING</small></span>
       </a>
       <nav ref={navRef} className="ms-nav" aria-label="Main navigation">
