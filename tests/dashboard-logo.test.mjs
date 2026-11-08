@@ -6,6 +6,7 @@ const app = await readFile(new URL('../src/App.tsx', import.meta.url), 'utf8');
 const slider = await readFile(new URL('../src/HomeSlider.tsx', import.meta.url), 'utf8');
 const worker = await readFile(new URL('../worker/index.ts', import.meta.url), 'utf8');
 const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
+const festival = await readFile(new URL('../src/modules/seasonal/IndianFestivalAtmosphere.tsx', import.meta.url), 'utf8');
 
 const officialLogo = '/resources/Logo.png';
 
@@ -41,6 +42,7 @@ test('the public header uses the official PNG logo and feedback widget uses the 
   assert.match(app, /FeedbackWidget\(\{ logoUrl = DEFAULT_BRAND_LOGO \}/);
   assert.match(app, /logoUrl=\{content\.logoUrl\|\|DEFAULT_BRAND_LOGO\}/);
   assert.match(app, /const logoUrl = content\.logoUrl \|\| DEFAULT_BRAND_LOGO/);
+  assert.match(festival, /src=\{logoUrl\} alt="MAP132 DIGITALS"/);
   assert.ok(app.includes(officialLogo));
 });
 
