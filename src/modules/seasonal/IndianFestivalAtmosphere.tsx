@@ -27,6 +27,13 @@ function IndianFestivalAtmosphere() {
 
   const campaign = useMemo(() => getFestivalCampaign(todayKey, FESTIVAL_CALENDAR), [todayKey]);
 
+  // Keep the festival greeting brief; the visitor can still dismiss it immediately.
+  useEffect(() => {
+    if (!campaign?.isFestivalDay || dismissed) return;
+    const autoCloseTimer = window.setTimeout(() => setDismissed(true), 8_000);
+    return () => window.clearTimeout(autoCloseTimer);
+  }, [campaign?.festival.date, campaign?.isFestivalDay, dismissed]);
+
   useEffect(() => {
     if (!campaign?.isFestivalDay) {
       setGreeting(null);
