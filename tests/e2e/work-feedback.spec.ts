@@ -239,7 +239,7 @@ test('feedback form controls stay aligned and the message field keeps a visible 
     const dialog = page.getByRole('dialog');
     const message = dialog.getByLabel('YOUR FEEDBACK');
     const email = dialog.getByLabel('EMAIL (OPTIONAL)');
-    const consent = dialog.getByLabel(/I understand my feedback may be displayed publicly/);
+    const consent = dialog.locator('.feedback-public-consent');
     const submit = dialog.getByRole('button', { name: /Send feedback/ });
     const bounds = await Promise.all([
       dialog.boundingBox(), message.boundingBox(), email.boundingBox(),
