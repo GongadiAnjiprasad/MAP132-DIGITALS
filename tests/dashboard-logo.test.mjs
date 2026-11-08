@@ -44,8 +44,8 @@ test('the public header uses the official PNG logo and feedback widget uses the 
 
 test('the official Logo.png logo is used for browser icons and social metadata', () => {
   assert.match(app, /const absoluteLogo=new URL\(DEFAULT_BRAND_LOGO,window\.location\.origin\)\.href/);
-  assert.match(app, /icon\.href='\/favicon\.svg';icon\.type='image\/svg\+xml'/);
+  assert.match(app, /icon\.href='\/resources\/Logo\.png';icon\.type='image\/png'/);
   assert.match(app, /apple\.href=absoluteLogo/);
   assert.match(app, /item\.logo=\{'@type':'ImageObject',url:absoluteLogo\}/);
-  assert.match(html, /rel="icon" type="image\/svg\+xml" href="\/favicon\.svg"/);
+  assert.match(html, /rel="icon" type="image\/png" href="\/resources\/Logo\.png"/);
 });
