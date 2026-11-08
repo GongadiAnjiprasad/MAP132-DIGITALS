@@ -15,6 +15,7 @@ test('mobile work feedback remains usable and submits a service-specific rating'
   await dialog.getByLabel('WHICH SERVICE ARE YOU REVIEWING?').selectOption('Wedding / B’Day');
   await dialog.getByRole('button', { name: '5 stars' }).tap();
   await dialog.getByLabel('YOUR FEEDBACK').fill('Super');
+  await dialog.getByLabel(/I understand my feedback may be displayed publicly/).check();
   await dialog.getByRole('button', { name: /Send feedback/g }).tap();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload.service).toBe('Wedding / B’Day');
