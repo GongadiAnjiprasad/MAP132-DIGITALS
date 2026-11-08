@@ -167,7 +167,7 @@ test('Studio displays only reviews returned by the public reviews endpoint', asy
 });
 
 
-test('admin can publish a work review after explicitly confirming client permission', async ({ page }) => {
+test('admin feedback inbox does not require manual approval for legacy entries', async ({ page }) => {
   await page.route('**/api/admin/session', route => route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: 'Not signed in' }) }));
   await page.route('**/api/admin/login', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true }) }));
   await page.route('**/api/portfolio', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ content: {} }) }));
@@ -210,7 +210,7 @@ test('homepage feedback tabs show only matching live reviews and refresh on focu
   let calls = 0;
   await page.route('**/api/reviews', async route => {
     calls += 1;
-    const reviews = calls === 1 ? [] : [{
+    const reviews = calls <= 2 ? [] : [{
       id: 'live-service-review', kind: 'Work feedback', service: 'Cinematic Trailers',
       rating: 5, message: 'Mee service super undhi', response: 'Maa feedback share chesinanduku chala thanks!',
       createdAt: '2026-11-08T00:00:00.000Z'
