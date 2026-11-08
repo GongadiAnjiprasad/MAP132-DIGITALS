@@ -262,7 +262,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   const contactLinks = [
     { label: 'WhatsApp', href: whatsappUrl, icon: <MessageCircle size={16}/> },
     { label: 'Instagram', href: socialLink(p.instagram, 'instagram'), icon: <Instagram size={16}/> },
-    { label: 'YouTube', href: socialLink(p.youtube, 'youtube'), icon: <Youtube size={16}/> },
+    { label: 'YouTube', href: socialLink(p.youtube || 'https://youtube.com/@map132digitals?si=4tSF4nERwaC-mf7k', 'youtube'), icon: <Youtube size={16}/> },
     { label: 'Facebook', href: socialLink(p.facebook, 'facebook'), icon: <Facebook size={16}/> },
     { label: 'Telegram', href: socialLink(p.telegram, 'telegram'), icon: <Send size={16}/> },
     { label: 'LinkedIn', href: socialLink(p.linkedin, 'linkedin'), icon: <Linkedin size={16}/> },
