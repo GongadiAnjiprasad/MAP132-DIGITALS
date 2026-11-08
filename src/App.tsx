@@ -565,7 +565,7 @@ function AdminApp() {
   const [source,setSource] = useState<'youtube'|'drive'|'other'>('youtube');
   const [uploading,setUploading] = useState(false);
   useEffect(()=>{ api.get('/api/admin/session').then(()=>setLoggedIn(true)).catch(()=>setLoggedIn(false)).finally(()=>setChecking(false)); },[]);
-  useEffect(()=>{ if(loggedIn) api.get('/api/portfolio').then(r=>setContent(r.data.content || defaults)).catch(()=>setError('Could not load portfolio content.')); },[loggedIn]);
+  useEffect(()=>{ if(loggedIn) api.get('/api/portfolio').then(r=>{const incoming=r.data.content||{};setContent({...defaults,...incoming,profile:{...defaults.profile,...(incoming.profile||{})},skills:Array.isArray(incoming.skills)?incoming.skills:defaults.skills,items:Array.isArray(incoming.items)?incoming.items:[],resources:Array.isArray(incoming.resources)?incoming.resources:[]});}).catch(()=>setError('Could not load portfolio content.')); },[loggedIn]);
   useEffect(()=>{if(loggedIn&&tab==='enquiries')api.get('/api/admin/enquiries').then(r=>setEnquiries(r.data.enquiries||[])).catch(error=>setError(error instanceof Error?error.message:'Could not load enquiries.'));},[loggedIn,tab]);
   useEffect(()=>{if(loggedIn&&tab==='feedback')api.get('/api/admin/feedback').then(r=>setFeedback(r.data.feedback||[])).catch(error=>setError(error instanceof Error?error.message:'Could not load feedback.'));},[loggedIn,tab]);
   async function login(e:React.FormEvent){e.preventDefault();setError('');try{await api.post('/api/admin/login',{password});setLoggedIn(true);setPassword('');}catch(error){setError(error instanceof Error?error.message:'Could not sign in. Please try again.');}}
