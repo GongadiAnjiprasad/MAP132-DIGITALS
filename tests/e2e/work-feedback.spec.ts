@@ -31,7 +31,7 @@ test('work feedback form collects a service rating and seals the submitted revie
   });
 });
 
-test('work feedback starts disabled and enables for a one-word review only after service selection', async ({ page }) => {
+test('work feedback enables after service selection and public display notice', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Give feedback' }).click();
   const dialog = page.getByRole('dialog');
@@ -125,7 +125,7 @@ test('feedback drawer uses the MAP132 cinematic studio design system', async ({ 
   expect(design.accent).not.toBe('');
 });
 
-test('website experience feedback submits separately without requiring a service', async ({ page }) => {
+test('website experience feedback submits separately without a service selection', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   let payload: any = null;
   await page.route('**/api/feedback', async route => {
@@ -161,7 +161,7 @@ test('Studio displays only reviews returned by the public reviews endpoint', asy
   await page.goto('/');
   await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Studio', exact: true }).click();
   await expect(page.getByRole('region', { name: 'Client reviews' })).toBeVisible();
-  await expect(page.getByText('Excellent storytelling and polished editing.')).toBeVisible();
+  await expect(reviews.getByText('Excellent storytelling and polished editing.')).toBeVisible();
   const reviews = page.getByRole('region', { name: 'Client reviews' });
   await expect(reviews.getByText('Cinematic Trailers', { exact: true })).toBeVisible();
 });
