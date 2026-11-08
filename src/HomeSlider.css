@@ -1570,3 +1570,25 @@
   .ms-work-page .work-category-tab span { font-size: 9px; }
   .ms-work-page .work-category-tab small { font-size: 7px; letter-spacing: .45px; }
 }
+
+
+/* Live customer feedback feed */
+.ms-live-feedback-feed{position:relative}
+.ms-live-label{display:inline-flex;align-items:center;gap:7px;color:var(--ms-muted,#b9b6ae);font-size:10px;letter-spacing:.14em;font-weight:800}
+.ms-live-label i{width:7px;height:7px;border-radius:50%;background:#65c99a;box-shadow:0 0 12px #65c99a;display:inline-block}
+.ms-review-tabs{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0 16px}
+.ms-review-tabs button{border:1px solid var(--ms-line,rgba(255,255,255,.14));background:rgba(255,255,255,.035);color:var(--ms-text,#f3f0e9);border-radius:999px;padding:10px 16px;font:inherit;font-size:12px;font-weight:750;cursor:pointer;transition:background .2s,border-color .2s,color .2s}
+.ms-review-tabs button.active{background:linear-gradient(120deg,rgba(215,164,95,.2),rgba(215,164,95,.07));border-color:rgba(215,164,95,.72);color:var(--ms-gold,#f0c88e);box-shadow:0 0 22px rgba(215,164,95,.09)}
+.ms-live-review-card{min-width:0}
+.ms-live-review-card .ms-review-by{margin-top:14px}
+.ms-live-review-card .ms-review-by small{opacity:.7}
+.ms-brand-reply{border-top:1px solid rgba(215,164,95,.2);margin-top:14px;padding-top:12px}
+.ms-brand-reply span{display:block;color:var(--ms-gold,#f0c88e);font-size:9px;letter-spacing:.13em;font-weight:850}
+.ms-brand-reply p{font-size:12px;line-height:1.55;margin:6px 0 0;opacity:.82}
+.ms-review-empty{display:flex;flex-direction:column;gap:6px;padding:24px 18px;border:1px dashed var(--ms-line,rgba(255,255,255,.18));border-radius:14px;color:var(--ms-text,#f3f0e9)}
+.ms-review-empty span{font-size:12px;opacity:.68}
+.feedback-auto-reply,.admin-feedback-reply{margin:16px 0;padding:14px 16px;border:1px solid rgba(215,164,95,.28);border-radius:13px;background:rgba(215,164,95,.07);text-align:left}
+.feedback-auto-reply span,.admin-feedback-reply b{display:block;font-size:10px;letter-spacing:.12em;font-weight:850;color:var(--ms-gold,#d7a45f)}
+.feedback-auto-reply p,.admin-feedback-reply p{margin:7px 0 0;line-height:1.6;font-size:13px}
+.admin-feedback-reply{margin:12px 0}
+@media(max-width:600px){.ms-review-tabs{gap:7px}.ms-review-tabs button{flex:1;padding:10px 11px;font-size:11px}.ms-review-empty{padding:18px 14px}}
