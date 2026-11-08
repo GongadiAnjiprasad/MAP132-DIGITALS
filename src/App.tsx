@@ -17,7 +17,7 @@ type Item = {
   kind: 'video' | 'image' | 'link'; url?: string; path?: string;
   mediaUrl?: string; source?: 'upload' | 'youtube' | 'drive' | 'other';
 };
-const DEFAULT_BRAND_LOGO = '/resources/MAP%20logo.png';
+const DEFAULT_BRAND_LOGO = '/resources/myLogo-removebg-preview.png';
 type Content = {
   logoPath?: string;
   logoUrl?: string;
@@ -91,7 +91,7 @@ function BrandLogo({ compact = false, src = DEFAULT_BRAND_LOGO }: { compact?: bo
 }
 function downloadBrandLogo() {
   const link = document.createElement('a');
-  link.href = '/resources/MAP%20logo.png';
+  link.href = '/resources/myLogo-removebg-preview.png';
   link.download = 'MAP132-DIGITALS-logo.png';
   link.click();
 }
@@ -104,7 +104,7 @@ function TitleMotionStudio(){
   try{
    const h=quality==='720p'?720:quality==='1080p'?1080:2160,dims:Record<string,[number,number]>={'16:9':[Math.round(h*16/9),h],'9:16':[h,Math.round(h*16/9)],'1:1':[h,h]},[w,hh]=dims[ratio];
    const canvas=document.createElement('canvas');canvas.width=w;canvas.height=hh;const ctx=canvas.getContext('2d');if(!ctx)throw new Error('Canvas unavailable.');
-   const logo=new Image();logo.src='/resources/MAP%20logo.png';await new Promise<void>((ok,no)=>{logo.onload=()=>ok();logo.onerror=()=>no(new Error('Transparent logo upload is still pending.'));});
+   const logo=new Image();logo.src='/resources/myLogo-removebg-preview.png';await new Promise<void>((ok,no)=>{logo.onload=()=>ok();logo.onerror=()=>no(new Error('Transparent logo upload is still pending.'));});
    audio=new AudioContext();await audio.resume();const out=audio.createMediaStreamDestination(),stream=new MediaStream([...canvas.captureStream(30).getVideoTracks(),...out.stream.getAudioTracks()]);
    const mime=MediaRecorder.isTypeSupported('video/webm;codecs=vp9,opus')?'video/webm;codecs=vp9,opus':'video/webm',rec=new MediaRecorder(stream,{mimeType:mime,videoBitsPerSecond:quality==='4K'?18000000:9000000}),chunks:BlobPart[]=[];rec.ondataavailable=e=>{if(e.data.size)chunks.push(e.data)};
    const palettes=[['#D7A45F','#FFE8B7','#17100A'],['#D45A39','#FFD18C','#090D16'],['#66517E','#D7C5F2','#08070D'],['#397DB0','#C7ECFF','#071522'],['#B78090','#FFE3D5','#21161D'],['#A7A7A7','#FFFFFF','#111318']],pal=palettes[styles.indexOf(style)],start=performance.now(),duration=5500;
@@ -118,7 +118,7 @@ function TitleMotionStudio(){
   }catch(e){setMessage(e instanceof Error?e.message:'Could not render intro.')}finally{cancelAnimationFrame(raf);if(audio)await audio.close().catch(()=>{});setBusy(false)}
  }
  return <section className="motion-lab logo-intro-builder"><div className="motion-lab-head"><div><p className="kicker">PRIVATE STUDIO TOOL · 5.5 SECOND EXPORT</p><h2>Logo <em>intro builder.</em></h2><p>Choose a visual treatment and export the original MAP132 logo with original synthesized sound. Rendering happens on this device.</p></div><span className="lab-stamp">MAP132<br/>INTRO / 01</span></div>
- <div className="motion-lab-grid"><div className="title-preview"><small>LIVE LOGO PREVIEW</small><img src="/resources/MAP%20logo.png" alt="MAP132 logo preview"/><i>MAP132 / VIDEO EDITING</i><span className="preview-time">00:00:05:15</span></div>
+ <div className="motion-lab-grid"><div className="title-preview"><small>LIVE LOGO PREVIEW</small><img src="/resources/myLogo-removebg-preview.png" alt="MAP132 logo preview"/><i>MAP132 / VIDEO EDITING</i><span className="preview-time">00:00:05:15</span></div>
  <div className="motion-controls"><span className="control-label">INTRO STYLE</span><div className="style-choices intro-style-choices">{styles.map((x,i)=><button type="button" key={x} className={style===x?'chosen':''} onClick={()=>setStyle(x)}><b>0{i+1}</b><span>{x}</span></button>)}</div>
  <div className="intro-export-options"><label>ASPECT RATIO<select value={ratio} onChange={e=>setRatio(e.target.value)}><option>16:9</option><option>9:16</option><option>1:1</option></select></label><label>RESOLUTION<select value={quality} onChange={e=>setQuality(e.target.value)}><option>720p</option><option>1080p</option><option>4K</option></select></label></div>
  <button className="gold-button render-title" onClick={render} disabled={busy}><Film size={17}/>{busy?'Rendering…':'Render & download logo intro'} <ArrowDownRight size={17}/></button><p className="render-note">{message||'5.5 seconds · 16:9 / 9:16 / 1:1 · 720p / 1080p / 4K · WebM + original sound'}</p></div></div></section>;
@@ -233,7 +233,7 @@ function PublicSite({ content }: { content: Content }) {
 }
 const workspaceResources = [
  {section:'Workspace Home',title:'Your complete editing toolkit',description:'All agreed MAP132 editing resources in one place — music and SFX, stock footage, templates, motion graphics, LUTs, fonts, PNG graphics and saved favourites. Open any provider to preview and download under its licence.',cards:[]},
-{section:'Brand Kit',title:'MAP132 logo assets',description:'The official MAP132 DIGITALS identity. Use the transparent PNG on dark or light backgrounds; keep its proportions intact.',cards:[{id:'logo-transparent',title:'Official transparent logo',detail:'PNG · Transparent background · High resolution',tags:['Brand','Logo','PNG'],href:'/resources/MAP%20logo.png',action:'Download PNG',download:true}]},
+{section:'Brand Kit',title:'MAP132 logo assets',description:'The official MAP132 DIGITALS identity. Use the transparent PNG on dark or light backgrounds; keep its proportions intact.',cards:[{id:'logo-transparent',title:'Official transparent logo',detail:'PNG · Transparent background · High resolution',tags:['Brand','Logo','PNG'],href:'/resources/myLogo-removebg-preview.png',action:'Download PNG',download:true}]},
 {section:'Intro Library',title:'MAP132 logo intro videos',description:'Six agreed intro directions. Final exports are planned in 16:9, 9:16 and 1:1, at 720p, 1080p and 4K where supported. Only uploaded files will show a download action.',cards:[
 {id:'intro-golden',title:'Premium Golden',detail:'Commercials · Brand identity · Luxury reveal',tags:['Commercial','Logo intro','Golden'],status:'Intro export not uploaded yet'},
 {id:'intro-epic',title:'Epic Cinematic',detail:'Trailers · Teasers · Action edits',tags:['Trailer','Teaser','Cinematic'],status:'Intro export not uploaded yet'},
