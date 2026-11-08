@@ -2335,3 +2335,14 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-public-consent{display:flex;align-items:flex-start;gap:10px;margin:14px 0;color:var(--brand-amber,#E8BD7A);font-size:12px;line-height:1.5}.feedback-public-consent input{accent-color:#E8BD7A;margin-top:2px;flex:0 0 auto}.feedback-publish-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-top:14px}.feedback-publish-row .gold-button{min-height:38px;padding:8px 14px;font-size:12px}.feedback-publish-row .gold-button:disabled{opacity:.45;cursor:not-allowed}
 
 .ms-public-reviews{margin-top:38px;padding:26px;border:1px solid #d9b47735;border-radius:20px;background:linear-gradient(145deg,#17130f88,#0c0d10cc)}.ms-review-heading{display:flex;justify-content:space-between;align-items:end;gap:14px;margin-bottom:18px}.ms-review-heading h3{margin:5px 0 0;font-size:clamp(22px,3vw,32px)}.ms-review-heading h3 em{color:var(--brand-amber,#E8BD7A);font-style:normal}.ms-review-heading>span{font-size:10px;letter-spacing:.12em;color:var(--brand-amber,#E8BD7A)}.ms-review-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,220px),1fr));gap:12px}.ms-review-card{padding:18px;border:1px solid #d9b47728;border-radius:14px;background:#ffffff06}.ms-review-stars{color:#E8BD7A;letter-spacing:3px}.ms-review-card p{margin:12px 0 16px;line-height:1.65;color:inherit}.ms-review-card>span{font-size:11px;color:var(--brand-amber,#E8BD7A)}@media(max-width:600px){.ms-public-reviews{padding:16px;margin-top:24px}.ms-review-heading{align-items:flex-start;flex-direction:column}}
+
+
+/* Dashboard-managed website logo */
+.logo-settings-card { max-width: 900px; }
+.logo-settings-preview { display: grid; place-items: center; gap: 14px; min-height: 210px; margin: 22px 0; padding: 24px; border: 1px solid #DDB57955; border-radius: 14px; background: radial-gradient(ellipse at center, #DDB57912, transparent 68%), #080B12; }
+.logo-settings-preview > span { color: #DDB579; font-size: 10px; font-weight: 700; letter-spacing: 2px; }
+.logo-settings-preview img { display: block; width: min(100%, 300px); max-height: 150px; object-fit: contain; }
+.logo-settings-actions { display: flex; align-items: center; flex-wrap: wrap; gap: 14px; margin-top: 18px; }
+.logo-settings-actions .quiet-link { border: 0; background: transparent; color: #D8C9B7; cursor: pointer; font: inherit; text-decoration: underline; text-underline-offset: 4px; }
+.logo-settings-actions button:disabled { cursor: not-allowed; opacity: .55; }
+@media (max-width: 600px) { .logo-settings-preview { min-height: 170px; padding: 18px; } .logo-settings-actions { align-items: stretch; flex-direction: column; } }
