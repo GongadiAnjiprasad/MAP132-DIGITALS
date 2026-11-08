@@ -177,8 +177,9 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   useEffect(() => {
     if (activePreview === null) ambientTheme.clearPlayback('preview-modal');
   }, [activePreview, ambientTheme.clearPlayback]);
-  const pointerStart = useRef<{ x: number; y: number; pointerId: number; atHomeTop: boolean } | null>(null);
+  const pointerStart = useRef<{ x: number; y: number; pointerId: number; atHomeTop: boolean; target: HTMLElement } | null>(null);
   const suppressSwipeClick = useRef(false);
+  const swipeClickTarget = useRef<HTMLElement | null>(null);
   const wheelTotal = useRef(0);
   const wheelLocked = useRef(false);
   const selectedWorkItems = activeProjectCategory === null ? [] : content.items.filter(item => activeProjectCategory === 'All Projects' || Boolean(workCategoryCards.find(category => category.id === activeProjectCategory)?.pattern.test(item.category)));
@@ -221,6 +222,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
       y: event.clientY,
       pointerId: event.pointerId,
       atHomeTop: active === 0 && !!page && page.scrollTop <= 2,
+      target,
     };
   };
   const onPointerUp = (event: PointerEvent<HTMLElement>) => {
@@ -235,16 +237,26 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     }
     const direction = getHorizontalSwipeDirection(dx, dy, 38, 1.2);
     if (direction !== 0) {
+      // Suppress only the synthetic click generated on the element that received
+      // the swipe. Do not swallow the visitor's next navigation/category tap.
       suppressSwipeClick.current = true;
+      swipeClickTarget.current = start.target;
       goTo(active + direction);
-      window.setTimeout(() => { suppressSwipeClick.current = false; }, 450);
+      window.setTimeout(() => {
+        suppressSwipeClick.current = false;
+        swipeClickTarget.current = null;
+      }, 250);
     }
   };
   const onClickCapture = (event: MouseEvent<HTMLElement>) => {
     if (!suppressSwipeClick.current) return;
+    const swipeTarget = swipeClickTarget.current;
+    const clickTarget = event.target as Node;
+    if (!swipeTarget || (clickTarget !== swipeTarget && !swipeTarget.contains(clickTarget))) return;
     event.preventDefault();
     event.stopPropagation();
     suppressSwipeClick.current = false;
+    swipeClickTarget.current = null;
   };
   const onWheel = (event: WheelEvent<HTMLElement>) => {
     // Trackpads report horizontal gestures as deltaX; ordinary vertical scrolling is untouched.
