@@ -167,6 +167,8 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     nav.scrollTo({ left: Math.max(0, Math.min(targetLeft, maxScroll)), behavior: 'smooth' });
   }, [active]);
   const [activePreview, setActivePreview] = useState<number | null>(null);
+  const previewDialogRef = useRef<HTMLDivElement | null>(null);
+  const previewTriggerRef = useRef<HTMLElement | null>(null);
   const [enquirySubmitted, setEnquirySubmitted] = useState(false);
   const [enquiryBusy, setEnquiryBusy] = useState(false);
   const [enquiryError, setEnquiryError] = useState('');
@@ -177,6 +179,27 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   useEffect(() => {
     if (activePreview === null) ambientTheme.clearPlayback('preview-modal');
   }, [activePreview, ambientTheme.clearPlayback]);
+  useEffect(() => {
+    if (activePreview === null) return;
+    const dialog = previewDialogRef.current;
+    const trigger = previewTriggerRef.current;
+    const focusable = () => dialog ? Array.from(dialog.querySelectorAll<HTMLElement>('button:not([disabled]),a[href],audio[controls],video[controls],input:not([disabled]),select:not([disabled]),textarea:not([disabled]),[tabindex]:not([tabindex="-1"])')).filter(el => el.getAttribute('aria-hidden') !== 'true') : [];
+    const frame = window.requestAnimationFrame(() => dialog?.querySelector<HTMLElement>('.ms-preview-close')?.focus());
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key !== 'Tab') return;
+      const items = focusable();
+      if (!items.length) { event.preventDefault(); return; }
+      const first = items[0], last = items[items.length - 1];
+      if (event.shiftKey && (document.activeElement === first || !dialog?.contains(document.activeElement))) { event.preventDefault(); last.focus(); }
+      else if (!event.shiftKey && (document.activeElement === last || !dialog?.contains(document.activeElement))) { event.preventDefault(); first.focus(); }
+    };
+    document.addEventListener('keydown', onKeyDown);
+    return () => {
+      window.cancelAnimationFrame(frame);
+      document.removeEventListener('keydown', onKeyDown);
+      if (trigger?.isConnected) trigger.focus();
+    };
+  }, [activePreview]);
   const pointerStart = useRef<{ x: number; y: number; pointerId: number; atHomeTop: boolean; target: HTMLElement } | null>(null);
   const suppressSwipeClick = useRef(false);
   const swipeClickTarget = useRef<HTMLElement | null>(null);
@@ -321,7 +344,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
           <div className="ms-home-showcase">
             <div className="ms-showcase-top"><span>WHAT WE CAN CREATE</span><span>MAP132 / 01—06</span></div>
             <div className="ms-service-bento">
-              {serviceCards.map((card, index) => <button type="button" key={card.title} data-service-theme={card.theme} aria-label={`Play ${card.title} sample video`} title={`Play ${card.title} sample video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={() => { ambientTheme.pin(card.theme); setActivePreview(index); }} style={{ backgroundImage: `linear-gradient(180deg, #090b0e08 5%, #090b0edb 100%), url("${card.image}")` }}>
+              {serviceCards.map((card, index) => <button type="button" key={card.title} data-service-theme={card.theme} aria-label={`Play ${card.title} sample video`} title={`Play ${card.title} sample video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={(event) => { ambientTheme.pin(card.theme); previewTriggerRef.current = event.currentTarget; setActivePreview(index); }} style={{ backgroundImage: `linear-gradient(180deg, #090b0e08 5%, #090b0edb 100%), url("${card.image}")` }}>
                 <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small>
               </button>)}
             </div>
@@ -425,7 +448,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     </main>
 
     {activePreview !== null && <div className="ms-preview-modal" role="dialog" aria-modal="true" aria-label={serviceCards[activePreview].title + ' video preview'} onClick={closePreview}>
-      <div className="ms-preview-dialog" onClick={event => event.stopPropagation()} onPointerDown={event => { if (event.pointerType !== 'touch' && event.pointerType !== 'pen' && event.pointerType !== 'mouse') return; if ((event.target as HTMLElement).closest('button, input')) return; event.currentTarget.setPointerCapture(event.pointerId); previewGesture.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId }; }} onPointerUp={event => { const start = previewGesture.current; previewGesture.current = null; if (!start || start.pointerId !== event.pointerId) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; const direction = getHorizontalSwipeDirection(dx, dy, event.pointerType === 'mouse' ? 55 : 42, 1.15); if (direction !== 0) changePreview(direction); }} onPointerCancel={() => { previewGesture.current = null; }} onWheel={event => { if (Math.abs(event.deltaX) < Math.abs(event.deltaY) * 1.15 || Math.abs(event.deltaX) < 2) return; event.preventDefault(); if (wheelLocked.current) return; wheelTotal.current += event.deltaX; if (Math.abs(wheelTotal.current) >= 58) { changePreview(wheelTotal.current > 0 ? 1 : -1); wheelTotal.current = 0; wheelLocked.current = true; window.setTimeout(() => { wheelLocked.current = false; }, 520); } }}>
+      <div ref={previewDialogRef} className="ms-preview-dialog" onClick={event => event.stopPropagation()} onPointerDown={event => { if (event.pointerType !== 'touch' && event.pointerType !== 'pen' && event.pointerType !== 'mouse') return; if ((event.target as HTMLElement).closest('button, input')) return; event.currentTarget.setPointerCapture(event.pointerId); previewGesture.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId }; }} onPointerUp={event => { const start = previewGesture.current; previewGesture.current = null; if (!start || start.pointerId !== event.pointerId) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; const direction = getHorizontalSwipeDirection(dx, dy, event.pointerType === 'mouse' ? 55 : 42, 1.15); if (direction !== 0) changePreview(direction); }} onPointerCancel={() => { previewGesture.current = null; }} onWheel={event => { if (Math.abs(event.deltaX) < Math.abs(event.deltaY) * 1.15 || Math.abs(event.deltaX) < 2) return; event.preventDefault(); if (wheelLocked.current) return; wheelTotal.current += event.deltaX; if (Math.abs(wheelTotal.current) >= 58) { changePreview(wheelTotal.current > 0 ? 1 : -1); wheelTotal.current = 0; wheelLocked.current = true; window.setTimeout(() => { wheelLocked.current = false; }, 520); } }}>
         <div className="ms-preview-dialog-head"><div><span>MAP132 DIGITALS / SHOWCASE PREVIEW</span><h2>{serviceCards[activePreview].title}</h2></div><button type="button" className="ms-preview-close" aria-label="Close video" onClick={closePreview}><X size={22}/></button></div>
         <div className="ms-preview-stage">
           <video key={activePreview} className="ms-preview-player" src={previewVideos[activePreview].src} controls autoPlay playsInline preload="metadata" onPlay={() => ambientTheme.setPlayback(serviceCards[activePreview].theme as ServiceThemeKey, 'preview-modal')} onPause={() => ambientTheme.clearPlayback('preview-modal')} onEnded={() => ambientTheme.clearPlayback('preview-modal')}>Your browser does not support video playback.</video>
