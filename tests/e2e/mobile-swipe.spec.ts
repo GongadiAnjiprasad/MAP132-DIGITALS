@@ -220,6 +220,8 @@ test('Explore category tabs allow horizontal page swipe while category taps stil
   await page.goto('/');
   const track = page.locator('.ms-track');
   await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
+  // Wait for the page-track transition to settle before measuring and dispatching touch coordinates.
+  await page.waitForTimeout(750);
   const firstCategory = page.locator('.work-category-tab').first();
   await expect(firstCategory).toBeVisible();
 
