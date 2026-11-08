@@ -3,7 +3,7 @@
 .map132-slider-site *{box-sizing:border-box}
 .ms-header{height:76px;flex:0 0 76px;padding:0 clamp(20px,5vw,76px);display:flex;align-items:center;justify-content:space-between;gap:24px;border-bottom:1px solid var(--ms-line);background:rgba(8,10,14,.82);backdrop-filter:blur(18px);z-index:5}
 .ms-brand{display:flex;align-items:center;gap:12px;min-width:190px;color:var(--ms-text);text-decoration:none}
-.ms-brand img{width:58px;height:48px;object-fit:contain}
+.ms-brand img{width:58px;height:48px;object-fit:contain;background:transparent;mix-blend-mode:screen}
 .ms-brand span{display:flex;flex-direction:column;gap:3px}
 .ms-brand b{font:800 17px/1 'Manrope',sans-serif;letter-spacing:1.5px}
 .ms-brand small{font-size:8px;letter-spacing:1.6px;color:var(--ms-gold)}
