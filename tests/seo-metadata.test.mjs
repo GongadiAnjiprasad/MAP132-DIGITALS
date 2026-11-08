@@ -4,8 +4,8 @@ import { readFile } from 'node:fs/promises';
 
 test('homepage exposes descriptive MAP132 brand SEO metadata', async () => {
   const html = await readFile(new URL('../index.html', import.meta.url), 'utf8');
-  assert.match(html, /<title>MAP132 DIGITALS \| Cinematic Video Editing, Trailers &amp; Reels<\/title>/);
-  assert.match(html, /name="description" content="MAP132 DIGITALS offers cinematic video editing for trailers, weddings, birthdays, brands, AI videos, Instagram Reels and YouTube content\."\s*\/>/);
+  assert.match(html, /<title>MAP132 DIGITALS by Anji \| Cinematic Video Editing, Trailers &amp; Reels<\/title>/);
+  assert.match(html, /name="description" content="MAP132 DIGITALS by Anji Gongadi offers cinematic video editing for trailers, weddings, birthdays, brands, AI videos, Instagram Reels and YouTube content\."\s*\/>/);
   assert.match(html, /name="robots" content="index, follow/);
   assert.match(html, /rel="canonical" href="https:\/\/map132-digitals\.anji-gongadi\.workers\.dev\/"\s*\/>/);
 });
