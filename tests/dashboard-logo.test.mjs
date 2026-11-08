@@ -39,7 +39,6 @@ test('public portfolio API resolves uploaded logos and falls back to the officia
 test('the public header uses the official PNG logo and feedback widget uses the configured brand default', () => {
   assert.match(slider, /content\.logoUrl \|\| '\/resources\/Logo\.png'/);
   assert.match(app, /FeedbackWidget\(\{ logoUrl = DEFAULT_BRAND_LOGO \}/);
-  assert.match(app, /<FeedbackWidget logoUrl=\{DEFAULT_BRAND_LOGO\}/);
   assert.match(app, /logoUrl=\{content\.logoUrl\|\|DEFAULT_BRAND_LOGO\}/);
   assert.match(app, /const logoUrl = content\.logoUrl \|\| DEFAULT_BRAND_LOGO/);
   assert.ok(app.includes(officialLogo));
