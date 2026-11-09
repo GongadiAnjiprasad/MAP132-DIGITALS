@@ -2469,5 +2469,5 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 @keyframes feedback-scrim-out{to{opacity:0;backdrop-filter:blur(0)}}
 @keyframes feedback-studio-out{to{opacity:0;transform:translateY(10px) scale(.985)}}
 @media(prefers-reduced-motion:reduce){
-  .feedback-studio-scrim.is-closing,.feedback-studio.is-closing{animation-duration:1ms}
+  .feedback-studio-scrim.is-closing,.feedback-studio.is-closing{animation:none}
 }

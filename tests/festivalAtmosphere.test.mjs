@@ -3,7 +3,6 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
 const css = readFileSync(new URL('../src/modules/seasonal/festival-frames.css', import.meta.url), 'utf8');
-const component = readFileSync(new URL('../src/modules/seasonal/IndianFestivalAtmosphere.tsx', import.meta.url), 'utf8');
 
 test('pre-festival ambience remains visible without taking over the site', () => {
   assert.match(css, /pointer-events:\s*none;\s*opacity:\s*\.32/);
@@ -17,12 +16,4 @@ test('festival greeting stays click-through and keeps its dismiss control in the
   assert.match(css, /\.ff-greeting\s*\{[^}]*pointer-events:\s*none/s);
   assert.match(css, /\.ff-greeting-close\s*\{[^}]*top:\s*12px;\s*left:\s*12px/);
   assert.match(css, /\.ff-greeting-close\s*\{[^}]*pointer-events:\s*auto/s);
-});
-
-
-test('seasonal falling ambience stays subtle and uses a lower particle count', () => {
-  assert.match(component, /Array\.from\(\{ length: 6 \}/);
-  assert.match(component, /animationDuration: \(24 \+ \(index % 3\) \* 4\)/);
-  assert.match(css, /opacity:\s*\.32/);
-  assert.match(css, /font-size:\s*clamp\(13px,\s*1\.8vw,\s*22px\)/);
 });

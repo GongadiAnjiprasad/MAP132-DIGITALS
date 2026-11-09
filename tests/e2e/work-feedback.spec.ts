@@ -86,7 +86,7 @@ test('feedback drawer stays on the MAP132 brand accent across all service themes
     });
     // Feedback follows the effective MAP132 brand token, never the active genre accent.
     expect(accents.form.toLowerCase()).toBe(accents.brand.toLowerCase());
-    await dialog.getByRole('button', { name: 'Close feedback' }).click();
+    await dialog.getByRole('button', { name: 'Close feedback', exact: true }).click();
   }
 });
 
@@ -267,7 +267,7 @@ test('feedback form controls stay aligned and the message field keeps a visible 
     expect(textareaStyle.borderWidth).not.toBe('0px');
     expect(textareaStyle.borderStyle).toBe('solid');
     expect(textareaStyle.boxSizing).toBe('border-box');
-    await page.getByRole('button', { name: 'Close feedback' }).click();
+    await page.getByRole('button', { name: 'Close feedback', exact: true }).click();
   }
 });
 
@@ -288,7 +288,7 @@ test('floating F moves into the feedback header and toggles the dialog closed wi
     await expect(dialog).toBeVisible();
     const header = dialog.locator('.feedback-studio-brand');
     const toggle = header.getByRole('button', { name: 'Close feedback panel' });
-    const close = header.getByRole('button', { name: 'Close feedback' });
+    const close = header.getByRole('button', { name: 'Close feedback', exact: true });
     await expect(toggle).toBeVisible();
     await expect(launcher).toHaveCount(0);
     const [headerBox, toggleBox, closeBox, messageBox] = await Promise.all([

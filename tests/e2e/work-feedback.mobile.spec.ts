@@ -37,7 +37,7 @@ test('feedback seal button stays inside the parchment frame at narrow mobile and
     expect(button!.x).toBeGreaterThanOrEqual(drawer!.x + 8);
     expect(button!.x + button!.width).toBeLessThanOrEqual(drawer!.x + drawer!.width - 8);
     expect(button!.width).toBeGreaterThan(0);
-    await dialog.getByRole('button', { name: 'Close feedback' }).click();
+    await dialog.getByRole('button', { name: 'Close feedback', exact: true }).click();
   }
 });
 
@@ -50,7 +50,7 @@ test('mobile feedback F button relocates into the header and closes the panel', 
     const dialog = page.getByRole('dialog');
     const header = dialog.locator('.feedback-studio-brand');
     const toggle = header.getByRole('button', { name: 'Close feedback panel' });
-    const close = header.getByRole('button', { name: 'Close feedback' });
+    const close = header.getByRole('button', { name: 'Close feedback', exact: true });
     await expect(toggle).toBeVisible();
     const [headerBox, toggleBox, closeBox, messageBox] = await Promise.all([
       header.boundingBox(), toggle.boundingBox(), close.boundingBox(),
