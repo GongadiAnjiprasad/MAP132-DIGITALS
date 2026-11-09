@@ -100,6 +100,7 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 }
 
 export default function HomeSlider({ content, feedbackWidget }: { content: HomeContent; feedbackWidget?: ReactNode }) {
+  const logoUrl = content.logoUrl === '/resources/Logo.png' ? '/resources/Logo.webp' : content.logoUrl || '/resources/Logo.webp';
   const [active, setActive] = useState(0);
   const [activeProjectCategory, setActiveProjectCategory] = useState<string | null>(null);
   const [activeProjectPage, setActiveProjectPage] = useState(1);
@@ -287,7 +288,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   return <div data-theme={theme} data-ambient-playback={ambientTheme.isPlaying ? "true" : "false"} style={ambientTheme.style} className={`map132-slider-site ${desktopArrowsVisible ? "" : "ms-nav-arrows-hidden"}`}>
     <header className="ms-header">
       <a className="ms-brand" href="#top" onClick={e => { e.preventDefault(); goTo(0); }}>
-        <img src={content.logoUrl || '/resources/Logo.png'} alt="MAP132 DIGITALS"/>
+        <img src={logoUrl} alt="MAP132 DIGITALS" onError={event => { if (logoUrl === '/resources/Logo.webp') event.currentTarget.src = '/resources/Logo.png'; }}/>
         <span><b>MAP132</b><small>DIGITALS · VIDEO EDITING</small></span>
       </a>
       <nav ref={navRef} className="ms-nav" aria-label="Main navigation">
@@ -323,7 +324,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
           <div className="ms-home-showcase">
             <div className="ms-showcase-top"><span>WHAT WE CAN CREATE</span><span>MAP132 / 01—06</span></div>
             <div className="ms-service-bento">
-              {serviceCards.map((card, index) => <button type="button" key={card.title} data-service-theme={card.theme} aria-label={`Play ${card.title} sample video`} title={`Play ${card.title} sample video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={() => { ambientTheme.pin(card.theme); setActivePreview(index); }} style={{ backgroundImage: `linear-gradient(180deg, #090b0e08 5%, #090b0edb 100%), url("${card.image}")` }}>
+              {serviceCards.map((card, index) => <button type="button" key={card.title} data-service-theme={card.theme} aria-label={`Play ${card.title} sample video`} title={`Play ${card.title} sample video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={() => { ambientTheme.pin(card.theme); setActivePreview(index); }} ><img src={card.image} alt="" aria-hidden="true" loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'auto'} decoding="async" />
                 <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small>
               </button>)}
             </div>
