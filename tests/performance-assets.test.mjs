@@ -46,7 +46,11 @@ test('feedback launcher reveal avoids animated layout and paint-heavy properties
   assert.ok(!block.includes('transition:width'));
   assert.ok(!block.includes('transition:max-width'));
   assert.ok(!block.includes('transition:box-shadow'));
-  assert.ok(block.includes('clip-path:'));
+  assert.ok(block.includes('transform:scaleX(.36)'));
+  assert.ok(block.includes('transition:transform'));
+  assert.ok(!block.includes('transition:font-size'));
+  assert.ok(!block.includes('transition:flex-basis'));
+  assert.ok(!block.includes('transition:padding'));
 });
 
 test('font CSS is non-blocking and the LCP image has an early connection and preload', () => {
