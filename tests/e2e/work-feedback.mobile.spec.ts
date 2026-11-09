@@ -99,28 +99,60 @@ test('feedback F toggle remains operable when reduced motion is preferred', asyn
 });
 
 
-test('open F glow follows the capsule silhouette and feedback form stays within the mobile viewport lane', async ({ page }) => {
-  for (const width of [320, 360, 390, 430]) {
-    await page.setViewportSize({ width, height: 780 });
+
+test('open F glow follows the actual button silhouette without changing its size or position', async ({ page }) => {
+  for (const width of [320, 390, 430]) {
+    await page.setViewportSize({ width, height: 844 });
     await page.goto('/');
-    await page.getByRole('button', { name: 'Give feedback' }).tap();
-    const launcher = page.getByRole('button', { name: 'Close feedback form' });
-    const dialog = page.getByRole('dialog');
-    const [glow, button, form] = await Promise.all([
-      launcher.evaluate(el => {
-        const s = getComputedStyle(el, '::before');
-        return { width: parseFloat(s.width), height: parseFloat(s.height), radius: s.borderRadius };
-      }),
+    const launcher = page.getByRole('button', { name: 'Give feedback' });
+    const [before, beforeStyle] = await Promise.all([
       launcher.boundingBox(),
-      dialog.boundingBox(),
+      launcher.evaluate(el => {
+        const button = getComputedStyle(el);
+        const glow = getComputedStyle(el, '::before');
+        return {
+          width: button.width,
+          height: button.height,
+          position: button.position,
+          glowWidth: glow.width,
+          glowHeight: glow.height,
+          glowRadius: glow.borderRadius,
+          glowTransform: glow.transform,
+        };
+      }),
     ]);
-    expect(glow.width).toBeGreaterThan(glow.height * 2);
-    expect(glow.radius).toContain('999');
-    expect(button && form).toBeTruthy();
-    expect(form!.x).toBeGreaterThanOrEqual(0);
-    expect(form!.x + form!.width).toBeLessThanOrEqual(width);
-    expect(form!.y).toBeGreaterThanOrEqual(0);
-    expect(form!.y + form!.height).toBeLessThan(button!.y - 8);
+    expect(before).not.toBeNull();
     await launcher.tap();
+    const openLauncher = page.getByRole('button', { name: 'Close feedback form' });
+    await expect(page.getByRole('dialog')).toBeVisible();
+    const [after, afterStyle] = await Promise.all([
+      openLauncher.boundingBox(),
+      openLauncher.evaluate(el => {
+        const button = getComputedStyle(el);
+        const glow = getComputedStyle(el, '::before');
+        return {
+          width: button.width,
+          height: button.height,
+          position: button.position,
+          glowWidth: glow.width,
+          glowHeight: glow.height,
+          glowRadius: glow.borderRadius,
+          glowTransform: glow.transform,
+          backdrop: glow.backdropFilter,
+        };
+      }),
+    ]);
+    expect(after).not.toBeNull();
+    expect(afterStyle.position).toBe('fixed');
+    expect(afterStyle.glowWidth).toBe(beforeStyle.glowWidth);
+    expect(afterStyle.glowHeight).toBe(beforeStyle.glowHeight);
+    expect(afterStyle.glowRadius).toBe(beforeStyle.glowRadius);
+    expect(afterStyle.glowTransform).toBe(beforeStyle.glowTransform);
+    expect(afterStyle.width).toBe(beforeStyle.width);
+    expect(afterStyle.height).toBe(beforeStyle.height);
+    expect(afterStyle.backdrop).toContain('blur');
+    expect(Math.abs(after!.x - before!.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(after!.y - before!.y)).toBeLessThanOrEqual(1);
+    await openLauncher.tap();
   }
 });
