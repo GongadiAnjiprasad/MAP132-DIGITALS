@@ -57,3 +57,10 @@ test('font CSS is non-blocking and the LCP image has an early connection and pre
   assert.ok(html.includes('rel="preload" as="style"'));
   assert.ok(!css.includes('@import url(\'https://fonts.googleapis.com'));
 });
+test('SVG and HTML favicon references use the optimized logo, not the 3.5 MB PNG', () => {
+  const favicon = read('../public/favicon.svg');
+  const html = read('../index.html');
+  assert.ok(favicon.includes('/resources/Logo.webp'));
+  assert.ok(!favicon.includes('/resources/Logo.png'));
+  assert.ok(html.includes('type="image/webp" href="/resources/Logo.webp"'));
+});
