@@ -2285,12 +2285,12 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 @media(max-width:360px){.work-category-card{padding:11px}.work-category-card>strong{font-size:13px}.work-category-description{font-size:9px}}
 
 /* MAP132 Feedback Studio — centered brand-led experience */
-.feedback-studio-scrim{justify-content:center;align-items:center;padding:18px;overflow-y:auto}
+.feedback-studio-scrim{justify-content:center;align-items:center;padding:18px 18px 178px;overflow-y:auto}
+.feedback-studio-scrim .feedback-studio{max-height:calc(100dvh - 196px);padding-bottom:34px}
 /* The original floating F remains above the dialog; its open state is softly frosted, not relocated. */
 .feedback-launch.royal-feedback-launch.is-form-open{z-index:100;pointer-events:auto;color:#f8e5b0}
 .feedback-launch.royal-feedback-launch.is-form-open::before{background:linear-gradient(135deg,rgba(49,39,24,.58),rgba(18,18,17,.48));border-color:rgba(230,199,121,.78);backdrop-filter:blur(13px) saturate(145%);-webkit-backdrop-filter:blur(13px) saturate(145%);box-shadow:0 0 0 1px rgba(213,170,102,.24),0 0 18px rgba(213,170,102,.42),0 8px 24px rgba(0,0,0,.38)}
-.feedback-studio-scrim .feedback-studio{padding-bottom:88px}
-@media(max-width:600px){.feedback-launch.royal-feedback-launch.is-form-open{z-index:1000}.feedback-studio-scrim .feedback-studio{padding-bottom:82px}}
+@media(max-width:600px){.feedback-launch.royal-feedback-launch.is-form-open{z-index:1000}.feedback-studio-scrim{padding:18px 12px calc(160px + env(safe-area-inset-bottom))}.feedback-studio-scrim .feedback-studio{max-height:calc(100dvh - 178px - env(safe-area-inset-bottom));padding-bottom:34px}}
 .feedback-studio{width:min(620px,100%);height:auto;max-height:min(92dvh,900px);overflow-y:auto;border:1px solid #d5aa6666;border-radius:20px;padding:clamp(20px,4vw,34px);background:radial-gradient(ellipse at 90% 0%,#d5aa661b,transparent 42%),linear-gradient(150deg,#202124,#101114 72%);box-shadow:0 28px 100px #000b;animation:feedback-studio-in .24s ease-out}
 @keyframes feedback-studio-in{from{transform:translateY(12px) scale(.985);opacity:.5}to{transform:translateY(0) scale(1);opacity:1}}
 .feedback-studio-brand{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:16px;border-bottom:1px solid #d5aa6633}
