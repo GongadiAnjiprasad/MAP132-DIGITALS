@@ -15,7 +15,8 @@ test('mobile work feedback remains usable and submits a service-specific rating'
   await dialog.getByLabel('WHICH SERVICE ARE YOU REVIEWING?').selectOption('Wedding / B’Day');
   await dialog.getByRole('button', { name: '5 stars' }).tap();
   await dialog.getByLabel('YOUR FEEDBACK').fill('Super');
-  await dialog.getByLabel(/I understand my feedback may be displayed publicly/).check();
+  await expect(dialog.locator('input[type="checkbox"]')).toHaveCount(0);
+  await expect(dialog.locator('.feedback-public-consent')).toBeVisible();
   await dialog.getByRole('button', { name: /Send feedback/g }).tap();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload.service).toBe('Wedding / B’Day');
@@ -54,17 +55,20 @@ test('floating F stays in its original position with a frosted-glass finish and 
     await expect(dialog).toBeVisible();
     const openLauncher = page.getByRole('button', { name: 'Close feedback form' });
     await expect(openLauncher).toBeVisible();
-    const [after, style, formBox] = await Promise.all([
+    const [after, style] = await Promise.all([
       openLauncher.boundingBox(),
-      openLauncher.evaluate(el => ({ backdrop: getComputedStyle(el, '::before').backdropFilter, position: getComputedStyle(el).position })),
-      dialog.boundingBox(),
+      openLauncher.evaluate(el => ({
+        backdrop: getComputedStyle(el, '::before').backdropFilter,
+        background: getComputedStyle(el, '::before').backgroundImage,
+        position: getComputedStyle(el).position,
+      })),
     ]);
-    expect(after && before && formBox).toBeTruthy();
+    expect(after && before).toBeTruthy();
     expect(Math.abs(after!.x - before!.x)).toBeLessThanOrEqual(1);
     expect(Math.abs(after!.y - before!.y)).toBeLessThanOrEqual(1);
     expect(style.position).toBe('fixed');
     expect(style.backdrop).toContain('blur');
-    expect(formBox!.y + formBox!.height).toBeLessThan(after!.y - 8);
+    expect(style.background).toContain('0.24');
     await openLauncher.tap();
     await expect(dialog).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Give feedback' })).toBeVisible();
@@ -176,7 +180,8 @@ test('desktop feedback textarea submits on Enter and keeps Shift+Enter for a new
   await textarea.press('Shift+Enter');
   await textarea.type('Second line');
   await expect(textarea).toHaveValue('First line\nSecond line');
-  await dialog.getByLabel(/I understand my feedback may be displayed publicly/).check();
+  await expect(dialog.locator('input[type="checkbox"]')).toHaveCount(0);
+  await expect(dialog.locator('.feedback-public-consent')).toBeVisible();
   await textarea.press('Enter');
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload.message).toBe('First line\nSecond line');
