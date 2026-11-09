@@ -111,6 +111,10 @@ test('Android desktop-site viewport keeps content top-led, readable and balanced
 test('desktop-site viewport stage stays fixed while active page content scrolls internally', async ({ page }) => {
   await page.setViewportSize({ width: 980, height: 800 });
   await page.goto('/');
+  // Wait for the React portfolio shell to mount before measuring its stage.
+  // Without this readiness check, a transient pre-mount DOM returns null here.
+  await expect(page.locator('.map132-slider-site')).toBeVisible();
+  await expect(page.locator('.ms-stage')).toBeVisible();
   const measure = () => page.evaluate(() => {
     const stage = document.querySelector('.ms-stage') as HTMLElement;
     const activeIndex = Array.from(document.querySelectorAll('.ms-nav button')).findIndex(button => button.classList.contains('active'));
