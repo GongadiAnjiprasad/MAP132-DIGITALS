@@ -15,7 +15,7 @@ export function formatFeedbackTimestamp(value?: string | null): string {
     minute: '2-digit',
     hour12: true,
     timeZoneName: 'short',
-  }).format(timestamp);
+  }).format(timestamp).replace(/\\b(am|pm)\\b/i, (period) => period.toUpperCase());
 
   return `Date: ${date} · Time: ${time}`;
 }
