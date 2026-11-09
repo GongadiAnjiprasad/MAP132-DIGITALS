@@ -47,7 +47,7 @@ test('mobile horizontal swipe advances the main portfolio page', async ({ page }
   const track = page.locator('.ms-track');
   await expect(page.locator('.ms-stage')).toBeVisible();
 
-  await dispatchTouchSwipe(page, '.ms-home-copy', 'left');
+  await dispatchTouchSwipe(page, '.ms-kicker', 'left');
 
   await expect(track).toHaveAttribute('style', /translateX\(-100%\)/);
 });
