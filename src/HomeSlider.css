@@ -32,7 +32,12 @@
 .ms-showcase-top{display:flex;justify-content:space-between;gap:10px;padding:0 2px 13px;color:var(--ms-gold);font-size:8px;letter-spacing:1.6px;font-weight:800}
 .ms-showcase-top span:last-child{color:#888982}
 .ms-service-bento{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-template-rows:repeat(2,minmax(112px,1fr));gap:8px}
-.ms-service-tile{position:relative;min-width:0;min-height:112px;padding:12px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:5px;border:1px solid #ffffff16;background-size:cover;background-position:center;text-align:left;color:#fff;cursor:pointer;overflow:hidden;transition:transform .25s,border-color .25s}
+.ms-service-tile{position:relative;min-width:0;min-height:112px;padding:12px;display:flex;flex-direction:column;justify-content:flex-end;align-items:flex-start;gap:5px;border:1px solid #ffffff16;background:#171b22;text-align:left;color:#fff;cursor:pointer;overflow:hidden;transition:transform .25s,border-color .25s}
+.ms-service-tile>img{position:absolute;inset:0;z-index:0;display:block;width:100%;height:100%;object-fit:cover}
+.ms-service-tile::before{content:"";position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,#090b0e08 5%,#090b0edb 100%);pointer-events:none}
+.ms-service-tile>span{z-index:2}
+.ms-service-tile>b,.ms-service-tile>small{position:relative;z-index:2}
+.ms-service-tile>i{z-index:2}
 .ms-service-tile:hover{transform:translateY(-3px);border-color:var(--ms-gold)}
 .ms-service-tile>span{position:absolute;top:9px;left:10px;color:#f1dba8;font-size:8px;letter-spacing:1px}
 .ms-service-tile b{font:700 11px/1.2 'Manrope',sans-serif}
