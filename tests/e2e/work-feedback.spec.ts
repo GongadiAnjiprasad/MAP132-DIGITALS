@@ -289,6 +289,8 @@ test('floating F stays in its original position with a frosted-glass finish and 
     await expect(dialog).toBeVisible();
     const openLauncher = page.getByRole('button', { name: 'Close feedback form' });
     await expect(openLauncher).toBeVisible();
+    await page.mouse.move(0, 0);
+    await page.waitForTimeout(300);
     const [current, style] = await Promise.all([
       openLauncher.boundingBox(),
       openLauncher.evaluate(el => ({ backdrop: getComputedStyle(el, '::before').backdropFilter, position: getComputedStyle(el).position })),
