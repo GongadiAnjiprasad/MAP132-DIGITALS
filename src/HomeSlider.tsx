@@ -220,6 +220,10 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     if (target.closest('input, textarea, select, video, iframe, button:not(.ms-service-tile):not(.work-category-tab):not(.all-work-filter), a')) return;
     const page = target.closest('.ms-page') as HTMLElement | null;
     // Do not capture touch pointers: native vertical scrolling must remain available inside each page.
+    // Capture the touch sequence on the stage so pointerup is still received
+    // when the finger drifts beyond the original child/page boundary. CSS keeps
+    // vertical pan native, while horizontal movement remains available to the slider.
+    try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* browser may already own the pointer */ }
     pointerStart.current = {
       x: event.clientX,
       y: event.clientY,
@@ -232,13 +236,16 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     const start = pointerStart.current;
     pointerStart.current = null;
     if (!start || start.pointerId !== event.pointerId) return;
+    try {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch { /* pointer capture may have been released by the browser */ }
     const dx = event.clientX - start.x;
     const dy = event.clientY - start.y;
     if (start.atHomeTop && dy > 110 && dy > Math.abs(dx) * 1.3) {
       window.location.reload();
       return;
     }
-    const direction = getHorizontalSwipeDirection(dx, dy, 38, 1.2);
+    const direction = getHorizontalSwipeDirection(dx, dy, 44, 1.15);
     if (direction !== 0) {
       // Suppress only the synthetic click generated on the element that received
       // the swipe. Do not swallow the visitor's next navigation/category tap.

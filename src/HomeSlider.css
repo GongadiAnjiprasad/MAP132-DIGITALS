@@ -13,7 +13,7 @@
 .ms-nav button.active{box-shadow:0 2px 0 var(--ms-gold)}
 .ms-nav .ms-workspace{border:1px solid var(--ms-line);padding:10px 12px;color:var(--ms-gold)}
 .ms-stage{flex:1;min-height:0;overflow:hidden;position:relative}
-.ms-track{height:100%;width:500%;display:flex;transition:transform .68s cubic-bezier(.22,.75,.22,1);will-change:transform}
+.ms-track{height:100%;width:500%;display:flex;transition:transform .52s cubic-bezier(.22,.75,.22,1);will-change:transform;backface-visibility:hidden}
 .ms-page{width:20%;height:100%;flex:0 0 20%;min-width:0;overflow-y:auto;overscroll-behavior-y:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:clamp(24px,4vh,48px) clamp(22px,6vw,92px)}
 .ms-page::-webkit-scrollbar{display:none}
 .ms-home-page{display:grid;grid-template-columns:minmax(280px,.82fr) minmax(460px,1.18fr);align-items:center;gap:clamp(24px,4vw,64px);background:radial-gradient(ellipse at 25% 50%,#4a38201f,transparent 55%)}
@@ -1597,3 +1597,17 @@
 .feedback-auto-reply p,.admin-feedback-reply p{margin:7px 0 0;line-height:1.6;font-size:13px}
 .admin-feedback-reply{margin:12px 0}
 @media(max-width:600px){.ms-review-tabs{gap:7px}.ms-review-tabs button{flex:1;padding:10px 11px;font-size:11px}.ms-review-empty{padding:18px 14px}}
+
+
+/* Reliable touch page swipes: native vertical scrolling, custom horizontal paging. */
+.map132-slider-site .ms-stage {
+  touch-action: pan-y pinch-zoom;
+  -webkit-tap-highlight-color: transparent;
+}
+.map132-slider-site .ms-track {
+  transform: translate3d(0, 0, 0);
+  backface-visibility: hidden;
+}
+@media (prefers-reduced-motion: reduce) {
+  .map132-slider-site .ms-track { transition: none; }
+}
