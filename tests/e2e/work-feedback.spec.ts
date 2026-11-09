@@ -17,7 +17,8 @@ test('work feedback form collects a service rating and seals the submitted revie
   await dialog.getByRole('button', { name: '4 stars' }).click();
   await dialog.getByLabel('YOUR FEEDBACK').fill('The pacing and colour grading were excellent.');
   await dialog.getByLabel('EMAIL (OPTIONAL)').fill('client@example.com');
-  await dialog.getByLabel(/I understand my feedback may be displayed publicly/).check();
+  await expect(dialog.locator('input[type="checkbox"]')).toHaveCount(0);
+  await expect(dialog.locator('.feedback-public-consent')).toBeVisible();
   await dialog.getByRole('button', { name: /Send feedback/ }).click();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload).toEqual({
@@ -47,8 +48,8 @@ test('work feedback enables after service selection and public display notice', 
   await message.fill('Super');
   await expect(submit).toBeDisabled();
   await dialog.getByRole('button', { name: '4 stars' }).click();
-  await expect(submit).toBeDisabled();
-  await dialog.getByLabel(/I understand my feedback may be displayed publicly/).check();
+  await expect(dialog.locator('input[type="checkbox"]')).toHaveCount(0);
+  await expect(dialog.locator('.feedback-public-consent')).toBeVisible();
   await expect(submit).toBeEnabled();
   await message.fill('   ');
   await expect(submit).toBeDisabled();
@@ -141,7 +142,8 @@ test('website experience feedback submits separately without a service selection
   await dialog.getByRole('button', { name: 'Mobile experience' }).click();
   await dialog.getByRole('button', { name: '5 stars' }).click();
   await dialog.getByLabel('YOUR FEEDBACK').fill('The site looks cinematic and is easy to explore on mobile.');
-  await dialog.getByLabel(/I understand my feedback may be displayed publicly/).check();
+  await expect(dialog.locator('input[type="checkbox"]')).toHaveCount(0);
+  await expect(dialog.locator('.feedback-public-consent')).toBeVisible();
   await dialog.getByRole('button', { name: /Send feedback/ }).click();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload).toEqual({
@@ -327,4 +329,53 @@ test('feedback feed removes duplicate Share feedback action and does not auto-ro
   await videoTab.click();
   await expect(videoTab).toHaveAttribute('aria-pressed', 'true');
   await expect(feed.getByText('Excellent cinematic edit.')).toBeVisible();
+});
+
+test('feedback studio fits mobile and desktop viewports without internal scrolling', async ({ page }) => {
+  for (const viewport of [{ width: 320, height: 740 },{ width: 390, height: 844 },{ width: 768, height: 1024 },{ width: 1440, height: 900 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Give feedback' }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    const metrics = await dialog.evaluate(element => {
+      const form = element.querySelector('form')!;
+      const rect = element.getBoundingClientRect();
+      const submit = form.querySelector('.feedback-submit')!.getBoundingClientRect();
+      const privacy = form.querySelector('.feedback-privacy')!.getBoundingClientRect();
+      return {top:rect.top,bottom:rect.bottom,left:rect.left,right:rect.right,formScroll:form.scrollHeight-form.clientHeight,dialogScroll:element.scrollHeight-element.clientHeight,submitBottom:submit.bottom,privacyBottom:privacy.bottom};
+    });
+    expect(metrics.top).toBeGreaterThanOrEqual(-1);
+    expect(metrics.left).toBeGreaterThanOrEqual(-1);
+    expect(metrics.right).toBeLessThanOrEqual(viewport.width+1);
+    expect(metrics.bottom).toBeLessThanOrEqual(viewport.height+1);
+    expect(metrics.formScroll).toBeLessThanOrEqual(1);
+    expect(metrics.dialogScroll).toBeLessThanOrEqual(1);
+    expect(metrics.submitBottom).toBeLessThanOrEqual(metrics.bottom+1);
+    expect(metrics.privacyBottom).toBeLessThanOrEqual(metrics.bottom+1);
+    await page.getByRole('button', { name: 'Close feedback', exact: true }).click();
+  }
+});
+
+test('desktop Enter submits feedback while Shift+Enter keeps a newline', async ({ page }) => {
+  await page.setViewportSize({width:1440,height:900});
+  let payload:any=null;
+  await page.route('**/api/feedback',async route=>{
+    payload=route.request().postDataJSON();
+    await route.fulfill({status:201,contentType:'application/json',body:JSON.stringify({submitted:true,id:'enter-feedback'})});
+  });
+  await page.goto('/');
+  await page.getByRole('button',{name:'Give feedback'}).click();
+  const dialog=page.getByRole('dialog');
+  await dialog.getByRole('button',{name:/Video Editing Services/}).click();
+  await dialog.getByLabel('WHICH SERVICE ARE YOU REVIEWING?').selectOption('Cinematic Trailers');
+  await dialog.getByRole('button',{name:'4 stars'}).click();
+  const message=dialog.getByLabel('YOUR FEEDBACK');
+  await message.fill('First line');
+  await message.press('Shift+Enter');
+  await message.type('Second line');
+  await message.press('Enter');
+  await expect(dialog.getByRole('heading',{name:'Thank you for your feedback.'})).toBeVisible();
+  expect(payload.message).toBe('First line\nSecond line');
+  expect(payload.publicConsent).toBe(true);
 });
