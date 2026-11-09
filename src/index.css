@@ -2477,3 +2477,18 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   .feedback-studio-scrim.is-closing{animation-name:feedback-scrim-out;animation-duration:1ms}
   .feedback-studio.is-closing{animation-name:feedback-studio-out;animation-duration:1ms}
 }
+
+/* Mobile feedback form: reserve a dedicated bottom lane for the fixed F launcher.
+   Keep the launcher in its original viewport position; constrain and scroll the dialog instead. */
+@media (max-width: 600px) {
+  .feedback-studio-scrim {
+    align-items: center;
+    padding: 10px 12px calc(112px + env(safe-area-inset-bottom));
+    overflow-y: auto;
+  }
+  .feedback-studio-scrim .feedback-studio {
+    max-height: calc(100dvh - 132px - env(safe-area-inset-bottom));
+    padding-bottom: 34px;
+    overflow-y: auto;
+  }
+}
