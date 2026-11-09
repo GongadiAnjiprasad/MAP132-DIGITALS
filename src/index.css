@@ -2478,55 +2478,21 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   .feedback-studio.is-closing{animation-name:feedback-studio-out;animation-duration:1ms}
 }
 
-/* One canonical mobile layout: center the form in the available viewport area,
-   reserve the fixed F launcher's bottom lane, and scroll only the form content. */
+/* Single source of truth for mobile Feedback Studio clearance.
+   Fixed launcher geometry: bottom 92px + height 52px; reserve 160px
+   for a reliable clearance buffer across mobile viewports. */
 @media (max-width: 600px) {
   .feedback-studio-scrim {
     justify-content: center;
     align-items: center;
-    padding: 10px 12px calc(160px + env(safe-area-inset-bottom));
-    overflow-y: auto;
-  }
-  .feedback-studio-scrim .feedback-studio {
-    max-height: calc(100dvh - 178px - env(safe-area-inset-bottom));
-    padding-bottom: 34px;
-    overflow-y: auto;
-  }
-}
-
-/* Frost the existing F control without changing its own silhouette or animation geometry. */
-.feedback-launch.royal-feedback-launch.is-form-open {
-  z-index: 100;
-  pointer-events: auto;
-  color: #f8e5b0;
-}
-.feedback-launch.royal-feedback-launch.is-form-open::before {
-  background: linear-gradient(135deg, rgba(49,39,24,.58), rgba(18,18,17,.48));
-  border-color: rgba(230,199,121,.78);
-  backdrop-filter: blur(13px) saturate(145%);
-  -webkit-backdrop-filter: blur(13px) saturate(145%);
-  box-shadow: 0 0 0 1px rgba(213,170,102,.24), 0 0 18px rgba(213,170,102,.42), 0 8px 24px rgba(0,0,0,.38);
-}
-@media (max-width: 600px) {
-  .feedback-launch.royal-feedback-launch.is-form-open { z-index: 1000; }
-}
-
-
-/* Feedback Studio viewport fit: use the available desktop width and reduce the reserved mobile launcher lane. */
-.feedback-studio {
-  width: min(820px, 92vw);
-  max-height: calc(100dvh - 40px);
-}
-.feedback-studio-scrim {
-  padding: 20px;
-  align-items: center;
-}
-@media (max-width: 600px) {
-  .feedback-studio-scrim {
     padding: max(8px, env(safe-area-inset-top)) 10px calc(160px + env(safe-area-inset-bottom));
+    overflow-y: auto;
   }
   .feedback-studio-scrim .feedback-studio {
-    max-height: calc(100dvh - 176px - env(safe-area-inset-bottom));
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 178px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     box-sizing: border-box;
+    overflow-y: auto;
   }
 }
