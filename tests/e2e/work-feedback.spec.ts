@@ -18,7 +18,6 @@ test('work feedback form collects a service rating and seals the submitted revie
   await dialog.getByLabel('YOUR FEEDBACK').fill('The pacing and colour grading were excellent.');
   await dialog.getByLabel('EMAIL (OPTIONAL)').fill('client@example.com');
   await expect(dialog.locator('input[type="checkbox"]')).toHaveCount(0);
-  await expect(dialog.locator('.feedback-public-consent')).toBeVisible();
   await dialog.getByRole('button', { name: /Send feedback/ }).click();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload).toEqual({
@@ -32,7 +31,7 @@ test('work feedback form collects a service rating and seals the submitted revie
   });
 });
 
-test('work feedback enables after service selection and public display notice', async ({ page }) => {
+test('work feedback enables after service selection', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Give feedback' }).click();
   const dialog = page.getByRole('dialog');
@@ -49,7 +48,6 @@ test('work feedback enables after service selection and public display notice', 
   await expect(submit).toBeDisabled();
   await dialog.getByRole('button', { name: '4 stars' }).click();
   await expect(dialog.locator('input[type="checkbox"]')).toHaveCount(0);
-  await expect(dialog.locator('.feedback-public-consent')).toBeVisible();
   await expect(submit).toBeEnabled();
   await message.fill('   ');
   await expect(submit).toBeDisabled();
@@ -143,7 +141,6 @@ test('website experience feedback submits separately without a service selection
   await dialog.getByRole('button', { name: '5 stars' }).click();
   await dialog.getByLabel('YOUR FEEDBACK').fill('The site looks cinematic and is easy to explore on mobile.');
   await expect(dialog.locator('input[type="checkbox"]')).toHaveCount(0);
-  await expect(dialog.locator('.feedback-public-consent')).toBeVisible();
   await dialog.getByRole('button', { name: /Send feedback/ }).click();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload).toEqual({
@@ -245,23 +242,20 @@ test('feedback form controls stay aligned and the message field keeps a visible 
     const dialog = page.getByRole('dialog');
     const message = dialog.getByLabel('YOUR FEEDBACK');
     const email = dialog.getByLabel('EMAIL (OPTIONAL)');
-    const consent = dialog.locator('.feedback-public-consent');
     const submit = dialog.getByRole('button', { name: /Send feedback/ });
     const bounds = await Promise.all([
       dialog.boundingBox(), message.boundingBox(), email.boundingBox(),
-      consent.boundingBox(), submit.boundingBox(),
+      submit.boundingBox(),
     ]);
     expect(bounds.every(Boolean)).toBeTruthy();
-    const [drawerBox, messageBox, emailBox, consentBox, submitBox] = bounds;
+    const [drawerBox, messageBox, emailBox, submitBox] = bounds;
     const inset = 9.5; // allow sub-pixel border rounding in Chromium
-    for (const control of [messageBox!, emailBox!, consentBox!, submitBox!]) {
+    for (const control of [messageBox!, emailBox!, submitBox!]) {
       expect(control.x).toBeGreaterThanOrEqual(drawerBox!.x + inset);
       expect(control.x + control.width).toBeLessThanOrEqual(drawerBox!.x + drawerBox!.width - inset);
     }
     expect(messageBox!.y).toBeLessThan(emailBox!.y);
-    expect(emailBox!.y).toBeLessThan(consentBox!.y);
-    expect(consentBox!.y).toBeLessThan(submitBox!.y);
-    expect(submitBox!.y - (consentBox!.y + consentBox!.height)).toBeLessThanOrEqual(16);
+    expect(emailBox!.y).toBeLessThan(submitBox!.y);
     const textareaStyle = await message.evaluate(element => {
       const style = getComputedStyle(element);
       return { borderWidth: style.borderTopWidth, borderStyle: style.borderTopStyle, boxSizing: style.boxSizing };

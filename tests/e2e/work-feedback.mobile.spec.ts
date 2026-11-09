@@ -16,7 +16,6 @@ test('mobile work feedback remains usable and submits a service-specific rating'
   await dialog.getByRole('button', { name: '5 stars' }).tap();
   await dialog.getByLabel('YOUR FEEDBACK').fill('Super');
   await expect(dialog.locator('input[type="checkbox"]')).toHaveCount(0);
-  await expect(dialog.locator('.feedback-public-consent')).toBeVisible();
   await dialog.getByRole('button', { name: /Send feedback/g }).tap();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload.service).toBe('Wedding / B’Day');
@@ -122,10 +121,14 @@ test('open F glow follows the actual button silhouette without changing its size
           glowHeight: glow.height,
           glowRadius: glow.borderRadius,
           glowTransform: glow.transform,
+          glowFilter: glow.filter,
+          glowShadow: glow.boxShadow,
         };
       }),
     ]);
     expect(before).not.toBeNull();
+    expect(beforeStyle.glowFilter).toContain('drop-shadow');
+    expect(beforeStyle.glowShadow).toBe('none');
     await launcher.tap();
     const openLauncher = page.getByRole('button', { name: 'Close feedback form' });
     await expect(page.getByRole('dialog')).toBeVisible();
@@ -143,10 +146,14 @@ test('open F glow follows the actual button silhouette without changing its size
           glowRadius: glow.borderRadius,
           glowTransform: glow.transform,
           backdrop: glow.backdropFilter,
+          glowFilter: glow.filter,
+          glowShadow: glow.boxShadow,
         };
       }),
     ]);
     expect(after).not.toBeNull();
+    expect(afterStyle.glowFilter).toContain('drop-shadow');
+    expect(afterStyle.glowShadow).toBe('none');
     expect(afterStyle.position).toBe('fixed');
     expect(afterStyle.glowWidth).toBe(beforeStyle.glowWidth);
     expect(afterStyle.glowHeight).toBe(beforeStyle.glowHeight);
@@ -181,7 +188,6 @@ test('desktop feedback textarea submits on Enter and keeps Shift+Enter for a new
   await textarea.type('Second line');
   await expect(textarea).toHaveValue('First line\nSecond line');
   await expect(dialog.locator('input[type="checkbox"]')).toHaveCount(0);
-  await expect(dialog.locator('.feedback-public-consent')).toBeVisible();
   await textarea.press('Enter');
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload.message).toBe('First line\nSecond line');
