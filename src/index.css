@@ -2492,3 +2492,16 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
     overflow-y: auto;
   }
 }
+
+/* Keep the open-state F launcher glow inside the circular control. */
+.feedback-launch.royal-feedback-launch.is-form-open::before{
+  top:0;right:0;width:54px;height:54px;transform:none;border-radius:50%;
+  background:linear-gradient(145deg,rgba(49,39,24,.72),rgba(18,18,17,.62));
+  border:1px solid rgba(230,199,121,.78);
+  box-shadow:0 0 0 1px rgba(213,170,102,.2),0 0 12px rgba(213,170,102,.34),0 5px 14px rgba(0,0,0,.3);
+}
+.feedback-launch.royal-feedback-launch.is-form-open .feedback-mark{transform:none}
+.feedback-launch.royal-feedback-launch.is-form-open .feedback-launch-text{opacity:0;transform:translateX(6px)}
+@media(max-width:600px){
+  .feedback-launch.royal-feedback-launch.is-form-open::before{width:52px;height:52px}
+}
