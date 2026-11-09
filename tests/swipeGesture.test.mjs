@@ -21,3 +21,12 @@ test('threshold and horizontal ratio are configurable', () => {
   assert.equal(getHorizontalSwipeDirection(-50, 10, 42, 1.15), 1);
   assert.equal(getHorizontalSwipeDirection(-50, 45, 42, 1.15), 0);
 });
+
+test('page swipe accepts a deliberate horizontal finger movement', () => {
+  assert.equal(getHorizontalSwipeDirection(-64, 12, 44, 1.15), 1);
+  assert.equal(getHorizontalSwipeDirection(64, 12, 44, 1.15), -1);
+});
+test('page swipe ignores short or mostly vertical finger movement', () => {
+  assert.equal(getHorizontalSwipeDirection(-42, 8, 44, 1.15), 0);
+  assert.equal(getHorizontalSwipeDirection(-64, 60, 44, 1.15), 0);
+});
