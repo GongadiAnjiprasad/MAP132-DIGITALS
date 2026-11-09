@@ -2478,19 +2478,20 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   .feedback-studio.is-closing{animation-name:feedback-studio-out;animation-duration:1ms}
 }
 
-/* Feedback Studio mobile viewport: clear the fixed F launcher using its real geometry.
-   Launcher: bottom 92px + height 52px; keep an 8px visual gap above it. */
+/* Single source of truth for mobile Feedback Studio clearance.
+   Fixed launcher geometry: bottom 92px + height 52px; reserve 160px
+   for a reliable clearance buffer across mobile viewports. */
 @media (max-width: 600px) {
   .feedback-studio-scrim {
     justify-content: center;
     align-items: center;
-    padding: max(8px, env(safe-area-inset-top)) 10px calc(152px + env(safe-area-inset-bottom));
+    padding: max(8px, env(safe-area-inset-top)) 10px calc(160px + env(safe-area-inset-bottom));
     overflow-y: auto;
   }
   .feedback-studio-scrim .feedback-studio {
     width: 100%;
     max-width: 100%;
-    max-height: calc(100dvh - 170px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 178px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     box-sizing: border-box;
     overflow-y: auto;
   }
