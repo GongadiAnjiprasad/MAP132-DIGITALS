@@ -1434,6 +1434,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-success{color:#9ed8ad}.feedback-error{color:#ff9b8e}
 .feedback-privacy{color:#777;font-size:10px;line-height:1.6;margin-top:16px}
 .feedback-inbox-item{margin-top:12px;border-color:#DDB57944}
+.feedback-inbox-timestamp{display:block;margin-top:6px;color:#e8d8b8;font-size:12px;font-weight:600;letter-spacing:.2px;text-transform:none;line-height:1.5}
 .feedback-inbox-item h2{font-size:18px;color:#d5aa66}
 .feedback-inbox-rating{font-size:11px;color:#aaa}
 .feedback-inbox-message{white-space:pre-wrap;overflow-wrap:anywhere;color:#e6e0d5;font-size:13px;line-height:1.7}
