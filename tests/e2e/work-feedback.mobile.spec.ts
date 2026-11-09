@@ -156,3 +156,28 @@ test('open F glow follows the actual button silhouette without changing its size
     await openLauncher.tap();
   }
 });
+
+
+test('desktop feedback textarea submits on Enter and keeps Shift+Enter for a newline', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  let payload: any = null;
+  await page.route('**/api/feedback', async route => {
+    payload = route.request().postDataJSON();
+    await route.fulfill({ status: 201, contentType: 'application/json', body: JSON.stringify({ submitted: true, id: 'test-enter-feedback' }) });
+  });
+  await page.goto('/');
+  await page.getByRole('button', { name: 'Give feedback' }).click();
+  const dialog = page.getByRole('dialog');
+  await dialog.getByRole('button', { name: /Video Editing Services/ }).click();
+  await dialog.getByLabel('WHICH SERVICE ARE YOU REVIEWING?').selectOption('Cinematic Trailers');
+  await dialog.getByRole('button', { name: '5 stars' }).click();
+  const textarea = dialog.getByLabel('YOUR FEEDBACK');
+  await textarea.fill('First line');
+  await textarea.press('Shift+Enter');
+  await textarea.type('Second line');
+  await expect(textarea).toHaveValue('First line\nSecond line');
+  await dialog.getByLabel(/I understand my feedback may be displayed publicly/).check();
+  await textarea.press('Enter');
+  await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
+  expect(payload.message).toBe('First line\nSecond line');
+});

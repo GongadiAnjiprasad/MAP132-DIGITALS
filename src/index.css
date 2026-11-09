@@ -2510,3 +2510,23 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 @media (max-width: 600px) {
   .feedback-launch.royal-feedback-launch.is-form-open { z-index: 1000; }
 }
+
+
+/* Feedback Studio viewport fit: use the available desktop width and reduce the reserved mobile launcher lane. */
+.feedback-studio {
+  width: min(820px, 92vw);
+  max-height: calc(100dvh - 40px);
+}
+.feedback-studio-scrim {
+  padding: 20px;
+  align-items: center;
+}
+@media (max-width: 600px) {
+  .feedback-studio-scrim {
+    padding: max(8px, env(safe-area-inset-top)) 10px calc(160px + env(safe-area-inset-bottom));
+  }
+  .feedback-studio-scrim .feedback-studio {
+    max-height: calc(100dvh - 176px - env(safe-area-inset-bottom));
+    box-sizing: border-box;
+  }
+}
