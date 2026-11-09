@@ -257,3 +257,22 @@ test('feedback review feed changes category with finger swipes without changing 
   await expect(feed.getByRole('button', { name: 'Video Editing Service' })).toHaveAttribute('aria-pressed', 'true');
   await expect(track).toHaveAttribute('style', /translateX\(0%\)/);
 });
+
+
+test('feedback review categories do not rotate automatically', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route('**/api/reviews', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ reviews: [
+      { id: 'video-review', kind: 'Work feedback', service: 'Cinematic Trailers', rating: 5, message: 'Excellent cinematic edit.', createdAt: '2026-11-09T10:00:00Z' },
+      { id: 'site-review', kind: 'Website Experience', service: 'Website Experience', rating: 5, message: 'Easy navigation and great design.', createdAt: '2026-11-09T10:05:00Z' },
+    ] }),
+  }));
+  await page.goto('/');
+  const feed = page.locator('.ms-home-review-feed');
+  await expect(feed.getByRole('button', { name: 'Video Editing Service' })).toHaveAttribute('aria-pressed', 'true');
+  await page.waitForTimeout(8300);
+  await expect(feed.getByRole('button', { name: 'Video Editing Service' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(feed.getByRole('button', { name: 'Website Experience' })).toHaveAttribute('aria-pressed', 'false');
+});
