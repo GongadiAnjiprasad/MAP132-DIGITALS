@@ -2526,6 +2526,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
     padding: max(8px, env(safe-area-inset-top)) 10px calc(104px + env(safe-area-inset-bottom));
   }
   .feedback-studio-scrim .feedback-studio {
-    max-height: calc(100dvh - 122px - env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 176px - env(safe-area-inset-bottom));
+    box-sizing: border-box;
   }
 }
