@@ -234,3 +234,26 @@ test('Explore category tabs allow horizontal page swipe while category taps stil
   await firstCategory.click();
   await expect(firstCategory).toHaveAttribute('aria-pressed', 'true');
 });
+
+
+test('feedback review feed changes category with finger swipes without changing the website page', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route('**/api/reviews', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ reviews: [
+      { id: 'video-review', kind: 'Work feedback', service: 'Cinematic Trailers', rating: 5, message: 'Excellent cinematic edit.', createdAt: '2026-11-09T10:00:00Z' },
+      { id: 'site-review', kind: 'Website Experience', service: 'Website Experience', rating: 5, message: 'Easy navigation and great design.', createdAt: '2026-11-09T10:05:00Z' },
+    ] }),
+  }));
+  await page.goto('/');
+  const feed = page.locator('.ms-home-review-feed');
+  const track = page.locator('.ms-track');
+  await expect(feed.getByRole('button', { name: 'Video Editing Service' })).toHaveAttribute('aria-pressed', 'true');
+  await dispatchTouchSwipe(page, '.ms-home-review-feed', 'left');
+  await expect(feed.getByRole('button', { name: 'Website Experience' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(feed.locator('.ms-review-card')).toContainText('Easy navigation and great design.');
+  await dispatchTouchSwipe(page, '.ms-home-review-feed', 'right');
+  await expect(feed.getByRole('button', { name: 'Video Editing Service' })).toHaveAttribute('aria-pressed', 'true');
+  await expect(track).toHaveAttribute('style', /translateX\(0%\)/);
+});
