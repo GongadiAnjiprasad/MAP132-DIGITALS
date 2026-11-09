@@ -2494,18 +2494,37 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   }
 }
 
-/* Frost the existing F control without changing its own silhouette or animation geometry. */
+/* Open feedback: collapse the launcher glow to the F control itself (not the full capsule). */
 .feedback-launch.royal-feedback-launch.is-form-open {
   z-index: 100;
   pointer-events: auto;
   color: #f8e5b0;
 }
 .feedback-launch.royal-feedback-launch.is-form-open::before {
-  background: linear-gradient(135deg, rgba(49,39,24,.58), rgba(18,18,17,.48));
+  top: 0;
+  right: 0;
+  width: 54px;
+  height: 54px;
+  transform: none;
+  border-radius: 50%;
+  background: linear-gradient(145deg, rgba(49,39,24,.58), rgba(18,18,17,.48));
   border-color: rgba(230,199,121,.78);
   backdrop-filter: blur(13px) saturate(145%);
   -webkit-backdrop-filter: blur(13px) saturate(145%);
   box-shadow: 0 0 0 1px rgba(213,170,102,.24), 0 0 18px rgba(213,170,102,.42), 0 8px 24px rgba(0,0,0,.38);
+}
+.feedback-launch.royal-feedback-launch.is-form-open .feedback-mark {
+  transform: none;
+}
+.feedback-launch.royal-feedback-launch.is-form-open .feedback-launch-text {
+  opacity: 0;
+  transform: translateX(6px);
+}
+@media (max-width: 600px) {
+  .feedback-launch.royal-feedback-launch.is-form-open::before {
+    width: 52px;
+    height: 52px;
+  }
 }
 @media (max-width: 600px) {
   .feedback-launch.royal-feedback-launch.is-form-open { z-index: 1000; }
