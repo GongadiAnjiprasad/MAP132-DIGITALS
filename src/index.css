@@ -2451,3 +2451,8 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
     font-size: 12px;
   }
 }
+
+
+.feedback-keyword-tags{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 13px}
+.feedback-keyword-tags span{display:inline-flex;align-items:center;max-width:100%;padding:6px 9px;border:1px solid rgba(232,189,122,.35);border-radius:999px;background:linear-gradient(110deg,rgba(232,189,122,.13),rgba(255,255,255,.035));color:#f0d2a5;font-size:9px;font-weight:700;letter-spacing:.25px;line-height:1.35}
+.ms-review-card .feedback-keyword-tags{margin:0 0 14px}
