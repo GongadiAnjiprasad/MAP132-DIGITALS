@@ -2506,3 +2506,65 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 @media(max-width:600px){
   .feedback-launch.royal-feedback-launch.is-form-open::before{width:52px;height:52px}
 }
+
+
+/* Final feedback launcher geometry: the open glow must match the capsule, not a circle. */
+.feedback-launch.royal-feedback-launch.is-form-open::before {
+  top: 0;
+  right: 0;
+  width: 150px;
+  height: 54px;
+  border-radius: 999px;
+  transform: scaleX(1);
+  transform-origin: right center;
+  background: linear-gradient(135deg, rgba(49,39,24,.72), rgba(18,18,17,.62));
+  border: 1px solid rgba(230,199,121,.78);
+  box-shadow: 0 0 0 1px rgba(213,170,102,.2), 0 0 15px rgba(213,170,102,.38), 0 7px 20px rgba(0,0,0,.32);
+}
+.feedback-launch.royal-feedback-launch.is-form-open .feedback-mark {
+  transform: translateX(-94px);
+}
+.feedback-launch.royal-feedback-launch.is-form-open .feedback-launch-text {
+  opacity: 1;
+  transform: translateX(0);
+}
+@media (max-width: 600px) {
+  .feedback-launch.royal-feedback-launch.is-form-open::before {
+    width: 146px;
+    height: 52px;
+    border-radius: 999px;
+    transform: scaleX(1);
+  }
+  .feedback-launch.royal-feedback-launch.is-form-open .feedback-mark {
+    transform: translateX(-91px);
+  }
+}
+
+/* Keep the existing floating launcher clear of the form while sizing the
+   dialog to the live mobile viewport; only the dialog body scrolls. */
+@media (max-width: 600px) {
+  .feedback-studio-scrim {
+    position: fixed;
+    inset: 0;
+    min-width: 0;
+    min-height: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    padding: max(10px, env(safe-area-inset-top)) 12px calc(160px + env(safe-area-inset-bottom));
+    box-sizing: border-box;
+  }
+  .feedback-studio-scrim .feedback-studio {
+    width: 100%;
+    max-width: 100%;
+    max-height: calc(100dvh - 178px - env(safe-area-inset-bottom));
+    min-height: 0;
+    flex: 0 1 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    box-sizing: border-box;
+  }
+}
