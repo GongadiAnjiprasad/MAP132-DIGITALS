@@ -100,27 +100,12 @@ test('feedback F toggle remains operable when reduced motion is preferred', asyn
 
 
 
-test('open F glow follows the actual button silhouette without changing its size or position', async ({ page }) => {
+test('open F glow is a glassy circle matching the F control, without shifting its fixed position', async ({ page }) => {
   for (const width of [320, 390, 430]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto('/');
     const launcher = page.getByRole('button', { name: 'Give feedback' });
-    const [before, beforeStyle] = await Promise.all([
-      launcher.boundingBox(),
-      launcher.evaluate(el => {
-        const button = getComputedStyle(el);
-        const glow = getComputedStyle(el, '::before');
-        return {
-          width: button.width,
-          height: button.height,
-          position: button.position,
-          glowWidth: glow.width,
-          glowHeight: glow.height,
-          glowRadius: glow.borderRadius,
-          glowTransform: glow.transform,
-        };
-      }),
-    ]);
+    const before = await launcher.boundingBox();
     expect(before).not.toBeNull();
     await launcher.tap();
     const openLauncher = page.getByRole('button', { name: 'Close feedback form' });
@@ -130,6 +115,8 @@ test('open F glow follows the actual button silhouette without changing its size
       openLauncher.evaluate(el => {
         const button = getComputedStyle(el);
         const glow = getComputedStyle(el, '::before');
+        const mark = getComputedStyle(el.querySelector('.feedback-mark'));
+        const label = getComputedStyle(el.querySelector('.feedback-launch-text'));
         return {
           width: button.width,
           height: button.height,
@@ -138,18 +125,24 @@ test('open F glow follows the actual button silhouette without changing its size
           glowHeight: glow.height,
           glowRadius: glow.borderRadius,
           glowTransform: glow.transform,
+          glowTop: glow.top,
+          glowRight: glow.right,
           backdrop: glow.backdropFilter,
+          markTransform: mark.transform,
+          labelOpacity: label.opacity,
         };
       }),
     ]);
     expect(after).not.toBeNull();
     expect(afterStyle.position).toBe('fixed');
-    expect(afterStyle.glowWidth).toBe(beforeStyle.glowWidth);
-    expect(afterStyle.glowHeight).toBe(beforeStyle.glowHeight);
-    expect(afterStyle.glowRadius).toBe(beforeStyle.glowRadius);
-    expect(afterStyle.glowTransform).toBe(beforeStyle.glowTransform);
-    expect(afterStyle.width).toBe(beforeStyle.width);
-    expect(afterStyle.height).toBe(beforeStyle.height);
+    expect(afterStyle.glowWidth).toBe('52px');
+    expect(afterStyle.glowHeight).toBe('52px');
+    expect(afterStyle.glowRadius).toBe('50%');
+    expect(afterStyle.glowTransform).toBe('none');
+    expect(afterStyle.glowTop).toBe('0px');
+    expect(afterStyle.glowRight).toBe('0px');
+    expect(afterStyle.markTransform).toBe('none');
+    expect(afterStyle.labelOpacity).toBe('0');
     expect(afterStyle.backdrop).toContain('blur');
     expect(Math.abs(after!.x - before!.x)).toBeLessThanOrEqual(1);
     expect(Math.abs(after!.y - before!.y)).toBeLessThanOrEqual(1);
