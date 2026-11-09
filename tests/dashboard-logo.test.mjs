@@ -30,7 +30,7 @@ test('logo uploads are restricted to authenticated admin sessions and supported 
   assert.match(worker, /validWebp/);
 });
 
-test('public portfolio API resolves uploaded logos and falls back to the official Logo.png worker asset and uses the PNG brand default', () => {
+test('public portfolio API resolves uploaded logos and falls back to the original Logo.png worker asset while serving the optimized WebP default', () => {
   assert.match(worker, /content\.logoUrl=content\.logoPath\?/);
   assert.match(worker, /portfolio\/logos\//);
   assert.match(worker, /resources\/Logo\.png/);
@@ -46,7 +46,7 @@ test('the public header uses the official PNG logo and feedback widget uses the 
   assert.ok(app.includes(officialLogo));
 });
 
-test('the official Logo.png logo is used for browser icons and social metadata', () => {
+test('the optimized public logo is used for browser icons and social metadata', () => {
   assert.match(app, /const absoluteLogo=new URL\(content\.logoUrl\|\|DEFAULT_BRAND_LOGO,window\.location\.origin\)\.href/);
   assert.match(app, /icon\.href=content\.logoUrl\|\|DEFAULT_BRAND_LOGO/);
   assert.match(app, /apple\.href=absoluteLogo/);
