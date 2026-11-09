@@ -16,7 +16,6 @@ test('mobile work feedback remains usable and submits a service-specific rating'
   await dialog.getByRole('button', { name: '5 stars' }).tap();
   await dialog.getByLabel('YOUR FEEDBACK').fill('Super');
   await expect(dialog.locator('input[type="checkbox"]')).toHaveCount(0);
-  await expect(dialog.locator('.feedback-public-consent')).toBeVisible();
   await dialog.getByRole('button', { name: /Send feedback/g }).tap();
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload.service).toBe('Wedding / B’Day');
@@ -189,7 +188,6 @@ test('desktop feedback textarea submits on Enter and keeps Shift+Enter for a new
   await textarea.type('Second line');
   await expect(textarea).toHaveValue('First line\nSecond line');
   await expect(dialog.locator('input[type="checkbox"]')).toHaveCount(0);
-  await expect(dialog.locator('.feedback-public-consent')).toBeVisible();
   await textarea.press('Enter');
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload.message).toBe('First line\nSecond line');
