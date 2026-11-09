@@ -1611,3 +1611,24 @@
 @media (prefers-reduced-motion: reduce) {
   .map132-slider-site .ms-track { transition: none; }
 }
+
+
+/* MAP132 home sections: match the Feedback Studio's restrained champagne-gold frame.
+   Border-only treatment; existing section content, spacing, colours and interactions stay unchanged. */
+.ms-page {
+  position: relative;
+  border: 1px solid rgba(213, 170, 102, .40);
+  border-radius: 18px;
+}
+.ms-page::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 18px;
+  right: 18px;
+  height: 2px;
+  border-radius: 0 0 2px 2px;
+  background: linear-gradient(90deg, transparent, #d5aa66 18%, #f1d69b 50%, #d5aa66 82%, transparent);
+  opacity: .88;
+  pointer-events: none;
+}
