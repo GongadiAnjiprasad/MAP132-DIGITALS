@@ -349,7 +349,7 @@ test('feedback studio fits mobile and desktop viewports without internal scrolli
     expect(metrics.left).toBeGreaterThanOrEqual(-1);
     expect(metrics.right).toBeLessThanOrEqual(viewport.width+1);
     expect(metrics.bottom).toBeLessThanOrEqual(viewport.height+1);
-    expect(metrics.formScroll).toBeLessThanOrEqual(1);
+    expect(metrics.formScroll, `${viewport.width}x${viewport.height}: ${JSON.stringify(metrics)}`).toBeLessThanOrEqual(1);
     expect(metrics.dialogScroll).toBeLessThanOrEqual(1);
     expect(metrics.submitBottom).toBeLessThanOrEqual(metrics.bottom+1);
     expect(metrics.privacyBottom).toBeLessThanOrEqual(metrics.bottom+1);
