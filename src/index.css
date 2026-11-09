@@ -2454,79 +2454,69 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .ms-review-card .feedback-keyword-tags{margin:0 0 14px}
 
 
-/* Feedback Studio: keep the F toggle inside the dialog header while open. */
+/* Feedback Studio — one viewport-fit layout; preserve existing design and colours. */
 .feedback-studio-brand-actions{display:flex;flex:0 0 auto;align-items:center;gap:9px}
-.feedback-launch.royal-feedback-launch.feedback-launch-in-dialog{
-  position:relative;inset:auto;z-index:1;width:40px;height:40px;min-width:40px;
-  padding:0;overflow:hidden;display:grid;place-items:center;border:1px solid #e6c779;
-  border-radius:50%;background:linear-gradient(145deg,#302719,#171613);box-shadow:0 0 14px #d5aa6655;
-  color:#f0cf82;transform:none;
-}
-.feedback-launch.royal-feedback-launch.feedback-launch-in-dialog::before{display:none}
-.feedback-launch.royal-feedback-launch.feedback-launch-in-dialog .feedback-mark{
-  position:static;inset:auto;width:100%;height:100%;transform:none;
-  font-size:21px;
-}
-.feedback-launch.royal-feedback-launch.feedback-launch-in-dialog:hover{transform:translateY(-1px)}
 .feedback-studio-brand-actions .feedback-close{width:40px;height:40px;display:grid;place-items:center}
+.feedback-studio-scrim{position:fixed;inset:0;justify-content:center;align-items:center;padding:max(8px,env(safe-area-inset-top)) 12px max(8px,env(safe-area-inset-bottom));overflow:hidden;overscroll-behavior:none;box-sizing:border-box}
+.feedback-studio-scrim .feedback-studio{width:min(620px,calc(100vw - 24px));max-width:620px;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 16px);height:auto;overflow:hidden;display:flex;flex-direction:column;padding:14px 20px;box-sizing:border-box}
+.feedback-studio-brand{flex:0 0 auto;padding-bottom:9px}
+.feedback-studio .feedback-drawer-head{flex:0 0 auto;margin:8px 0 7px}
+.feedback-studio .feedback-drawer-head .kicker{margin-bottom:6px}
+.feedback-studio form{flex:1 1 auto;min-height:0;width:100%;max-width:100%;display:flex;flex-direction:column;align-items:stretch;overflow:hidden}
+.feedback-studio form>*{flex:0 0 auto;min-width:0}
+.feedback-studio .feedback-label{margin:9px 0 5px}
+.feedback-studio .feedback-category-grid{gap:8px}
+.feedback-studio .feedback-category-grid button{min-height:104px;padding:9px 11px;gap:5px}
+.feedback-studio .feedback-stars{gap:10px}
+.feedback-studio #feedback-message{min-height:76px;max-height:84px;padding:10px 12px;resize:none}
+.feedback-studio #feedback-email,.feedback-studio #feedback-service{min-height:38px;padding:8px 10px}
+.feedback-studio .feedback-public-consent{margin:7px 0 4px;line-height:1.35}
+.feedback-studio .feedback-submit{min-height:44px;margin-top:4px;padding:10px 14px}
+.feedback-studio .feedback-submit-hint{margin:4px 0 0;line-height:1.3}
+.feedback-studio .feedback-privacy{margin:6px 0 0;line-height:1.35}
+/* Keep the floating F at its original position; translucent glass lets the layer beneath remain visible. */
+.feedback-launch.royal-feedback-launch.is-form-open{z-index:1000;pointer-events:auto;color:#f8e5b0}
+.feedback-launch.royal-feedback-launch.is-form-open::before{background:linear-gradient(135deg,rgba(49,39,24,.24),rgba(18,18,17,.20));border-color:rgba(230,199,121,.62);backdrop-filter:blur(6px) saturate(125%);-webkit-backdrop-filter:blur(6px) saturate(125%);box-shadow:0 0 0 1px rgba(213,170,102,.14),0 0 12px rgba(213,170,102,.22),0 5px 14px rgba(0,0,0,.20)}
 .feedback-studio-scrim.is-closing{animation:feedback-scrim-out .22s ease-in both}
 .feedback-studio.is-closing{animation:feedback-studio-out .22s cubic-bezier(.4,0,.8,.3) both}
 @keyframes feedback-scrim-out{to{opacity:0;backdrop-filter:blur(0)}}
 @keyframes feedback-studio-out{to{opacity:0;transform:translateY(10px) scale(.985)}}
-@media(prefers-reduced-motion:reduce){
-  .feedback-studio-scrim.is-closing{animation-name:feedback-scrim-out;animation-duration:1ms}
-  .feedback-studio.is-closing{animation-name:feedback-studio-out;animation-duration:1ms}
+@media(prefers-reduced-motion:reduce){.feedback-studio-scrim.is-closing{animation-name:feedback-scrim-out;animation-duration:1ms}.feedback-studio.is-closing{animation-name:feedback-studio-out;animation-duration:1ms}}
+@media(max-width:600px){
+.feedback-studio-scrim{padding:max(6px,env(safe-area-inset-top)) 8px max(6px,env(safe-area-inset-bottom))}
+.feedback-studio-scrim .feedback-studio{width:calc(100vw - 16px);max-width:100%;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);padding:12px 12px;border-radius:16px}
+.feedback-studio-brand{padding-bottom:7px}.feedback-studio-brand>img{max-height:43px;max-width:65%}
+.feedback-studio .feedback-drawer-head{margin:6px 0 5px}
+.feedback-studio .feedback-category-grid{gap:7px}
+.feedback-studio .feedback-category-grid button{min-height:96px;padding:8px;gap:4px}
+.feedback-studio .feedback-label{margin:7px 0 4px}
+.feedback-studio #feedback-message{min-height:68px;max-height:74px;padding:9px 10px}
+.feedback-studio #feedback-email,.feedback-studio #feedback-service{min-height:36px;padding:7px 9px}
+.feedback-studio .feedback-public-consent{margin:6px 0 3px;line-height:1.3}
+.feedback-studio .feedback-submit{min-height:42px;margin-top:3px;padding:9px 12px}
+.feedback-studio .feedback-submit-hint{margin:3px 0 0}
+.feedback-studio .feedback-privacy{margin:5px 0 0;line-height:1.3}
 }
-
-/* One canonical mobile layout: center the form in the available viewport area,
-   reserve the fixed F launcher's bottom lane, and scroll only the form content. */
-@media (max-width: 600px) {
-  .feedback-studio-scrim {
-    justify-content: center;
-    align-items: center;
-    padding: 10px 12px calc(160px + env(safe-area-inset-bottom));
-    overflow-y: auto;
-  }
-  .feedback-studio-scrim .feedback-studio {
-    max-height: calc(100dvh - 178px - env(safe-area-inset-bottom));
-    padding-bottom: 34px;
-    overflow-y: auto;
-  }
+@media(max-width:360px){
+.feedback-studio .feedback-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.feedback-studio .feedback-category-grid button{min-height:76px;padding:6px;gap:3px}
+.feedback-studio .feedback-category-icon{width:48px;height:48px}
 }
-
-/* Frost the existing F control without changing its own silhouette or animation geometry. */
-.feedback-launch.royal-feedback-launch.is-form-open {
-  z-index: 100;
-  pointer-events: auto;
-  color: #f8e5b0;
+@media(max-height:760px){
+.feedback-studio-scrim .feedback-studio{padding-top:8px;padding-bottom:8px}
+.feedback-studio-brand{padding-bottom:4px}
+.feedback-studio .feedback-drawer-head{margin:3px 0 2px}
+.feedback-studio .feedback-label{margin:4px 0 2px}
+.feedback-studio .feedback-category-grid button{min-height:76px;padding:6px}
+.feedback-studio #feedback-message{min-height:48px;max-height:52px;padding:6px 8px}
+.feedback-studio .feedback-public-consent{margin:4px 0 2px}
+.feedback-studio .feedback-submit{min-height:38px;padding:7px 10px}
+.feedback-studio .feedback-submit-hint{margin:2px 0 0}
+.feedback-studio .feedback-privacy{margin-top:3px;line-height:1.2;font-size:9px}
 }
-.feedback-launch.royal-feedback-launch.is-form-open::before {
-  background: linear-gradient(135deg, rgba(49,39,24,.58), rgba(18,18,17,.48));
-  border-color: rgba(230,199,121,.78);
-  backdrop-filter: blur(13px) saturate(145%);
-  -webkit-backdrop-filter: blur(13px) saturate(145%);
-  box-shadow: 0 0 0 1px rgba(213,170,102,.24), 0 0 18px rgba(213,170,102,.42), 0 8px 24px rgba(0,0,0,.38);
-}
-@media (max-width: 600px) {
-  .feedback-launch.royal-feedback-launch.is-form-open { z-index: 1000; }
-}
-
-
-/* Feedback Studio viewport fit: use the available desktop width and reduce the reserved mobile launcher lane. */
-.feedback-studio {
-  width: min(820px, 92vw);
-  max-height: calc(100dvh - 40px);
-}
-.feedback-studio-scrim {
-  padding: 20px;
-  align-items: center;
-}
-@media (max-width: 600px) {
-  .feedback-studio-scrim {
-    padding: max(8px, env(safe-area-inset-top)) 10px calc(160px + env(safe-area-inset-bottom));
-  }
-  .feedback-studio-scrim .feedback-studio {
-    max-height: calc(100dvh - 176px - env(safe-area-inset-bottom));
-    box-sizing: border-box;
-  }
+@media(max-width:600px) and (max-height:760px){
+.feedback-studio-scrim .feedback-studio{padding:7px 9px}
+.feedback-studio .feedback-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+.feedback-studio .feedback-category-grid button{min-height:70px;padding:5px}
+.feedback-studio #feedback-message{min-height:44px;max-height:48px;padding:6px 8px}
 }
