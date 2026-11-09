@@ -175,9 +175,9 @@ test('desktop feedback textarea submits on Enter and keeps Shift+Enter for a new
   await textarea.fill('First line');
   await textarea.press('Shift+Enter');
   await textarea.type('Second line');
-  await expect(textarea).toHaveValue('First line\\nSecond line');
+  await expect(textarea).toHaveValue('First line\nSecond line');
   await dialog.getByLabel(/I understand my feedback may be displayed publicly/).check();
   await textarea.press('Enter');
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
-  expect(payload.message).toBe('First line\\nSecond line');
+  expect(payload.message).toBe('First line\nSecond line');
 });
