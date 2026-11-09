@@ -495,7 +495,7 @@
 
 
 /* Review feed demo cards */
-.ms-home-review-feed{grid-column:1/-1;margin-top:2px;padding:19px 20px;border:1px solid rgba(232,199,122,.25);background:linear-gradient(115deg,rgba(232,199,122,.075),rgba(255,255,255,.018))}
+.ms-home-review-feed{grid-column:1/-1;margin-top:2px;padding:19px 20px;border:1px solid rgba(232,199,122,.25);background:linear-gradient(115deg,rgba(232,199,122,.075),rgba(255,255,255,.018));touch-action:pan-y;overscroll-behavior:contain}
 .ms-review-feed-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
 .ms-review-feed-heading>div>span{display:block;color:var(--ms-gold);font-size:10px;font-weight:800;letter-spacing:1.6px;margin-bottom:5px}
 .ms-review-feed-heading>div>b{font:700 19px/1.2 Manrope,sans-serif}
