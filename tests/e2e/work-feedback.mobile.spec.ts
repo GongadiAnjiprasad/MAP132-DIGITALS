@@ -94,7 +94,7 @@ test('feedback F toggle remains operable when reduced motion is preferred', asyn
   await page.getByRole('button', { name: 'Give feedback' }).tap();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
-  await page.getByRole('button', { name: 'Close feedback form' }).tap();
+  await page.getByRole('button', { name: 'Close feedback' }).tap();
   await expect(dialog).toHaveCount(0);
 });
 
@@ -144,6 +144,6 @@ test('feedback form fits without internal scrolling when a normal mobile viewpor
       .toBeLessThanOrEqual(measurements.clientHeight + 1);
     expect(measurements.top).toBeGreaterThanOrEqual(0);
     expect(measurements.bottom).toBeLessThanOrEqual(measurements.viewportHeight - 170);
-    await page.getByRole('button', { name: 'Close feedback form' }).tap();
+    await page.getByRole('button', { name: 'Close feedback' }).tap();
   }
 });
