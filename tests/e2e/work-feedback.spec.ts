@@ -270,3 +270,60 @@ test('feedback form controls stay aligned and the message field keeps a visible 
     await page.getByRole('button', { name: 'Close feedback' }).click();
   }
 });
+
+
+test('floating F moves into the feedback header and toggles the dialog closed without overlapping the form', async ({ page }) => {
+  for (const viewport of [
+    { width: 320, height: 740 },
+    { width: 390, height: 844 },
+    { width: 768, height: 1024 },
+    { width: 1440, height: 900 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    const launcher = page.getByRole('button', { name: 'Give feedback' });
+    await expect(launcher).toBeVisible();
+    await launcher.click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    const header = dialog.locator('.feedback-studio-brand');
+    const toggle = header.getByRole('button', { name: 'Close feedback panel' });
+    const close = header.getByRole('button', { name: 'Close feedback' });
+    await expect(toggle).toBeVisible();
+    await expect(launcher).toHaveCount(0);
+    const [headerBox, toggleBox, closeBox, messageBox] = await Promise.all([
+      header.boundingBox(), toggle.boundingBox(), close.boundingBox(),
+      dialog.getByLabel('YOUR FEEDBACK').boundingBox(),
+    ]);
+    expect(headerBox && toggleBox && closeBox && messageBox).toBeTruthy();
+    expect(toggleBox!.x).toBeGreaterThanOrEqual(headerBox!.x);
+    expect(toggleBox!.x + toggleBox!.width).toBeLessThanOrEqual(closeBox!.x);
+    expect(closeBox!.x + closeBox!.width).toBeLessThanOrEqual(headerBox!.x + headerBox!.width);
+    expect(messageBox!.y).toBeGreaterThan(headerBox!.y + headerBox!.height);
+    await toggle.click();
+    await expect(dialog).toHaveCount(0);
+    await expect(page.getByRole('button', { name: 'Give feedback' })).toBeVisible();
+  }
+});
+
+test('feedback feed removes the duplicate Share feedback action and automatically rotates when both categories have reviews', async ({ page }) => {
+  await page.route('**/api/reviews', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ reviews: [
+      { id: 'video-review', kind: 'Work feedback', service: 'Cinematic Trailers', rating: 5, message: 'Excellent cinematic edit.', createdAt: new Date().toISOString() },
+      { id: 'website-review', kind: 'Website Experience', service: '', rating: 4, message: 'The website is easy to navigate.', createdAt: new Date().toISOString() },
+    ] }),
+  }));
+  await page.goto('/');
+  const feed = page.getByRole('region', { name: 'Client feedback feed' });
+  const videoTab = feed.getByRole('button', { name: 'Video Editing Service' });
+  const websiteTab = feed.getByRole('button', { name: 'Website Experience' });
+  await expect(videoTab).toHaveAttribute('aria-pressed', 'true');
+  await expect(feed.getByRole('button', { name: /Share feedback/ })).toHaveCount(0);
+  await expect(websiteTab).toHaveAttribute('aria-pressed', 'true', { timeout: 10000 });
+  await expect(feed.getByText('The website is easy to navigate.')).toBeVisible();
+  await videoTab.click();
+  await expect(videoTab).toHaveAttribute('aria-pressed', 'true');
+  await expect(feed.getByText('Excellent cinematic edit.')).toBeVisible();
+});

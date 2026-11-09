@@ -116,7 +116,16 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     window.addEventListener('focus',onFocus);
     return()=>{active=false;window.clearInterval(timer);document.removeEventListener('visibilitychange',onFocus);window.removeEventListener('focus',onFocus);};
   },[]);
+  const hasVideoReviews=publicReviews.some(review=>review.kind!=='Website Experience');
+  const hasWebsiteReviews=publicReviews.some(review=>review.kind==='Website Experience');
   const visibleHomeReviews=publicReviews.filter(review=>review.kind==='Website Experience'?reviewCategory==='Website Experience':reviewCategory==='Video Editing Service');
+  useEffect(()=>{
+    if(!hasVideoReviews||!hasWebsiteReviews||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
+    const timer=window.setInterval(()=>{
+      if(document.visibilityState==='visible')setReviewCategory(current=>current==='Video Editing Service'?'Website Experience':'Video Editing Service');
+    },8000);
+    return()=>window.clearInterval(timer);
+  },[hasVideoReviews,hasWebsiteReviews]);
   const ambientTheme = useAmbientServiceTheme();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
@@ -343,7 +352,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
                 <button type="button" className={reviewCategory==='Video Editing Service'?'active':''} aria-pressed={reviewCategory==='Video Editing Service'} onClick={()=>setReviewCategory('Video Editing Service')}>Video Editing Service</button>
                 <button type="button" className={reviewCategory==='Website Experience'?'active':''} aria-pressed={reviewCategory==='Website Experience'} onClick={()=>setReviewCategory('Website Experience')}>Website Experience</button>
               </div>
-              {visibleHomeReviews.length>0?<div className="ms-review-feed-grid">
+              {visibleHomeReviews.length>0?<div className="ms-review-feed-grid" aria-live="polite">
                 {visibleHomeReviews.slice(0,3).map(review=><article className="ms-review-card ms-live-review-card" key={review.id}>
                   <div className="ms-review-stars" aria-label={review.rating+' out of 5 stars'}>{'★'.repeat(Math.max(0,Math.min(5,review.rating)))}</div>
                   <p>“{review.message}”</p>
@@ -351,8 +360,8 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
                   <div className="ms-review-by"><span>{review.kind==='Website Experience'?'W':'M'}</span><div><b>{review.service || (review.kind==='Website Experience'?'Website Experience':'Video Editing Service')}</b><small>{review.kind==='Website Experience'?'Website Experience':'Video Editing Service'} · {formatFeedbackTimestamp(review.createdAt)}</small></div></div>
                   {review.response&&<div className="ms-brand-reply"><span>MAP132 DIGITALS REPLY</span><p>{review.response}</p></div>}
                 </article>)}
-              </div>:<div className="ms-review-empty"><b>No published feedback in this category yet.</b><span>Share your genuine experience and help us improve.</span></div>}
-              <div className="ms-review-feed-foot"><span>{visibleHomeReviews.length} published {visibleHomeReviews.length===1?'review':'reviews'} · refreshes automatically</span><button type="button" onClick={()=>window.dispatchEvent(new Event('map132-open-feedback'))}>Share feedback <ArrowRight size={15}/></button></div>
+              </div>:<div className="ms-review-empty" aria-live="polite"><b>No published feedback in this category yet.</b><span>Share your genuine experience and help us improve.</span></div>}
+              <div className="ms-review-feed-foot"><span>{visibleHomeReviews.length} published {visibleHomeReviews.length===1?'review':'reviews'} · refreshes automatically</span></div>
             </section>
         </section>
 

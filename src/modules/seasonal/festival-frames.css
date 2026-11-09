@@ -1,19 +1,19 @@
 .festival-atmosphere {
   position: fixed; inset: 0; z-index: 1; overflow: hidden;
-  pointer-events: none; opacity: .48;
+  pointer-events: none; opacity: .32;
 }
 .festival-atmosphere span {
   position: absolute; top: -8%; color: #d5aa66;
-  font-size: clamp(16px, 2.4vw, 30px);
-  text-shadow: 0 0 14px currentColor, 0 0 26px currentColor;
+  font-size: clamp(13px, 1.8vw, 22px);
+  text-shadow: 0 0 8px currentColor;
   animation: festival-drift linear infinite;
 }
 .festival-snow span { color: #d9e9f6; }
 .festival-sun span { color: #e8bd7a; }
 @keyframes festival-drift {
   0% { transform: translate3d(0,-4vh,0) rotate(0deg); opacity: 0; }
-  12% { opacity: .88; }
-  88% { opacity: .72; }
+  8% { opacity: .62; }
+  92% { opacity: .5; }
   100% { transform: translate3d(22px,110vh,0) rotate(180deg); opacity: 0; }
 }
 

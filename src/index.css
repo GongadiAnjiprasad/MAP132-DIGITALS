@@ -2447,3 +2447,27 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-keyword-tags{display:flex;flex-wrap:wrap;gap:7px;margin:10px 0 13px}
 .feedback-keyword-tags span{display:inline-flex;align-items:center;max-width:100%;padding:6px 9px;border:1px solid rgba(232,189,122,.35);border-radius:999px;background:linear-gradient(110deg,rgba(232,189,122,.13),rgba(255,255,255,.035));color:#f0d2a5;font-size:9px;font-weight:700;letter-spacing:.25px;line-height:1.35}
 .ms-review-card .feedback-keyword-tags{margin:0 0 14px}
+
+
+/* Feedback Studio: keep the F toggle inside the dialog header while open. */
+.feedback-studio-brand-actions{display:flex;flex:0 0 auto;align-items:center;gap:9px}
+.feedback-launch.royal-feedback-launch.feedback-launch-in-dialog{
+  position:relative;inset:auto;z-index:1;width:40px;height:40px;min-width:40px;
+  padding:0;overflow:hidden;display:grid;place-items:center;border:1px solid #e6c779;
+  border-radius:50%;background:linear-gradient(145deg,#302719,#171613);box-shadow:0 0 14px #d5aa6655;
+  color:#f0cf82;transform:none;
+}
+.feedback-launch.royal-feedback-launch.feedback-launch-in-dialog::before{display:none}
+.feedback-launch.royal-feedback-launch.feedback-launch-in-dialog .feedback-mark{
+  position:static;inset:auto;width:100%;height:100%;transform:none;
+  font-size:21px;
+}
+.feedback-launch.royal-feedback-launch.feedback-launch-in-dialog:hover{transform:translateY(-1px)}
+.feedback-studio-brand-actions .feedback-close{width:40px;height:40px;display:grid;place-items:center}
+.feedback-studio-scrim.is-closing{animation:feedback-scrim-out .22s ease-in both}
+.feedback-studio.is-closing{animation:feedback-studio-out .22s cubic-bezier(.4,0,.8,.3) both}
+@keyframes feedback-scrim-out{to{opacity:0;backdrop-filter:blur(0)}}
+@keyframes feedback-studio-out{to{opacity:0;transform:translateY(10px) scale(.985)}}
+@media(prefers-reduced-motion:reduce){
+  .feedback-studio-scrim.is-closing,.feedback-studio.is-closing{animation:none}
+}

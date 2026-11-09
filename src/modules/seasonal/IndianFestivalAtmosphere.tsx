@@ -74,13 +74,13 @@ function IndianFestivalAtmosphere({ logoUrl = '/resources/Logo.png' }: { logoUrl
   return (
     <>
       <div className={'festival-atmosphere festival-' + festival.theme} aria-hidden="true">
-        {Array.from({ length: 10 }, (_, index) => (
+        {Array.from({ length: 6 }, (_, index) => (
           <span
             key={index}
             style={{
-              left: (5 + index * 10) + '%',
-              animationDuration: (18 + (index % 4) * 4) + 's',
-              animationDelay: (-index * 2.1) + 's'
+              left: (7 + index * 17) + '%',
+              animationDuration: (24 + (index % 3) * 4) + 's',
+              animationDelay: (-index * 3.5) + 's'
             }}
           >
             {particles[index % particles.length]}
