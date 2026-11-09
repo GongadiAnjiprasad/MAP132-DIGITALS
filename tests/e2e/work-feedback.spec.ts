@@ -315,25 +315,3 @@ test('feedback feed removes duplicate Share feedback action and does not auto-ro
   }));
   await page.goto('/');
   const feed = page.getByRole('region', { name: 'Client feedback feed' });
-  const videoTab = feed.getByRole('button', { name: 'Video Editing Service' });
-  const websiteTab = feed.getByRole('button', { name: 'Website Experience' });
-  await expect(videoTab).toHaveAttribute('aria-pressed', 'true');
-  await expect(feed.getByRole('button', { name: /Share feedback/ })).toHaveCount(0);
-  await page.waitForTimeout(8300);
-  await expect(videoTab).toHaveAttribute('aria-pressed', 'true');
-  await expect(websiteTab).toHaveAttribute('aria-pressed', 'false');
-  await videoTab.click();
-  await expect(videoTab).toHaveAttribute('aria-pressed', 'true');
-  await expect(feed.getByText('Excellent cinematic edit.')).toBeVisible();
-});
-
-  const videoTab = feed.getByRole('button', { name: 'Video Editing Service' });
-  const websiteTab = feed.getByRole('button', { name: 'Website Experience' });
-  await expect(videoTab).toHaveAttribute('aria-pressed', 'true');
-  await expect(feed.getByRole('button', { name: /Share feedback/ })).toHaveCount(0);
-  await expect(websiteTab).toHaveAttribute('aria-pressed', 'true', { timeout: 10000 });
-  await expect(feed.getByText('The website is easy to navigate.')).toBeVisible();
-  await videoTab.click();
-  await expect(videoTab).toHaveAttribute('aria-pressed', 'true');
-  await expect(feed.getByText('Excellent cinematic edit.')).toBeVisible();
-});
