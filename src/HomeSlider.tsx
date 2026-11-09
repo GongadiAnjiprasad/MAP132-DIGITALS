@@ -8,6 +8,7 @@ import { getHorizontalSwipeDirection } from './swipeGesture';
 import { DEMO_SHOWCASE } from './demoShowcase';
 import { useAmbientServiceTheme, type ServiceThemeKey } from './modules/ambient-service-themes/useAmbientServiceTheme';
 import { getFeedbackHighlights } from './modules/feedback/feedbackHighlights';
+import { formatFeedbackTimestamp } from './modules/feedback/feedbackTimestamp';
 
 type PortfolioItem = {
   id: string; title: string; category: string; description: string;
@@ -339,7 +340,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
                   <div className="ms-review-stars" aria-label={review.rating+' out of 5 stars'}>{'★'.repeat(Math.max(0,Math.min(5,review.rating)))}</div>
                   <p>“{review.message}”</p>
                   {getFeedbackHighlights(review.message,review.kind).length>0&&<div className="feedback-keyword-tags" aria-label="Feedback highlights">{getFeedbackHighlights(review.message,review.kind).map(tag=><span key={tag}>{tag}</span>)}</div>}
-                  <div className="ms-review-by"><span>{review.kind==='Website Experience'?'W':'M'}</span><div><b>{review.service}</b><small>Verified customer feedback</small></div></div>
+                  <div className="ms-review-by"><span>{review.kind==='Website Experience'?'W':'M'}</span><div><b>{review.service || (review.kind==='Website Experience'?'Website Experience':'Video Editing Service')}</b><small>{review.kind==='Website Experience'?'Website Experience':'Video Editing Service'} · {formatFeedbackTimestamp(review.createdAt)}</small></div></div>
                   {review.response&&<div className="ms-brand-reply"><span>MAP132 DIGITALS REPLY</span><p>{review.response}</p></div>}
                 </article>)}
               </div>:<div className="ms-review-empty"><b>No published feedback in this category yet.</b><span>Share your genuine experience and help us improve.</span></div>}

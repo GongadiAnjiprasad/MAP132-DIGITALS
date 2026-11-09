@@ -213,8 +213,8 @@ test('homepage feedback tabs show only matching live reviews and refresh on focu
     calls += 1;
     const reviews = calls <= 2 ? [] : [{
       id: 'live-service-review', kind: 'Work feedback', service: 'Cinematic Trailers',
-      rating: 5, message: 'Mee service super undhi', response: 'Maa feedback share chesinanduku chala thanks!',
-      createdAt: '2026-11-08T00:00:00.000Z'
+      rating: 5, message: 'Cinematic editing with smooth transitions and colour grading.',
+      response: 'Maa feedback share chesinanduku chala thanks!', createdAt: new Date().toISOString()
     }];
     await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ reviews }) });
   });
@@ -223,7 +223,11 @@ test('homepage feedback tabs show only matching live reviews and refresh on focu
   await expect(feed).toBeVisible();
   await feed.getByRole('button', { name: 'Video Editing Service' }).click();
   await page.evaluate(() => window.dispatchEvent(new Event('focus')));
-  await expect(feed.getByText('Mee service super undhi')).toBeVisible();
+  await expect(feed.getByText('Cinematic editing with smooth transitions and colour grading.')).toBeVisible();
+  await expect(feed.getByText('Cinematic Editing', { exact: true })).toBeVisible();
+  await expect(feed.getByText('Transitions', { exact: true })).toBeVisible();
+  await expect(feed.getByText('Colour Grading', { exact: true })).toBeVisible();
+  await expect(feed.getByText('Just now')).toBeVisible();
   await expect(feed.getByText('Maa feedback share chesinanduku chala thanks!')).toBeVisible();
   await feed.getByRole('button', { name: 'Website Experience' }).click();
   await expect(feed.getByText('No published feedback in this category yet.')).toBeVisible();
