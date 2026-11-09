@@ -331,13 +331,14 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
             <section className="ms-home-review-feed ms-live-feedback-feed" aria-label="Client feedback feed">
               <div className="ms-review-feed-heading"><div><span>CLIENT LOVE / FEEDBACK FEED</span><b>Kind words. Creative stories.</b></div><span className="ms-live-label"><i/> LIVE REVIEWS</span></div>
               <div className="ms-review-tabs" role="group" aria-label="Feedback category">
-                <button type="button" className={reviewCategory==='Website Experience'?'active':''} aria-pressed={reviewCategory==='Website Experience'} onClick={()=>setReviewCategory('Website Experience')}>Website Experience</button>
                 <button type="button" className={reviewCategory==='Video Editing Service'?'active':''} aria-pressed={reviewCategory==='Video Editing Service'} onClick={()=>setReviewCategory('Video Editing Service')}>Video Editing Service</button>
+                <button type="button" className={reviewCategory==='Website Experience'?'active':''} aria-pressed={reviewCategory==='Website Experience'} onClick={()=>setReviewCategory('Website Experience')}>Website Experience</button>
               </div>
               {visibleHomeReviews.length>0?<div className="ms-review-feed-grid">
                 {visibleHomeReviews.slice(0,3).map(review=><article className="ms-review-card ms-live-review-card" key={review.id}>
                   <div className="ms-review-stars" aria-label={review.rating+' out of 5 stars'}>{'★'.repeat(Math.max(0,Math.min(5,review.rating)))}</div>
                   <p>“{review.message}”</p>
+                  {getFeedbackHighlights(review.message,review.kind).length>0&&<div className="feedback-keyword-tags" aria-label="Feedback highlights">{getFeedbackHighlights(review.message,review.kind).map(tag=><span key={tag}>{tag}</span>)}</div>}
                   <div className="ms-review-by"><span>{review.kind==='Website Experience'?'W':'M'}</span><div><b>{review.service}</b><small>Verified customer feedback</small></div></div>
                   {review.response&&<div className="ms-brand-reply"><span>MAP132 DIGITALS REPLY</span><p>{review.response}</p></div>}
                 </article>)}
