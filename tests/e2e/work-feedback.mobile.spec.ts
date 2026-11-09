@@ -138,7 +138,7 @@ test('open F glow is a glassy circle matching the F control, without shifting it
     expect(afterStyle.glowWidth).toBe('52px');
     expect(afterStyle.glowHeight).toBe('52px');
     expect(afterStyle.glowRadius).toBe('50%');
-    expect(afterStyle.glowTransform).toBe('none');
+    expect(afterStyle.glowTransform).toMatch(/^(none|matrix\\(1, 0, 0, 1, 0, 0\\))$/);
     expect(afterStyle.glowTop).toBe('0px');
     expect(afterStyle.glowRight).toBe('0px');
     expect(afterStyle.markTransform).toBe('none');
