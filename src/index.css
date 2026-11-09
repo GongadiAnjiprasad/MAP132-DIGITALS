@@ -2478,70 +2478,8 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   .feedback-studio.is-closing{animation-name:feedback-studio-out;animation-duration:1ms}
 }
 
-/* One canonical mobile layout: center the form in the available viewport area,
-   reserve the fixed F launcher's bottom lane, and scroll only the form content. */
-@media (max-width: 600px) {
-  .feedback-studio-scrim {
-    justify-content: center;
-    align-items: center;
-    padding: 10px 12px calc(160px + env(safe-area-inset-bottom));
-    overflow-y: auto;
-  }
-  .feedback-studio-scrim .feedback-studio {
-    max-height: calc(100dvh - 178px - env(safe-area-inset-bottom));
-    padding-bottom: 34px;
-    overflow-y: auto;
-  }
-}
-
-/* Keep the open-state F launcher glow inside the circular control. */
-.feedback-launch.royal-feedback-launch.is-form-open::before{
-  top:0;right:0;width:54px;height:54px;transform:none;border-radius:50%;
-  background:linear-gradient(145deg,rgba(49,39,24,.72),rgba(18,18,17,.62));
-  border:1px solid rgba(230,199,121,.78);
-  box-shadow:0 0 0 1px rgba(213,170,102,.2),0 0 12px rgba(213,170,102,.34),0 5px 14px rgba(0,0,0,.3);
-}
-.feedback-launch.royal-feedback-launch.is-form-open .feedback-mark{transform:none}
-.feedback-launch.royal-feedback-launch.is-form-open .feedback-launch-text{opacity:0;transform:translateX(6px)}
-@media(max-width:600px){
-  .feedback-launch.royal-feedback-launch.is-form-open::before{width:52px;height:52px}
-}
-
-
-/* Final feedback launcher geometry: the open glow must match the capsule, not a circle. */
-.feedback-launch.royal-feedback-launch.is-form-open::before {
-  top: 0;
-  right: 0;
-  width: 150px;
-  height: 54px;
-  border-radius: 999px;
-  transform: scaleX(1);
-  transform-origin: right center;
-  background: linear-gradient(135deg, rgba(49,39,24,.72), rgba(18,18,17,.62));
-  border: 1px solid rgba(230,199,121,.78);
-  box-shadow: 0 0 0 1px rgba(213,170,102,.2), 0 0 15px rgba(213,170,102,.38), 0 7px 20px rgba(0,0,0,.32);
-}
-.feedback-launch.royal-feedback-launch.is-form-open .feedback-mark {
-  transform: translateX(-94px);
-}
-.feedback-launch.royal-feedback-launch.is-form-open .feedback-launch-text {
-  opacity: 1;
-  transform: translateX(0);
-}
-@media (max-width: 600px) {
-  .feedback-launch.royal-feedback-launch.is-form-open::before {
-    width: 146px;
-    height: 52px;
-    border-radius: 999px;
-    transform: scaleX(1);
-  }
-  .feedback-launch.royal-feedback-launch.is-form-open .feedback-mark {
-    transform: translateX(-91px);
-  }
-}
-
-/* Keep the existing floating launcher clear of the form while sizing the
-   dialog to the live mobile viewport; only the dialog body scrolls. */
+/* Feedback Studio mobile fit: keep the existing F launcher clear without wasting
+   the viewport. Compact the content first; scroll only on genuinely short screens. */
 @media (max-width: 600px) {
   .feedback-studio-scrim {
     position: fixed;
@@ -2550,21 +2488,50 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
     min-height: 0;
     display: flex;
     justify-content: center;
-    align-items: center;
+    align-items: flex-start;
+    padding: max(10px, env(safe-area-inset-top)) 12px calc(174px + env(safe-area-inset-bottom));
     overflow: hidden;
-    padding: max(10px, env(safe-area-inset-top)) 12px calc(160px + env(safe-area-inset-bottom));
     box-sizing: border-box;
   }
   .feedback-studio-scrim .feedback-studio {
     width: 100%;
     max-width: 100%;
-    max-height: calc(100dvh - 178px - env(safe-area-inset-bottom));
+    height: auto;
+    max-height: calc(100dvh - 184px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     min-height: 0;
     flex: 0 1 auto;
     overflow-x: hidden;
     overflow-y: auto;
     overscroll-behavior: contain;
     -webkit-overflow-scrolling: touch;
+    padding: 13px 14px 16px;
     box-sizing: border-box;
   }
+  .feedback-studio-brand { padding-bottom: 9px; }
+  .feedback-studio-brand > img { max-height: 34px; }
+  .feedback-studio .feedback-drawer-head { margin: 11px 0 10px; }
+  .feedback-studio .feedback-drawer-head h2 { font-size: clamp(24px, 6vw, 30px); }
+  .feedback-studio .feedback-drawer-head p:last-child { margin: 5px 0 0; font-size: 10px; line-height: 1.45; }
+  .feedback-studio .feedback-label { margin: 10px 0 6px; font-size: 8px; }
+  .feedback-category-grid { gap: 7px; }
+  .feedback-category-grid button { min-height: 72px; gap: 4px; padding: 8px; }
+  .feedback-category-icon { width: 36px; height: 36px; border-radius: 10px; font-size: 15px; }
+  .feedback-category-icon:before { border-radius: 9px; }
+  .feedback-category-grid strong { font-size: 10px; }
+  .feedback-category-grid small { font-size: 8px; line-height: 1.25; }
+  .feedback-studio select,
+  .feedback-studio input[type="email"] { padding: 9px 10px; font-size: 12px; }
+  .feedback-studio .feedback-stars { gap: 8px; }
+  .feedback-studio .feedback-stars button { font-size: 24px; }
+  .feedback-studio #feedback-message { min-height: 68px; padding: 9px 10px; font-size: 12px; }
+  .feedback-studio .feedback-count { margin-top: 2px; }
+  .feedback-studio .feedback-public-consent { gap: 7px; margin: 7px 0 4px; font-size: 9px; line-height: 1.35; }
+  .feedback-studio .feedback-submit { min-height: 40px; margin-top: 4px; padding: 9px 10px; }
+  .feedback-studio .feedback-submit-hint { margin-top: 4px; font-size: 9px; line-height: 1.3; }
+  .feedback-studio .feedback-privacy { margin-top: 7px; font-size: 8px; line-height: 1.35; }
+}
+@media (max-width: 360px) {
+  .feedback-category-grid { grid-template-columns: 1fr; }
+  .feedback-category-grid button { min-height: 62px; }
+  .feedback-category-icon { width: 32px; height: 32px; }
 }
