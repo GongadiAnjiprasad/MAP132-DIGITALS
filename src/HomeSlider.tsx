@@ -119,13 +119,21 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   const hasVideoReviews=publicReviews.some(review=>review.kind!=='Website Experience');
   const hasWebsiteReviews=publicReviews.some(review=>review.kind==='Website Experience');
   const visibleHomeReviews=publicReviews.filter(review=>review.kind==='Website Experience'?reviewCategory==='Website Experience':reviewCategory==='Video Editing Service');
-  useEffect(()=>{
-    if(!hasVideoReviews||!hasWebsiteReviews||window.matchMedia('(prefers-reduced-motion: reduce)').matches)return;
-    const timer=window.setInterval(()=>{
-      if(document.visibilityState==='visible')setReviewCategory(current=>current==='Video Editing Service'?'Website Experience':'Video Editing Service');
-    },8000);
-    return()=>window.clearInterval(timer);
-  },[hasVideoReviews,hasWebsiteReviews]);
+  const reviewSwipeStart=useRef<{x:number;y:number;pointerId:number}|null>(null);
+  const onReviewPointerDown=(event:PointerEvent<HTMLElement>)=>{
+    if((event.pointerType!=='touch'&&event.pointerType!=='pen')||!hasVideoReviews||!hasWebsiteReviews)return;
+    const target=event.target as HTMLElement;
+    if(target.closest('button,a,input,textarea,select'))return;
+    reviewSwipeStart.current={x:event.clientX,y:event.clientY,pointerId:event.pointerId};
+    try{event.currentTarget.setPointerCapture(event.pointerId);}catch{/* pointer capture may be unavailable */}
+  };
+  const onReviewPointerUp=(event:PointerEvent<HTMLElement>)=>{
+    const start=reviewSwipeStart.current;reviewSwipeStart.current=null;
+    if(!start||start.pointerId!==event.pointerId)return;
+    try{if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);}catch{/* capture may already be released */}
+    const direction=getHorizontalSwipeDirection(event.clientX-start.x,event.clientY-start.y,44,1.15);
+    if(direction!==0)setReviewCategory(direction>0?'Website Experience':'Video Editing Service');
+  };
   const ambientTheme = useAmbientServiceTheme();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
     try {
@@ -226,6 +234,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     const target = event.target as HTMLElement;
     // Keep native interaction/vertical scrolling for controls, but allow horizontal page swipes
     // from the Contact page's non-interactive areas (page 5 must swipe back to page 4).
+    if (target.closest('.ms-home-review-feed')) return;
     if (target.closest('input, textarea, select, video, iframe, button:not(.ms-service-tile):not(.work-category-tab):not(.all-work-filter), a')) return;
     const page = target.closest('.ms-page') as HTMLElement | null;
     // Do not capture touch pointers: native vertical scrolling must remain available inside each page.
@@ -346,7 +355,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
             </div>
             <p className="ms-showcase-foot">Tap any showcase tile to play its sample video here — no page navigation.</p>
           </div>
-            <section className="ms-home-review-feed ms-live-feedback-feed" aria-label="Client feedback feed">
+            <section className="ms-home-review-feed ms-live-feedback-feed" aria-label="Client feedback feed" onPointerDown={onReviewPointerDown} onPointerUp={onReviewPointerUp} onPointerCancel={()=>{reviewSwipeStart.current=null;}}>
               <div className="ms-review-feed-heading"><div><span>CLIENT LOVE / FEEDBACK FEED</span><b>Kind words. Creative stories.</b></div><span className="ms-live-label"><i/> LIVE REVIEWS</span></div>
               <div className="ms-review-tabs" role="group" aria-label="Feedback category">
                 <button type="button" className={reviewCategory==='Video Editing Service'?'active':''} aria-pressed={reviewCategory==='Video Editing Service'} onClick={()=>setReviewCategory('Video Editing Service')}>Video Editing Service</button>

@@ -42,28 +42,49 @@ test('feedback seal button stays inside the parchment frame at narrow mobile and
 });
 
 
-test('mobile feedback F button relocates into the header and closes the panel', async ({ page }) => {
+test('floating F stays in its original position with a frosted-glass finish and toggles the form closed', async ({ page }) => {
   for (const width of [320, 390]) {
     await page.setViewportSize({ width, height: 844 });
     await page.goto('/');
-    await page.getByRole('button', { name: 'Give feedback' }).tap();
+    const launcher = page.getByRole('button', { name: 'Give feedback' });
+    const before = await launcher.boundingBox();
+    expect(before).not.toBeNull();
+    await launcher.tap();
     const dialog = page.getByRole('dialog');
-    const header = dialog.locator('.feedback-studio-brand');
-    const toggle = header.getByRole('button', { name: 'Close feedback panel' });
-    const close = header.getByRole('button', { name: 'Close feedback', exact: true });
-    await expect(toggle).toBeVisible();
-    const [headerBox, toggleBox, closeBox, messageBox] = await Promise.all([
-      header.boundingBox(), toggle.boundingBox(), close.boundingBox(),
-      dialog.getByLabel('YOUR FEEDBACK').boundingBox(),
+    await expect(dialog).toBeVisible();
+    const openLauncher = page.getByRole('button', { name: 'Close feedback form' });
+    await expect(openLauncher).toBeVisible();
+    const [after, style, formBox] = await Promise.all([
+      openLauncher.boundingBox(),
+      openLauncher.evaluate(el => ({ backdrop: getComputedStyle(el, '::before').backdropFilter, position: getComputedStyle(el).position })),
+      dialog.boundingBox(),
     ]);
-    expect(headerBox && toggleBox && closeBox && messageBox).toBeTruthy();
-    expect(toggleBox!.x + toggleBox!.width).toBeLessThanOrEqual(closeBox!.x);
-    expect(closeBox!.x + closeBox!.width).toBeLessThanOrEqual(headerBox!.x + headerBox!.width);
-    expect(messageBox!.y).toBeGreaterThan(headerBox!.y + headerBox!.height);
-    await toggle.tap();
+    expect(after && before && formBox).toBeTruthy();
+    expect(Math.abs(after!.x - before!.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(after!.y - before!.y)).toBeLessThanOrEqual(1);
+    expect(style.position).toBe('fixed');
+    expect(style.backdrop).toContain('blur');
+    expect(formBox!.y + formBox!.height).toBeLessThan(after!.y - 8);
+    await openLauncher.tap();
     await expect(dialog).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Give feedback' })).toBeVisible();
   }
+});
+
+test('X closes the form independently while F remains in its original floating position', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const launcher = page.getByRole('button', { name: 'Give feedback' });
+  const original = await launcher.boundingBox();
+  await launcher.tap();
+  const dialog = page.getByRole('dialog');
+  await expect(page.getByRole('button', { name: 'Close feedback form' })).toBeVisible();
+  await dialog.getByRole('button', { name: 'Close feedback', exact: true }).tap();
+  await expect(dialog).toHaveCount(0);
+  const restored = await page.getByRole('button', { name: 'Give feedback' }).boundingBox();
+  expect(restored && original).toBeTruthy();
+  expect(Math.abs(restored!.x - original!.x)).toBeLessThanOrEqual(1);
+  expect(Math.abs(restored!.y - original!.y)).toBeLessThanOrEqual(1);
 });
 
 test('feedback F toggle remains operable when reduced motion is preferred', async ({ page }) => {
@@ -73,6 +94,6 @@ test('feedback F toggle remains operable when reduced motion is preferred', asyn
   await page.getByRole('button', { name: 'Give feedback' }).tap();
   const dialog = page.getByRole('dialog');
   await expect(dialog).toBeVisible();
-  await dialog.getByRole('button', { name: 'Close feedback panel' }).tap();
+  await page.getByRole('button', { name: 'Close feedback form' }).tap();
   await expect(dialog).toHaveCount(0);
 });
