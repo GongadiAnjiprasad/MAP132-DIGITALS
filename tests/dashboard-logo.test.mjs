@@ -34,14 +34,14 @@ test('public portfolio API resolves uploaded logos and falls back to the origina
   assert.match(worker, /content\.logoUrl=content\.logoPath\?/);
   assert.match(worker, /portfolio\/logos\//);
   assert.match(worker, /resources\/Logo\.png/);
-  assert.match(app, /const DEFAULT_BRAND_LOGO = '\/resources\/Logo\.png'/);
+  assert.ok(app.includes("const DEFAULT_BRAND_LOGO = '/resources/Logo.webp'"));
 });
 
-test('the public header uses the official PNG logo and feedback widget uses the configured brand default', () => {
-  assert.match(slider, /content\.logoUrl \|\| '\/resources\/Logo\.png'/);
+test('the public header uses the optimized WebP logo and feedback widget uses the configured brand default', () => {
+  assert.ok(slider.includes("content.logoUrl === '/resources/Logo.png' ? '/resources/Logo.webp'"));
   assert.match(app, /FeedbackWidget\(\{ logoUrl = DEFAULT_BRAND_LOGO \}/);
-  assert.match(app, /logoUrl=\{content\.logoUrl\|\|DEFAULT_BRAND_LOGO\}/);
-  assert.match(app, /const logoUrl = content\.logoUrl \|\| DEFAULT_BRAND_LOGO/);
+  assert.ok(app.includes('logoUrl={publicLogoUrl}'));
+  assert.ok(app.includes('configuredLogoUrl === LEGACY_BRAND_LOGO ? DEFAULT_BRAND_LOGO : configuredLogoUrl'));
   assert.match(festival, /src=\{logoUrl\} alt="MAP132 DIGITALS"/);
   assert.ok(app.includes(officialLogo));
 });
