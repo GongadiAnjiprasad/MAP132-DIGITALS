@@ -7,9 +7,10 @@ const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 test('critical showcase image is preloaded at the exact optimized URL', () => {
   const html = read('../index.html');
   const showcase = read('../src/demoShowcase.ts');
-  const url = 'photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=720&q=72';
-  assert.ok(html.includes(url));
-  assert.ok(showcase.includes(url));
+  const sourceUrl = 'photo-1519608487953-e999c86e7455?auto=format&fit=crop&w=720&q=72';
+  const htmlUrl = 'photo-1519608487953-e999c86e7455?auto=format&amp;fit=crop&amp;w=720&amp;q=72';
+  assert.ok(html.includes(htmlUrl));
+  assert.ok(showcase.includes(sourceUrl));
 });
 
 test('showcase photos use reduced delivery dimensions and quality', () => {
