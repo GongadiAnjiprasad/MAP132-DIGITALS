@@ -97,3 +97,30 @@ test('feedback F toggle remains operable when reduced motion is preferred', asyn
   await page.getByRole('button', { name: 'Close feedback form' }).tap();
   await expect(dialog).toHaveCount(0);
 });
+
+
+test('open F glow follows the capsule silhouette and feedback form stays within the mobile viewport lane', async ({ page }) => {
+  for (const width of [320, 360, 390, 430]) {
+    await page.setViewportSize({ width, height: 780 });
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Give feedback' }).tap();
+    const launcher = page.getByRole('button', { name: 'Close feedback form' });
+    const dialog = page.getByRole('dialog');
+    const [glow, button, form] = await Promise.all([
+      launcher.evaluate(el => {
+        const s = getComputedStyle(el, '::before');
+        return { width: parseFloat(s.width), height: parseFloat(s.height), radius: s.borderRadius };
+      }),
+      launcher.boundingBox(),
+      dialog.boundingBox(),
+    ]);
+    expect(glow.width).toBeGreaterThan(glow.height * 2);
+    expect(glow.radius).toContain('999');
+    expect(button && form).toBeTruthy();
+    expect(form!.x).toBeGreaterThanOrEqual(0);
+    expect(form!.x + form!.width).toBeLessThanOrEqual(width);
+    expect(form!.y).toBeGreaterThanOrEqual(0);
+    expect(form!.y + form!.height).toBeLessThan(button!.y - 8);
+    await launcher.tap();
+  }
+});
