@@ -272,7 +272,7 @@ test('feedback form controls stay aligned and the message field keeps a visible 
 });
 
 
-test('floating F moves into the feedback header and toggles the dialog closed without overlapping the form', async ({ page }) => {
+test('floating F stays in its original position with a frosted-glass finish and toggles the form closed', async ({ page }) => {
   for (const viewport of [
     { width: 320, height: 740 },
     { width: 390, height: 844 },
@@ -282,31 +282,29 @@ test('floating F moves into the feedback header and toggles the dialog closed wi
     await page.setViewportSize(viewport);
     await page.goto('/');
     const launcher = page.getByRole('button', { name: 'Give feedback' });
-    await expect(launcher).toBeVisible();
+    const original = await launcher.boundingBox();
+    expect(original).not.toBeNull();
     await launcher.click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
-    const header = dialog.locator('.feedback-studio-brand');
-    const toggle = header.getByRole('button', { name: 'Close feedback panel' });
-    const close = header.getByRole('button', { name: 'Close feedback', exact: true });
-    await expect(toggle).toBeVisible();
-    await expect(launcher).toHaveCount(0);
-    const [headerBox, toggleBox, closeBox, messageBox] = await Promise.all([
-      header.boundingBox(), toggle.boundingBox(), close.boundingBox(),
-      dialog.getByLabel('YOUR FEEDBACK').boundingBox(),
+    const openLauncher = page.getByRole('button', { name: 'Close feedback form' });
+    await expect(openLauncher).toBeVisible();
+    const [current, style] = await Promise.all([
+      openLauncher.boundingBox(),
+      openLauncher.evaluate(el => ({ backdrop: getComputedStyle(el, '::before').backdropFilter, position: getComputedStyle(el).position })),
     ]);
-    expect(headerBox && toggleBox && closeBox && messageBox).toBeTruthy();
-    expect(toggleBox!.x).toBeGreaterThanOrEqual(headerBox!.x);
-    expect(toggleBox!.x + toggleBox!.width).toBeLessThanOrEqual(closeBox!.x);
-    expect(closeBox!.x + closeBox!.width).toBeLessThanOrEqual(headerBox!.x + headerBox!.width);
-    expect(messageBox!.y).toBeGreaterThan(headerBox!.y + headerBox!.height);
-    await toggle.click();
+    expect(current && original).toBeTruthy();
+    expect(Math.abs(current!.x - original!.x)).toBeLessThanOrEqual(1);
+    expect(Math.abs(current!.y - original!.y)).toBeLessThanOrEqual(1);
+    expect(style.position).toBe('fixed');
+    expect(style.backdrop).toContain('blur');
+    await openLauncher.click();
     await expect(dialog).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Give feedback' })).toBeVisible();
   }
 });
 
-test('feedback feed removes the duplicate Share feedback action and automatically rotates when both categories have reviews', async ({ page }) => {
+test('feedback feed removes duplicate Share feedback action and does not auto-rotate categories', async ({ page }) => {
   await page.route('**/api/reviews', route => route.fulfill({
     status: 200,
     contentType: 'application/json',
@@ -317,6 +315,18 @@ test('feedback feed removes the duplicate Share feedback action and automaticall
   }));
   await page.goto('/');
   const feed = page.getByRole('region', { name: 'Client feedback feed' });
+  const videoTab = feed.getByRole('button', { name: 'Video Editing Service' });
+  const websiteTab = feed.getByRole('button', { name: 'Website Experience' });
+  await expect(videoTab).toHaveAttribute('aria-pressed', 'true');
+  await expect(feed.getByRole('button', { name: /Share feedback/ })).toHaveCount(0);
+  await page.waitForTimeout(8300);
+  await expect(videoTab).toHaveAttribute('aria-pressed', 'true');
+  await expect(websiteTab).toHaveAttribute('aria-pressed', 'false');
+  await videoTab.click();
+  await expect(videoTab).toHaveAttribute('aria-pressed', 'true');
+  await expect(feed.getByText('Excellent cinematic edit.')).toBeVisible();
+});
+
   const videoTab = feed.getByRole('button', { name: 'Video Editing Service' });
   const websiteTab = feed.getByRole('button', { name: 'Website Experience' });
   await expect(videoTab).toHaveAttribute('aria-pressed', 'true');
