@@ -1465,7 +1465,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   transform:translateX(0);transition:transform .36s ease;
 }
 .feedback-launch.royal-feedback-launch .feedback-launch-text{
-  position:absolute;left:18px;max-width:100px;opacity:0;overflow:hidden;white-space:nowrap;
+  position:absolute;left:49px;max-width:90px;opacity:0;overflow:hidden;white-space:nowrap;
   font-size:11px;font-weight:800;letter-spacing:.9px;transform:translateX(6px);
   transition:opacity .2s ease,transform .2s ease;
 }
