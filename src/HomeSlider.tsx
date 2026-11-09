@@ -132,7 +132,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     if(!start||start.pointerId!==event.pointerId)return;
     try{if(event.currentTarget.hasPointerCapture(event.pointerId))event.currentTarget.releasePointerCapture(event.pointerId);}catch{/* capture may already be released */}
     const direction=getHorizontalSwipeDirection(event.clientX-start.x,event.clientY-start.y,44,1.15);
-    if(direction!==0)setReviewCategory(direction<0?'Website Experience':'Video Editing Service');
+    if(direction!==0)setReviewCategory(direction>0?'Website Experience':'Video Editing Service');
   };
   const ambientTheme = useAmbientServiceTheme();
   const [theme, setTheme] = useState<'dark' | 'light'>(() => {
