@@ -22,6 +22,10 @@ jobs:
           node-version: 22
       - name: Install dependencies
         run: npm install
+      - name: Generate optimized transparent brand logo
+        run: npx --yes sharp-cli@6.1.0 -i public/resources/Logo.png -o public/resources/Logo.webp -f webp -q 90 --alphaQuality 100 resize 1200
+      - name: Verify optimized brand logo
+        run: test -s public/resources/Logo.webp && du -h public/resources/Logo.png public/resources/Logo.webp
       - name: Test swipe navigation
         run: npm test
       - name: Install mobile browser
