@@ -249,6 +249,7 @@ test('feedback review feed changes category with finger swipes without changing 
   await page.goto('/');
   const feed = page.locator('.ms-home-review-feed');
   const track = page.locator('.ms-track');
+  await feed.scrollIntoViewIfNeeded();
   await expect(feed.getByRole('button', { name: 'Video Editing Service' })).toHaveAttribute('aria-pressed', 'true');
   await dispatchTouchSwipe(page, '.ms-home-review-feed', 'left');
   await expect(feed.getByRole('button', { name: 'Website Experience' })).toHaveAttribute('aria-pressed', 'true');
@@ -271,6 +272,7 @@ test('feedback review categories do not rotate automatically', async ({ page }) 
   }));
   await page.goto('/');
   const feed = page.locator('.ms-home-review-feed');
+  await feed.scrollIntoViewIfNeeded();
   await expect(feed.getByRole('button', { name: 'Video Editing Service' })).toHaveAttribute('aria-pressed', 'true');
   await page.waitForTimeout(8300);
   await expect(feed.getByRole('button', { name: 'Video Editing Service' })).toHaveAttribute('aria-pressed', 'true');
