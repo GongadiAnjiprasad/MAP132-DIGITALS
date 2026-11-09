@@ -57,7 +57,7 @@ test('floating F stays in its original position with a frosted-glass finish and 
     const [after, style, formBox] = await Promise.all([
       openLauncher.boundingBox(),
       openLauncher.evaluate(el => ({ backdrop: getComputedStyle(el, '::before').backdropFilter, position: getComputedStyle(el).position })),
-      dialog.locator('.feedback-studio').boundingBox(),
+      dialog.boundingBox(),
     ]);
     expect(after && before && formBox).toBeTruthy();
     expect(Math.abs(after!.x - before!.x)).toBeLessThanOrEqual(1);
