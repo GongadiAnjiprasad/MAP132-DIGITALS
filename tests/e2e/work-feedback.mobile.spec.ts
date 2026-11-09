@@ -124,3 +124,26 @@ test('open F glow follows the capsule silhouette and feedback form stays within 
     await launcher.tap();
   }
 });
+
+
+test('feedback form fits without internal scrolling when a normal mobile viewport has enough room', async ({ page }) => {
+  for (const viewport of [{ width: 390, height: 844 }, { width: 430, height: 900 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Give feedback' }).tap();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    const measurements = await dialog.evaluate(el => ({
+      clientHeight: el.clientHeight,
+      scrollHeight: el.scrollHeight,
+      top: el.getBoundingClientRect().top,
+      bottom: el.getBoundingClientRect().bottom,
+      viewportHeight: window.innerHeight,
+    }));
+    expect(measurements.scrollHeight, `unneeded form scroll at ${viewport.width}x${viewport.height}`)
+      .toBeLessThanOrEqual(measurements.clientHeight + 1);
+    expect(measurements.top).toBeGreaterThanOrEqual(0);
+    expect(measurements.bottom).toBeLessThanOrEqual(measurements.viewportHeight - 170);
+    await page.getByRole('button', { name: 'Close feedback form' }).tap();
+  }
+});
