@@ -2483,11 +2483,11 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 @media (max-width: 600px) {
   .feedback-studio-scrim {
     align-items: center;
-    padding: 10px 12px calc(112px + env(safe-area-inset-bottom));
+    padding: 10px 12px calc(160px + env(safe-area-inset-bottom));
     overflow-y: auto;
   }
   .feedback-studio-scrim .feedback-studio {
-    max-height: calc(100dvh - 132px - env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 178px - env(safe-area-inset-bottom));
     padding-bottom: 34px;
     overflow-y: auto;
   }
