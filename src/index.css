@@ -2477,6 +2477,11 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 /* Keep the floating F at its original position; translucent glass lets the layer beneath remain visible. */
 .feedback-launch.royal-feedback-launch.is-form-open{z-index:1000;pointer-events:auto;color:#f8e5b0}
 .feedback-launch.royal-feedback-launch.is-form-open::before{background:linear-gradient(135deg,rgba(49,39,24,.24),rgba(18,18,17,.20));border-color:rgba(230,199,121,.62);backdrop-filter:blur(6px) saturate(125%);-webkit-backdrop-filter:blur(6px) saturate(125%);box-shadow:0 0 0 1px rgba(213,170,102,.14),0 0 12px rgba(213,170,102,.22),0 5px 14px rgba(0,0,0,.20)}
+/* Glow is rendered as a filtered silhouette of the existing rounded pseudo-element.
+   Avoid broad box-shadows, which read as a separate rectangular/vertical glow. */
+.feedback-launch.royal-feedback-launch::before{box-shadow:none;filter:drop-shadow(0 0 3px rgba(230,199,121,.78)) drop-shadow(0 0 7px rgba(213,170,102,.48))}
+.feedback-launch.royal-feedback-launch.is-form-open::before{box-shadow:none;filter:drop-shadow(0 0 2px rgba(230,199,121,.62)) drop-shadow(0 0 5px rgba(213,170,102,.34))}
+
 .feedback-studio-scrim.is-closing{animation:feedback-scrim-out .22s ease-in both}
 .feedback-studio.is-closing{animation:feedback-studio-out .22s cubic-bezier(.4,0,.8,.3) both}
 @keyframes feedback-scrim-out{to{opacity:0;backdrop-filter:blur(0)}}
