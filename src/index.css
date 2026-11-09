@@ -2488,7 +2488,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
     overflow-y: auto;
   }
   .feedback-studio-scrim .feedback-studio {
-    max-height: calc(100dvh - 106px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 182px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     padding-bottom: 34px;
     overflow-y: auto;
   }
@@ -2526,7 +2526,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
     padding: max(8px, env(safe-area-inset-top)) 10px calc(88px + env(safe-area-inset-bottom));
   }
   .feedback-studio-scrim .feedback-studio {
-    max-height: calc(100dvh - 106px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 182px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     box-sizing: border-box;
   }
 }
