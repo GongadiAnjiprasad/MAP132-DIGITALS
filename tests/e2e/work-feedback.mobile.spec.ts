@@ -54,17 +54,17 @@ test('floating F stays in its original position with a frosted-glass finish and 
     await expect(dialog).toBeVisible();
     const openLauncher = page.getByRole('button', { name: 'Close feedback form' });
     await expect(openLauncher).toBeVisible();
-    const [after, style, dialogBox] = await Promise.all([
+    const [after, style, formBox] = await Promise.all([
       openLauncher.boundingBox(),
       openLauncher.evaluate(el => ({ backdrop: getComputedStyle(el, '::before').backdropFilter, position: getComputedStyle(el).position })),
-      dialog.boundingBox(),
+      dialog.locator('.feedback-studio').boundingBox(),
     ]);
-    expect(after && before && dialogBox).toBeTruthy();
+    expect(after && before && formBox).toBeTruthy();
     expect(Math.abs(after!.x - before!.x)).toBeLessThanOrEqual(1);
     expect(Math.abs(after!.y - before!.y)).toBeLessThanOrEqual(1);
     expect(style.position).toBe('fixed');
     expect(style.backdrop).toContain('blur');
-    expect(dialogBox!.y + dialogBox!.height).toBeLessThan(after!.y - 8);
+    expect(formBox!.y + formBox!.height).toBeLessThan(after!.y - 8);
     await openLauncher.tap();
     await expect(dialog).toHaveCount(0);
     await expect(page.getByRole('button', { name: 'Give feedback' })).toBeVisible();
