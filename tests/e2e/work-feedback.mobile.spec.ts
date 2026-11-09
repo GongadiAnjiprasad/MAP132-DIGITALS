@@ -122,10 +122,14 @@ test('open F glow follows the actual button silhouette without changing its size
           glowHeight: glow.height,
           glowRadius: glow.borderRadius,
           glowTransform: glow.transform,
+          glowFilter: glow.filter,
+          glowShadow: glow.boxShadow,
         };
       }),
     ]);
     expect(before).not.toBeNull();
+    expect(beforeStyle.glowFilter).toContain('drop-shadow');
+    expect(beforeStyle.glowShadow).toBe('none');
     await launcher.tap();
     const openLauncher = page.getByRole('button', { name: 'Close feedback form' });
     await expect(page.getByRole('dialog')).toBeVisible();
@@ -143,10 +147,14 @@ test('open F glow follows the actual button silhouette without changing its size
           glowRadius: glow.borderRadius,
           glowTransform: glow.transform,
           backdrop: glow.backdropFilter,
+          glowFilter: glow.filter,
+          glowShadow: glow.boxShadow,
         };
       }),
     ]);
     expect(after).not.toBeNull();
+    expect(afterStyle.glowFilter).toContain('drop-shadow');
+    expect(afterStyle.glowShadow).toBe('none');
     expect(afterStyle.position).toBe('fixed');
     expect(afterStyle.glowWidth).toBe(beforeStyle.glowWidth);
     expect(afterStyle.glowHeight).toBe(beforeStyle.glowHeight);
