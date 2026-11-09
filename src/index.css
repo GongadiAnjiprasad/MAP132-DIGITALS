@@ -2490,7 +2490,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   .feedback-studio-scrim .feedback-studio {
     width: 100%;
     max-width: 100%;
-    max-height: calc(100dvh - 160px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
+    max-height: calc(100dvh - 168px - env(safe-area-inset-top) - env(safe-area-inset-bottom));
     box-sizing: border-box;
     overflow-y: auto;
   }
