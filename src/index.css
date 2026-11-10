@@ -2286,7 +2286,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 
 /* MAP132 Feedback Studio — centered brand-led experience */
 .feedback-studio-scrim{justify-content:center;align-items:center;padding:18px 18px 178px;overflow-y:auto}
-.feedback-studio-scrim .feedback-studio{max-height:calc(100dvh - 196px);padding-bottom:34px}
+.feedback-studio-scrim .feedback-studio{max-height:calc(100dvh - 156px);padding-bottom:34px}
 /* The original floating F remains above the dialog; its open state is softly frosted, not relocated. */
 .feedback-launch.royal-feedback-launch.is-form-open{z-index:100;pointer-events:auto;color:#f8e5b0}
 .feedback-launch.royal-feedback-launch.is-form-open::before{background:linear-gradient(135deg,rgba(49,39,24,.58),rgba(18,18,17,.48));border-color:rgba(230,199,121,.78);backdrop-filter:blur(13px) saturate(145%);-webkit-backdrop-filter:blur(13px) saturate(145%);box-shadow:0 0 0 1px rgba(213,170,102,.24),0 0 18px rgba(213,170,102,.42),0 8px 24px rgba(0,0,0,.38)}
@@ -2622,7 +2622,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   justify-content: center;
   margin: 5px 0 0;
   box-sizing: border-box;
-  background: linear-gradient(110deg, var(--brand-amber, #FFB45B), #FFD28A 55%, var(--brand-coral, #FF654F));
+  background: linear-gradient(110deg, #E8BD7A, #FFD28A 55%, #FF654F);
   color: #17120E;
   border: 1px solid rgba(255, 210, 138, .72);
   box-shadow: 0 8px 24px rgba(255, 180, 91, .18), inset 0 1px rgba(255,255,255,.48);
