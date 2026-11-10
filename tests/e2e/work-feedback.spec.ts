@@ -417,3 +417,50 @@ test('homepage live feedback cards include translation controls and the MAP132 r
   await feed.getByRole('button', { name: 'Translate to English' }).click();
   await expect(feed.getByText('Excellent video editing and storytelling.')).toBeVisible();
 });
+
+
+test('feedback inner form elements stay aligned inside the panel and Send Feedback uses MAP132 brand colours', async ({ page }) => {
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+    { width: 320, height: 740 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Give feedback' }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    const metrics = await dialog.evaluate(element => {
+      const form = element.querySelector('form')!;
+      const panel = element.getBoundingClientRect();
+      const children = Array.from(form.children).map(child => {
+        const rect = child.getBoundingClientRect();
+        return { tag: child.tagName, className: (child as HTMLElement).className, top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, width: rect.width };
+      }).filter(item => item.bottom > item.top);
+      const submit = form.querySelector<HTMLButtonElement>('.feedback-submit')!;
+      return {
+        panel: { left: panel.left, right: panel.right },
+        children,
+        submitBackground: getComputedStyle(submit).backgroundImage,
+        submitText: getComputedStyle(submit).color,
+        submitWidth: submit.getBoundingClientRect().width,
+        formWidth: form.getBoundingClientRect().width,
+      };
+    });
+    expect(metrics.children.length).toBeGreaterThan(8);
+    for (const child of metrics.children) {
+      expect(child.left).toBeGreaterThan(metrics.panel.left + 8);
+      expect(child.right).toBeLessThan(metrics.panel.right - 8);
+      expect(child.width).toBeGreaterThan(0);
+    }
+    const ordered = [...metrics.children].sort((a, b) => a.top - b.top);
+    for (let index = 1; index < ordered.length; index += 1) {
+      expect(ordered[index].top).toBeGreaterThanOrEqual(ordered[index - 1].bottom - 1);
+    }
+    expect(metrics.submitWidth).toBeCloseTo(metrics.formWidth, 0);
+    expect(metrics.submitBackground).toContain('linear-gradient');
+    expect(metrics.submitBackground).toContain('255, 180, 91');
+    expect(metrics.submitText).toBe('rgb(23, 18, 14)');
+    await page.getByRole('button', { name: 'Close feedback', exact: true }).click();
+  }
+});
