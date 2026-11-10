@@ -351,7 +351,7 @@ test('feedback studio keeps inner controls aligned and scrolls the panel only wh
     await page.getByRole('button', { name: 'Give feedback' }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
-    const panel = dialog.locator('.feedback-studio');
+    const panel = dialog;
     await expect(panel).toBeVisible();
     const metrics = await panel.evaluate(element => {
       const form = element.querySelector('form')!;
