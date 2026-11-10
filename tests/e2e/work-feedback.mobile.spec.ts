@@ -199,7 +199,8 @@ test('floating Feedback F has no default blue mobile tap highlight', async ({ pa
   await page.goto('/');
   const launcher = page.getByRole('button', { name: 'Give feedback' });
   await launcher.tap();
-  const tapStyle = await launcher.evaluate(el => ({
+  const openedLauncher = page.getByRole('button', { name: 'Close feedback form' });
+  const tapStyle = await openedLauncher.evaluate(el => ({
     tapHighlight: getComputedStyle(el).webkitTapHighlightColor,
     outlineStyle: getComputedStyle(el).outlineStyle,
   }));
