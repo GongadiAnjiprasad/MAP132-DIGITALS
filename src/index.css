@@ -2677,3 +2677,10 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   .feedback-studio .feedback-submit-hint { margin-top: 1px; }
   .feedback-studio .feedback-privacy { margin-top: 2px; line-height: 1.1; font-size: 8px; }
 }
+
+/* Let the dialog itself scroll when its content exceeds the available viewport. */
+.feedback-studio-scrim .feedback-studio {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
