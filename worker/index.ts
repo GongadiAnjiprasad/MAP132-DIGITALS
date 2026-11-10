@@ -181,7 +181,7 @@ if(path==='/api/translate'&&method==='POST'){
   const targetLanguage=body.targetLanguage;
   if(!sourceText||sourceText.length>2000)return json({error:'Feedback text must be between 1 and 2000 characters.'},400);
   if(targetLanguage!=='te'&&targetLanguage!=='en')return json({error:'Choose Telugu or English translation.'},400);
-  const sourceLanguage=/[\u0C00-\u0C7F]/.test(sourceText)?'te':'en';
+  const sourceLanguage=/[\u0C00-\u0C7F]/.test(sourceText)?'te':/[\u0900-\u097F]/.test(sourceText)?'hi':'en';
   if(sourceLanguage===targetLanguage)return json({translatedText:sourceText,sourceLanguage,targetLanguage});
   try{
     const result=await env.AI.run('@cf/meta/m2m100-1.2b',{text:sourceText,source_lang:sourceLanguage,target_lang:targetLanguage});
