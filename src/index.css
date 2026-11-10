@@ -2489,7 +2489,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 @media(prefers-reduced-motion:reduce){.feedback-studio-scrim.is-closing{animation-name:feedback-scrim-out;animation-duration:1ms}.feedback-studio.is-closing{animation-name:feedback-studio-out;animation-duration:1ms}}
 @media(max-width:600px){
 .feedback-studio-scrim{padding:max(6px,env(safe-area-inset-top)) 8px max(6px,env(safe-area-inset-bottom))}
-.feedback-studio-scrim .feedback-studio{width:calc(100vw - 16px);max-width:100%;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);padding:12px 12px;border-radius:16px}
+.feedback-studio-scrim .feedback-studio{width:calc(100vw - 16px);max-width:100%;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);padding:20px 22px;border-radius:16px}
 .feedback-studio-brand{padding-bottom:7px}.feedback-studio-brand>img{max-height:43px;max-width:65%}
 .feedback-studio .feedback-drawer-head{margin:6px 0 5px}
 .feedback-studio .feedback-category-grid{gap:7px}
@@ -2520,7 +2520,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-studio .feedback-privacy{margin-top:3px;line-height:1.2;font-size:9px}
 }
 @media(max-width:600px) and (max-height:760px){
-.feedback-studio-scrim .feedback-studio{padding:7px 9px}
+.feedback-studio-scrim .feedback-studio{padding:7px 22px}
 .feedback-studio .feedback-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 .feedback-studio .feedback-category-grid button{min-height:70px;padding:5px}
 .feedback-studio #feedback-message{min-height:44px;max-height:48px;padding:6px 8px}
@@ -2639,15 +2639,10 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   margin: 5px 0 0;
   box-sizing: border-box;
   white-space: normal;
-  background: linear-gradient(110deg, #E8BD7A, #FFD28A 55%, #FF654F);
-  color: #17120E;
-  border: 1px solid rgba(255, 210, 138, .72);
-  box-shadow: 0 8px 24px rgba(255, 180, 91, .18), inset 0 1px rgba(255,255,255,.48);
+  /* Preserve the existing MAP132 submit-button appearance; alignment only. */
 }
 .feedback-studio .feedback-submit:disabled {
-  color: #17120E;
   opacity: .62;
-  filter: saturate(.72);
 }
 .feedback-studio .feedback-submit-hint,
 .feedback-studio .feedback-privacy,
