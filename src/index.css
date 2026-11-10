@@ -2648,3 +2648,19 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+
+/* Tight-height mobile feedback layout: keep every control visible without drawer scrolling. */
+@media (max-width: 360px) and (max-height: 760px) {
+  .feedback-studio-brand > img { max-height: 34px; }
+  .feedback-studio .feedback-drawer-head h2 { font-size: 23px; letter-spacing: -0.8px; }
+  .feedback-studio .feedback-category-grid button { min-height: 56px; padding: 4px; gap: 2px; }
+  .feedback-studio .feedback-category-icon { width: 36px; height: 36px; }
+  .feedback-studio .feedback-stars { min-height: 32px; gap: 7px; }
+  .feedback-studio .feedback-label { margin: 2px 0 1px; line-height: 1.2; }
+  .feedback-studio #feedback-message { min-height: 38px; max-height: 42px; padding: 5px 7px; }
+  .feedback-studio .feedback-public-consent { margin: 3px 0 1px; line-height: 1.15; }
+  .feedback-studio .feedback-submit { min-height: 34px; padding: 6px 9px; }
+  .feedback-studio .feedback-submit-hint { margin-top: 1px; }
+  .feedback-studio .feedback-privacy { margin-top: 2px; line-height: 1.1; font-size: 8px; }
+}
