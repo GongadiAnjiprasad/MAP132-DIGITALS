@@ -8,6 +8,7 @@ import { getHorizontalSwipeDirection } from './swipeGesture';
 import { DEMO_SHOWCASE } from './demoShowcase';
 import { useAmbientServiceTheme, type ServiceThemeKey } from './modules/ambient-service-themes/useAmbientServiceTheme';
 import { getFeedbackHighlights } from './modules/feedback/feedbackHighlights';
+import FeedbackTranslation from './modules/feedback/FeedbackTranslation';
 import { formatFeedbackTimestamp } from './modules/feedback/feedbackTimestamp';
 
 type PortfolioItem = {
@@ -15,7 +16,7 @@ type PortfolioItem = {
   kind: 'video' | 'image' | 'link'; url?: string; mediaUrl?: string;
   source?: 'upload' | 'youtube' | 'drive' | 'other';
 };
-type PublicReview = {id:string;kind:'Website Experience'|'Work feedback';service:string;rating:number;message:string;response?:string;responseType?:string;createdAt:string};
+type PublicReview = {id:string;kind:'Website Experience'|'Work feedback';service:string;rating:number;message:string;response?:string;responseType?:string;responseLanguage?:string;createdAt:string};
 type HomeContent = {
   profile: {
     name: string; headline: string; intro: string; about: string; location: string;
@@ -418,7 +419,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
             {['Brief & references','Rough cut','Visual polish','Final delivery'].map((step,index)=><article key={step}><span>0{index+1}</span><h3>{step}</h3><p>{['Share your footage, target platform, sample style and delivery date.','Select the strongest moments and shape the story before effects.','Add titles, transitions, colour treatment, captions and motion where useful.','Balance dialogue, music and effects, then export in the agreed format.'][index]}</p></article>)}
           </div>
           <div className="ms-skills"><div><p className="ms-kicker">TOOLS & CREATIVE CRAFT</p><h3>Made frame by frame.</h3></div><div className="ms-skill-list">{content.skills.map((skill,index)=><span key={skill}>{String(index+1).padStart(2,'0')} · {skill}</span>)}</div></div>
-          {publicReviews.length>0&&<section className="ms-public-reviews" aria-label="Client reviews"><div className="ms-review-heading"><div><p className="ms-kicker">CLIENT VOICE</p><h3>Words that <em>stay with us.</em></h3></div><span>{publicReviews.length} PUBLISHED REVIEWS</span></div><div className="ms-review-grid">{publicReviews.map(review=><article className="ms-review-card" key={review.id}><div className="ms-review-stars" aria-label={review.rating+' out of 5 stars'}>{'★'.repeat(Math.max(0,Math.min(5,review.rating)))}</div><p>“{review.message}”</p>{getFeedbackHighlights(review.message,review.kind).length>0&&<div className="feedback-keyword-tags" aria-label="Feedback highlights">{getFeedbackHighlights(review.message,review.kind).map(tag=><span key={tag}>{tag}</span>)}</div>}<span>{review.service}</span></article>)}</div></section>}
+          {publicReviews.length>0&&<section className="ms-public-reviews" aria-label="Client reviews"><div className="ms-review-heading"><div><p className="ms-kicker">CLIENT VOICE</p><h3>Words that <em>stay with us.</em></h3></div><span>{publicReviews.length} PUBLISHED REVIEWS</span></div><div className="ms-review-grid">{publicReviews.map(review=><article className="ms-review-card" key={review.id}><div className="ms-review-stars" aria-label={review.rating+' out of 5 stars'}>{'★'.repeat(Math.max(0,Math.min(5,review.rating)))}</div><FeedbackTranslation id={review.id} message={review.message} sourceLanguage={review.responseLanguage}/>{getFeedbackHighlights(review.message,review.kind).length>0&&<div className="feedback-keyword-tags" aria-label="Feedback highlights">{getFeedbackHighlights(review.message,review.kind).map(tag=><span key={tag}>{tag}</span>)}</div>}{review.response&&<div className="ms-review-response"><small>MAP132 DIGITALS RESPONSE</small><p>{review.response}</p></div>}<span>{review.service}</span></article>)}</div></section>}
           <div className="ms-studio-extra">
             <article><span>DELIVERY / 01</span><h3>Platform-ready exports.</h3><p>Vertical 9:16 reels, square 1:1 posts and widescreen 16:9 videos, prepared for the destination platform.</p></article>
             <article><span>CRAFT / 02</span><h3>More than transitions.</h3><p>Clean cuts, typography, motion accents, colour finishing, captions and sound design chosen to serve the story.</p></article>
