@@ -1810,3 +1810,25 @@
     padding: 7px 0;
   }
 }
+
+
+/* Home navigation is intentionally borderless: no capsule, underline, dot or glow. */
+.map132-slider-site .ms-nav button.ms-home-active {
+  min-height: 0;
+  padding: 10px 0;
+  border: 0 !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+  box-shadow: none !important;
+  color: #ffe4ad;
+}
+.map132-slider-site .ms-nav button.ms-home-active::before {
+  content: none !important;
+  display: none !important;
+}
+@media (max-width: 760px) {
+  .map132-slider-site .ms-nav button.ms-home-active {
+    min-height: 0;
+    padding: 7px 0;
+  }
+}
