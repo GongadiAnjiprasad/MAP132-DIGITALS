@@ -2550,6 +2550,14 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .ms-review-response p{margin:5px 0 0;font-size:12px;line-height:1.55}
 .feedback-inbox-item .feedback-translation-text{margin-top:10px}
 
+/* Compact MAP132 feedback language switch */
+.feedback-translation-controls{display:flex;align-items:center;gap:3px;margin:0 0 11px;min-height:18px}
+.feedback-translation-controls>span{display:none}
+.feedback-translation-controls .feedback-translation-icon{width:13px;height:13px;flex:none;color:var(--brand-amber,#FFB45B);margin-right:2px}
+.feedback-translation-controls button{display:inline-grid;place-items:center;min-width:17px;width:17px;height:17px;padding:0;border:0;border-radius:3px;background:transparent;color:var(--brand-muted,#AAB3C2);font-size:9px;font-weight:800;line-height:1}
+.feedback-translation-controls button.active{background:rgba(255,180,91,.13);color:var(--brand-amber,#FFB45B)}
+.feedback-translation-controls button:disabled{opacity:.55;cursor:wait}
+.feedback-translation-controls small{max-width:min(220px,70vw);margin-left:5px;color:#c6a98a;font-size:9px;line-height:1.35;overflow-wrap:anywhere}
 
 /* MAP132 Feedback Studio — consistent inner alignment and responsive dialog scrolling. */
 .feedback-studio,

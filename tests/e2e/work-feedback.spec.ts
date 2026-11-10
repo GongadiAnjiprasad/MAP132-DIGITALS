@@ -374,6 +374,8 @@ test('feedback studio keeps inner controls aligned and scrolls the dialog only w
   }
 });
 
+
+
 test('desktop Enter submits feedback while Shift+Enter keeps a newline', async ({ page }) => {
   await page.setViewportSize({width:1440,height:900});
   let payload:any=null;
@@ -408,20 +410,46 @@ test('homepage live feedback cards include translation controls and the MAP132 r
       responseLanguage: 'en', createdAt: '2026-11-10T12:00:00.000Z'
     }] })
   }));
-  await page.route('**/api/translate', route => route.fulfill({
-    status: 200, contentType: 'application/json', body: JSON.stringify({ translatedText: 'వీడియో ఎడిటింగ్ మరియు కథనం అద్భుతంగా ఉన్నాయి.' })
-  }));
+  let translationPayload:any=null;
+  await page.route('**/api/translate', route => {
+    translationPayload=route.request().postDataJSON();
+    return route.fulfill({
+      status: 200, contentType: 'application/json', body: JSON.stringify({ translatedText: 'వీడియో ఎడిటింగ్ మరియు కథనం అద్భుతంగా ఉన్నాయి.' })
+    });
+  });
   await page.goto('/');
   const feed = page.getByRole('region', { name: 'Client feedback feed' });
   await expect(feed.getByText('Excellent video editing and storytelling.')).toBeVisible();
   await expect(feed.getByText('MAP132 DIGITALS RESPONSE')).toBeVisible();
   await expect(feed.getByText('We appreciate your feedback about the editing and storytelling.')).toBeVisible();
+  const controls=feed.locator('.feedback-translation-controls').first();
+  await expect(controls.locator('svg.feedback-translation-icon')).toBeVisible();
+  const buttonSize=await controls.getByRole('button',{name:'Translate to Telugu'}).evaluate(el=>({width:el.getBoundingClientRect().width,height:el.getBoundingClientRect().height}));
+  expect(buttonSize.width).toBeLessThanOrEqual(18);
+  expect(buttonSize.height).toBeLessThanOrEqual(18);
   await feed.getByRole('button', { name: 'Translate to Telugu' }).click();
+  expect(translationPayload).toEqual({text:'Excellent video editing and storytelling.',targetLanguage:'te'});
   await expect(feed.getByText('వీడియో ఎడిటింగ్ మరియు కథనం అద్భుతంగా ఉన్నాయి.')).toBeVisible();
   await feed.getByRole('button', { name: 'Translate to English' }).click();
   await expect(feed.getByText('Excellent video editing and storytelling.')).toBeVisible();
 });
 
+
+test('feedback translation shows the actual service error instead of a generic unavailable label', async ({ page }) => {
+  await page.route('**/api/reviews', route => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({ reviews: [{
+      id: 'translation-error-review', kind: 'Work feedback', service: 'Cinematic Trailers',
+      rating: 5, message: 'Excellent video editing.', response: '', createdAt: '2026-11-10T12:00:00.000Z'
+    }] })
+  }));
+  await page.route('**/api/translate', route => route.fulfill({
+    status: 503, contentType: 'application/json', body: JSON.stringify({ error: 'Translation service is not available right now. Please try again later.' })
+  }));
+  await page.goto('/');
+  const feed = page.getByRole('region', { name: 'Client feedback feed' });
+  await feed.getByRole('button', { name: 'Translate to Telugu' }).click();
+  await expect(feed.getByRole('status').getByText('Translation service is not available right now. Please try again later.')).toBeVisible();
+});
 
 test('feedback inner form elements stay aligned inside the panel and Send Feedback uses MAP132 brand colours', async ({ page }) => {
   for (const viewport of [
