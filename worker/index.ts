@@ -1,6 +1,6 @@
 import { FESTIVAL_CALENDAR, getIndiaDateKey } from '../src/modules/seasonal/festivalCalendar';
 import { createFeedbackResponse } from './feedback';
-interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string }> }; }
+interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string }> }; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
 const json=(body:unknown,status=200,headers:HeadersInit={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...Object.fromEntries(new Headers(headers))}});
 const COOKIE='map132_admin';
@@ -174,7 +174,23 @@ if(path==='/api/enquiries'&&method==='POST'){
    await env.MAP132_KV.put('enquiries/'+id,JSON.stringify(entry));
    return json({submitted:true,id},201);
  }
-if(path==='/api/reviews'&&method==='GET'){if(!env.MAP132_KV)return json({reviews:[]});const listed=await env.MAP132_KV.list({prefix:'feedback/',limit:100});const entries=await Promise.all(listed.keys.filter(key=>!key.name.startsWith('feedback-rate/')).map(async key=>{const value=await env.MAP132_KV!.get(key.name);if(!value)return null;try{return JSON.parse(value);}catch{return null;}}));const reviews=entries.filter((item:any)=>item&&['Website Experience','Work feedback'].includes(item.kind)&&item.publicConsent===true&&item.responseType!=='enquiry').map((item:any)=>({id:item.id,kind:item.kind,service:item.kind==='Website Experience'?'Website Experience':item.service||'Video Editing',rating:item.rating,message:item.message,response:item.response||'',responseType:item.responseType||'general',createdAt:item.createdAt})).sort((a:any,b:any)=>String(b.createdAt).localeCompare(String(a.createdAt)));return json({reviews});}
+if(path==='/api/translate'&&method==='POST'){
+  if(!env.AI)return json({error:'Translation service is not available right now.'},503);
+  let body:any;try{body=await req.json();}catch{return json({error:'Invalid translation request.'},400);}
+  const sourceText=typeof body.text==='string'?body.text.trim():'';
+  const targetLanguage=body.targetLanguage;
+  if(!sourceText||sourceText.length>2000)return json({error:'Feedback text must be between 1 and 2000 characters.'},400);
+  if(targetLanguage!=='te'&&targetLanguage!=='en')return json({error:'Choose Telugu or English translation.'},400);
+  const sourceLanguage=/[\\u0C00-\\u0C7F]/.test(sourceText)?'te':'en';
+  if(sourceLanguage===targetLanguage)return json({translatedText:sourceText,sourceLanguage,targetLanguage});
+  try{
+    const result=await env.AI.run('@cf/meta/m2m100-1.2b',{text:sourceText,source_lang:sourceLanguage,target_lang:targetLanguage});
+    const translatedText=typeof result.translated_text==='string'?result.translated_text.trim():'';
+    if(!translatedText)return json({error:'The translation model returned no translated text.'},502);
+    return json({translatedText,sourceLanguage,targetLanguage});
+  }catch{return json({error:'Translation could not be completed. Please try again.'},502);}
+}
+if(path==='/api/reviews'&&method==='GET'){if(!env.MAP132_KV)return json({reviews:[]});const listed=await env.MAP132_KV.list({prefix:'feedback/',limit:100});const entries=await Promise.all(listed.keys.filter(key=>!key.name.startsWith('feedback-rate/')).map(async key=>{const value=await env.MAP132_KV!.get(key.name);if(!value)return null;try{return JSON.parse(value);}catch{return null;}}));const reviews=entries.filter((item:any)=>item&&['Website Experience','Work feedback'].includes(item.kind)&&item.publicConsent===true&&item.responseType!=='enquiry').map((item:any)=>({id:item.id,kind:item.kind,service:item.kind==='Website Experience'?'Website Experience':item.service||'Video Editing',rating:item.rating,message:item.message,response:item.response||'',responseType:item.responseType||'general',responseLanguage:item.responseLanguage||'en',createdAt:item.createdAt})).sort((a:any,b:any)=>String(b.createdAt).localeCompare(String(a.createdAt)));return json({reviews});}
 if(path==='/api/portfolio'&&method==='GET'){const content=await read(env);for(const item of content.items||[])if(item.path&&env.MAP132_MEDIA){item.mediaUrl='/media/'+encodeURIComponent(item.path);}content.logoUrl=content.logoPath?'/media/'+encodeURIComponent(content.logoPath):'/resources/Logo.png';return json({content});}
 if(path==='/api/admin/session'&&method==='GET'){const authenticated=await validSession(req,env);return json({authenticated},authenticated?200:401);}
 if(path==='/api/admin/login'&&method==='POST'){let stage='check admin secret';try{if(!env.ADMIN_PASSWORD)return json({error:'Admin password secret is not configured in Cloudflare.'},503);stage='parse login request';let body:any;try{body=await req.json();}catch{return json({error:'Invalid request.'},400);}stage='validate password';if(typeof body.password!=='string'||body.password!==env.ADMIN_PASSWORD)return json({error:'Incorrect admin password.'},401);stage='create session payload';const payload=toBase64Url(encoder.encode(JSON.stringify({exp:Date.now()+8*60*60*1000})));stage='sign session token';const signed=await signature(payload,env.ADMIN_PASSWORD);const token=payload+'.'+signed;stage='create login response';return json({authenticated:true},200,{ 'Set-Cookie':sessionCookie(token,8*60*60) });}catch(error){const detail=error instanceof Error?error.message:'Unknown error';const name=error instanceof Error?error.name:'Error';return json({error:'Admin login failed at stage "'+stage+'" ('+name+'): '+detail},500);}}
@@ -183,6 +199,26 @@ if(!await validSession(req,env))return json({error:'Admin session required.'},40
 
 if(path==='/api/admin/feedback'&&method==='GET'){
   if(!env.MAP132_KV)return json({error:'Feedback storage is not configured.'},503);
+  const responseMigrationKey='meta/feedback-topic-replies-v2';
+  if(!(await env.MAP132_KV.get(responseMigrationKey))){
+    let cursor:string|undefined;
+    do{
+      const page=await env.MAP132_KV.list({prefix:'feedback/',limit:1000,...(cursor?{cursor}:{})});
+      for(const key of page.keys){
+        const stored=await env.MAP132_KV.get(key.name);
+        if(!stored)continue;
+        let item:any;try{item=JSON.parse(stored);}catch{continue;}
+        if(typeof item.message!=='string'||!Number.isFinite(Number(item.rating)))continue;
+        const personalized=createFeedbackResponse(item.message,Number(item.rating));
+        item.response=personalized.reply;
+        item.responseType=personalized.type;
+        item.responseLanguage=personalized.language;
+        await env.MAP132_KV.put(key.name,JSON.stringify(item));
+      }
+      cursor=page.cursor;
+    }while(cursor);
+    await env.MAP132_KV.put(responseMigrationKey,new Date().toISOString());
+  }
   const listed=await env.MAP132_KV.list({prefix:'feedback/',limit:100});
   const entries=await Promise.all(listed.keys.filter(key=>!key.name.startsWith('feedback-rate/')).map(async key=>{const value=await env.MAP132_KV!.get(key.name);if(!value)return null;try{return JSON.parse(value);}catch{return null;}}));
   return json({feedback:entries.filter(Boolean).sort((a:any,b:any)=>String(b.createdAt).localeCompare(String(a.createdAt)))});
