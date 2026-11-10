@@ -2549,3 +2549,105 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .ms-review-response small{color:#E8BD7A;font-size:8px;font-weight:800;letter-spacing:.1em}
 .ms-review-response p{margin:5px 0 0;font-size:12px;line-height:1.55}
 .feedback-inbox-item .feedback-translation-text{margin-top:10px}
+
+
+/* MAP132 Feedback Studio — final inner-form alignment pass only. */
+.feedback-studio {
+  overflow-x: hidden;
+  overflow-y: auto;
+  scrollbar-gutter: stable;
+}
+.feedback-studio form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  align-content: start;
+  justify-items: stretch;
+  align-items: start;
+  gap: 0;
+  flex: 0 0 auto;
+  min-height: auto;
+  width: 100%;
+  max-width: 100%;
+  overflow: visible;
+}
+.feedback-studio form > * {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  justify-self: stretch;
+  align-self: start;
+  box-sizing: border-box;
+}
+.feedback-studio form > .feedback-category-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 8px;
+}
+.feedback-studio form > .feedback-stars {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 40px;
+  margin: 0;
+}
+.feedback-studio form > .feedback-label {
+  margin: 10px 0 5px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+.feedback-studio form > .feedback-count {
+  margin: 4px 0 0;
+  text-align: right;
+  line-height: 1.35;
+}
+.feedback-studio #feedback-service,
+.feedback-studio #feedback-message,
+.feedback-studio #feedback-email {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.feedback-studio .feedback-submit {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  margin: 5px 0 0;
+  box-sizing: border-box;
+  background: linear-gradient(110deg, var(--brand-amber, #FFB45B), #FFD28A 55%, var(--brand-coral, #FF654F));
+  color: #17120E;
+  border: 1px solid rgba(255, 210, 138, .72);
+  box-shadow: 0 8px 24px rgba(255, 180, 91, .18), inset 0 1px rgba(255,255,255,.48);
+}
+.feedback-studio .feedback-submit:disabled {
+  color: #17120E;
+  opacity: .62;
+  filter: saturate(.72);
+}
+.feedback-studio .feedback-submit-hint,
+.feedback-studio .feedback-privacy,
+.feedback-studio .feedback-error {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+}
+@media (max-width: 600px) {
+  .feedback-studio form > .feedback-label { margin-top: 8px; }
+  .feedback-studio form > .feedback-category-grid { gap: 7px; }
+  .feedback-studio form > .feedback-stars { gap: 10px; }
+}
+@media (max-width: 360px) {
+  .feedback-studio form > .feedback-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
