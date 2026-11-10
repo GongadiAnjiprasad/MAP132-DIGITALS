@@ -155,7 +155,9 @@ if(path==='/api/feedback'&&method==='POST'){
   await env.MAP132_KV.put(rateKey,String(current+1),{expirationTtl:600});
   const id=Date.now().toString(36)+'-'+crypto.randomUUID();
   const createdAt=new Date().toISOString();
-  const entry={id,kind,service:service||undefined,aspects,rating,message,email,publicConsent:true,consentSource:'client',consentRecordedAt:createdAt,published:reply.publishable,publishedAt:reply.publishable?createdAt:null,responseType:reply.type,responseLanguage:reply.language,response:reply.reply,createdAt,status:reply.publishable?'published':reply.type};
+  const cfCountry=(req as Request & {cf?:{country?:string}}).cf?.country;
+  const countryCode=typeof cfCountry==='string'&&/^[A-Za-z]{2}$/.test(cfCountry)&&!['XX','T1'].includes(cfCountry.toUpperCase())?cfCountry.toUpperCase():undefined;
+  const entry={id,kind,countryCode,service:service||undefined,aspects,rating,message,email,publicConsent:true,consentSource:'client',consentRecordedAt:createdAt,published:reply.publishable,publishedAt:reply.publishable?createdAt:null,responseType:reply.type,responseLanguage:reply.language,response:reply.reply,createdAt,status:reply.publishable?'published':reply.type};
   await env.MAP132_KV.put('feedback/'+id,JSON.stringify(entry));
   return json({submitted:true,id,reply:reply.reply,responseType:reply.type,responseLanguage:reply.language,published:reply.publishable},201);
 }
