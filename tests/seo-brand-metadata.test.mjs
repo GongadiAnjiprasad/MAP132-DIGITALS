@@ -9,10 +9,16 @@ const graph = JSON.parse(jsonLdMatch[1]);
 const websiteNodes = graph['@graph'].filter((node) => node['@type'] === 'WebSite');
 const organizationNodes = graph['@graph'].filter((node) => node['@type'] === 'Organization');
 const expectedAliases = [
-  'MAP132 ANJI DIGITALS',
-  'ANJI MAP132 DIGITALS',
+  'MAP 132 DIGITALS',
+  'MAP132 DIGITALS',
+  'MAP132',
+  'MAP 132',
+  'map132 digitals',
+  'map132digitals',
+  'MAP132-DIGITALS',
   'MAP132 Digitals',
-  'map132digitals'
+  'MAP132 ANJI DIGITALS',
+  'ANJI MAP132 DIGITALS'
 ];
 
 test('homepage preserves one canonical MAP132 DIGITALS WebSite identity', () => {
