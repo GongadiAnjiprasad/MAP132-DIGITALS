@@ -166,6 +166,24 @@ test('Studio displays only reviews returned by the public reviews endpoint', asy
 });
 
 
+test('public reviews show topic-aware MAP132 replies and Telugu / English translation controls', async ({ page }) => {
+  await page.route('**/api/reviews', route => route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({reviews:[{
+    id:'review-translation-1',kind:'Work feedback',service:'Cinematic Trailers',rating:5,
+    message:'Excellent video editing and storytelling.',response:'We especially appreciate your comments about the video editing.',
+    responseLanguage:'en',createdAt:'2026-11-10T12:00:00.000Z'
+  }]})}));
+  await page.route('**/api/translate', route => route.fulfill({status:200,contentType:'application/json',body:JSON.stringify({translatedText:'వీడియో ఎడిటింగ్ మరియు కథనం అద్భుతంగా ఉన్నాయి.'})}));
+  await page.goto('/');
+  await page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Studio', exact: true }).click();
+  const reviews=page.getByRole('region',{name:'Client reviews'});
+  await expect(reviews.getByText('Excellent video editing and storytelling.')).toBeVisible();
+  await expect(reviews.getByText('MAP132 DIGITALS RESPONSE')).toBeVisible();
+  await reviews.getByRole('button',{name:'Translate to Telugu'}).click();
+  await expect(reviews.getByText('వీడియో ఎడిటింగ్ మరియు కథనం అద్భుతంగా ఉన్నాయి.')).toBeVisible();
+  await reviews.getByRole('button',{name:'Translate to English'}).click();
+  await expect(reviews.getByText('Excellent video editing and storytelling.')).toBeVisible();
+});
+
 test('admin feedback inbox does not require manual approval for legacy entries', async ({ page }) => {
   await page.route('**/api/admin/session', route => route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: 'Not signed in' }) }));
   await page.route('**/api/admin/login', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true }) }));
