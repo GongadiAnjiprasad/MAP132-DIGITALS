@@ -367,9 +367,9 @@ test('feedback studio keeps inner controls aligned and scrolls the dialog only w
     expect(metrics.bottom).toBeLessThanOrEqual(viewport.height+1);
     expect(metrics.formScroll, `${viewport.width}x${viewport.height}: ${JSON.stringify(metrics)}`).toBeLessThanOrEqual(1);
     expect(['auto','scroll']).toContain(metrics.dialogOverflowY);
+    await expect(dialog.locator('.feedback-submit')).toBeInViewport();
     await dialog.evaluate(element => { element.scrollTop = element.scrollHeight; });
     await expect(dialog.locator('.feedback-privacy')).toBeInViewport();
-    await expect(dialog.locator('.feedback-submit')).toBeInViewport();
     await page.getByRole('button', { name: 'Close feedback', exact: true }).click();
   }
 });
