@@ -22,7 +22,7 @@ test('routes enquiries to contact without publishing them as reviews', () => {
   assert.equal(result.type, 'enquiry');
   assert.equal(result.publishable, false);
   assert.match(result.reply, /WhatsApp/i);
-  assert.match(result.reply, /wedding/i);
+  assert.match(result.reply, /wedding mariyu special event videos/i);
 });
 
 test('responds to suggestions in the detected language and acknowledges the topic', () => {
@@ -36,7 +36,7 @@ test('responds to suggestions in the detected language and acknowledges the topi
 test('responds to low-rating complaints with an apology and the relevant topic', () => {
   const result = createFeedbackResponse('The delivery was delayed', 1);
   assert.equal(result.type, 'complaint');
-  assert.match(result.reply, /badha ga undi/i);
+  assert.match(result.reply, /sorry/i);
   assert.match(result.reply, /delivery timing/i);
 });
 
