@@ -2649,3 +2649,5 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Keep feedback form inner alignment scoped to the existing drawer. */
