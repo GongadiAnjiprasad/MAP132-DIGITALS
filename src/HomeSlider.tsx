@@ -317,7 +317,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
         <span><b>MAP132</b><small>DIGITALS · VIDEO EDITING</small></span>
       </a>
       <nav ref={navRef} className="ms-nav" aria-label="Main navigation">
-        {pages.map((page, index) => <button key={page} type="button" className={active === index ? 'active' : ''} aria-current={active === index ? 'page' : undefined} onClick={() => goTo(index)}>{page}</button>)}
+        {pages.map((page, index) => <button key={page} type="button" className={active === index ? (index === 0 ? 'active ms-home-active' : 'active') : ''} aria-current={active === index ? 'page' : undefined} onClick={() => goTo(index)}>{page}</button>)}
       </nav>
       <button
         type="button"
