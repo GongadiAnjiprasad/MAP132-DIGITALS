@@ -33,3 +33,12 @@ test('homepage keeps its existing production canonical URL and Google indexing d
   assert.match(html, /<link rel="canonical" href="https:\/\/map132-digitals\.anji-gongadi\.workers\.dev\/"\s*\/>/);
   assert.match(html, /<meta name="robots" content="index, follow, max-image-preview:large"/);
 });
+
+test('homepage connects Anji Gongadi to MAP132 DIGITALS through Person structured data', () => {
+  const personNodes = graph['@graph'].filter((node) => node['@type'] === 'Person');
+  assert.equal(personNodes.length, 1);
+  assert.equal(personNodes[0].name, 'Anji Gongadi');
+  assert.equal(personNodes[0].alternateName, 'anji.gongadi');
+  assert.equal(websiteNodes[0].creator['@id'], personNodes[0]['@id']);
+  assert.equal(personNodes[0].url, websiteNodes[0].url);
+});
