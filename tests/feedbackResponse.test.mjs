@@ -34,7 +34,7 @@ test('responds to suggestions in the detected language and acknowledges the topi
 });
 
 test('responds to low-rating complaints with an apology and the relevant topic', () => {
-  const result = createFeedbackResponse('Video delivery was delayed', 1);
+  const result = createFeedbackResponse('The delivery was delayed', 1);
   assert.equal(result.type, 'complaint');
   assert.match(result.reply, /badha ga undi/i);
   assert.match(result.reply, /delivery timing/i);
