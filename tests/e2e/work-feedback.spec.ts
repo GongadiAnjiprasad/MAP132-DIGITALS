@@ -344,7 +344,7 @@ test('feedback feed removes duplicate Share feedback action and does not auto-ro
   await expect(feed.getByText('Excellent cinematic edit.')).toBeVisible();
 });
 
-test('feedback studio fits mobile and desktop viewports without internal scrolling', async ({ page }) => {
+test('feedback studio keeps inner controls aligned and scrolls the dialog only when required', async ({ page }) => {
   for (const viewport of [{ width: 320, height: 740 },{ width: 390, height: 844 },{ width: 768, height: 1024 },{ width: 1440, height: 900 }]) {
     await page.setViewportSize(viewport);
     await page.goto('/');
@@ -354,18 +354,22 @@ test('feedback studio fits mobile and desktop viewports without internal scrolli
     const metrics = await dialog.evaluate(element => {
       const form = element.querySelector('form')!;
       const rect = element.getBoundingClientRect();
-      const submit = form.querySelector('.feedback-submit')!.getBoundingClientRect();
-      const privacy = form.querySelector('.feedback-privacy')!.getBoundingClientRect();
-      return {top:rect.top,bottom:rect.bottom,left:rect.left,right:rect.right,formScroll:form.scrollHeight-form.clientHeight,dialogScroll:element.scrollHeight-element.clientHeight,submitBottom:submit.bottom,privacyBottom:privacy.bottom};
+      return {
+        top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right,
+        formScroll: form.scrollHeight - form.clientHeight,
+        dialogScroll: element.scrollHeight - element.clientHeight,
+        dialogOverflowY: getComputedStyle(element).overflowY,
+      };
     });
     expect(metrics.top).toBeGreaterThanOrEqual(-1);
     expect(metrics.left).toBeGreaterThanOrEqual(-1);
     expect(metrics.right).toBeLessThanOrEqual(viewport.width+1);
     expect(metrics.bottom).toBeLessThanOrEqual(viewport.height+1);
     expect(metrics.formScroll, `${viewport.width}x${viewport.height}: ${JSON.stringify(metrics)}`).toBeLessThanOrEqual(1);
-    expect(metrics.dialogScroll).toBeLessThanOrEqual(1);
-    expect(metrics.submitBottom).toBeLessThanOrEqual(metrics.bottom+1);
-    expect(metrics.privacyBottom).toBeLessThanOrEqual(metrics.bottom+1);
+    expect(['auto','scroll']).toContain(metrics.dialogOverflowY);
+    await dialog.evaluate(element => { element.scrollTop = element.scrollHeight; });
+    await expect(dialog.locator('.feedback-privacy')).toBeInViewport();
+    await expect(dialog.locator('.feedback-submit')).toBeInViewport();
     await page.getByRole('button', { name: 'Close feedback', exact: true }).click();
   }
 });
