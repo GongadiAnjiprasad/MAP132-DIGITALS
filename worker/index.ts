@@ -1,6 +1,6 @@
 import { FESTIVAL_CALENDAR, getIndiaDateKey } from '../src/modules/seasonal/festivalCalendar';
 import { createFeedbackResponse } from './feedback';
-interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string }> }; }
+interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
 const json=(body:unknown,status=200,headers:HeadersInit={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...Object.fromEntries(new Headers(headers))}});
 const COOKIE='map132_admin';
@@ -175,7 +175,7 @@ if(path==='/api/enquiries'&&method==='POST'){
    return json({submitted:true,id},201);
  }
 if(path==='/api/translate'&&method==='POST'){
-  if(!env.AI)return json({error:'Translation service is not available right now.'},503);
+  if(!env.AI)return json({error:'Translation service is not available right now. Please try again later.'},503);
   let body:any;try{body=await req.json();}catch{return json({error:'Invalid translation request.'},400);}
   const sourceText=typeof body.text==='string'?body.text.trim():'';
   const targetLanguage=body.targetLanguage;
@@ -184,11 +184,12 @@ if(path==='/api/translate'&&method==='POST'){
   const sourceLanguage=/[\u0C00-\u0C7F]/.test(sourceText)?'te':/[\u0900-\u097F]/.test(sourceText)?'hi':'en';
   if(sourceLanguage===targetLanguage)return json({translatedText:sourceText,sourceLanguage,targetLanguage});
   try{
-    const result=await env.AI.run('@cf/meta/m2m100-1.2b',{text:sourceText,source_lang:sourceLanguage,target_lang:targetLanguage});
-    const translatedText=typeof result.translated_text==='string'?result.translated_text.trim():'';
-    if(!translatedText)return json({error:'The translation model returned no translated text.'},502);
+    const targetModelLanguage=targetLanguage==='te'?'tel_Telu':'eng_Latn';
+    const result=await env.AI.run('@cf/ai4bharat/indictrans2-en-indic-1B',{text:sourceText,target_language:targetModelLanguage});
+    const translatedText=Array.isArray(result.translations)?String(result.translations[0]||'').trim():'';
+    if(!translatedText)return json({error:'The translation service returned an empty result. Please try again.'},502);
     return json({translatedText,sourceLanguage,targetLanguage});
-  }catch{return json({error:'Translation could not be completed. Please try again.'},502);}
+  }catch{return json({error:'Translation could not be completed right now. Please try again.'},502);}
 }
 if(path==='/api/reviews'&&method==='GET'){if(!env.MAP132_KV)return json({reviews:[]});const listed=await env.MAP132_KV.list({prefix:'feedback/',limit:100});const entries=await Promise.all(listed.keys.filter(key=>!key.name.startsWith('feedback-rate/')).map(async key=>{const value=await env.MAP132_KV!.get(key.name);if(!value)return null;try{return JSON.parse(value);}catch{return null;}}));const reviews=entries.filter((item:any)=>item&&['Website Experience','Work feedback'].includes(item.kind)&&item.publicConsent===true&&item.responseType!=='enquiry').map((item:any)=>({id:item.id,kind:item.kind,service:item.kind==='Website Experience'?'Website Experience':item.service||'Video Editing',rating:item.rating,message:item.message,response:item.response||'',responseType:item.responseType||'general',responseLanguage:item.responseLanguage||'en',createdAt:item.createdAt})).sort((a:any,b:any)=>String(b.createdAt).localeCompare(String(a.createdAt)));return json({reviews});}
 if(path==='/api/portfolio'&&method==='GET'){const content=await read(env);for(const item of content.items||[])if(item.path&&env.MAP132_MEDIA){item.mediaUrl='/media/'+encodeURIComponent(item.path);}content.logoUrl=content.logoPath?'/media/'+encodeURIComponent(content.logoPath):'/resources/Logo.png';return json({content});}
