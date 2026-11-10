@@ -459,7 +459,7 @@ test('feedback inner form elements stay aligned inside the panel and Send Feedba
     }
     expect(metrics.submitWidth).toBeCloseTo(metrics.formWidth, 0);
     expect(metrics.submitBackground).toContain('linear-gradient');
-    expect(metrics.submitBackground).toContain('255, 180, 91');
+    expect(metrics.submitBackground).toContain('232, 189, 122');
     expect(metrics.submitText).toBe('rgb(23, 18, 14)');
     await page.getByRole('button', { name: 'Close feedback', exact: true }).click();
   }
