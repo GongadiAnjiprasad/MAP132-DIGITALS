@@ -344,32 +344,32 @@ test('feedback feed removes duplicate Share feedback action and does not auto-ro
   await expect(feed.getByText('Excellent cinematic edit.')).toBeVisible();
 });
 
-test('feedback studio fits mobile and desktop viewports without internal scrolling', async ({ page }) => {
+test('feedback studio keeps inner controls aligned and scrolls the panel only when required', async ({ page }) => {
   for (const viewport of [{ width: 320, height: 740 },{ width: 390, height: 844 },{ width: 768, height: 1024 },{ width: 1440, height: 900 }]) {
     await page.setViewportSize(viewport);
     await page.goto('/');
     await page.getByRole('button', { name: 'Give feedback' }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
-    const metrics = await dialog.evaluate(element => {
+    const panel = dialog;
+    await expect(panel).toBeVisible();
+    const metrics = await panel.evaluate(element => {
       const form = element.querySelector('form')!;
       const rect = element.getBoundingClientRect();
-      const submit = form.querySelector('.feedback-submit')!.getBoundingClientRect();
-      const privacy = form.querySelector('.feedback-privacy')!.getBoundingClientRect();
-      return {top:rect.top,bottom:rect.bottom,left:rect.left,right:rect.right,formScroll:form.scrollHeight-form.clientHeight,dialogScroll:element.scrollHeight-element.clientHeight,submitBottom:submit.bottom,privacyBottom:privacy.bottom};
+      return { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, formScroll: form.scrollHeight - form.clientHeight, panelScroll: element.scrollHeight - element.clientHeight, panelOverflowY: getComputedStyle(element).overflowY };
     });
     expect(metrics.top).toBeGreaterThanOrEqual(-1);
     expect(metrics.left).toBeGreaterThanOrEqual(-1);
-    expect(metrics.right).toBeLessThanOrEqual(viewport.width+1);
-    expect(metrics.bottom).toBeLessThanOrEqual(viewport.height+1);
+    expect(metrics.right).toBeLessThanOrEqual(viewport.width + 1);
+    expect(metrics.bottom).toBeLessThanOrEqual(viewport.height + 1);
     expect(metrics.formScroll, `${viewport.width}x${viewport.height}: ${JSON.stringify(metrics)}`).toBeLessThanOrEqual(1);
-    expect(metrics.dialogScroll).toBeLessThanOrEqual(1);
-    expect(metrics.submitBottom).toBeLessThanOrEqual(metrics.bottom+1);
-    expect(metrics.privacyBottom).toBeLessThanOrEqual(metrics.bottom+1);
+    expect(['auto', 'scroll']).toContain(metrics.panelOverflowY);
+    await expect(panel.locator('.feedback-submit')).toBeInViewport();
+    await panel.evaluate(element => { element.scrollTop = element.scrollHeight; });
+    await expect(panel.locator('.feedback-privacy')).toBeInViewport();
     await page.getByRole('button', { name: 'Close feedback', exact: true }).click();
   }
 });
-
 test('desktop Enter submits feedback while Shift+Enter keeps a newline', async ({ page }) => {
   await page.setViewportSize({width:1440,height:900});
   let payload:any=null;
@@ -443,4 +443,48 @@ test('feedback translation shows the actual service error instead of a generic u
   const feed = page.getByRole('region', { name: 'Client feedback feed' });
   await feed.getByRole('button', { name: 'Translate to Telugu' }).click();
   await expect(feed.getByRole('status').getByText('Translation service is not available right now. Please try again later.')).toBeVisible();
+});
+
+test('feedback form elements stay evenly inset inside the inner border', async ({ page }) => {
+  for (const viewport of [
+    { width: 1440, height: 900 },
+    { width: 390, height: 844 },
+    { width: 320, height: 740 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    await page.getByRole('button', { name: 'Give feedback' }).click();
+    const dialog = page.getByRole('dialog');
+    await expect(dialog).toBeVisible();
+    const metrics = await dialog.evaluate(element => {
+      const form = element.querySelector('form')!;
+      const panel = element.getBoundingClientRect();
+      const innerBorder = getComputedStyle(element, '::before');
+      const innerInset = Number.parseFloat(innerBorder.inset) || 12;
+      const children = Array.from(form.children).map(child => {
+        const rect = child.getBoundingClientRect();
+        return { tag: child.tagName, className: (child as HTMLElement).className, top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, width: rect.width };
+      }).filter(item => item.bottom > item.top);
+      const submit = form.querySelector<HTMLButtonElement>('.feedback-submit')!;
+      return {
+        panel: { left: panel.left, right: panel.right },
+        innerInset,
+        children,
+        submitWidth: submit.getBoundingClientRect().width,
+        formWidth: form.getBoundingClientRect().width,
+      };
+    });
+    expect(metrics.children.length).toBeGreaterThan(8);
+    for (const child of metrics.children) {
+      expect(child.left).toBeGreaterThanOrEqual(metrics.panel.left + metrics.innerInset + 7);
+      expect(child.right).toBeLessThanOrEqual(metrics.panel.right - metrics.innerInset - 7);
+      expect(child.width).toBeGreaterThan(0);
+    }
+    const ordered = [...metrics.children].sort((a, b) => a.top - b.top);
+    for (let index = 1; index < ordered.length; index += 1) {
+      expect(ordered[index].top).toBeGreaterThanOrEqual(ordered[index - 1].bottom - 1);
+    }
+    expect(metrics.submitWidth).toBeCloseTo(metrics.formWidth, 0);
+    await page.getByRole('button', { name: 'Close feedback', exact: true }).click();
+  }
 });

@@ -2489,7 +2489,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 @media(prefers-reduced-motion:reduce){.feedback-studio-scrim.is-closing{animation-name:feedback-scrim-out;animation-duration:1ms}.feedback-studio.is-closing{animation-name:feedback-studio-out;animation-duration:1ms}}
 @media(max-width:600px){
 .feedback-studio-scrim{padding:max(6px,env(safe-area-inset-top)) 8px max(6px,env(safe-area-inset-bottom))}
-.feedback-studio-scrim .feedback-studio{width:calc(100vw - 16px);max-width:100%;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);padding:12px 12px;border-radius:16px}
+.feedback-studio-scrim .feedback-studio{width:calc(100vw - 16px);max-width:100%;max-height:calc(100dvh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 12px);padding:20px 22px;border-radius:16px}
 .feedback-studio-brand{padding-bottom:7px}.feedback-studio-brand>img{max-height:43px;max-width:65%}
 .feedback-studio .feedback-drawer-head{margin:6px 0 5px}
 .feedback-studio .feedback-category-grid{gap:7px}
@@ -2520,7 +2520,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-studio .feedback-privacy{margin-top:3px;line-height:1.2;font-size:9px}
 }
 @media(max-width:600px) and (max-height:760px){
-.feedback-studio-scrim .feedback-studio{padding:7px 9px}
+.feedback-studio-scrim .feedback-studio{padding:7px 22px}
 .feedback-studio .feedback-category-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
 .feedback-studio .feedback-category-grid button{min-height:70px;padding:5px}
 .feedback-studio #feedback-message{min-height:44px;max-height:48px;padding:6px 8px}
@@ -2558,3 +2558,129 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-translation-controls button.active{background:rgba(255,180,91,.13);color:var(--brand-amber,#FFB45B)}
 .feedback-translation-controls button:disabled{opacity:.55;cursor:wait}
 .feedback-translation-controls small{max-width:min(220px,70vw);margin-left:5px;color:#c6a98a;font-size:9px;line-height:1.35;overflow-wrap:anywhere}
+
+/* MAP132 Feedback Studio — consistent inner alignment and responsive dialog scrolling. */
+.feedback-studio,
+.feedback-studio form,
+.feedback-studio form > * {
+  min-width: 0;
+  box-sizing: border-box;
+}
+.feedback-studio {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+.feedback-studio form {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: stretch;
+  width: 100%;
+  max-width: 100%;
+  min-height: 0;
+  overflow: visible;
+}
+.feedback-studio form > * {
+  flex: 0 0 auto;
+  max-width: 100%;
+}
+.feedback-studio form > .feedback-category-grid {
+  display: grid;
+  width: 100%;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: stretch;
+  gap: 8px;
+}
+.feedback-studio form > .feedback-aspects {
+  display: flex;
+  width: 100%;
+  flex-wrap: wrap;
+  gap: 7px;
+}
+.feedback-studio form > .feedback-stars {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  min-height: 40px;
+  margin: 0;
+}
+.feedback-studio form > .feedback-label {
+  width: 100%;
+  margin: 9px 0 4px;
+  line-height: 1.35;
+  overflow-wrap: anywhere;
+}
+.feedback-studio form > .feedback-count {
+  width: 100%;
+  margin: 3px 0 0;
+  text-align: right;
+  line-height: 1.3;
+}
+.feedback-studio #feedback-service,
+.feedback-studio #feedback-message,
+.feedback-studio #feedback-email {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  margin: 0;
+  box-sizing: border-box;
+}
+.feedback-studio .feedback-submit {
+  display: flex;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  align-items: center;
+  justify-content: center;
+  margin: 5px 0 0;
+  box-sizing: border-box;
+  white-space: normal;
+  /* Preserve the existing MAP132 submit-button appearance; alignment only. */
+}
+.feedback-studio .feedback-submit:disabled {
+  opacity: .62;
+}
+.feedback-studio .feedback-submit-hint,
+.feedback-studio .feedback-privacy,
+.feedback-studio .feedback-error {
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+}
+@media (max-width: 600px) {
+  .feedback-studio form > .feedback-label { margin-top: 7px; }
+  .feedback-studio form > .feedback-category-grid { gap: 7px; }
+  .feedback-studio form > .feedback-stars { gap: 10px; }
+}
+@media (max-width: 360px) {
+  .feedback-studio form > .feedback-category-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+@media (max-width: 360px) and (max-height: 760px) {
+  .feedback-studio-brand > img { max-height: 34px; }
+  .feedback-studio .feedback-drawer-head { margin: 3px 0 2px; }
+  .feedback-studio .feedback-drawer-head h2 { font-size: 23px; letter-spacing: -0.8px; }
+  .feedback-studio .feedback-category-grid button { min-height: 56px; padding: 4px; gap: 2px; }
+  .feedback-studio .feedback-category-icon { width: 36px; height: 36px; }
+  .feedback-studio .feedback-stars { min-height: 32px; gap: 7px; }
+  .feedback-studio .feedback-label { margin: 2px 0 1px; line-height: 1.2; }
+  .feedback-studio #feedback-message { min-height: 38px; max-height: 42px; padding: 5px 7px; }
+  .feedback-studio .feedback-public-consent { margin: 3px 0 1px; line-height: 1.15; }
+  .feedback-studio .feedback-submit { min-height: 34px; padding: 6px 9px; }
+  .feedback-studio .feedback-submit-hint { margin-top: 1px; }
+  .feedback-studio .feedback-privacy { margin-top: 2px; line-height: 1.1; font-size: 8px; }
+}
+
+/* Let the dialog itself scroll when its content exceeds the available viewport. */
+.feedback-studio-scrim .feedback-studio {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
