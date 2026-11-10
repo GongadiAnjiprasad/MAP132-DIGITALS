@@ -344,38 +344,32 @@ test('feedback feed removes duplicate Share feedback action and does not auto-ro
   await expect(feed.getByText('Excellent cinematic edit.')).toBeVisible();
 });
 
-test('feedback studio keeps inner controls aligned and scrolls the dialog only when required', async ({ page }) => {
+test('feedback studio keeps inner controls aligned and scrolls the panel only when required', async ({ page }) => {
   for (const viewport of [{ width: 320, height: 740 },{ width: 390, height: 844 },{ width: 768, height: 1024 },{ width: 1440, height: 900 }]) {
     await page.setViewportSize(viewport);
     await page.goto('/');
     await page.getByRole('button', { name: 'Give feedback' }).click();
     const dialog = page.getByRole('dialog');
     await expect(dialog).toBeVisible();
-    const metrics = await dialog.evaluate(element => {
+    const panel = dialog.locator('.feedback-studio');
+    await expect(panel).toBeVisible();
+    const metrics = await panel.evaluate(element => {
       const form = element.querySelector('form')!;
       const rect = element.getBoundingClientRect();
-      return {
-        top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right,
-        formScroll: form.scrollHeight - form.clientHeight,
-        dialogScroll: element.scrollHeight - element.clientHeight,
-        dialogOverflowY: getComputedStyle(element).overflowY,
-      };
+      return { top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, formScroll: form.scrollHeight - form.clientHeight, panelScroll: element.scrollHeight - element.clientHeight, panelOverflowY: getComputedStyle(element).overflowY };
     });
     expect(metrics.top).toBeGreaterThanOrEqual(-1);
     expect(metrics.left).toBeGreaterThanOrEqual(-1);
-    expect(metrics.right).toBeLessThanOrEqual(viewport.width+1);
-    expect(metrics.bottom).toBeLessThanOrEqual(viewport.height+1);
+    expect(metrics.right).toBeLessThanOrEqual(viewport.width + 1);
+    expect(metrics.bottom).toBeLessThanOrEqual(viewport.height + 1);
     expect(metrics.formScroll, `${viewport.width}x${viewport.height}: ${JSON.stringify(metrics)}`).toBeLessThanOrEqual(1);
-    expect(['auto','scroll']).toContain(metrics.dialogOverflowY);
-    await expect(dialog.locator('.feedback-submit')).toBeInViewport();
-    await dialog.evaluate(element => { element.scrollTop = element.scrollHeight; });
-    await expect(dialog.locator('.feedback-privacy')).toBeInViewport();
+    expect(['auto', 'scroll']).toContain(metrics.panelOverflowY);
+    await expect(panel.locator('.feedback-submit')).toBeInViewport();
+    await panel.evaluate(element => { element.scrollTop = element.scrollHeight; });
+    await expect(panel.locator('.feedback-privacy')).toBeInViewport();
     await page.getByRole('button', { name: 'Close feedback', exact: true }).click();
   }
 });
-
-
-
 test('desktop Enter submits feedback while Shift+Enter keeps a newline', async ({ page }) => {
   await page.setViewportSize({width:1440,height:900});
   let payload:any=null;
