@@ -1736,8 +1736,7 @@
 .map132-slider-site > .ms-stage {
   position: relative;
   border: 0;
-  outline: 2px solid rgba(213, 170, 102, .58);
-  outline-offset: -2px;
+  outline: 0;
   box-shadow: none;
   background-image: none;
 }
