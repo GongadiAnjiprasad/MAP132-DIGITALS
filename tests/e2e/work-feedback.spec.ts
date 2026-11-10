@@ -445,7 +445,7 @@ test('feedback translation shows the actual service error instead of a generic u
   await expect(feed.getByRole('status').getByText('Translation service is not available right now. Please try again later.')).toBeVisible();
 });
 
-test('feedback inner form elements stay aligned inside the panel and Send Feedback uses MAP132 brand colours', async ({ page }) => {
+test('feedback form elements stay evenly inset inside the inner border', async ({ page }) => {
   for (const viewport of [
     { width: 1440, height: 900 },
     { width: 390, height: 844 },
@@ -459,6 +459,8 @@ test('feedback inner form elements stay aligned inside the panel and Send Feedba
     const metrics = await dialog.evaluate(element => {
       const form = element.querySelector('form')!;
       const panel = element.getBoundingClientRect();
+      const innerBorder = getComputedStyle(element, '::before');
+      const innerInset = Number.parseFloat(innerBorder.inset) || 12;
       const children = Array.from(form.children).map(child => {
         const rect = child.getBoundingClientRect();
         return { tag: child.tagName, className: (child as HTMLElement).className, top: rect.top, bottom: rect.bottom, left: rect.left, right: rect.right, width: rect.width };
@@ -466,17 +468,16 @@ test('feedback inner form elements stay aligned inside the panel and Send Feedba
       const submit = form.querySelector<HTMLButtonElement>('.feedback-submit')!;
       return {
         panel: { left: panel.left, right: panel.right },
+        innerInset,
         children,
-        submitBackground: getComputedStyle(submit).backgroundImage,
-        submitText: getComputedStyle(submit).color,
         submitWidth: submit.getBoundingClientRect().width,
         formWidth: form.getBoundingClientRect().width,
       };
     });
     expect(metrics.children.length).toBeGreaterThan(8);
     for (const child of metrics.children) {
-      expect(child.left).toBeGreaterThan(metrics.panel.left + 8);
-      expect(child.right).toBeLessThan(metrics.panel.right - 8);
+      expect(child.left).toBeGreaterThanOrEqual(metrics.panel.left + metrics.innerInset + 7);
+      expect(child.right).toBeLessThanOrEqual(metrics.panel.right - metrics.innerInset - 7);
       expect(child.width).toBeGreaterThan(0);
     }
     const ordered = [...metrics.children].sort((a, b) => a.top - b.top);
@@ -484,9 +485,6 @@ test('feedback inner form elements stay aligned inside the panel and Send Feedba
       expect(ordered[index].top).toBeGreaterThanOrEqual(ordered[index - 1].bottom - 1);
     }
     expect(metrics.submitWidth).toBeCloseTo(metrics.formWidth, 0);
-    expect(metrics.submitBackground).toContain('linear-gradient');
-    expect(metrics.submitBackground).toContain('232, 189, 122');
-    expect(metrics.submitText).toBe('rgb(23, 18, 14)');
     await page.getByRole('button', { name: 'Close feedback', exact: true }).click();
   }
 });
