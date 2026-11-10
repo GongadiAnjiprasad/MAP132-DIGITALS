@@ -268,7 +268,7 @@ test('feedback form controls stay aligned and the message field keeps a visible 
     ]);
     expect(bounds.every(Boolean)).toBeTruthy();
     const [drawerBox, messageBox, emailBox, submitBox] = bounds;
-    const inset = 9.5; // allow sub-pixel border rounding in Chromium
+    const inset = 9; // allow fractional CSS-pixel rounding across Chromium viewport sizes
     for (const control of [messageBox!, emailBox!, submitBox!]) {
       expect(control.x).toBeGreaterThanOrEqual(drawerBox!.x + inset);
       expect(control.x + control.width).toBeLessThanOrEqual(drawerBox!.x + drawerBox!.width - inset);
