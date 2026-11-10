@@ -2525,3 +2525,12 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-studio .feedback-category-grid button{min-height:70px;padding:5px}
 .feedback-studio #feedback-message{min-height:44px;max-height:48px;padding:6px 8px}
 }
+
+
+/* Remove Android/Chrome's default blue tap flash from the floating Feedback F only. */
+.feedback-launch.royal-feedback-launch {
+  -webkit-tap-highlight-color: transparent;
+}
+.feedback-launch.royal-feedback-launch:focus:not(:focus-visible) {
+  outline: none;
+}
