@@ -1788,3 +1788,25 @@
     background-size: calc(100% - 38px) 2px;
   }
 }
+
+
+/* Home navigation: remove only its oversized active capsule.
+   Keep the Home label highlighted with the original understated underline. */
+.ms-nav button.ms-home-active {
+  min-height: 38px;
+  padding: 10px 0;
+  border: 0;
+  border-radius: 0;
+  background: none;
+  color: #ffe4ad;
+  box-shadow: 0 2px 0 var(--ms-gold);
+}
+.ms-nav button.ms-home-active::before {
+  display: none;
+}
+@media (max-width: 760px) {
+  .ms-nav button.ms-home-active {
+    min-height: 34px;
+    padding: 7px 0;
+  }
+}
