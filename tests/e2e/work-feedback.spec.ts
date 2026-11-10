@@ -393,3 +393,27 @@ test('desktop Enter submits feedback while Shift+Enter keeps a newline', async (
   expect(payload.publicConsent).toBe(true);
 });
 
+
+
+test('homepage live feedback cards include translation controls and the MAP132 reply', async ({ page }) => {
+  await page.route('**/api/reviews', route => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({ reviews: [{
+      id: 'homepage-translation-review', kind: 'Work feedback', service: 'Cinematic Trailers',
+      rating: 5, message: 'Excellent video editing and storytelling.',
+      response: 'We appreciate your feedback about the editing and storytelling.',
+      responseLanguage: 'en', createdAt: '2026-11-10T12:00:00.000Z'
+    }] })
+  }));
+  await page.route('**/api/translate', route => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({ translatedText: 'వీడియో ఎడిటింగ్ మరియు కథనం అద్భుతంగా ఉన్నాయి.' })
+  }));
+  await page.goto('/');
+  const feed = page.getByRole('region', { name: 'Client feedback feed' });
+  await expect(feed.getByText('Excellent video editing and storytelling.')).toBeVisible();
+  await expect(feed.getByText('MAP132 DIGITALS RESPONSE')).toBeVisible();
+  await expect(feed.getByText('We appreciate your feedback about the editing and storytelling.')).toBeVisible();
+  await feed.getByRole('button', { name: 'Translate to Telugu' }).click();
+  await expect(feed.getByText('వీడియో ఎడిటింగ్ మరియు కథనం అద్భుతంగా ఉన్నాయి.')).toBeVisible();
+  await feed.getByRole('button', { name: 'Translate to English' }).click();
+  await expect(feed.getByText('Excellent video editing and storytelling.')).toBeVisible();
+});
