@@ -172,7 +172,7 @@ test('admin feedback inbox does not require manual approval for legacy entries',
   await page.route('**/api/portfolio', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ content: {} }) }));
   await page.route('**/api/admin/feedback', route => route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ feedback: [{
     id: 'private-review-1', kind: 'Work feedback', service: 'Cinematic Trailers', rating: 5,
-    message: 'Excellent editing and storytelling.', email: 'client@example.com',
+    message: 'Excellent editing and storytelling.', email: 'client@example.com', countryCode: 'IN',
     createdAt: '2026-11-08T00:00:00.000Z', status: 'new', publicConsent: false, published: false,
   }] }) }));
   let publicationRequest: any = null;
@@ -201,6 +201,7 @@ test('admin feedback inbox does not require manual approval for legacy entries',
   await feedbackTab.click();
   const review = page.locator('.feedback-inbox-item').filter({ hasText: 'Excellent editing and storytelling.' });
   await expect(review.getByText('OLDER ENTRY', { exact: true })).toBeVisible();
+  await expect(review.getByText('Country: India (IN)', { exact: true })).toBeVisible();
   await expect(review.getByRole('button', { name: /publish/i })).toHaveCount(0);
   await expect(review.getByRole('button', { name: /delete feedback/i })).toHaveCount(0);
 });
@@ -372,4 +373,32 @@ test('desktop Enter submits feedback while Shift+Enter keeps a newline', async (
   await expect(dialog.getByRole('heading',{name:'Thank you for your feedback.'})).toBeVisible();
   expect(payload.message).toBe('First line\nSecond line');
   expect(payload.publicConsent).toBe(true);
+});
+
+
+test('Home navigation has no border, capsule, underline, dot or glow', async ({ page }) => {
+  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    const home = page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Home', exact: true });
+    const styles = await home.evaluate(element => {
+      const style = getComputedStyle(element);
+      const before = getComputedStyle(element, '::before');
+      return {
+        borderWidth: style.borderTopWidth,
+        borderStyle: style.borderTopStyle,
+        borderRadius: style.borderRadius,
+        backgroundImage: style.backgroundImage,
+        backgroundColor: style.backgroundColor,
+        boxShadow: style.boxShadow,
+        beforeContent: before.content,
+        beforeDisplay: before.display,
+      };
+    });
+    expect(styles.borderWidth).toBe('0px');
+    expect(styles.borderRadius).toBe('0px');
+    expect(styles.backgroundImage).toBe('none');
+    expect(styles.boxShadow).toBe('none');
+    expect(styles.beforeDisplay).toBe('none');
+  }
 });
