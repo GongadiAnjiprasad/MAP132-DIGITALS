@@ -2534,3 +2534,18 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-launch.royal-feedback-launch:focus:not(:focus-visible) {
   outline: none;
 }
+
+
+/* Compact Telugu / English translation controls on feedback messages. */
+.feedback-translation{min-width:0}
+.feedback-translation-text{margin:12px 0 6px;line-height:1.65;color:inherit;overflow-wrap:anywhere}
+.feedback-translation-controls{display:flex;align-items:center;gap:5px;margin:0 0 13px}
+.feedback-translation-controls>span{margin-right:3px;color:#b9aa98;font-size:8px;font-weight:700;letter-spacing:.1em}
+.feedback-translation-controls button{min-width:23px;height:21px;padding:0 6px;border:1px solid #d9b47745;border-radius:6px;background:#ffffff08;color:#d7c5ad;font-size:9px;font-weight:800;line-height:1;cursor:pointer}
+.feedback-translation-controls button.active{border-color:#E8BD7A;background:#E8BD7A20;color:#F3D49F}
+.feedback-translation-controls button:disabled{opacity:.55;cursor:wait}
+.feedback-translation-controls small{color:#b9aa98;font-size:9px}
+.ms-review-response{margin:10px 0 13px;padding:10px 11px;border-left:2px solid #E8BD7A;background:#E8BD7A0A;border-radius:0 8px 8px 0}
+.ms-review-response small{color:#E8BD7A;font-size:8px;font-weight:800;letter-spacing:.1em}
+.ms-review-response p{margin:5px 0 0;font-size:12px;line-height:1.55}
+.feedback-inbox-item .feedback-translation-text{margin-top:10px}
