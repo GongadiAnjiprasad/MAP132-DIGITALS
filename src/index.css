@@ -2558,25 +2558,23 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   scrollbar-gutter: stable;
 }
 .feedback-studio form {
-  display: grid;
-  grid-template-columns: minmax(0, 1fr);
-  align-content: start;
-  justify-items: stretch;
-  align-items: start;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
   gap: 0;
-  flex: 0 0 auto;
-  min-height: auto;
+  flex: 1 1 auto;
+  min-height: 0;
   width: 100%;
   max-width: 100%;
-  overflow: visible;
+  overflow: hidden;
 }
 .feedback-studio form > * {
   display: block;
+  flex: 0 0 auto;
   width: 100%;
   max-width: 100%;
   min-width: 0;
-  justify-self: stretch;
-  align-self: start;
+  align-self: stretch;
   box-sizing: border-box;
 }
 .feedback-studio form > .feedback-category-grid {
