@@ -108,6 +108,52 @@ test('Android desktop-site viewport keeps content top-led, readable and balanced
 });
 
 
+test('gold frame stays fixed while the user scrolls section content', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await expect(page.locator('.ms-stage')).toBeVisible();
+
+  const stage = page.locator('.ms-stage');
+  const frameStyle = await stage.evaluate(element => {
+    const style = getComputedStyle(element, '::before');
+    return {
+      content: style.content,
+      position: style.position,
+      inset: style.top,
+      borderStyle: style.borderTopStyle,
+      borderWidth: style.borderTopWidth,
+      zIndex: style.zIndex,
+      pointerEvents: style.pointerEvents,
+    };
+  });
+  expect(frameStyle.content).not.toBe('none');
+  expect(frameStyle.position).toBe('absolute');
+  expect(frameStyle.inset).toBe('10px');
+  expect(frameStyle.borderStyle).toBe('solid');
+  expect(frameStyle.borderWidth).toBe('1px');
+  expect(frameStyle.zIndex).toBe('20');
+  expect(frameStyle.pointerEvents).toBe('none');
+
+  await page.locator('.ms-nav').getByRole('button', { name: 'Contact', exact: true }).click();
+  const contactPage = page.locator('.ms-contact-page');
+  await expect(contactPage).toBeVisible();
+  const before = await stage.boundingBox();
+  const scrollMetrics = await contactPage.evaluate(element => {
+    const page = element as HTMLElement;
+    const style = getComputedStyle(page);
+    return { scrollHeight: page.scrollHeight, clientHeight: page.clientHeight, paddingTop: parseFloat(style.paddingTop) };
+  });
+  expect(scrollMetrics.scrollHeight).toBeGreaterThan(scrollMetrics.clientHeight);
+  expect(scrollMetrics.paddingTop).toBeGreaterThan(10);
+
+  await contactPage.evaluate(element => { (element as HTMLElement).scrollTop = 120; });
+  await expect.poll(() => contactPage.evaluate(element => (element as HTMLElement).scrollTop)).toBeGreaterThan(0);
+  const after = await stage.boundingBox();
+  expect(after).not.toBeNull();
+  expect(before).not.toBeNull();
+  expect(Math.abs(after!.y - before!.y), 'gold frame viewport position must not move with inner content').toBeLessThanOrEqual(1);
+});
+
 test('desktop-site viewport stage stays fixed while active page content scrolls internally', async ({ page }) => {
   await page.setViewportSize({ width: 980, height: 800 });
   await page.goto('/');
