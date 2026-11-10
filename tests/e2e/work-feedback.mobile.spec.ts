@@ -192,3 +192,17 @@ test('desktop feedback textarea submits on Enter and keeps Shift+Enter for a new
   await expect(dialog.getByRole('heading', { name: 'Thank you for your feedback.' })).toBeVisible();
   expect(payload.message).toBe('First line\nSecond line');
 });
+
+
+test('floating Feedback F has no default blue mobile tap highlight', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const launcher = page.getByRole('button', { name: 'Give feedback' });
+  await launcher.tap();
+  const tapStyle = await launcher.evaluate(el => ({
+    tapHighlight: getComputedStyle(el).webkitTapHighlightColor,
+    outlineStyle: getComputedStyle(el).outlineStyle,
+  }));
+  expect(tapStyle.tapHighlight).toBe('rgba(0, 0, 0, 0)');
+  expect(tapStyle.outlineStyle).toBe('none');
+});
