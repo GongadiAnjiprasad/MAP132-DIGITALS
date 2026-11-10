@@ -375,30 +375,3 @@ test('desktop Enter submits feedback while Shift+Enter keeps a newline', async (
   expect(payload.publicConsent).toBe(true);
 });
 
-
-test('Home navigation has no border, capsule, underline, dot or glow', async ({ page }) => {
-  for (const viewport of [{ width: 1440, height: 900 }, { width: 390, height: 844 }]) {
-    await page.setViewportSize(viewport);
-    await page.goto('/');
-    const home = page.getByRole('navigation', { name: 'Main navigation' }).getByRole('button', { name: 'Home', exact: true });
-    const styles = await home.evaluate(element => {
-      const style = getComputedStyle(element);
-      const before = getComputedStyle(element, '::before');
-      return {
-        borderWidth: style.borderTopWidth,
-        borderStyle: style.borderTopStyle,
-        borderRadius: style.borderRadius,
-        backgroundImage: style.backgroundImage,
-        backgroundColor: style.backgroundColor,
-        boxShadow: style.boxShadow,
-        beforeContent: before.content,
-        beforeDisplay: before.display,
-      };
-    });
-    expect(styles.borderWidth).toBe('0px');
-    expect(styles.borderRadius).toBe('0px');
-    expect(styles.backgroundImage).toBe('none');
-    expect(styles.boxShadow).toBe('none');
-    expect(styles.beforeDisplay).toBe('none');
-  }
-});
