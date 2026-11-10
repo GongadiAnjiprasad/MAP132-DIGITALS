@@ -1731,17 +1731,14 @@
 }
 
 
-/* Single stationary frame: paint it on the stage itself, behind scrolling content.
-   This avoids pseudo-element overlays and removes the legacy per-page top strip. */
+/* Stationary gold/black frame as a real stage border.
+   Border width is reserved by layout, so scrollable page text cannot slide underneath it. */
 .map132-slider-site > .ms-stage {
   position: relative;
-  isolation: isolate;
-  box-shadow: inset 0 0 0 1px rgba(213, 170, 102, .58),
-              inset 0 0 0 2px rgba(8, 10, 14, .96);
-  background-image: linear-gradient(90deg, transparent, #b88b4c 14%, #f1d69b 50%, #b88b4c 86%, transparent);
-  background-repeat: no-repeat;
-  background-position: center 8px;
-  background-size: calc(100% - 56px) 2px;
+  border: 2px solid rgba(213, 170, 102, .58);
+  border-top: 2px solid #e8c77a;
+  box-shadow: none;
+  background-image: none;
 }
 /* Disable the old gold strip on every slider page; the stage owns the only frame. */
 .map132-slider-site .ms-page::before,
