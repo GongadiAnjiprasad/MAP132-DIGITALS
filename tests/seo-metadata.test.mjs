@@ -21,5 +21,11 @@ test('homepage structured data describes the website and its publisher organizat
   const data = JSON.parse(match[1]);
   assert.equal(data['@context'], 'https://schema.org');
   assert.ok(data['@graph'].some((entry) => entry['@type'] === 'Organization' && entry.name === 'MAP132 DIGITALS'));
-  assert.ok(data['@graph'].some((entry) => entry['@type'] === 'WebSite' && entry.name === 'MAP132 DIGITALS'));
+  const organization = data['@graph'].find((entry) => entry['@type'] === 'Organization');
+  const website = data['@graph'].find((entry) => entry['@type'] === 'WebSite');
+  assert.equal(website.name, 'MAP132 DIGITALS');
+  for (const alias of ['MAP 132 DIGITALS', 'MAP132 DIGITALS', 'MAP132', 'MAP 132', 'map132 digitals', 'map132digitals', 'MAP132-DIGITALS']) {
+    assert.ok(organization.alternateName.includes(alias), `Organization alias should include ${alias}`);
+    assert.ok(website.alternateName.includes(alias), `Website alias should include ${alias}`);
+  }
 });
