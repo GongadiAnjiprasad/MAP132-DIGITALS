@@ -2551,18 +2551,30 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-inbox-item .feedback-translation-text{margin-top:10px}
 
 
-/* MAP132 Feedback Studio — scoped inner alignment only. */
+/* MAP132 Feedback Studio — consistent inner alignment and responsive dialog scrolling. */
 .feedback-studio,
 .feedback-studio form,
 .feedback-studio form > * {
   min-width: 0;
   box-sizing: border-box;
 }
+.feedback-studio {
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
 .feedback-studio form {
   display: flex;
+  flex: 0 0 auto;
   flex-direction: column;
   align-items: stretch;
   width: 100%;
+  max-width: 100%;
+  min-height: 0;
+  overflow: visible;
+}
+.feedback-studio form > * {
+  flex: 0 0 auto;
   max-width: 100%;
 }
 .feedback-studio form > .feedback-category-grid {
@@ -2589,15 +2601,15 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 }
 .feedback-studio form > .feedback-label {
   width: 100%;
-  margin: 10px 0 5px;
-  line-height: 1.4;
+  margin: 9px 0 4px;
+  line-height: 1.35;
   overflow-wrap: anywhere;
 }
 .feedback-studio form > .feedback-count {
   width: 100%;
-  margin: 4px 0 0;
+  margin: 3px 0 0;
   text-align: right;
-  line-height: 1.35;
+  line-height: 1.3;
 }
 .feedback-studio #feedback-service,
 .feedback-studio #feedback-message,
@@ -2639,7 +2651,7 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   box-sizing: border-box;
 }
 @media (max-width: 600px) {
-  .feedback-studio form > .feedback-label { margin-top: 8px; }
+  .feedback-studio form > .feedback-label { margin-top: 7px; }
   .feedback-studio form > .feedback-category-grid { gap: 7px; }
   .feedback-studio form > .feedback-stars { gap: 10px; }
 }
@@ -2648,11 +2660,9 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
-
-
-/* Tight-height mobile feedback layout: keep every control visible without drawer scrolling. */
 @media (max-width: 360px) and (max-height: 760px) {
   .feedback-studio-brand > img { max-height: 34px; }
+  .feedback-studio .feedback-drawer-head { margin: 3px 0 2px; }
   .feedback-studio .feedback-drawer-head h2 { font-size: 23px; letter-spacing: -0.8px; }
   .feedback-studio .feedback-category-grid button { min-height: 56px; padding: 4px; gap: 2px; }
   .feedback-studio .feedback-category-icon { width: 36px; height: 36px; }
