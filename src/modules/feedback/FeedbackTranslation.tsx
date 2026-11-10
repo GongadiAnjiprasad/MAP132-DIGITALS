@@ -5,7 +5,7 @@ type Language = 'te' | 'en';
 type Props = { id:string; message:string; sourceLanguage?:string };
 
 export default function FeedbackTranslation({id,message,sourceLanguage}:Props) {
-  const originalLanguage:Language = sourceLanguage==='te' || /[\\u0C00-\\u0C7F]/.test(message) ? 'te' : 'en';
+  const originalLanguage:Language = sourceLanguage==='te' || /[\u0C00-\u0C7F]/.test(message) ? 'te' : 'en';
   const [selected,setSelected] = useState<Language>(originalLanguage);
   const [translations,setTranslations] = useState<Partial<Record<Language,string>>>({});
   const [loading,setLoading] = useState<Language|null>(null);
@@ -29,7 +29,7 @@ export default function FeedbackTranslation({id,message,sourceLanguage}:Props) {
   }
 
   const displayedText=selected===originalLanguage?message:translations[selected]||message;
-  return <div className="feedback-translation">
+  return <div className="feedback-translation" data-feedback-id={id}>
     <p className="feedback-translation-text">“{displayedText}”</p>
     <div className="feedback-translation-controls" aria-label="Translate feedback">
       <span>TRANSLATE</span>
