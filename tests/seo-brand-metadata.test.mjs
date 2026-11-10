@@ -9,10 +9,16 @@ const graph = JSON.parse(jsonLdMatch[1]);
 const websiteNodes = graph['@graph'].filter((node) => node['@type'] === 'WebSite');
 const organizationNodes = graph['@graph'].filter((node) => node['@type'] === 'Organization');
 const expectedAliases = [
-  'MAP132 ANJI DIGITALS',
-  'ANJI MAP132 DIGITALS',
+  'MAP 132 DIGITALS',
+  'MAP132 DIGITALS',
+  'MAP132',
+  'MAP 132',
+  'map132 digitals',
+  'map132digitals',
+  'MAP132-DIGITALS',
   'MAP132 Digitals',
-  'map132digitals'
+  'MAP132 ANJI DIGITALS',
+  'ANJI MAP132 DIGITALS'
 ];
 
 test('homepage preserves one canonical MAP132 DIGITALS WebSite identity', () => {
@@ -32,4 +38,13 @@ test('homepage exposes the approved Anji and MAP132 brand aliases', () => {
 test('homepage keeps its existing production canonical URL and Google indexing directives', () => {
   assert.match(html, /<link rel="canonical" href="https:\/\/map132-digitals\.anji-gongadi\.workers\.dev\/"\s*\/>/);
   assert.match(html, /<meta name="robots" content="index, follow, max-image-preview:large"/);
+});
+
+test('homepage connects Anji Gongadi to MAP132 DIGITALS through Person structured data', () => {
+  const personNodes = graph['@graph'].filter((node) => node['@type'] === 'Person');
+  assert.equal(personNodes.length, 1);
+  assert.equal(personNodes[0].name, 'Anji Gongadi');
+  assert.equal(personNodes[0].alternateName, 'anji.gongadi');
+  assert.equal(websiteNodes[0].creator['@id'], personNodes[0]['@id']);
+  assert.equal(personNodes[0].url, websiteNodes[0].url);
 });
