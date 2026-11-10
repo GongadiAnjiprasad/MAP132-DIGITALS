@@ -18,7 +18,7 @@ test('homepage exposes accurate, indexable MAP132 studio metadata', () => {
 test('structured data describes the actual six video-editing services', () => {
   const match = html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/);
   assert.ok(match, 'JSON-LD script should exist');
-  const graph = JSON.parse(match[1]).['@graph'];
+  const graph = JSON.parse(match[1])['@graph'];
   const organization = graph.find((entry) => entry['@type'] === 'Organization');
   assert.ok(organization);
   const offers = organization.hasOfferCatalog.itemListElement;
