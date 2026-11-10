@@ -1731,12 +1731,13 @@
 }
 
 
-/* Stationary gold/black frame as a real stage border.
-   Border width is reserved by layout, so scrollable page text cannot slide underneath it. */
+/* Stationary stage frame: outline paints at the edge without changing
+   flex sizing or covering the scrollable page's padded content. */
 .map132-slider-site > .ms-stage {
   position: relative;
-  border: 2px solid rgba(213, 170, 102, .58);
-  border-top: 2px solid #e8c77a;
+  border: 0;
+  outline: 2px solid rgba(213, 170, 102, .58);
+  outline-offset: -2px;
   box-shadow: none;
   background-image: none;
 }
