@@ -6,9 +6,9 @@ type FeedbackTopic =
   | 'communication' | 'website' | 'pricing' | 'design';
 
 const topicRules: Array<[FeedbackTopic, RegExp]> = [
+  ['wedding', /\b(wedding|marriage|bride|groom|birthday)\b|పెళ్లి|వెడ్డింగ్|వివాహం|పుట్టినరోజు|शादी|विवाह|जन्मदिन/i],
   ['editing', /\b(edit|editing|video|videos|trailer|trailers|montage|reel|reels|shorts)\b|ఎడిటింగ్|వీడియో|ట్రైలర్|రీల్స్|वीडियो|एडिटिंग|ट्रेलर|रील्स/i],
   ['colour', /\b(colou?r|grading|colour grading|color grading|tone|visuals)\b|కలర్|గ్రేడింగ్|రంగులు|कलर|ग्रेडिंग|रंग/i],
-  ['wedding', /\b(wedding|marriage|bride|groom|birthday)\b|పెళ్లి|వెడ్డింగ్|వివాహం|పుట్టినరోజు|शादी|विवाह|जन्मदिन/i],
   ['audio', /\b(audio|sound|music|song|voice|mixing)\b|ఆడియో|సౌండ్|మ్యూజిక్|పాట|శబ్దం|ऑडियो|आवाज़|संगीत|गाना/i],
   ['delivery', /\b(delivery|deadline|delay|late|timely|time)\b|డెలివరీ|ఆలస్యం|సమయం|త్వరగా|देरी|समय|डिलीवरी/i],
   ['communication', /\b(communicat|response|reply|support|contact|cooperation)\b|స్పందన|సమాధానం|సపోర్ట్|సంప్రదింపు|जवाब|सहयोग|संपर्क/i],
