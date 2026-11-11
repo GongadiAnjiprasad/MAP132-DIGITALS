@@ -4,6 +4,7 @@ interface DriveEnv {
   GOOGLE_CLIENT_SECRET?: string;
   MY_DRIVE_SESSION_SECRET?: string;
   GOOGLE_PICKER_API_KEY?: string;
+  ADMIN_PASSWORD?: string;
 }
 
 const COOKIE = 'map132_drive_session';
@@ -110,10 +111,27 @@ function readCookie(request: Request, name: string): string | null {
   try { return decodeURIComponent(item.slice(name.length + 1)); } catch { return null; }
 }
 function unlockCookie(value: string, maxAge: number): string {
-  return UNLOCK_COOKIE + '=' + encodeURIComponent(value) + '; HttpOnly; Secure; SameSite=Strict; Path=/api/my-drive; Max-Age=' + maxAge;
+  return UNLOCK_COOKIE + '=' + encodeURIComponent(value) + '; HttpOnly; Secure; SameSite=Strict; Path=/api/my-drive';
 }
 function clearUnlockCookie(): string {
   return UNLOCK_COOKIE + '=; HttpOnly; Secure; SameSite=Strict; Path=/api/my-drive; Max-Age=0';
+}
+
+async function hasAdminSession(request: Request, env: DriveEnv): Promise<boolean> {
+  if (!env.ADMIN_PASSWORD) return false;
+  const raw = readCookie(request, 'map132_admin');
+  if (!raw) return false;
+  const parts = raw.split('.');
+  if (parts.length !== 2) return false;
+  try {
+    const base64 = parts[0].replace(/-/g, '+').replace(/_/g, '/');
+    const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+    const payload = JSON.parse(atob(padded));
+    if (!Number.isFinite(payload.exp) || payload.exp < Date.now()) return false;
+    const key = await crypto.subtle.importKey('raw', encoder.encode(env.ADMIN_PASSWORD), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const signature = b64url(new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode(parts[0]))));
+    return signature === parts[1];
+  } catch { return false; }
 }
 async function passwordDigest(password: string, secret: string): Promise<string> {
   const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
@@ -209,6 +227,7 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
   }
 
   if (path === '/api/my-drive/lock/setup' && request.method === 'POST') {
+    if (!await hasAdminSession(request, env)) return json({ error: 'Sign in to the MAP132 admin dashboard before creating the first My Drive password.' }, 403);
     const body = await request.json().catch(() => ({})) as { password?: string };
     const password = String(body.password || '');
     if (password.length < 8 || password.length > 128) return json({ error: 'Choose a password between 8 and 128 characters.' }, 400);
