@@ -30,6 +30,22 @@ test('My Drive password forms include accessible show and hide controls', () => 
   assert.ok(source.includes("button.setAttribute('aria-pressed', String(visible))"));
 });
 
+
+test('My Drive lock status and setup errors are visible before unlock', () => {
+  const statusIndex = rootHtml.indexOf('id="myDriveStatus"');
+  const contentIndex = rootHtml.indexOf('id="myDriveContent"');
+  assert.ok(statusIndex >= 0 && contentIndex > statusIndex, 'Status must render outside the hidden content container');
+  assert.ok(rootHtml.includes('target="_blank" rel="noopener">Open Admin Dashboard'));
+  assert.ok(rootHtml.includes('id="myDriveSetupToggle"'));
+  assert.ok(rootHtml.includes('id="myDriveUnlockToggle"'));
+});
+
+test('Admin dashboard password input has a working show/hide control', () => {
+  assert.ok(appSource.includes("type={showPassword?'text':'password'}"));
+  assert.ok(appSource.includes("onClick={()=>setShowPassword(v=>!v)}"));
+  assert.ok(appSource.includes("aria-label={showPassword?'Hide password':'Show password'}"));
+});
+
 test('My Drive setup and unlock forms call the protected server-side lock APIs', () => {
   for (const route of ['/api/my-drive/lock/status', '/api/my-drive/lock/setup', '/api/my-drive/lock/unlock']) {
     assert.ok(source.includes(route), 'Missing route: ' + route);
