@@ -338,16 +338,31 @@ function SoundResultCard({sound}:{sound:any}){
 function MyDriveAssetsPanel(){
   type SavedAsset={id:string;name:string;kind:'font'|'audio'|'video'|'image'|'archive';size:number;contentType:string;storedAt:string;licenseStatus:string;};
   const [configured,setConfigured]=useState(false),[unlocked,setUnlocked]=useState(false),[connected,setConnected]=useState(false);
-  const [password,setPassword]=useState(''),[assets,setAssets]=useState<SavedAsset[]>([]),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
+  const [password,setPassword]=useState(''),[assets,setAssets]=useState<SavedAsset[]>([]),[assetsCursor,setAssetsCursor]=useState<string|null>(null),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
   async function refresh(){
     try{
       const lock=await fetch('/api/my-drive/lock/status',{credentials:'same-origin'}),lockData=await lock.json();
       setConfigured(Boolean(lockData.configured));setUnlocked(Boolean(lockData.unlocked));
       const session=await fetch('/api/my-drive/session',{credentials:'same-origin'}),sessionData=await session.json();setConnected(Boolean(sessionData.connected));
-      if(lockData.unlocked){const saved=await fetch('/api/my-drive/assets',{credentials:'same-origin'});if(saved.ok){const data=await saved.json();setAssets(Array.isArray(data.assets)?data.assets:[]);}else setMessage((await saved.json().catch(()=>({error:'Could not load saved resources.'}))).error||'Could not load saved resources.');}
+      if(lockData.unlocked){const saved=await fetch('/api/my-drive/assets?limit=50',{credentials:'same-origin'});if(saved.ok){const data=await saved.json();setAssets(Array.isArray(data.assets)?data.assets:[]);setAssetsCursor(typeof data.cursor==='string'&&data.cursor?data.cursor:null);}else setMessage((await saved.json().catch(()=>({error:'Could not load saved resources.'}))).error||'Could not load saved resources.');}else{setAssets([]);setAssetsCursor(null);}
     }catch{setMessage('My Drive API is not reachable. Please try again.');}
   }
   useEffect(()=>{void refresh();},[]);
+  async function loadMoreAssets(){
+    if(!assetsCursor||busy)return;
+    setBusy(true);setMessage('Loading more saved resources…');
+    try{
+      const response=await fetch('/api/my-drive/assets?limit=50&cursor='+encodeURIComponent(assetsCursor),{credentials:'same-origin'});
+      const data=await response.json();
+      if(!response.ok)throw new Error(data.error||'Could not load more saved resources.');
+      const nextAssets=Array.isArray(data.assets)?data.assets:[];
+      setAssets(current=>{const seen=new Set(current.map(asset=>asset.id));const additions:SavedAsset[]=[];for(const asset of nextAssets as SavedAsset[]){if(!seen.has(asset.id)){seen.add(asset.id);additions.push(asset);}}return [...current,...additions];});
+      setAssetsCursor(typeof data.cursor==='string'&&data.cursor?data.cursor:null);
+      setMessage('Additional saved resources loaded.');
+    }catch(error){setMessage(error instanceof Error?error.message:'Could not load more saved resources.');}
+    finally{setBusy(false);}
+  }
+
   async function passwordAction(path:string){
     setBusy(true);setMessage('');
     try{const response=await fetch(path,{method:'POST',credentials:'same-origin',headers:{'Content-Type':'application/json'},body:JSON.stringify({password})}),data=await response.json();if(!response.ok)throw new Error(data.error||'Password action failed.');setPassword('');await refresh();setMessage(path.endsWith('/setup')?'My Drive password set and unlocked.':'My Drive unlocked.');}
@@ -398,9 +413,10 @@ function MyDriveAssetsPanel(){
       {connected&&<MyDriveFolderImport disabled={busy} onImported={refresh}/ >}
       <label className="gold-button" style={{display:'inline-flex',alignItems:'center',gap:8,margin:'12px 0',cursor:busy?'wait':'pointer'}}>Import files from device<input type="file" multiple accept=".ttf,.otf,.woff,.woff2,.mp3,.wav,.ogg,.m4a,.mp4,.webm,.mov,.jpg,.jpeg,.png,.webp,.gif,.zip" style={{display:'none'}} disabled={busy} onChange={e=>{void importFiles(e.currentTarget.files);e.currentTarget.value='';}}/></label>
       <p className="workspace-form-note">Supported: fonts, audio, video, images and ZIP. Individual file limit is 100 MB. ZIP imports recursively scan archive entries and extract supported TTF, OTF, WOFF and WOFF2 files. Google Drive folder imports scan nested subfolders for the same font formats.</p>
-      <div className="workspace-section-title"><h3>Saved resources</h3><span>{assets.length} ITEMS</span></div>
+      <div className="workspace-section-title"><h3>Saved resources</h3><span>{assets.length} LOADED ITEMS</span></div>
       {assets.length===0?<div className="workspace-empty"><b>No saved resources yet</b><p>Import files from your device to store persistent copies in your private vault.</p></div>:<div className="workspace-resource-grid">{assets.map(asset=><article className="workspace-resource-card" key={asset.id}><div className="workspace-card-top"><span>{asset.kind.toUpperCase()} · {(asset.size/1024/1024).toFixed(2)} MB</span><span>{asset.licenseStatus.toUpperCase()}</span></div><h4>{asset.name}</h4><p>Saved {new Date(asset.storedAt).toLocaleString()}</p>{asset.kind==='audio'&&<audio controls preload="metadata" src={assetUrl(asset)} />}{asset.kind==='video'&&<video controls playsInline preload="metadata" src={assetUrl(asset)} style={{width:'100%'}}/>}{asset.kind==='image'&&<img src={assetUrl(asset)} alt={asset.name} style={{maxWidth:'100%',maxHeight:240,objectFit:'contain'}}/>}{asset.kind==='font'&&<p style={{fontFamily:'sans-serif'}}>Font file saved. Download to install and preview in editing software.</p>}<div className="workspace-card-actions"><a href={assetUrl(asset,'download')}>Download</a><button type="button" onClick={()=>void removeAsset(asset)} disabled={busy}>Remove</button></div></article>)}</div>}
-      <button type="button" className="admin-nav" style={{width:'auto',marginTop:12}} onClick={async()=>{setBusy(true);try{await fetch('/api/my-drive/lock',{method:'POST',credentials:'same-origin'});setUnlocked(false);setAssets([]);setMessage('My Drive locked.');}finally{setBusy(false);}}} disabled={busy}>Lock My Drive</button>
+      {assetsCursor&&<button type="button" className="gold-button" style={{marginTop:12}} onClick={()=>void loadMoreAssets()} disabled={busy}>{busy?'Loading…':'Load more resources'}</button>}
+      <button type="button" className="admin-nav" style={{width:'auto',marginTop:12}} onClick={async()=>{setBusy(true);try{await fetch('/api/my-drive/lock',{method:'POST',credentials:'same-origin'});setUnlocked(false);setAssets([]);setAssetsCursor(null);setMessage('My Drive locked.');}finally{setBusy(false);}}} disabled={busy}>Lock My Drive</button>
     </>}
     {message&&<p className="workspace-form-note" role="status">{message}</p>}
   </section>;
