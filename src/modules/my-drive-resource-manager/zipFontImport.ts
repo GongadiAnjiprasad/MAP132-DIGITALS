@@ -4,6 +4,15 @@ const MAX_FONT_BYTES = 25 * 1024 * 1024;
 const MAX_TOTAL_BYTES = 250 * 1024 * 1024;
 const MAX_ENTRIES = 1000;
 
+function crc32(data: Uint8Array): number {
+  let crc = 0xffffffff;
+  for (const byte of data) {
+    crc ^= byte;
+    for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+  }
+  return (crc ^ 0xffffffff) >>> 0;
+}
+
 function extensionOf(name: string): string {
   return name.split('/').pop()?.split('.').pop()?.toLowerCase() || '';
 }
@@ -37,6 +46,7 @@ export async function extractSupportedFontsFromZip(file: File): Promise<File[]> 
     }
     const flags = view.getUint16(offset + 8, true);
     const method = view.getUint16(offset + 10, true);
+    const expectedCrc = view.getUint32(offset + 16, true);
     const compressedSize = view.getUint32(offset + 20, true);
     const uncompressedSize = view.getUint32(offset + 24, true);
     const nameLength = view.getUint16(offset + 28, true);
@@ -55,6 +65,7 @@ export async function extractSupportedFontsFromZip(file: File): Promise<File[]> 
     if ((unixMode & 0xf000) === 0xa000 || rawName.endsWith('/')) continue;
     if (!FONT_EXTENSIONS.has(extensionOf(rawName))) continue;
     if ((flags & 1) !== 0) continue;
+    if (compressedSize === 0xffffffff || uncompressedSize === 0xffffffff || localOffset === 0xffffffff) throw new Error('ZIP64 font entries are not supported yet.');
     if (uncompressedSize > MAX_FONT_BYTES || totalUncompressed + uncompressedSize > MAX_TOTAL_BYTES) {
       throw new Error('ZIP font contents exceed the per-file or total extraction limit.');
     }
@@ -62,8 +73,12 @@ export async function extractSupportedFontsFromZip(file: File): Promise<File[]> 
     if (localOffset + 30 > bytes.length || view.getUint32(localOffset, true) !== 0x04034b50) {
       throw new Error('ZIP local file header is invalid.');
     }
+    const localFlags = view.getUint16(localOffset + 6, true);
+    const localMethod = view.getUint16(localOffset + 8, true);
     const localNameLength = view.getUint16(localOffset + 26, true);
     const localExtraLength = view.getUint16(localOffset + 28, true);
+    const localName = decoder.decode(bytes.subarray(localOffset + 30, localOffset + 30 + localNameLength)).replace(/\\\\/g, '/');
+    if (localName !== rawName || localMethod !== method || localFlags !== flags) throw new Error('ZIP local and central directory records do not match.');
     const dataStart = localOffset + 30 + localNameLength + localExtraLength;
     const dataEnd = dataStart + compressedSize;
     if (dataStart < 0 || dataEnd > bytes.length) throw new Error('ZIP font data is truncated.');
@@ -81,6 +96,7 @@ export async function extractSupportedFontsFromZip(file: File): Promise<File[]> 
       }
     }
     if (output.byteLength !== uncompressedSize) throw new Error('Extracted ZIP font size does not match its directory record.');
+    if (crc32(new Uint8Array(output)) !== expectedCrc) throw new Error('Extracted ZIP font failed its CRC integrity check.');
     totalUncompressed += output.byteLength;
     const name = parts[parts.length - 1];
     const ext = extensionOf(name);
