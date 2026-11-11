@@ -75,7 +75,7 @@
  <button type="button" class="resource-pill" data-resource-view="fonts" aria-pressed="false"><span class="resource-pill-icon">Aa</span><strong>Cinematic Fonts</strong></button>
  <button type="button" class="resource-pill" data-resource-view="my-drive" aria-pressed="false"><span class="resource-pill-icon">☁</span><strong>My Drive</strong></button>
 </nav>
-<div class="notice"><strong>Storage & privacy note:</strong> Free Sources remain online catalogues. My Drive uses read-only Google authorization; original Drive files are never changed. Imported previews are temporary in this browser session and are not yet stored permanently in MAP132. Do not use this workspace as a client-confidential file vault.</div>
+<div class="notice"><strong>Storage & privacy note:</strong> Free Sources remain online catalogues. My Drive reads selected Drive folders without changing the originals. Imported fonts and assets are copied into your Google Drive folder “MAP132 DIGITALS Resources” and listed from encrypted MAP132 metadata. Licences remain unverified until checked. Do not use this workspace as a client-confidential file vault.</div>
 
 <section class="sfx-panel resource-panel" id="cinematic-sfx" data-resource-panel="sounds">
 <div class="sfx-head"><h2>🎧 Cinematic Sound Effects</h2><span class="kicker">PLAY · PAUSE · DOWNLOAD</span></div>
@@ -112,16 +112,17 @@
 
 <section class="mydrive-panel resource-panel" id="myDrivePanel" data-resource-panel="my-drive" hidden>
  <div class="mydrive-head"><h2>☁ My Drive Resource Library</h2><span class="kicker">PRIVATE · READ ONLY · IMPORT</span></div>
- <p class="mydrive-sub">Your personal Google Drive collection, separate from Free Sources. Original Drive files and folders are never modified. Imported assets are held temporarily in this browser session; unknown licences are not treated as free.</p>
+ <p class="mydrive-sub">Your personal Google Drive collection, separate from Free Sources. Original Drive files and folders are never modified. Imported copies are stored in your Google Drive folder “MAP132 DIGITALS Resources”; unknown licences are not treated as free.</p>
  <div class="mydrive-gate" id="myDriveGate">
   <form class="mydrive-form" id="myDriveSetupForm"><p>First-time setup requires an active MAP132 admin dashboard sign-in. After setup, My Drive uses its own password.</p><label for="myDriveSetupPassword">Create a separate My Drive password (8–128 characters)</label><input id="myDriveSetupPassword" type="password" minlength="8" maxlength="128" autocomplete="new-password" required><button type="submit">Set password</button></form>
   <form class="mydrive-form" id="myDriveUnlockForm" hidden><label for="myDriveUnlockPassword">My Drive password</label><input id="myDriveUnlockPassword" type="password" maxlength="128" autocomplete="current-password" required><button type="submit">Unlock My Drive</button></form>
  </div>
  <div id="myDriveContent" hidden>
-  <div class="mydrive-actions"><button type="button" id="myDriveConnect">Connect Google Drive</button><button type="button" id="myDrivePicker" disabled>Open Google Picker</button><button type="button" id="myDriveBrowse" disabled>Browse Drive folders</button><label class="mydrive-upload">Import ZIP from device <input type="file" id="myDriveLocalZip" accept=".zip,application/zip"></label><button type="button" id="myDriveLock">Lock My Drive</button><button type="button" id="myDriveDisconnect">Disconnect Drive</button></div>
+  <div class="mydrive-actions"><button type="button" id="myDriveRefresh">Refresh resources</button><button type="button" id="myDriveConnect">Connect Google Drive</button><button type="button" id="myDrivePicker" disabled>Open Google Picker</button><button type="button" id="myDriveBrowse" disabled>Browse Drive folders</button><label class="mydrive-upload">Import ZIP from device <input type="file" id="myDriveLocalZip" accept=".zip,application/zip"></label><button type="button" id="myDriveLock">Lock My Drive</button><button type="button" id="myDriveDisconnect">Disconnect Drive</button></div>
   <div class="mydrive-status" id="myDriveStatus" role="status" aria-live="polite">Checking My Drive connection…</div>
   <div class="mydrive-browse-list" id="myDriveBrowseList"></div>
-  <h3>Imported assets</h3><div class="mydrive-items" id="myDriveItems"><p class="mydrive-empty">No assets imported yet.</p></div>
+  <p class="mydrive-sub">Google Drive folder import scans nested folders for TTF, OTF, WOFF and WOFF2 fonts. ZIP import scans nested archive paths, extracts supported font files and saves each font persistently. Unsupported files are skipped.</p>
+  <h3>Saved resources</h3><div class="mydrive-items" id="myDriveItems"><p class="mydrive-empty">No assets imported yet.</p></div>
  </div>
 </section>
 

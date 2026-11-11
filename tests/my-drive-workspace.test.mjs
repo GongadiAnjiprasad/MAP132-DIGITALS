@@ -2,26 +2,46 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-test('My Drive resource library is a separate workspace tab and panel', () => {
-  const html = readFileSync(new URL('../public/workspace.html', import.meta.url), 'utf8');
-  assert.match(html, /data-resource-view="my-drive"/);
-  assert.match(html, /data-resource-panel="my-drive"/);
-  assert.match(html, /id="myDrivePanel"/);
-  assert.match(html, /my-drive-resource-manager\.js/);
-});
+const rootHtml = readFileSync(new URL('../workspace.html', import.meta.url), 'utf8');
+const publishedHtml = readFileSync(new URL('../public/workspace.html', import.meta.url), 'utf8');
+const source = readFileSync(new URL('../public/my-drive-resource-manager.js', import.meta.url), 'utf8');
 
-test('My Drive browser script parses and does not persist Drive tokens or password text', () => {
-  const source = readFileSync(new URL('../public/my-drive-resource-manager.js', import.meta.url), 'utf8');
+test('My Drive is a separate workspace tab and its browser script is loaded', () => {
+  assert.ok(rootHtml.includes('data-resource-view="my-drive"'));
+  assert.ok(rootHtml.includes('data-resource-panel="my-drive"'));
+  assert.ok(rootHtml.includes('id="myDrivePanel"'));
+  assert.ok(rootHtml.includes('my-drive-resource-manager.js'));
+  assert.ok(source.includes("panel.dataset.initialized"));
   assert.doesNotThrow(() => new Function(source));
-  assert.doesNotMatch(source, /localStorage|sessionStorage/);
-  assert.match(source, /api\/my-drive\/lock\/setup/);
-  assert.match(source, /api\/my-drive\/picker-config/);
-  assert.match(source, /listPage\(folder\.id,token\)/);
-  assert.match(source, /crypto\.subtle\.digest\('SHA-256'/);
 });
 
-test('root and public workspace copies stay byte-for-byte synchronized', () => {
-  const root = readFileSync(new URL('../workspace.html', import.meta.url), 'utf8');
-  const published = readFileSync(new URL('../public/workspace.html', import.meta.url), 'utf8');
-  assert.equal(root, published);
+test('My Drive setup and unlock forms call the protected server-side lock APIs', () => {
+  for (const route of ['/api/my-drive/lock/status', '/api/my-drive/lock/setup', '/api/my-drive/lock/unlock']) {
+    assert.ok(source.includes(route), 'Missing route: ' + route);
+  }
+  assert.ok(source.includes('Admin Dashboard sign-in'));
+  assert.ok(source.includes('index.html#admin'));
+});
+
+test('Google Drive folder import and ZIP font import use persistent asset APIs', () => {
+  for (const route of ['/api/my-drive/oauth/start', '/api/my-drive/picker-config', '/api/my-drive/import-folder', '/api/my-drive/assets']) {
+    assert.ok(source.includes(route), 'Missing route: ' + route);
+  }
+  assert.match(source, /ttf.*otf.*woff.*woff2/);
+  assert.ok(source.includes('DecompressionStream'));
+  assert.ok(source.includes('crc32'));
+  assert.ok(source.includes('MAP132 DIGITALS Resources'));
+  assert.ok(!source.includes('/api/my-drive/files'));
+  assert.ok(!source.includes('/api/my-drive/download/'));
+});
+
+test('My Drive script never stores passwords or OAuth tokens in browser storage', () => {
+  assert.doesNotMatch(source, /localStorage|sessionStorage/);
+  assert.ok(source.includes("credentials: 'same-origin'"));
+});
+
+test('root and published workspace pages remain byte-for-byte synchronized', () => {
+  assert.equal(rootHtml, publishedHtml);
+  assert.ok(rootHtml.includes('copied into your Google Drive folder'));
+  assert.ok(rootHtml.includes('id="myDriveRefresh"'));
 });
