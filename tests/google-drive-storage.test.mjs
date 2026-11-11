@@ -64,7 +64,12 @@ test('uploads resource bytes through a resumable Drive upload session', async ()
 test('rejects resumable upload sessions without a Location header', async () => {
   const kv = memoryKv({ 'my-drive/storage-folder-id': 'folder-123' });
   const originalFetch = globalThis.fetch;
-  globalThis.fetch = async () => new Response(null, { status: 200 });
+  let calls = 0;
+  globalThis.fetch = async () => {
+    calls++;
+    if (calls === 1) return Response.json({ id: 'folder-123', trashed: false });
+    return new Response(null, { status: 200 });
+  };
   try {
     await assert.rejects(
       uploadMap132DriveFile('access-token', kv, 'sample.ttf', 'font/ttf', new TextEncoder().encode('font').buffer),
