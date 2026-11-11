@@ -22,7 +22,8 @@ export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Resp
  if(!accessToken)return json({error:'Google Drive session expired. Reconnect Google Drive and try again.'},401);
  if(path==='/api/my-drive/assets'&&req.method==='GET'){
   const page=Math.max(1,Math.min(100,Number(url.searchParams.get('limit')||50)));
-  const listed=await env.MAP132_KV.list({prefix:'my-drive/assets/',limit:page});
+  const cursor=url.searchParams.get('cursor')||undefined;
+  const listed=await env.MAP132_KV.list({prefix:'my-drive/assets/',limit:page,...(cursor?{cursor}:{})});
   const records=await Promise.all(listed.keys.map(async key=>{const value=await env.MAP132_KV!.get(key.name);if(!value)return null;try{return JSON.parse(value);}catch{return null;}}));
   return json({assets:records.filter(Boolean),cursor:listed.cursor||null});
  }
