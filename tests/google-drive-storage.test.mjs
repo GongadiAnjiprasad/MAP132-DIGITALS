@@ -18,7 +18,7 @@ test('creates and caches a dedicated MAP132 Drive folder', async () => {
   let calls = 0;
   globalThis.fetch = async (url, init) => {
     calls++;
-    assert.match(String(url), /www.googleapis.com\\/drive\\/v3\\/files/);
+    assert.match(String(url), /www\.googleapis\.com\/drive\/v3\/files/);
     assert.equal(init.method, 'POST');
     const body = JSON.parse(init.body);
     assert.equal(body.name, 'MAP132 DIGITALS Resources');
