@@ -103,6 +103,15 @@ async function readSession(request: Request, env: DriveEnv): Promise<{ access_to
 }
 
 
+
+const OAUTH_STATE_COOKIE = 'map132_drive_oauth_state';
+function oauthStateCookie(value: string): string {
+  return OAUTH_STATE_COOKIE + '=' + encodeURIComponent(value) + '; HttpOnly; Secure; SameSite=Lax; Path=/api/my-drive/oauth/callback; Max-Age=' + STATE_TTL;
+}
+function clearOAuthStateCookie(): string {
+  return OAUTH_STATE_COOKIE + '=; HttpOnly; Secure; SameSite=Lax; Path=/api/my-drive/oauth/callback; Max-Age=0';
+}
+
 const UNLOCK_COOKIE = 'map132_drive_unlock';
 const LOCK_TTL = 60 * 60 * 12;
 function readCookie(request: Request, name: string): string | null {
@@ -174,12 +183,12 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
     authorize.searchParams.set('state', state);
     authorize.searchParams.set('code_challenge', challenge);
     authorize.searchParams.set('code_challenge_method', 'S256');
-    return json({ authorizationUrl: authorize.toString(), redirectUri });
+    return json({ authorizationUrl: authorize.toString(), redirectUri }, 200, { 'Set-Cookie': oauthStateCookie(state) });
   }
 
   if (path === '/api/my-drive/oauth/callback' && request.method === 'GET') {
     if (url.searchParams.has('error')) {
-      return Response.redirect(new URL('/?myDrive=cancelled#workspace', url.origin), 302);
+      const response = Response.redirect(new URL('/?myDrive=cancelled#workspace', url.origin), 302);\n      response.headers.append('Set-Cookie', clearOAuthStateCookie());\n      return response;
     }
     const state = url.searchParams.get('state') || '';
     const code = url.searchParams.get('code') || '';
@@ -210,14 +219,13 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
     await env.MAP132_KV!.put('my-drive/session/' + sessionId, encrypted, {
       expirationTtl: Math.max(60, Math.floor((expiresAt - Date.now()) / 1000)),
     });
-    return new Response(null, {
-      status: 302,
-      headers: {
-        Location: new URL('/?myDrive=connected#workspace', url.origin).toString(),
-        'Cache-Control': 'no-store',
-        'Set-Cookie': sessionCookie(sessionId, Math.max(60, Math.floor((expiresAt - Date.now()) / 1000))),
-      },
+    const headers = new Headers({
+      Location: new URL('/?myDrive=connected#workspace', url.origin).toString(),
+      'Cache-Control': 'no-store',
     });
+    headers.append('Set-Cookie', sessionCookie(sessionId, Math.max(60, Math.floor((expiresAt - Date.now()) / 1000))));
+    headers.append('Set-Cookie', clearOAuthStateCookie());
+    return new Response(null, { status: 302, headers });
   }
 
 
