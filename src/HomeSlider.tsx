@@ -233,22 +233,23 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   const onPointerDown = (event: PointerEvent<HTMLElement>) => {
     if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
     const target = event.target as HTMLElement;
-    // Keep native interaction/vertical scrolling for controls, but allow horizontal page swipes
-    // from the Contact page's non-interactive areas (page 5 must swipe back to page 4).
+    // The feedback feed owns its own horizontal gesture and must not navigate pages.
     if (target.closest('.ms-home-review-feed')) return;
-    // A fresh intentional control press must never inherit a pending synthetic-click
-    // suppression from an earlier swipe. Otherwise a fast nav-to-category tap can be lost.
-    if (target.closest('input, textarea, select, video, iframe, button, a')) {
-      suppressSwipeClick.current = false;
-      swipeClickTarget.current = null;
-      return;
-    }
+    // Every new touch starts a fresh click-suppression window. Buttons and links are
+    // gesture origins too: a horizontal drag should navigate, while a short tap should
+    // still activate the control normally.
+    suppressSwipeClick.current = false;
+    swipeClickTarget.current = null;
+    // Form fields and media retain their native touch behaviour and are not page-swipe origins.
+    if (target.closest('input, textarea, select, video, iframe')) return;
     const page = target.closest('.ms-page') as HTMLElement | null;
-    // Do not capture touch pointers: native vertical scrolling must remain available inside each page.
-    // Capture the touch sequence on the stage so pointerup is still received
-    // when the finger drifts beyond the original child/page boundary. CSS keeps
-    // vertical pan native, while horizontal movement remains available to the slider.
-    try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* browser may already own the pointer */ }
+    // Avoid pointer capture for buttons/links so their ordinary tap still produces a
+    // click on the control. Pointer-up continues to bubble through the stage for drags.
+    // Other page surfaces use capture so a swipe remains detectable if the finger
+    // drifts beyond the original child/page boundary. CSS keeps vertical pan native.
+    if (!target.closest('button, a')) {
+      try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* browser may already own the pointer */ }
+    }
     pointerStart.current = {
       x: event.clientX,
       y: event.clientY,
