@@ -51,7 +51,9 @@ async function encrypt(value: unknown, secret: string): Promise<string> {
 }
 
 async function decrypt<T>(value: string, secret: string): Promise<T> {
-  const bytes = Uint8Array.from(atob(value.replace(/-/g, '+').replace(/_/g, '/')), c => c.charCodeAt(0));
+  const base64 = value.replace(/-/g, '+').replace(/_/g, '/');
+  const padded = base64 + '='.repeat((4 - (base64.length % 4)) % 4);
+  const bytes = Uint8Array.from(atob(padded), c => c.charCodeAt(0));
   const plaintext = await crypto.subtle.decrypt(
     { name: 'AES-GCM', iv: bytes.slice(0, 12) },
     await encryptionKey(secret),
@@ -63,7 +65,8 @@ async function decrypt<T>(value: string, secret: string): Promise<T> {
 function cookieValue(request: Request): string | null {
   const cookie = request.headers.get('Cookie') || '';
   const item = cookie.split(';').map(part => part.trim()).find(part => part.startsWith(COOKIE + '='));
-  return item ? decodeURIComponent(item.slice(COOKIE.length + 1)) : null;
+  if (!item) return null;
+  try { return decodeURIComponent(item.slice(COOKIE.length + 1)); } catch { return null; }
 }
 
 function sessionCookie(value: string, maxAge: number): string {
@@ -76,7 +79,7 @@ function clearCookie(): string {
 }
 
 function configReady(env: DriveEnv): boolean {
-  return Boolean(env.MAP132_KV && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET && env.MY_DRIVE_SESSION_SECRET);
+  return Boolean(env.MAP132_KV && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET && env.MY_DRIVE_SESSION_SECRET && env.MY_DRIVE_SESSION_SECRET.length >= 32);
 }
 
 async function readSession(request: Request, env: DriveEnv): Promise<{ access_token: string; expires_at: number } | null> {
@@ -127,6 +130,9 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
   }
 
   if (path === '/api/my-drive/oauth/callback' && request.method === 'GET') {
+    if (url.searchParams.has('error')) {
+      return Response.redirect(new URL('/?myDrive=cancelled#workspace', url.origin), 302);
+    }
     const state = url.searchParams.get('state') || '';
     const code = url.searchParams.get('code') || '';
     const verifier = state ? await env.MAP132_KV!.get('my-drive/oauth-state/' + state) : null;
@@ -159,7 +165,7 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
     return new Response(null, {
       status: 302,
       headers: {
-        Location: new URL('/#workspace?myDrive=connected', url.origin).toString(),
+        Location: new URL('/?myDrive=connected#workspace', url.origin).toString(),
         'Cache-Control': 'no-store',
         'Set-Cookie': sessionCookie(sessionId, Math.max(60, Math.floor((expiresAt - Date.now()) / 1000))),
       },
@@ -182,7 +188,9 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
     if (!session) return json({ error: 'Connect Google Drive again to continue.' }, 401);
     const pageToken = url.searchParams.get('pageToken');
     const parentId = url.searchParams.get('parentId');
-    const query = ["trashed = false", parentId ? "'" + parentId.replace(/[^a-zA-Z0-9_-]/g, '') + "' in parents" : null]
+    if (pageToken && pageToken.length > 4096) return json({ error: 'Invalid Drive page token.' }, 400);
+    if (parentId && !/^[a-zA-Z0-9_-]{1,256}$/.test(parentId)) return json({ error: 'Invalid Drive folder ID.' }, 400);
+    const query = ["trashed = false", parentId ? "'" + parentId + "' in parents" : null]
       .filter(Boolean).join(' and ');
     const driveUrl = new URL('https://www.googleapis.com/drive/v3/files');
     driveUrl.searchParams.set('q', query);
