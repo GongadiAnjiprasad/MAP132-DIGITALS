@@ -488,3 +488,45 @@ test('feedback form elements stay evenly inset inside the inner border', async (
     await page.getByRole('button', { name: 'Close feedback', exact: true }).click();
   }
 });
+
+test('feedback studio text remains high-contrast in the website light theme', async ({ page }) => {
+  await page.setViewportSize({ width: 1440, height: 900 });
+  await page.goto('/');
+  const site = page.locator('.map132-slider-site');
+  await expect(site).toBeVisible();
+  if (await site.getAttribute('data-theme') !== 'light') {
+    await page.locator('.ms-theme-toggle').click();
+  }
+  await expect(site).toHaveAttribute('data-theme', 'light');
+  await page.getByRole('button', { name: 'Give feedback' }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog).toBeVisible();
+  const colors = await dialog.evaluate(element => {
+    const get = (selector: string, pseudo?: string) => {
+      const node = element.querySelector(selector);
+      return node ? getComputedStyle(node, pseudo).color : '';
+    };
+    return {
+      heading: get('.feedback-drawer-head h2'),
+      intro: get('.feedback-drawer-head p:last-child'),
+      label: get('.feedback-label'),
+      categoryTitle: get('.feedback-category-grid strong'),
+      categoryDescription: get('.feedback-category-grid small'),
+      textarea: get('#feedback-message'),
+      placeholder: get('#feedback-message', '::placeholder'),
+      count: get('.feedback-count'),
+      hint: get('.feedback-submit-hint'),
+      privacy: get('.feedback-privacy'),
+    };
+  });
+  expect(colors.heading).toBe('rgb(41, 37, 31)');
+  expect(colors.intro).toBe('rgb(85, 83, 78)');
+  expect(colors.label).toBe('rgb(128, 85, 31)');
+  expect(colors.categoryTitle).toBe('rgb(41, 37, 31)');
+  expect(colors.categoryDescription).toBe('rgb(93, 90, 84)');
+  expect(colors.textarea).toBe('rgb(41, 37, 31)');
+  expect(colors.placeholder).toBe('rgb(112, 107, 98)');
+  expect(colors.count).toBe('rgb(98, 94, 86)');
+  expect(colors.hint).toBe('rgb(85, 81, 73)');
+  expect(colors.privacy).toBe('rgb(85, 81, 73)');
+});
