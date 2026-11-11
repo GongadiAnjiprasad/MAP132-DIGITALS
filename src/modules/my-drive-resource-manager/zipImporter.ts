@@ -1,4 +1,4 @@
-import { ARCHIVE_LIMITS, classifyAsset, validateArchiveEntry } from './archivePolicy';
+import { ARCHIVE_LIMITS, classifyAsset, validateArchiveEntry } from './archivePolicy.ts';
 import type { ImportCandidate, ImportIssue, ImportSummary } from './types';
 
 const decoder = new TextDecoder();
