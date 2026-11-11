@@ -387,6 +387,25 @@
     finally { setBusy(false); }
   }
 
+  function bindPasswordVisibility(inputId, buttonId) {
+    const input = $(inputId), button = $(buttonId);
+    if (!input || !button) return;
+    button.addEventListener('click', () => {
+      const visible = input.type === 'password';
+      input.type = visible ? 'text' : 'password';
+      button.setAttribute('aria-label', visible ? 'Hide password' : 'Show password');
+      button.setAttribute('title', visible ? 'Hide password' : 'Show password');
+      button.setAttribute('aria-pressed', String(visible));
+      const open = button.querySelector('[data-eye-open]');
+      const closed = button.querySelector('[data-eye-closed]');
+      if (open) open.hidden = visible;
+      if (closed) closed.hidden = !visible;
+      input.focus({ preventScroll: true });
+    });
+  }
+  bindPasswordVisibility('myDriveSetupPassword', 'myDriveSetupToggle');
+  bindPasswordVisibility('myDriveUnlockPassword', 'myDriveUnlockToggle');
+
   setupForm.addEventListener('submit', event => passwordAction(event, '/api/my-drive/lock/setup', 'myDriveSetupPassword'));
   unlockForm.addEventListener('submit', event => passwordAction(event, '/api/my-drive/lock/unlock', 'myDriveUnlockPassword'));
   $('myDriveConnect').addEventListener('click', connectDrive);
