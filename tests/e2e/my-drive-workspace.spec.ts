@@ -76,6 +76,7 @@ test('main Editor Workspace navigation opens the persistent My Drive page', asyn
   await page.goto('/index.html#workspace');
   await expect(page).toHaveURL(/\/workspace\.html$/);
   await expect(page.locator('#myDrivePanel')).toBeAttached();
+  await page.locator('[data-resource-view="my-drive"]').click();
   await expect(page.locator('#myDriveSetupForm')).toBeVisible();
 });
 
@@ -85,6 +86,7 @@ test('My Drive create-password field can be shown and hidden', async ({ page }) 
     body: JSON.stringify({ configured: false, unlocked: false })
   }));
   await page.goto('/workspace.html');
+  await page.locator('[data-resource-view="my-drive"]').click();
   const password = page.locator('#myDriveSetupPassword');
   const toggle = page.locator('#myDriveSetupToggle');
   await expect(password).toHaveAttribute('type', 'password');
@@ -102,6 +104,7 @@ test('My Drive unlock-password field can be shown and hidden', async ({ page }) 
     body: JSON.stringify({ configured: true, unlocked: false })
   }));
   await page.goto('/workspace.html');
+  await page.locator('[data-resource-view="my-drive"]').click();
   const password = page.locator('#myDriveUnlockPassword');
   const toggle = page.locator('#myDriveUnlockToggle');
   await expect(password).toBeVisible();
