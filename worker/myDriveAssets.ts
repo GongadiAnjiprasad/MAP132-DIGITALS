@@ -47,7 +47,7 @@ export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Resp
   await env.MAP132_KV.put(key,JSON.stringify(asset));
   return json({saved:true,asset},201);
  }
- const match=path.match(/^\\/api\\/my-drive\\/assets\\/([a-z0-9-]+)(?:\\/(preview|download))?$/i);
+ const match=path.match(/^\/api\/my-drive\/assets\/([a-z0-9-]+)(?:\/(preview|download))?$/i);
  if(match&&req.method==='GET'){
   const id=match[1],action=match[2]||'preview',key='my-drive/assets/'+id;
   const meta=await env.MAP132_KV.get(key);if(!meta)return json({error:'Saved resource not found.'},404);
