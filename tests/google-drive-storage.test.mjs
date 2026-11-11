@@ -37,7 +37,7 @@ test('uploads resource bytes into the dedicated Drive folder and returns the Dri
   const originalFetch = globalThis.fetch;
   let uploadSeen = false;
   globalThis.fetch = async (url, init) => {
-    if (init.method === 'GET') return Response.json({ id: 'folder-123', trashed: false });
+    if (!init.method || init.method === 'GET') return Response.json({ id: 'folder-123', trashed: false });
     assert.match(String(url), /uploadType=multipart/);
     assert.equal(init.method, 'POST');
     assert.ok(init.body instanceof FormData);
