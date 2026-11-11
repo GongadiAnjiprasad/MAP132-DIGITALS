@@ -1,6 +1,7 @@
 import { FESTIVAL_CALENDAR, getIndiaDateKey } from '../src/modules/seasonal/festivalCalendar';
 import { createFeedbackResponse } from './feedback';
-interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
+import { handleMyDriveOAuth } from '../src/modules/my-drive-resource-manager/driveOAuth';
+interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; MY_DRIVE_SESSION_SECRET?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
 const json=(body:unknown,status=200,headers:HeadersInit={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...Object.fromEntries(new Headers(headers))}});
 const COOKIE='map132_admin';
@@ -50,7 +51,7 @@ async function read(env:Env){
     return {...DEFAULTS,...stored,profile,skills,items,resources,logoPath:typeof stored.logoPath==='string'&&stored.logoPath.startsWith('portfolio/logos/')?stored.logoPath:''};
   }catch{return DEFAULTS;}
 }
-async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;
+async function api(req:Request,env:Env){const driveOAuthResponse=await handleMyDriveOAuth(req,env);if(driveOAuthResponse)return driveOAuthResponse;const url=new URL(req.url),path=url.pathname,method=req.method;
 if(path.startsWith('/api/resources/sounds/')&&path.endsWith('/preview')&&method==='GET'){
   if(!env.FREESOUND_API_KEY)return json({error:'Sound preview is not connected.'},503);
   const id=path.split('/')[4];
