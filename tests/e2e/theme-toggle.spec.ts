@@ -38,7 +38,11 @@ test('light theme keeps the homepage MAP132 logo and supporting text readable', 
     await page.setViewportSize(viewport);
     await page.goto('/');
     const site = page.locator('.map132-slider-site');
-    await page.getByRole('button', { name: 'Switch to light theme' }).click();
+    const themeToggle = site.locator('.ms-theme-toggle');
+    await expect(themeToggle).toBeVisible();
+    if (await themeToggle.getAttribute('aria-pressed') !== 'true') {
+      await themeToggle.click();
+    }
     await expect(site).toHaveAttribute('data-theme', 'light');
 
     const logo = site.locator('.ms-header .ms-brand img');
