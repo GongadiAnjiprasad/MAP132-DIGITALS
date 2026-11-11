@@ -236,7 +236,13 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     // Keep native interaction/vertical scrolling for controls, but allow horizontal page swipes
     // from the Contact page's non-interactive areas (page 5 must swipe back to page 4).
     if (target.closest('.ms-home-review-feed')) return;
-    if (target.closest('input, textarea, select, video, iframe, button:not(.ms-service-tile):not(.work-category-tab):not(.all-work-filter), a')) return;
+    // A fresh intentional control press must never inherit a pending synthetic-click
+    // suppression from an earlier swipe. Otherwise a fast nav-to-category tap can be lost.
+    if (target.closest('input, textarea, select, video, iframe, button, a')) {
+      suppressSwipeClick.current = false;
+      swipeClickTarget.current = null;
+      return;
+    }
     const page = target.closest('.ms-page') as HTMLElement | null;
     // Do not capture touch pointers: native vertical scrolling must remain available inside each page.
     // Capture the touch sequence on the stage so pointerup is still received
