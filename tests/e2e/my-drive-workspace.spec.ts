@@ -70,3 +70,46 @@ test('My Drive tab and controls fit a narrow mobile viewport', async ({ page }) 
   expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport + 1);
   await expect(page.locator('#myDriveSetupForm')).toBeVisible();
 });
+
+
+test('main Editor Workspace navigation opens the persistent My Drive page', async ({ page }) => {
+  await page.goto('/index.html#workspace');
+  await expect(page).toHaveURL(/\/workspace\.html$/);
+  await expect(page.locator('#myDrivePanel')).toBeAttached();
+  await expect(page.locator('#myDriveSetupForm')).toBeVisible();
+});
+
+test('My Drive create-password field can be shown and hidden', async ({ page }) => {
+  await page.route('**/api/my-drive/lock/status', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ configured: false, unlocked: false })
+  }));
+  await page.goto('/workspace.html');
+  const password = page.locator('#myDriveSetupPassword');
+  const toggle = page.locator('#myDriveSetupToggle');
+  await expect(password).toHaveAttribute('type', 'password');
+  await toggle.click();
+  await expect(password).toHaveAttribute('type', 'text');
+  await expect(toggle).toHaveAttribute('aria-label', 'Hide password');
+  await toggle.click();
+  await expect(password).toHaveAttribute('type', 'password');
+  await expect(toggle).toHaveAttribute('aria-label', 'Show password');
+});
+
+test('My Drive unlock-password field can be shown and hidden', async ({ page }) => {
+  await page.route('**/api/my-drive/lock/status', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ configured: true, unlocked: false })
+  }));
+  await page.goto('/workspace.html');
+  const password = page.locator('#myDriveUnlockPassword');
+  const toggle = page.locator('#myDriveUnlockToggle');
+  await expect(password).toBeVisible();
+  await expect(password).toHaveAttribute('type', 'password');
+  await toggle.click();
+  await expect(password).toHaveAttribute('type', 'text');
+  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
+  await toggle.click();
+  await expect(password).toHaveAttribute('type', 'password');
+  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+});
