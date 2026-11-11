@@ -28,3 +28,43 @@ test('theme toggle remains available on mobile without breaking page width', asy
   const width = await page.evaluate(() => document.documentElement.scrollWidth);
   expect(width).toBeLessThanOrEqual(392);
 });
+
+
+test('light theme keeps the homepage MAP132 logo and supporting text readable', async ({ page }) => {
+  for (const viewport of [
+    { width: 1280, height: 900 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    const site = page.locator('.map132-slider-site');
+    await page.getByRole('button', { name: 'Switch to light theme' }).click();
+    await expect(site).toHaveAttribute('data-theme', 'light');
+
+    const logo = site.locator('.ms-header .ms-brand img');
+    await expect(logo).toBeVisible();
+    await expect.poll(() => logo.evaluate((image: HTMLImageElement) => image.complete && image.naturalWidth > 0)).toBe(true);
+    const logoStyle = await logo.evaluate(image => {
+      const style = getComputedStyle(image);
+      return { blendMode: style.mixBlendMode, width: image.getBoundingClientRect().width, height: image.getBoundingClientRect().height };
+    });
+    expect(logoStyle.blendMode).toBe('normal');
+    expect(logoStyle.width).toBeGreaterThan(0);
+    expect(logoStyle.height).toBeGreaterThan(0);
+
+    const textColours = await site.evaluate(element => {
+      const read = (selector: string) => getComputedStyle(element.querySelector(selector)!).color;
+      const root = getComputedStyle(element);
+      return {
+        gold: root.getPropertyValue('--ms-gold').trim(),
+        homeProof: read('.ms-home-proof'),
+        footer: read('.ms-footer'),
+        placeholder: getComputedStyle(element.querySelector('.ms-contact-panel input')!, '::placeholder').color,
+      };
+    });
+    expect(textColours.gold).toBe('#80551f');
+    expect(textColours.homeProof).toBe('rgb(98, 93, 84)');
+    expect(textColours.footer).toBe('rgb(98, 93, 84)');
+    expect(textColours.placeholder).toBe('rgb(111, 109, 101)');
+  }
+});
