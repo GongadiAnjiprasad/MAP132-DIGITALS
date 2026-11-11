@@ -26,14 +26,31 @@ export async function ensureMap132DriveFolder(token: string, kv: KVNamespace): P
   return folder.id;
 }
 
+/**
+ * Uses Google's resumable upload protocol so large resources do not have to be
+ * sent as a multipart body. The caller enforces the application's size limit.
+ */
 export async function uploadMap132DriveFile(token: string, kv: KVNamespace, name: string, contentType: string, bytes: ArrayBuffer): Promise<DriveStorageMetadata> {
   const parentId = await ensureMap132DriveFolder(token, kv);
-  const metadata = { name, mimeType: contentType || 'application/octet-stream', parents: [parentId] };
-  const form = new FormData();
-  form.append('metadata', new Blob([JSON.stringify(metadata)], { type: 'application/json' }));
-  form.append('file', new Blob([bytes], { type: contentType || 'application/octet-stream' }), name);
-  const response = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=multipart&fields=id,name,mimeType,size,parents', {
-    method: 'POST', headers: auth(token), body: form,
+  const mimeType = contentType || 'application/octet-stream';
+  const metadata = { name, mimeType, parents: [parentId] };
+  const session = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,size,parents', {
+    method: 'POST',
+    headers: {
+      ...auth(token),
+      'Content-Type': 'application/json; charset=UTF-8',
+      'X-Upload-Content-Type': mimeType,
+      'X-Upload-Content-Length': String(bytes.byteLength),
+    },
+    body: JSON.stringify(metadata),
+  });
+  if (!session.ok) throw new Error('Google Drive could not start the resource upload session.');
+  const uploadUrl = session.headers.get('Location');
+  if (!uploadUrl) throw new Error('Google Drive did not return a resumable upload URL.');
+  const response = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': mimeType, 'Content-Length': String(bytes.byteLength) },
+    body: bytes,
   });
   if (!response.ok) throw new Error('Google Drive upload failed. Check Drive quota and granted permissions.');
   const result = await response.json() as DriveStorageMetadata;
