@@ -79,7 +79,7 @@ test('extracts supported font files from nested ZIP paths and ignores other file
 test('rejects a ZIP whose font bytes fail CRC integrity validation', async () => {
   const zip = makeZip([{ name: 'broken.ttf', content: 'font-data' }]);
   const bytes = new Uint8Array(await zip.arrayBuffer());
-  bytes[31] ^= 0xff;
+  bytes[30 + new TextEncoder().encode('broken.ttf').length] ^= 0xff;
   await assert.rejects(
     () => extractSupportedFontsFromZip(new File([bytes], 'broken.zip')),
     /CRC integrity check/
