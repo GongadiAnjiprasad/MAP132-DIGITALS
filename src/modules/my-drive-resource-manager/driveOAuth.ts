@@ -120,7 +120,7 @@ function readCookie(request: Request, name: string): string | null {
   try { return decodeURIComponent(item.slice(name.length + 1)); } catch { return null; }
 }
 function unlockCookie(value: string, maxAge: number): string {
-  return UNLOCK_COOKIE + '=' + encodeURIComponent(value) + '; HttpOnly; Secure; SameSite=Strict; Path=/api/my-drive';
+  return UNLOCK_COOKIE + '=' + encodeURIComponent(value) + '; HttpOnly; Secure; SameSite=Strict; Path=/api/my-drive; Max-Age=' + maxAge;
 }
 function clearUnlockCookie(): string {
   return UNLOCK_COOKIE + '=; HttpOnly; Secure; SameSite=Strict; Path=/api/my-drive; Max-Age=0';
