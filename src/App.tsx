@@ -4,6 +4,7 @@ import DemoShowcase from './DemoShowcase';
 import HomeSlider from './HomeSlider';
 import IndianFestivalAtmosphere from './modules/seasonal/IndianFestivalAtmosphere';
 import MyDriveFolderImport from './modules/my-drive-resource-manager/MyDriveFolderImport';
+import { extractSupportedFontsFromZip } from './modules/my-drive-resource-manager/zipFontImport';
 import {
   ArrowDownRight, ArrowRight, Check, ChevronRight, Film, LayoutDashboard, Clapperboard, MonitorSmartphone,
   Facebook, Instagram, Linkedin, Mail, MessageCircle, Play, Plus, Save, Send, ShieldCheck, Sparkles,
@@ -358,10 +359,32 @@ function MyDriveAssetsPanel(){
     catch(error){setMessage(error instanceof Error?error.message:'Google Drive connection failed.');setBusy(false);}
   }
   async function importFiles(files:FileList|null){
-    if(!files?.length)return;setBusy(true);setMessage('Saving selected resources to persistent storage…');
-    try{for(const file of Array.from(files)){const response=await fetch('/api/my-drive/assets',{method:'POST',credentials:'same-origin',headers:{'Content-Type':file.type||'application/octet-stream','X-Asset-Name':encodeURIComponent(file.name)},body:file});const data=await response.json();if(!response.ok)throw new Error(data.error||('Could not save '+file.name));}
-      await refresh();setMessage('Import complete. Files are saved in your private resource library.');
-    }catch(error){setMessage(error instanceof Error?error.message:'Resource import failed.');}finally{setBusy(false);}
+    if(!files?.length)return;
+    setBusy(true);setMessage('Preparing selected resources for secure storage…');
+    let savedCount=0,archiveCount=0;
+    try{
+      const uploadOne=async(file:File)=>{
+        const response=await fetch('/api/my-drive/assets',{method:'POST',credentials:'same-origin',headers:{'Content-Type':file.type||'application/octet-stream','X-Asset-Name':encodeURIComponent(file.name)},body:file});
+        const data=await response.json();
+        if(!response.ok)throw new Error(data.error||('Could not save '+file.name));
+        savedCount++;
+      };
+      for(const file of Array.from(files)){
+        if(file.name.toLowerCase().endsWith('.zip')){
+          archiveCount++;
+          setMessage('Extracting supported fonts from '+file.name+'…');
+          const fonts=await extractSupportedFontsFromZip(file);
+          if(!fonts.length)continue;
+          for(const font of fonts){setMessage('Saving extracted font '+font.name+'…');await uploadOne(font);}
+        }else{
+          setMessage('Saving '+file.name+' to persistent storage…');
+          await uploadOne(file);
+        }
+      }
+      await refresh();
+      setMessage('Import complete. '+savedCount+' resource(s) saved'+(archiveCount?' from '+archiveCount+' ZIP archive(s).':'.'));
+    }catch(error){setMessage(error instanceof Error?error.message:'Resource import failed.');}
+    finally{setBusy(false);}
   }
   async function removeAsset(asset:SavedAsset){
     if(!window.confirm('Remove '+asset.name+' from your saved My Drive resources?'))return;
@@ -374,7 +397,7 @@ function MyDriveAssetsPanel(){
       <div className="workspace-filterbar"><span className="count-pill">{connected?'GOOGLE DRIVE CONNECTED':'GOOGLE DRIVE NOT CONNECTED'}</span><button type="button" className="gold-button" onClick={()=>void connectDrive()} disabled={busy}>{connected?'Reconnect Google Drive':'Connect Google Drive'}</button></div>
       {connected&&<MyDriveFolderImport disabled={busy} onImported={refresh}/ >}
       <label className="gold-button" style={{display:'inline-flex',alignItems:'center',gap:8,margin:'12px 0',cursor:busy?'wait':'pointer'}}>Import files from device<input type="file" multiple accept=".ttf,.otf,.woff,.woff2,.mp3,.wav,.ogg,.m4a,.mp4,.webm,.mov,.jpg,.jpeg,.png,.webp,.gif,.zip" style={{display:'none'}} disabled={busy} onChange={e=>{void importFiles(e.currentTarget.files);e.currentTarget.value='';}}/></label>
-      <p className="workspace-form-note">Supported: fonts, audio, video, images and ZIP. Individual file limit is 100 MB. ZIP archives are accepted for import; recursive ZIP extraction is the next step. Google Drive folder import scans nested folders for TTF, OTF, WOFF and WOFF2 fonts.</p>
+      <p className="workspace-form-note">Supported: fonts, audio, video, images and ZIP. Individual file limit is 100 MB. ZIP imports recursively scan archive entries and extract supported TTF, OTF, WOFF and WOFF2 files. Google Drive folder imports scan nested subfolders for the same font formats.</p>
       <div className="workspace-section-title"><h3>Saved resources</h3><span>{assets.length} ITEMS</span></div>
       {assets.length===0?<div className="workspace-empty"><b>No saved resources yet</b><p>Import files from your device to store persistent copies in your private vault.</p></div>:<div className="workspace-resource-grid">{assets.map(asset=><article className="workspace-resource-card" key={asset.id}><div className="workspace-card-top"><span>{asset.kind.toUpperCase()} · {(asset.size/1024/1024).toFixed(2)} MB</span><span>{asset.licenseStatus.toUpperCase()}</span></div><h4>{asset.name}</h4><p>Saved {new Date(asset.storedAt).toLocaleString()}</p>{asset.kind==='audio'&&<audio controls preload="metadata" src={assetUrl(asset)} />}{asset.kind==='video'&&<video controls playsInline preload="metadata" src={assetUrl(asset)} style={{width:'100%'}}/>}{asset.kind==='image'&&<img src={assetUrl(asset)} alt={asset.name} style={{maxWidth:'100%',maxHeight:240,objectFit:'contain'}}/>}{asset.kind==='font'&&<p style={{fontFamily:'sans-serif'}}>Font file saved. Download to install and preview in editing software.</p>}<div className="workspace-card-actions"><a href={assetUrl(asset,'download')}>Download</a><button type="button" onClick={()=>void removeAsset(asset)} disabled={busy}>Remove</button></div></article>)}</div>}
       <button type="button" className="admin-nav" style={{width:'auto',marginTop:12}} onClick={async()=>{setBusy(true);try{await fetch('/api/my-drive/lock',{method:'POST',credentials:'same-origin'});setUnlocked(false);setAssets([]);setMessage('My Drive locked.');}finally{setBusy(false);}}} disabled={busy}>Lock My Drive</button>
