@@ -3,6 +3,7 @@ interface DriveEnv {
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   MY_DRIVE_SESSION_SECRET?: string;
+  GOOGLE_PICKER_API_KEY?: string;
 }
 
 const COOKIE = 'map132_drive_session';
@@ -242,6 +243,18 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
     // OAuth redirects must complete even if the workspace lock session expires mid-consent.
   } else if (!(path.startsWith('/api/my-drive/lock/') || path === '/api/my-drive/lock') && !await isUnlocked(request, env)) {
     return json({ error: 'Unlock My Drive before continuing.' }, 423);
+  }
+
+
+  if (path === '/api/my-drive/picker-config' && request.method === 'GET') {
+    const session = await readSession(request, env);
+    if (!session) return json({ error: 'Connect Google Drive again to continue.' }, 401);
+    return json({
+      accessToken: session.access_token,
+      developerKey: env.GOOGLE_PICKER_API_KEY || '',
+      appId: '101648327950',
+      pickerEnabled: Boolean(env.GOOGLE_PICKER_API_KEY),
+    });
   }
 
   if (path === '/api/my-drive/session' && request.method === 'GET') {
