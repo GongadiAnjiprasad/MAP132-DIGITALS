@@ -1,5 +1,3 @@
-import type { KVNamespace } from '@cloudflare/workers-types';
-
 interface DriveEnv {
   MAP132_KV?: KVNamespace;
   GOOGLE_CLIENT_ID?: string;
