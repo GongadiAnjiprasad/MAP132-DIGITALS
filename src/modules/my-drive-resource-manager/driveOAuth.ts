@@ -1,4 +1,4 @@
-import { uploadMap132DriveFile } from '../../../worker/googleDriveStorage';
+import { uploadMap132DriveFile } from '../../../worker/googleDriveStorage.ts';
 interface DriveEnv {
   MAP132_KV?: KVNamespace;
   GOOGLE_CLIENT_ID?: string;
