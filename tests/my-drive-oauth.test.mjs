@@ -69,7 +69,8 @@ test('valid OAuth callback exchanges the code, encrypts the session and returns 
   globalThis.fetch = async () => new Response(JSON.stringify({
     access_token: 'short-lived-access-token',
     expires_in: 3600,
-    scope: 'https://www.googleapis.com/auth/drive.readonly',
+    scope: 'https://www.googleapis.com/auth/drive.readonly https://www.googleapis.com/auth/drive.file',
+    refresh_token: 'long-lived-refresh-token',
   }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   try {
     const response = await handleMyDriveOAuth(new Request('https://example.test/api/my-drive/oauth/callback?code=auth-code&state=browser-state', {
@@ -81,5 +82,8 @@ test('valid OAuth callback exchanges the code, encrypts the session and returns 
     assert.ok(sessionEntry);
     assert.doesNotMatch(sessionEntry[1], /short-lived-access-token/);
     assert.equal(await e.MAP132_KV.get('my-drive/oauth-state/browser-state'), null);
+    const refreshEntry = await e.MAP132_KV.get('my-drive/google-refresh-token');
+    assert.ok(refreshEntry);
+    assert.doesNotMatch(refreshEntry, /long-lived-refresh-token/);
   } finally { globalThis.fetch = originalFetch; }
 });

@@ -1,16 +1,20 @@
+import { uploadMap132DriveFile } from '../../../worker/googleDriveStorage.ts';
 interface DriveEnv {
   MAP132_KV?: KVNamespace;
   GOOGLE_CLIENT_ID?: string;
   GOOGLE_CLIENT_SECRET?: string;
   MY_DRIVE_SESSION_SECRET?: string;
   GOOGLE_PICKER_API_KEY?: string;
+  MAP132_MEDIA?: R2Bucket;
   ADMIN_PASSWORD?: string;
 }
 
 const COOKIE = 'map132_drive_session';
 const STATE_TTL = 600;
 const SESSION_TTL = 3500;
-const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.readonly';
+const DRIVE_SCOPES = ['https://www.googleapis.com/auth/drive.readonly', 'https://www.googleapis.com/auth/drive.file'];
+const REFRESH_TOKEN_KEY = 'my-drive/google-refresh-token';
+const SESSION_RECORD_TTL = 60 * 60 * 24 * 30;
 const encoder = new TextEncoder();
 
 const json = (body: unknown, status = 200, headers: HeadersInit = {}) =>
@@ -87,19 +91,35 @@ function configReady(env: DriveEnv): boolean {
 async function readSession(request: Request, env: DriveEnv): Promise<{ access_token: string; expires_at: number } | null> {
   const id = cookieValue(request);
   if (!id || !env.MAP132_KV || !env.MY_DRIVE_SESSION_SECRET) return null;
-  const stored = await env.MAP132_KV.get('my-drive/session/' + id);
+  const key = 'my-drive/session/' + id;
+  const stored = await env.MAP132_KV.get(key);
   if (!stored) return null;
   try {
-    const session = await decrypt<{ access_token: string; expires_at: number }>(stored, env.MY_DRIVE_SESSION_SECRET);
-    if (session.expires_at <= Date.now()) {
-      await env.MAP132_KV.delete('my-drive/session/' + id);
-      return null;
-    }
+    let session = await decrypt<{ access_token: string; expires_at: number }>(stored, env.MY_DRIVE_SESSION_SECRET);
+    if (session.expires_at > Date.now() + 60_000) return session;
+    const encryptedRefresh = await env.MAP132_KV.get(REFRESH_TOKEN_KEY);
+    if (!encryptedRefresh || !env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) return null;
+    const refresh = await decrypt<{ refresh_token: string }>(encryptedRefresh, env.MY_DRIVE_SESSION_SECRET);
+    const response = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Accept': 'application/json' },
+      body: new URLSearchParams({ client_id: env.GOOGLE_CLIENT_ID, client_secret: env.GOOGLE_CLIENT_SECRET, refresh_token: refresh.refresh_token, grant_type: 'refresh_token' }),
+    });
+    if (!response.ok) return null;
+    const token = await response.json() as { access_token?: string; expires_in?: number };
+    if (!token.access_token) return null;
+    const expiresAt = Date.now() + Math.max(60, Number(token.expires_in || SESSION_TTL)) * 1000;
+    session = { access_token: token.access_token, expires_at: expiresAt };
+    await env.MAP132_KV.put(key, await encrypt(session, env.MY_DRIVE_SESSION_SECRET), { expirationTtl: SESSION_RECORD_TTL });
     return session;
   } catch {
-    await env.MAP132_KV.delete('my-drive/session/' + id);
+    await env.MAP132_KV.delete(key);
     return null;
   }
+}
+export async function getMyDriveAccessToken(request: Request, env: DriveEnv): Promise<string | null> {
+  const session = await readSession(request, env);
+  return session?.access_token || null;
 }
 
 
@@ -177,8 +197,9 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
     authorize.searchParams.set('client_id', env.GOOGLE_CLIENT_ID!);
     authorize.searchParams.set('redirect_uri', redirectUri);
     authorize.searchParams.set('response_type', 'code');
-    authorize.searchParams.set('scope', DRIVE_SCOPE);
-    authorize.searchParams.set('access_type', 'online');
+    authorize.searchParams.set('scope', DRIVE_SCOPES.join(' '));
+    authorize.searchParams.set('access_type', 'offline');
+    authorize.searchParams.set('prompt', 'consent');
     authorize.searchParams.set('include_granted_scopes', 'true');
     authorize.searchParams.set('state', state);
     authorize.searchParams.set('code_challenge', challenge);
@@ -211,21 +232,23 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
       }),
     });
     if (!tokenResponse.ok) return json({ error: 'Google token exchange failed. Check OAuth client settings and callback URL.' }, 502);
-    const token = await tokenResponse.json() as { access_token?: string; expires_in?: number; scope?: string };
-    if (!token.access_token || !String(token.scope || '').split(' ').includes(DRIVE_SCOPE)) {
-      return json({ error: 'Google did not grant the required read-only Drive permission.' }, 403);
+    const token = await tokenResponse.json() as { access_token?: string; expires_in?: number; scope?: string; refresh_token?: string };
+    const grantedScopes = String(token.scope || '').split(' ');
+    if (!token.access_token || !DRIVE_SCOPES.every(scope => grantedScopes.includes(scope))) {
+      return json({ error: 'Google did not grant the required Drive read and app-file permissions. Reconnect and approve both.' }, 403);
     }
+    if (token.refresh_token) await env.MAP132_KV!.put(REFRESH_TOKEN_KEY, await encrypt({ refresh_token: token.refresh_token }, env.MY_DRIVE_SESSION_SECRET!));
     const sessionId = randomToken();
     const expiresAt = Date.now() + Math.min(Number(token.expires_in || SESSION_TTL), SESSION_TTL) * 1000;
     const encrypted = await encrypt({ access_token: token.access_token, expires_at: expiresAt }, env.MY_DRIVE_SESSION_SECRET!);
     await env.MAP132_KV!.put('my-drive/session/' + sessionId, encrypted, {
-      expirationTtl: Math.max(60, Math.floor((expiresAt - Date.now()) / 1000)),
+      expirationTtl: SESSION_RECORD_TTL,
     });
     const headers = new Headers({
       Location: new URL('/workspace.html?myDrive=connected', url.origin).toString(),
       'Cache-Control': 'no-store',
     });
-    headers.append('Set-Cookie', sessionCookie(sessionId, Math.max(60, Math.floor((expiresAt - Date.now()) / 1000))));
+    headers.append('Set-Cookie', sessionCookie(sessionId, SESSION_RECORD_TTL));
     headers.append('Set-Cookie', clearOAuthStateCookie());
     return new Response(null, { status: 302, headers });
   }
@@ -286,6 +309,79 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
     });
   }
 
+  if (path === '/api/my-drive/import-folder' && request.method === 'POST') {
+    const session = await readSession(request, env);
+    if (!session) return json({ error: 'Connect Google Drive again to continue.' }, 401);
+    const body = await request.json().catch(() => ({})) as { folderId?: string };
+    const rootId = String(body.folderId || '');
+    if (!/^[a-zA-Z0-9_-]{1,256}$/.test(rootId)) return json({ error: 'Choose a valid Google Drive folder.' }, 400);
+    const headers = { Authorization: 'Bearer ' + session.access_token, Accept: 'application/json' };
+    const folders = [rootId];
+    const seenFolders = new Set<string>();
+    const fontExtensions = new Set(['ttf', 'otf', 'woff', 'woff2']);
+    const imported: Array<{ name: string; size: number }> = [];
+    const skipped: Array<{ name: string; reason: string }> = [];
+    let totalBytes = 0;
+    let scanned = 0;
+    while (folders.length && seenFolders.size < 500 && scanned < 1500 && imported.length < 500) {
+      const parentId = folders.shift()!;
+      if (seenFolders.has(parentId)) continue;
+      seenFolders.add(parentId);
+      let pageToken = '';
+      do {
+        const listUrl = new URL('https://www.googleapis.com/drive/v3/files');
+        listUrl.searchParams.set('q', "'" + parentId + "' in parents and trashed = false");
+        listUrl.searchParams.set('pageSize', '100');
+        listUrl.searchParams.set('orderBy', 'folder,name');
+        listUrl.searchParams.set('fields', 'nextPageToken,files(id,name,mimeType,size)');
+        if (pageToken) listUrl.searchParams.set('pageToken', pageToken);
+        const listResponse = await fetch(listUrl, { headers });
+        if (!listResponse.ok) return json({ error: 'Google Drive folder scan failed. Reconnect and retry.' }, listResponse.status === 401 ? 401 : 502);
+        const page = await listResponse.json() as { nextPageToken?: string; files?: Array<{ id: string; name: string; mimeType: string; size?: string }> };
+        for (const file of page.files || []) {
+          scanned++;
+          if (file.mimeType === 'application/vnd.google-apps.folder') {
+            if (!seenFolders.has(file.id) && folders.length + seenFolders.size < 500) folders.push(file.id);
+            continue;
+          }
+          const ext = String(file.name || '').split('.').pop()?.toLowerCase() || '';
+          if (!fontExtensions.has(ext)) continue;
+          const size = Number(file.size || 0);
+          if (!Number.isFinite(size) || size <= 0 || size > 25 * 1024 * 1024 || totalBytes + size > 250 * 1024 * 1024) {
+            skipped.push({ name: file.name, reason: 'File exceeds the per-font or total folder import limit.' });
+            continue;
+          }
+          const downloadUrl = new URL('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(file.id));
+          downloadUrl.searchParams.set('alt', 'media');
+          const download = await fetch(downloadUrl, { headers: { Authorization: 'Bearer ' + session.access_token, Accept: '*/*' } });
+          if (!download.ok || !download.body) {
+            skipped.push({ name: file.name, reason: 'Google Drive could not download this font.' });
+            continue;
+          }
+          const bytes = await download.arrayBuffer();
+          if (!bytes.byteLength || bytes.byteLength > 25 * 1024 * 1024 || totalBytes + bytes.byteLength > 250 * 1024 * 1024) {
+            skipped.push({ name: file.name, reason: 'Downloaded file exceeds the import limit.' });
+            continue;
+          }
+          const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+          const sha = [...digest].map(value => value.toString(16).padStart(2, '0')).join('');
+          const id = crypto.randomUUID();
+          const key = 'my-drive/assets/' + id;
+          const contentType = ext === 'woff' ? 'font/woff' : ext === 'woff2' ? 'font/woff2' : ext === 'otf' ? 'font/otf' : 'font/ttf';
+          const asset = { id, name: file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120) || 'font.' + ext, kind: 'font', size: bytes.byteLength, sha256: sha, contentType, storedAt: new Date().toISOString(), licenseStatus: 'unverified', source: 'google-drive-import', originalDriveFileId: file.id };
+          const driveFile = await uploadMap132DriveFile(session.access_token, env.MAP132_KV!, asset.name, contentType, bytes);
+          (asset as typeof asset & { driveFileId?: string }).driveFileId = driveFile.id;
+          await env.MAP132_KV!.put(key, JSON.stringify(asset));
+          totalBytes += bytes.byteLength;
+          imported.push({ name: asset.name, size: bytes.byteLength });
+          if (imported.length >= 500) break;
+        }
+        pageToken = page.nextPageToken || '';
+      } while (pageToken && scanned < 1500 && imported.length < 500);
+    }
+    return json({ importedCount: imported.length, skippedCount: skipped.length, scannedCount: scanned, totalBytes, imported, skipped, limits: { folders: 500, files: 1500, fonts: 500, totalBytes: 250 * 1024 * 1024 } });
+  }
+
   if (path === '/api/my-drive/session' && request.method === 'GET') {
     const session = await readSession(request, env);
     return json({ connected: Boolean(session), expiresAt: session?.expires_at ?? null });
@@ -294,6 +390,18 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
   if (path === '/api/my-drive/oauth/logout' && request.method === 'POST') {
     const id = cookieValue(request);
     if (id) await env.MAP132_KV!.delete('my-drive/session/' + id);
+    const encryptedRefresh = await env.MAP132_KV!.get(REFRESH_TOKEN_KEY);
+    if (encryptedRefresh) {
+      try {
+        const refresh = await decrypt<{ refresh_token: string }>(encryptedRefresh, env.MY_DRIVE_SESSION_SECRET!);
+        await fetch('https://oauth2.googleapis.com/revoke', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ token: refresh.refresh_token }),
+        });
+      } catch { /* Local credentials are still removed even if Google's revoke endpoint is unavailable. */ }
+      await env.MAP132_KV!.delete(REFRESH_TOKEN_KEY);
+    }
     return json({ disconnected: true }, 200, { 'Set-Cookie': clearCookie() });
   }
 
