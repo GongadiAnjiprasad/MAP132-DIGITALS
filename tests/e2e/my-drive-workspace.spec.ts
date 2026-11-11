@@ -28,10 +28,13 @@ test('My Drive setup explains the admin sign-in requirement when the setup API r
   await page.goto('/workspace.html');
   await page.locator('[data-resource-view="my-drive"]').click();
   await expect(page.locator('#myDriveSetupForm')).toBeVisible();
+  await expect(page.locator('#myDriveStatus')).toBeVisible();
+  await expect(page.locator('.mydrive-admin-link')).toHaveAttribute('target', '_blank');
   await page.locator('#myDriveSetupPassword').fill('test-password-123');
   await page.locator('#myDriveSetupForm button[type="submit"]').click();
   await expect(page.locator('#myDriveStatus')).toContainText('Admin sign-in required');
   await expect(page.locator('#myDriveStatus a')).toHaveAttribute('href', 'index.html#admin');
+  await expect(page.locator('#myDriveStatus a')).toHaveAttribute('target', '_blank');
 });
 
 test('connected My Drive displays saved persistent assets and refreshes the library', async ({ page }) => {
@@ -115,4 +118,21 @@ test('My Drive unlock-password field can be shown and hidden', async ({ page }) 
   await toggle.click();
   await expect(password).toHaveAttribute('type', 'password');
   await expect(toggle).toHaveAttribute('aria-pressed', 'false');
+});
+
+
+test('Admin dashboard password field can be shown and hidden', async ({ page }) => {
+  await page.route('**/api/admin/session', route => route.fulfill({
+    status: 401, contentType: 'application/json', body: JSON.stringify({ error: 'Admin session required.' })
+  }));
+  await page.goto('/index.html#admin');
+  const password = page.locator('.login-password-field input');
+  const toggle = page.locator('.login-password-field .password-visibility');
+  await expect(password).toHaveAttribute('type', 'password');
+  await toggle.click();
+  await expect(password).toHaveAttribute('type', 'text');
+  await expect(toggle).toHaveAttribute('aria-label', 'Hide password');
+  await toggle.click();
+  await expect(password).toHaveAttribute('type', 'password');
+  await expect(toggle).toHaveAttribute('aria-label', 'Show password');
 });
