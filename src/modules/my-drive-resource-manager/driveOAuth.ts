@@ -188,7 +188,7 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
 
   if (path === '/api/my-drive/oauth/callback' && request.method === 'GET') {
     if (url.searchParams.has('error')) {
-      const response = Response.redirect(new URL('/?myDrive=cancelled#workspace', url.origin), 302);
+      const response = Response.redirect(new URL('/workspace.html?myDrive=cancelled', url.origin), 302);
       response.headers.append('Set-Cookie', clearOAuthStateCookie());
       return response;
     }
@@ -222,7 +222,7 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
       expirationTtl: Math.max(60, Math.floor((expiresAt - Date.now()) / 1000)),
     });
     const headers = new Headers({
-      Location: new URL('/?myDrive=connected#workspace', url.origin).toString(),
+      Location: new URL('/workspace.html?myDrive=connected', url.origin).toString(),
       'Cache-Control': 'no-store',
     });
     headers.append('Set-Cookie', sessionCookie(sessionId, Math.max(60, Math.floor((expiresAt - Date.now()) / 1000))));
