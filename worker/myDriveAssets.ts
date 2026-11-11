@@ -61,6 +61,7 @@ export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Resp
  if(match&&req.method==='DELETE'){
   const key='my-drive/assets/'+match[1],meta=await env.MAP132_KV.get(key);if(!meta)return json({error:'Saved resource not found.'},404);
   let asset:any;try{asset=JSON.parse(meta);}catch{return json({error:'Resource metadata is invalid.'},500);}
+  if(!asset.driveFileId)return json({error:'Saved resource has no Google Drive file reference; metadata was kept.'},409);
   if(asset.driveFileId){
    try {
     const removed=await deleteMap132DriveFile(accessToken,asset.driveFileId);
