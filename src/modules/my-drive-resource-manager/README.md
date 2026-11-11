@@ -46,12 +46,13 @@ This module must not change the existing Free Sources implementation or the curr
 
 ## Integration gates
 
-1. Complete module implementation on this feature branch only.
-2. Add a dedicated mount point to the existing workspace only after module tests pass.
+1. Keep all implementation on this feature branch only.
+2. My Drive is mounted as a third independent workspace tab; Free Sources remain unchanged.
 3. Verify Free Sources behaviour and all current font/audio workflows remain unchanged.
-4. Run build, unit tests, Playwright desktop/mobile and import-security tests.
-5. Open a draft PR for review. No merge or production deployment without a separate verified release step.
+4. Run build, unit tests, Playwright desktop/mobile and import-security tests; fix every failure.
+5. Complete Cloudflare configuration and real Google OAuth/Picker tests before treating the feature as ready.
+6. Keep the PR draft. No merge or production deployment without a separate verified release step.
 
 ## External setup needed before live Drive connection
 
-A Google Cloud OAuth Web application, Google Picker API enabled, and Cloudflare Worker secrets `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and a long random `MY_DRIVE_SESSION_SECRET` (used to encrypt short-lived access tokens at rest in KV). Bind `MAP132_KV`. The exact redirect URI is `https://<production-worker-host>/api/my-drive/oauth/callback`; the JavaScript origin is `https://<production-worker-host>`. Configure these only after verifying the intended production hostname. Never commit credentials. The OAuth adapter currently requests the read-only `drive.readonly` scope and uses online access only; it does not request a refresh token.
+A Google Cloud OAuth Web application, Google Picker API enabled, and Cloudflare Worker variables/secrets `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, a long random `MY_DRIVE_SESSION_SECRET` (used to encrypt short-lived access tokens at rest in KV), and optional `GOOGLE_PICKER_API_KEY` (restrict it to the workspace origin and Google Picker API). Bind `MAP132_KV`. The first separate My Drive password can only be created while signed into the MAP132 admin dashboard; only an HMAC digest is stored in KV. The exact redirect URI is `https://<production-worker-host>/api/my-drive/oauth/callback`; the JavaScript origin is `https://<production-worker-host>`. Configure these only after verifying the intended production hostname. Never commit credentials. The OAuth adapter currently requests the read-only `drive.readonly` scope and uses online access only; it does not request a refresh token.
