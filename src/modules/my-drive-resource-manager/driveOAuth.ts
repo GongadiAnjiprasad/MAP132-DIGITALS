@@ -188,7 +188,9 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
 
   if (path === '/api/my-drive/oauth/callback' && request.method === 'GET') {
     if (url.searchParams.has('error')) {
-      const response = Response.redirect(new URL('/?myDrive=cancelled#workspace', url.origin), 302);\n      response.headers.append('Set-Cookie', clearOAuthStateCookie());\n      return response;
+      const response = Response.redirect(new URL('/?myDrive=cancelled#workspace', url.origin), 302);
+      response.headers.append('Set-Cookie', clearOAuthStateCookie());
+      return response;
     }
     const state = url.searchParams.get('state') || '';
     const code = url.searchParams.get('code') || '';
