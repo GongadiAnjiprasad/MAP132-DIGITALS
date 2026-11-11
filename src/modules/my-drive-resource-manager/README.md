@@ -27,7 +27,7 @@ This module must not change the existing Free Sources implementation or the curr
 ## Security and reliability rules
 
 - OAuth authorization uses a least-privilege read-only scope and a state/PKCE-protected flow. Access tokens must not be placed in URLs, localStorage, or committed source.
-- The dedicated My Drive password secret and Google OAuth client secret are Cloudflare Worker secrets, never committed to Git.
+- The Google OAuth client secret and My Drive session encryption secret are Cloudflare Worker secrets, never committed to Git. The first My Drive password is created only from an authenticated MAP132 admin session; its HMAC digest is stored in KV, never the plaintext password.
 - Apply rate limiting to password verification and short-lived sessions. Clear in-memory Drive tokens on lock/logout.
 - ZIP processing must reject absolute paths, traversal, symlinks, encrypted entries and unsupported compression methods. Enforce entry-count, per-file, total-uncompressed-size and compression-ratio limits before extraction.
 - Use MIME sniffing / file signature checks where practical; do not trust file extensions alone.
@@ -38,10 +38,10 @@ This module must not change the existing Free Sources implementation or the curr
 
 - types.ts — source, asset and import contracts.
 - archivePolicy.ts — safe path, supported-format and archive-entry policy.
-- driveClient.ts — read-only Drive Picker/API adapter (next phase; requires Google Cloud OAuth/Picker configuration).
-- zipImporter.ts — bounded ZIP reader/extractor (next phase).
-- fontPreview.ts — temporary FontFace preview and cleanup (next phase).
-- MyDriveResourceManager.tsx — isolated UI (next phase).
+- driveClient.ts — read-only Drive API adapter with recursive folder traversal; the workspace UI opens Google Picker when a restricted Picker API key is configured.
+- zipImporter.ts — bounded ZIP reader/extractor with stored/deflate support, CRC verification and duplicate SHA-256 detection.
+- fontPreview.ts — temporary FontFace preview and cleanup.
+- public/my-drive-resource-manager.js — isolated workspace UI for password gate, Picker, Drive folder scan and local/Drive ZIP import.
 - tests/ — unit, import-security and UI regression coverage.
 
 ## Integration gates
