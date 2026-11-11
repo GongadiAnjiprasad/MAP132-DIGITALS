@@ -98,3 +98,10 @@ test('skips traversal paths rather than extracting them', async () => {
   const files = await extractSupportedFontsFromZip(zip);
   assert.deepEqual(files.map(file => file.name), ['safe.ttf']);
 });
+
+test('extracts fonts from Windows-style nested ZIP paths', async () => {
+  const zip = makeZip([{ name: 'Windows\\Nested\\font.ttf', content: 'windows-path-font' }]);
+  const files = await extractSupportedFontsFromZip(zip);
+  assert.deepEqual(files.map(file => file.name), ['font.ttf']);
+  assert.equal(await files[0].text(), 'windows-path-font');
+});
