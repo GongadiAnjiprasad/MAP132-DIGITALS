@@ -72,3 +72,35 @@ test('light theme keeps the homepage MAP132 logo and supporting text readable', 
     expect(textColours.placeholder).toBe('rgb(111, 109, 101)');
   }
 });
+
+
+test('light theme keeps all feedback form text and fields readable on desktop and mobile', async ({ page }) => {
+  for (const viewport of [
+    { width: 1280, height: 900 },
+    { width: 390, height: 844 },
+  ]) {
+    await page.setViewportSize(viewport);
+    await page.goto('/');
+    const site = page.locator('.map132-slider-site');
+    const themeToggle = site.locator('button.ms-theme-toggle');
+    await expect(themeToggle).toBeVisible();
+    if (await themeToggle.getAttribute('aria-pressed') !== 'true') {
+      await themeToggle.click();
+    }
+    await expect(site).toHaveAttribute('data-theme', 'light');
+
+    await site.locator('button.feedback-launch').click();
+    const dialog = page.locator('.feedback-studio');
+    await expect(dialog).toBeVisible();
+    await expect(dialog.locator('.feedback-label').first()).toHaveCSS('color', 'rgb(128, 85, 31)');
+    await expect(dialog.locator('.feedback-drawer-head p').last()).toHaveCSS('color', 'rgb(36, 38, 43)');
+    await expect(dialog.locator('.feedback-category-grid small').first()).toHaveCSS('color', 'rgb(98, 103, 113)');
+    await expect(dialog.locator('#feedback-message')).toHaveCSS('color', 'rgb(36, 38, 43)');
+    await expect(dialog.locator('#feedback-message')).toHaveCSS('background-color', 'rgba(255, 255, 255, 0.94)');
+    await expect(dialog.locator('#feedback-message')).toHaveCSS('border-color', 'rgba(98, 103, 113, 0.48)');
+    const placeholder = await dialog.locator('#feedback-message').evaluate(element => getComputedStyle(element, '::placeholder').color);
+    expect(placeholder).toBe('rgb(111, 109, 101)');
+    await expect(dialog.locator('.feedback-privacy')).toHaveCSS('color', 'rgb(98, 103, 113)');
+    await expect(dialog.locator('.feedback-submit')).toBeVisible();
+  }
+});
