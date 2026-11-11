@@ -1,5 +1,5 @@
-import { getMyDriveAccessToken } from '../src/modules/my-drive-resource-manager/driveOAuth';
-import { uploadMap132DriveFile, downloadMap132DriveFile, deleteMap132DriveFile } from './googleDriveStorage';
+import { getMyDriveAccessToken } from '../src/modules/my-drive-resource-manager/driveOAuth.ts';
+import { uploadMap132DriveFile, downloadMap132DriveFile, deleteMap132DriveFile } from './googleDriveStorage.ts';
 interface AssetEnv { MAP132_KV?: KVNamespace; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; MY_DRIVE_SESSION_SECRET?: string; }
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const allowedExt=new Set(['ttf','otf','woff','woff2','mp3','wav','ogg','m4a','mp4','webm','mov','jpg','jpeg','png','webp','gif','zip']);
