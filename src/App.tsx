@@ -146,7 +146,7 @@ function PublicSite({ content }: { content: Content }) {
     <WebsiteIntro />
     <header className="nav">
       <a className="wordmark" href="#top"><BrandLogo src={logoUrl}/></a>
-      <nav aria-label="Main navigation"><a href="#top">Home</a><a href="#work">Portfolio</a><a href="#services">Services</a><a href="#approach">Our Approach</a><a href="#skills">Creative Lab</a><a href="#about">About</a><a className="nav-workspace" href="#workspace"><Film size={14}/> Editor Workspace</a><a className="nav-hire" href="#contact">Start a project <ArrowRight size={15}/></a></nav>
+      <nav aria-label="Main navigation"><a href="#top">Home</a><a href="#work">Portfolio</a><a href="#services">Services</a><a href="#approach">Our Approach</a><a href="#skills">Creative Lab</a><a href="#about">About</a><a className="nav-workspace" href="/workspace.html"><Film size={14}/> Editor Workspace</a><a className="nav-hire" href="#contact">Start a project <ArrowRight size={15}/></a></nav>
     </header>
     <nav className="mobile-dock" aria-label="Quick navigation"><a href="#top"><span>⌂</span>Home</a><a href="#work"><span>▧</span>Work</a><a href="#services"><span>✳</span>Services</a><a href="#approach"><span>◈</span>Approach</a><a href="#contact"><span>↗</span>Contact</a></nav>
     <main>
@@ -714,9 +714,10 @@ export default function App() {
     window.addEventListener('hashchange', syncRoute);
     return () => window.removeEventListener('hashchange', syncRoute);
   },[]);
+  useEffect(()=>{if(isWorkspace)window.location.replace('/workspace.html');},[isWorkspace]);
   useEffect(()=>{if(!isAdmin&&!isWorkspace)api.get('/api/portfolio').then(r=>setContent({...defaults,...(r.data.content||{}),logoUrl:r.data.content?.logoUrl===LEGACY_BRAND_LOGO?DEFAULT_BRAND_LOGO:r.data.content?.logoUrl||DEFAULT_BRAND_LOGO})).catch(()=>{}).finally(()=>setLoading(false));},[isAdmin,isWorkspace]);
   useEffect(()=>{if(isAdmin||isWorkspace)return;const absoluteLogo=new URL(content.logoUrl||DEFAULT_BRAND_LOGO,window.location.origin).href;let icon=document.querySelector<HTMLLinkElement>('link[rel="icon"]');if(!icon){icon=document.createElement('link');icon.rel='icon';document.head.appendChild(icon);}icon.href=content.logoUrl||DEFAULT_BRAND_LOGO;icon.type=/\.jpe?g(?:[?#]|$)/i.test(icon.href)?'image/jpeg':/\.webp(?:[?#]|$)/i.test(icon.href)?'image/webp':'image/png';let apple=document.querySelector<HTMLLinkElement>('link[rel="apple-touch-icon"]');if(!apple){apple=document.createElement('link');apple.rel='apple-touch-icon';document.head.appendChild(apple);}apple.href=absoluteLogo;const setMeta=(selector:string,attribute:'property'|'name',key:string,value:string)=>{let element=document.querySelector<HTMLMetaElement>(selector);if(!element){element=document.createElement('meta');element.setAttribute(attribute,key);document.head.appendChild(element);}element.content=value;};setMeta('meta[property="og:image"]','property','og:image',absoluteLogo);setMeta('meta[name="twitter:image"]','name','twitter:image',absoluteLogo);setMeta('meta[name="twitter:card"]','name','twitter:card','summary_large_image');const structured=document.querySelector<HTMLScriptElement>('script[type="application/ld+json"]');if(structured){try{const data=JSON.parse(structured.textContent||'{}');for(const item of data['@graph']||[]){if(item['@type']==='Organization')item.logo={'@type':'ImageObject',url:absoluteLogo};}structured.textContent=JSON.stringify(data);}catch{}}},[isAdmin,isWorkspace,content.logoUrl]);
-  if(isWorkspace)return <WorkspaceStandalone/>;
+  if(isWorkspace)return <div className="site-loading">Opening Editor Workspace…</div>;
   if(isAdmin)return <AdminApp/>;
   const publicLogoUrl = content.logoUrl === LEGACY_BRAND_LOGO ? DEFAULT_BRAND_LOGO : content.logoUrl || DEFAULT_BRAND_LOGO;
   return loading?<div className="site-loading">Preparing the next frame…</div>:<><IndianFestivalAtmosphere logoUrl={publicLogoUrl}/><HomeSlider content={{...content,logoUrl:publicLogoUrl}} feedbackWidget={<FeedbackWidget logoUrl={publicLogoUrl}/>}/></>;
