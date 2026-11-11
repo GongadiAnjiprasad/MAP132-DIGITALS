@@ -4,6 +4,7 @@ interface DriveEnv {
   GOOGLE_CLIENT_SECRET?: string;
   MY_DRIVE_SESSION_SECRET?: string;
   GOOGLE_PICKER_API_KEY?: string;
+  MAP132_MEDIA?: R2Bucket;
   ADMIN_PASSWORD?: string;
 }
 
@@ -284,6 +285,79 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
       appId: '101648327950',
       pickerEnabled: Boolean(env.GOOGLE_PICKER_API_KEY),
     });
+  }
+
+  if (path === '/api/my-drive/import-folder' && request.method === 'POST') {
+    if (!env.MAP132_MEDIA) return json({ error: 'Persistent storage is not configured. Bind MAP132_MEDIA in Cloudflare.' }, 503);
+    const session = await readSession(request, env);
+    if (!session) return json({ error: 'Connect Google Drive again to continue.' }, 401);
+    const body = await request.json().catch(() => ({})) as { folderId?: string };
+    const rootId = String(body.folderId || '');
+    if (!/^[a-zA-Z0-9_-]{1,256}$/.test(rootId)) return json({ error: 'Choose a valid Google Drive folder.' }, 400);
+    const headers = { Authorization: 'Bearer ' + session.access_token, Accept: 'application/json' };
+    const folders = [rootId];
+    const seenFolders = new Set<string>();
+    const fontExtensions = new Set(['ttf', 'otf', 'woff', 'woff2']);
+    const imported: Array<{ name: string; size: number }> = [];
+    const skipped: Array<{ name: string; reason: string }> = [];
+    let totalBytes = 0;
+    let scanned = 0;
+    while (folders.length && seenFolders.size < 500 && scanned < 1500 && imported.length < 500) {
+      const parentId = folders.shift()!;
+      if (seenFolders.has(parentId)) continue;
+      seenFolders.add(parentId);
+      let pageToken = '';
+      do {
+        const listUrl = new URL('https://www.googleapis.com/drive/v3/files');
+        listUrl.searchParams.set('q', "'" + parentId + "' in parents and trashed = false");
+        listUrl.searchParams.set('pageSize', '100');
+        listUrl.searchParams.set('orderBy', 'folder,name');
+        listUrl.searchParams.set('fields', 'nextPageToken,files(id,name,mimeType,size)');
+        if (pageToken) listUrl.searchParams.set('pageToken', pageToken);
+        const listResponse = await fetch(listUrl, { headers });
+        if (!listResponse.ok) return json({ error: 'Google Drive folder scan failed. Reconnect and retry.' }, listResponse.status === 401 ? 401 : 502);
+        const page = await listResponse.json() as { nextPageToken?: string; files?: Array<{ id: string; name: string; mimeType: string; size?: string }> };
+        for (const file of page.files || []) {
+          scanned++;
+          if (file.mimeType === 'application/vnd.google-apps.folder') {
+            if (!seenFolders.has(file.id) && folders.length + seenFolders.size < 500) folders.push(file.id);
+            continue;
+          }
+          const ext = String(file.name || '').split('.').pop()?.toLowerCase() || '';
+          if (!fontExtensions.has(ext)) continue;
+          const size = Number(file.size || 0);
+          if (!Number.isFinite(size) || size <= 0 || size > 25 * 1024 * 1024 || totalBytes + size > 250 * 1024 * 1024) {
+            skipped.push({ name: file.name, reason: 'File exceeds the per-font or total folder import limit.' });
+            continue;
+          }
+          const downloadUrl = new URL('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(file.id));
+          downloadUrl.searchParams.set('alt', 'media');
+          const download = await fetch(downloadUrl, { headers: { Authorization: 'Bearer ' + session.access_token, Accept: '*/*' } });
+          if (!download.ok || !download.body) {
+            skipped.push({ name: file.name, reason: 'Google Drive could not download this font.' });
+            continue;
+          }
+          const bytes = await download.arrayBuffer();
+          if (!bytes.byteLength || bytes.byteLength > 25 * 1024 * 1024 || totalBytes + bytes.byteLength > 250 * 1024 * 1024) {
+            skipped.push({ name: file.name, reason: 'Downloaded file exceeds the import limit.' });
+            continue;
+          }
+          const digest = new Uint8Array(await crypto.subtle.digest('SHA-256', bytes));
+          const sha = [...digest].map(value => value.toString(16).padStart(2, '0')).join('');
+          const id = crypto.randomUUID();
+          const key = 'my-drive/assets/' + id;
+          const contentType = ext === 'woff' ? 'font/woff' : ext === 'woff2' ? 'font/woff2' : ext === 'otf' ? 'font/otf' : 'font/ttf';
+          const asset = { id, name: file.name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 120) || 'font.' + ext, kind: 'font', size: bytes.byteLength, sha256: sha, contentType, storedAt: new Date().toISOString(), licenseStatus: 'unverified', source: 'google-drive-import', originalDriveFileId: file.id };
+          await env.MAP132_MEDIA.put(key, bytes, { httpMetadata: { contentType, cacheControl: 'private, no-store' } });
+          await env.MAP132_KV!.put(key, JSON.stringify(asset));
+          totalBytes += bytes.byteLength;
+          imported.push({ name: asset.name, size: bytes.byteLength });
+          if (imported.length >= 500) break;
+        }
+        pageToken = page.nextPageToken || '';
+      } while (pageToken && scanned < 1500 && imported.length < 500);
+    }
+    return json({ importedCount: imported.length, skippedCount: skipped.length, scannedCount: scanned, totalBytes, imported, skipped, limits: { folders: 500, files: 1500, fonts: 500, totalBytes: 250 * 1024 * 1024 } });
   }
 
   if (path === '/api/my-drive/session' && request.method === 'GET') {
