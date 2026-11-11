@@ -1785,3 +1785,33 @@
     background-size: calc(100% - 38px) 2px;
   }
 }
+
+
+/* Light-theme accessibility corrections: keep the brand mark true to its source
+   colours and bring small supporting copy to WCAG AA contrast on ivory panels. */
+.map132-slider-site[data-theme="light"] .ms-brand img {
+  mix-blend-mode: normal;
+  filter: contrast(1.08) saturate(1.08)
+    drop-shadow(0 1px 1px rgba(42, 31, 17, .52))
+    drop-shadow(0 0 5px rgba(154, 107, 44, .22));
+}
+.map132-slider-site[data-theme="light"] {
+  --ms-gold: #80551f;
+  --ms-gold2: #936326;
+}
+.map132-slider-site[data-theme="light"] .ms-home-proof,
+.map132-slider-site[data-theme="light"] .ms-showcase-top span:last-child,
+.map132-slider-site[data-theme="light"] .ms-showcase-foot,
+.map132-slider-site[data-theme="light"] .ms-studio-foot,
+.map132-slider-site[data-theme="light"] .ms-contact-panel > small,
+.map132-slider-site[data-theme="light"] .ms-footer {
+  color: #625d54;
+}
+.map132-slider-site[data-theme="light"] .ms-pagination button {
+  color: #625d54;
+}
+.map132-slider-site[data-theme="light"] .ms-contact-panel input::placeholder,
+.map132-slider-site[data-theme="light"] .ms-contact-panel textarea::placeholder {
+  color: #6f6d65;
+  opacity: 1;
+}
