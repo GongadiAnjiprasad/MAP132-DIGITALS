@@ -19,6 +19,8 @@
     if (error && /admin dashboard|sign in/i.test(text)) {
       const link = document.createElement('a');
       link.href = 'index.html#admin';
+      link.target = '_blank';
+      link.rel = 'noopener';
       link.textContent = ' Open Admin Dashboard';
       link.style.cssText = 'color:var(--gold);margin-left:6px';
       status.appendChild(link);
