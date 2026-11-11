@@ -301,11 +301,27 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
   if (path.startsWith('/api/my-drive/download/') && request.method === 'GET') {
     const fileId = path.slice('/api/my-drive/download/'.length);
     if (!/^[a-zA-Z0-9_-]{1,256}$/.test(fileId)) return json({ error: 'Invalid Google Drive file ID.' }, 400);
+    const session = await readSession(request, env);
+    if (!session) return json({ error: 'Connect Google Drive again to continue.' }, 401);
+    const authHeaders = { Authorization: 'Bearer ' + session.access_token, Accept: 'application/json' };
+    const metadataUrl = new URL('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(fileId));
+    metadataUrl.searchParams.set('fields', 'id,name,mimeType,size');
+    const metadataResponse = await fetch(metadataUrl, { headers: authHeaders });
+    if (!metadataResponse.ok) return json({ error: 'Could not verify the selected Drive file.' }, metadataResponse.status === 401 ? 401 : 502);
+    const metadata = await metadataResponse.json() as { name?: string; mimeType?: string; size?: string };
+    const name = String(metadata.name || '');
+    const extension = name.split('.').pop()?.toLowerCase() || '';
+    const isFont = ['ttf', 'otf', 'woff', 'woff2'].includes(extension);
+    const isZip = extension === 'zip' || ['application/zip', 'application/x-zip-compressed'].includes(String(metadata.mimeType || '').toLowerCase());
+    if (!isFont && !isZip) return json({ error: 'Only supported font files and ZIP archives can be imported.' }, 415);
+    const size = Number(metadata.size || 0);
+    const maxBytes = isZip ? 300 * 1024 * 1024 : 25 * 1024 * 1024;
+    if (!Number.isFinite(size) || size < 0 || size > maxBytes) return json({ error: 'The selected file exceeds its import size limit.' }, 413);
     const downloadUrl = new URL('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(fileId));
     downloadUrl.searchParams.set('alt', 'media');
-    const response = await fetch(downloadUrl, { headers: { Authorization: 'Bearer ' + (await readSession(request, env))?.access_token, Accept: '*/*' } });
-    if (!response.ok || !response.body) return json({ error: 'Google Drive could not download this file. Google Workspace-native files are not ZIP archives.' }, response.status === 401 ? 401 : 502);
-    return new Response(response.body, { headers: { 'Content-Type': response.headers.get('Content-Type') || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
+    const response = await fetch(downloadUrl, { headers: { Authorization: 'Bearer ' + session.access_token, Accept: '*/*' } });
+    if (!response.ok || !response.body) return json({ error: 'Google Drive could not download this file.' }, response.status === 401 ? 401 : 502);
+    return new Response(response.body, { headers: { 'Content-Type': response.headers.get('Content-Type') || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff', 'Content-Disposition': 'attachment; filename="' + name.replace(/[^a-zA-Z0-9._-]/g, '_').slice(0, 100) + '"' } });
   }
 
   if (path === '/api/my-drive/files' && request.method === 'GET') {
