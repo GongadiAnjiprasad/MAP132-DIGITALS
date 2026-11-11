@@ -54,4 +54,4 @@ This module must not change the existing Free Sources implementation or the curr
 
 ## External setup needed before live Drive connection
 
-A Google Cloud OAuth Web application with the authorized origin and redirect URI, Google Picker API enabled, and a Cloudflare Worker secret for the OAuth client secret. These values must be supplied/configured by the account owner; never commit credentials.
+A Google Cloud OAuth Web application, Google Picker API enabled, and Cloudflare Worker secrets `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET`, and a long random `MY_DRIVE_SESSION_SECRET` (used to encrypt short-lived access tokens at rest in KV). Bind `MAP132_KV`. The exact redirect URI is `https://<production-worker-host>/api/my-drive/oauth/callback`; the JavaScript origin is `https://<production-worker-host>`. Configure these only after verifying the intended production hostname. Never commit credentials. The OAuth adapter currently requests the read-only `drive.readonly` scope and uses online access only; it does not request a refresh token.
