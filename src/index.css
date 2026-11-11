@@ -2684,3 +2684,103 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   overflow-y: auto;
   overscroll-behavior: contain;
 }
+
+
+/* MAP132 Feedback Studio — accessible typography and control contrast in Light Theme.
+   Keep the dark-theme styling unchanged; scope every correction to the light theme. */
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-drawer-head h2,
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-drawer-head p,
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-seal-success h2,
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-seal-success > p {
+  color: #24262b;
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-drawer-head h2 em {
+  color: #80551f;
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-drawer-head .kicker,
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-label,
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-seal-eyebrow,
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-seal-signoff,
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-auto-reply > span {
+  color: #80551f;
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-optional,
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-category-grid small,
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-submit-hint,
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-privacy,
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-count {
+  color: #626771;
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-category-grid button {
+  color: #24262b;
+  background: rgba(255,255,255,.78);
+  border-color: rgba(128,85,31,.28);
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-category-grid button.selected {
+  color: #24262b;
+  background: linear-gradient(135deg, rgba(154,107,44,.16), rgba(255,255,255,.9));
+  border-color: #936326;
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-category-icon {
+  color: #80551f;
+  border-color: rgba(128,85,31,.38);
+  background: linear-gradient(145deg, rgba(154,107,44,.16), rgba(255,255,255,.9) 70%);
+  box-shadow: inset 0 1px 0 rgba(255,255,255,.9), 0 5px 16px rgba(36,38,43,.08);
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-aspects button {
+  color: #454952;
+  background: rgba(255,255,255,.76);
+  border-color: rgba(98,103,113,.35);
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-aspects button.selected {
+  color: #684719;
+  background: rgba(154,107,44,.13);
+  border-color: #936326;
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-stars button {
+  color: #777b83;
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-stars button.active {
+  color: #936326;
+  text-shadow: 0 0 10px rgba(147,99,38,.2);
+}
+.map132-slider-site[data-theme="light"] .feedback-studio #feedback-message,
+.map132-slider-site[data-theme="light"] .feedback-studio #feedback-email,
+.map132-slider-site[data-theme="light"] .feedback-studio #feedback-service {
+  color: #24262b;
+  background: rgba(255,255,255,.94);
+  border-color: rgba(98,103,113,.48);
+}
+.map132-slider-site[data-theme="light"] .feedback-studio #feedback-message::placeholder,
+.map132-slider-site[data-theme="light"] .feedback-studio #feedback-email::placeholder {
+  color: #6f6d65;
+  opacity: 1;
+}
+.map132-slider-site[data-theme="light"] .feedback-studio #feedback-service option {
+  color: #24262b;
+  background: #fffdf8;
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-submit-hint strong,
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-error {
+  color: #8b2e27;
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-public-consent {
+  color: #454952;
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-public-consent input[type="checkbox"] {
+  accent-color: #80551f;
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-submit {
+  color: #24211b;
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-close,
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-seal-close {
+  color: #454952;
+  border-color: rgba(98,103,113,.38);
+  background: rgba(255,255,255,.72);
+}
+.map132-slider-site[data-theme="light"] .feedback-studio .feedback-auto-reply {
+  color: #24262b;
+  background: rgba(154,107,44,.08);
+  border-color: rgba(128,85,31,.3);
+}
