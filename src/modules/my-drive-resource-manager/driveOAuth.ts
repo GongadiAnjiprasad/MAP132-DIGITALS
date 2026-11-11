@@ -194,8 +194,8 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
     }
     const state = url.searchParams.get('state') || '';
     const code = url.searchParams.get('code') || '';
-    const verifier = state ? await env.MAP132_KV!.get('my-drive/oauth-state/' + state) : null;
-    if (!verifier || !code) return json({ error: 'OAuth state expired or authorization was cancelled. Start again.' }, 400);
+    const verifier = state && readCookie(request, OAUTH_STATE_COOKIE) === state ? await env.MAP132_KV!.get('my-drive/oauth-state/' + state) : null;
+    if (!verifier || !code) return json({ error: 'OAuth state expired or does not match this browser session. Start again.' }, 400, { 'Set-Cookie': clearOAuthStateCookie() });
     await env.MAP132_KV!.delete('my-drive/oauth-state/' + state);
     const redirectUri = new URL('/api/my-drive/oauth/callback', url.origin).toString();
     const tokenResponse = await fetch('https://oauth2.googleapis.com/token', {
