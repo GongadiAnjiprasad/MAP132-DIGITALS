@@ -390,6 +390,18 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
   if (path === '/api/my-drive/oauth/logout' && request.method === 'POST') {
     const id = cookieValue(request);
     if (id) await env.MAP132_KV!.delete('my-drive/session/' + id);
+    const encryptedRefresh = await env.MAP132_KV!.get(REFRESH_TOKEN_KEY);
+    if (encryptedRefresh) {
+      try {
+        const refresh = await decrypt<{ refresh_token: string }>(encryptedRefresh, env.MY_DRIVE_SESSION_SECRET!);
+        await fetch('https://oauth2.googleapis.com/revoke', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+          body: new URLSearchParams({ token: refresh.refresh_token }),
+        });
+      } catch { /* Local credentials are still removed even if Google's revoke endpoint is unavailable. */ }
+      await env.MAP132_KV!.delete(REFRESH_TOKEN_KEY);
+    }
     return json({ disconnected: true }, 200, { 'Set-Cookie': clearCookie() });
   }
 
