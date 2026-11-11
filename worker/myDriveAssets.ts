@@ -47,7 +47,7 @@ export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Resp
   await env.MAP132_KV.put(key,JSON.stringify(asset));
   return json({saved:true,asset},201);
  }
- const match=path.match(/^\/api\/my-drive\/assets\/([a-z0-9-]+)(?:\/(preview|download))?$/i);
+ const match=path.match(/^\\/api\\/my-drive\\/assets\\/([a-z0-9-]+)(?:\\/(preview|download))?$/i);
  if(match&&req.method==='GET'){
   const id=match[1],action=match[2]||'preview',key='my-drive/assets/'+id;
   const meta=await env.MAP132_KV.get(key);if(!meta)return json({error:'Saved resource not found.'},404);
@@ -61,8 +61,16 @@ export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Resp
  if(match&&req.method==='DELETE'){
   const key='my-drive/assets/'+match[1],meta=await env.MAP132_KV.get(key);if(!meta)return json({error:'Saved resource not found.'},404);
   let asset:any;try{asset=JSON.parse(meta);}catch{return json({error:'Resource metadata is invalid.'},500);}
-  if(asset.driveFileId)await deleteMap132DriveFile(accessToken,asset.driveFileId);
-  await env.MAP132_KV.delete(key);return json({deleted:true});
+  if(asset.driveFileId){
+   try {
+    const removed=await deleteMap132DriveFile(accessToken,asset.driveFileId);
+    if(!removed)return json({error:'Google Drive could not delete this resource. Metadata was kept; retry after checking Drive permissions.'},502);
+   } catch {
+    return json({error:'Google Drive deletion failed. Metadata was kept; retry after checking the connection.'},502);
+   }
+  }
+  await env.MAP132_KV.delete(key);
+  return json({deleted:true});
  }
  return json({error:'Not found'},404);
 }
