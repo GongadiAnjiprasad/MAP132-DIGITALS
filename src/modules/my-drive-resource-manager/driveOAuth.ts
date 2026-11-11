@@ -100,6 +100,35 @@ async function readSession(request: Request, env: DriveEnv): Promise<{ access_to
   }
 }
 
+
+const UNLOCK_COOKIE = 'map132_drive_unlock';
+const LOCK_TTL = 60 * 60 * 12;
+function readCookie(request: Request, name: string): string | null {
+  const item = (request.headers.get('Cookie') || '').split(';').map(part => part.trim()).find(part => part.startsWith(name + '='));
+  if (!item) return null;
+  try { return decodeURIComponent(item.slice(name.length + 1)); } catch { return null; }
+}
+function unlockCookie(value: string, maxAge: number): string {
+  return UNLOCK_COOKIE + '=' + encodeURIComponent(value) + '; HttpOnly; Secure; SameSite=Strict; Path=/api/my-drive; Max-Age=' + maxAge;
+}
+function clearUnlockCookie(): string {
+  return UNLOCK_COOKIE + '=; HttpOnly; Secure; SameSite=Strict; Path=/api/my-drive; Max-Age=0';
+}
+async function passwordDigest(password: string, secret: string): Promise<string> {
+  const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  return b64url(new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode('map132-my-drive-password-v1:' + password))));
+}
+async function isUnlocked(request: Request, env: DriveEnv): Promise<boolean> {
+  const id = readCookie(request, UNLOCK_COOKIE);
+  if (!id || !env.MAP132_KV) return false;
+  return Boolean(await env.MAP132_KV.get('my-drive/unlock/' + id));
+}
+async function unlockResponse(env: DriveEnv): Promise<Response> {
+  const id = randomToken();
+  await env.MAP132_KV!.put('my-drive/unlock/' + id, '1', { expirationTtl: LOCK_TTL });
+  return json({ unlocked: true, expiresIn: LOCK_TTL }, 200, { 'Set-Cookie': unlockCookie(id, LOCK_TTL) });
+}
+
 /** Handles the server-side, read-only Google Drive OAuth and listing endpoints. */
 export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promise<Response | null> {
   const url = new URL(request.url);
@@ -172,6 +201,49 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
     });
   }
 
+
+  if (path === '/api/my-drive/lock/status' && request.method === 'GET') {
+    const configured = Boolean(await env.MAP132_KV!.get('my-drive/lock/password-hash'));
+    return json({ configured, unlocked: configured && await isUnlocked(request, env) });
+  }
+
+  if (path === '/api/my-drive/lock/setup' && request.method === 'POST') {
+    const body = await request.json().catch(() => ({})) as { password?: string };
+    const password = String(body.password || '');
+    if (password.length < 8 || password.length > 128) return json({ error: 'Choose a password between 8 and 128 characters.' }, 400);
+    const existing = await env.MAP132_KV!.get('my-drive/lock/password-hash');
+    if (existing) return json({ error: 'My Drive password is already set. Unlock it instead.' }, 409);
+    await env.MAP132_KV!.put('my-drive/lock/password-hash', await passwordDigest(password, env.MY_DRIVE_SESSION_SECRET!));
+    return unlockResponse(env);
+  }
+
+  if (path === '/api/my-drive/lock/unlock' && request.method === 'POST') {
+    const ipKey = 'my-drive/lock/attempts/' + (request.headers.get('CF-Connecting-IP') || 'unknown');
+    const attempts = Number(await env.MAP132_KV!.get(ipKey) || '0');
+    if (attempts >= 8) return json({ error: 'Too many attempts. Try again in 15 minutes.' }, 429);
+    const body = await request.json().catch(() => ({})) as { password?: string };
+    const password = String(body.password || '');
+    const expected = await env.MAP132_KV!.get('my-drive/lock/password-hash');
+    if (!expected || password.length > 128 || await passwordDigest(password, env.MY_DRIVE_SESSION_SECRET!) !== expected) {
+      await env.MAP132_KV!.put(ipKey, String(attempts + 1), { expirationTtl: 900 });
+      return json({ error: 'Incorrect My Drive password.' }, 401);
+    }
+    await env.MAP132_KV!.delete(ipKey);
+    return unlockResponse(env);
+  }
+
+  if (path === '/api/my-drive/lock' && request.method === 'POST') {
+    const id = readCookie(request, UNLOCK_COOKIE);
+    if (id) await env.MAP132_KV!.delete('my-drive/unlock/' + id);
+    return json({ locked: true }, 200, { 'Set-Cookie': clearUnlockCookie() });
+  }
+
+  if (path === '/api/my-drive/oauth/callback' && request.method === 'GET') {
+    // OAuth redirects must complete even if the workspace lock session expires mid-consent.
+  } else if (!(path.startsWith('/api/my-drive/lock/') || path === '/api/my-drive/lock') && !await isUnlocked(request, env)) {
+    return json({ error: 'Unlock My Drive before continuing.' }, 423);
+  }
+
   if (path === '/api/my-drive/session' && request.method === 'GET') {
     const session = await readSession(request, env);
     return json({ connected: Boolean(session), expiresAt: session?.expires_at ?? null });
@@ -181,6 +253,17 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
     const id = cookieValue(request);
     if (id) await env.MAP132_KV!.delete('my-drive/session/' + id);
     return json({ disconnected: true }, 200, { 'Set-Cookie': clearCookie() });
+  }
+
+
+  if (path.startsWith('/api/my-drive/download/') && request.method === 'GET') {
+    const fileId = path.slice('/api/my-drive/download/'.length);
+    if (!/^[a-zA-Z0-9_-]{1,256}$/.test(fileId)) return json({ error: 'Invalid Google Drive file ID.' }, 400);
+    const downloadUrl = new URL('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(fileId));
+    downloadUrl.searchParams.set('alt', 'media');
+    const response = await fetch(downloadUrl, { headers: { Authorization: 'Bearer ' + (await readSession(request, env))?.access_token, Accept: '*/*' } });
+    if (!response.ok || !response.body) return json({ error: 'Google Drive could not download this file. Google Workspace-native files are not ZIP archives.' }, response.status === 401 ? 401 : 502);
+    return new Response(response.body, { headers: { 'Content-Type': response.headers.get('Content-Type') || 'application/octet-stream', 'Cache-Control': 'no-store', 'X-Content-Type-Options': 'nosniff' } });
   }
 
   if (path === '/api/my-drive/files' && request.method === 'GET') {
