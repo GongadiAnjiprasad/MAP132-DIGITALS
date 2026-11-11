@@ -60,3 +60,25 @@ test('first My Drive password setup requires admin authentication and stores onl
   assert.notEqual(digest, 'separate-passphrase');
   assert.ok(response.headers.get('Set-Cookie').includes('map132_drive_unlock='));
 });
+
+test('valid OAuth callback exchanges the code, encrypts the session and returns to workspace', async () => {
+  const e = env();
+  await e.MAP132_KV.put('my-drive/oauth-state/browser-state', 'pkce-verifier');
+  const originalFetch = globalThis.fetch;
+  globalThis.fetch = async () => new Response(JSON.stringify({
+    access_token: 'short-lived-access-token',
+    expires_in: 3600,
+    scope: 'https://www.googleapis.com/auth/drive.readonly',
+  }), { status: 200, headers: { 'Content-Type': 'application/json' } });
+  try {
+    const response = await handleMyDriveOAuth(new Request('https://example.test/api/my-drive/oauth/callback?code=auth-code&state=browser-state', {
+      headers: { Cookie: 'map132_drive_oauth_state=browser-state' },
+    }), e);
+    assert.equal(response.status, 302);
+    assert.match(response.headers.get('Location'), /\/workspace\.html\?myDrive=connected/);
+    const sessionEntry = [...e.MAP132_KV.values.entries()].find(([key]) => key.startsWith('my-drive/session/'));
+    assert.ok(sessionEntry);
+    assert.doesNotMatch(sessionEntry[1], /short-lived-access-token/);
+    assert.equal(await e.MAP132_KV.get('my-drive/oauth-state/browser-state'), null);
+  } finally { globalThis.fetch = originalFetch; }
+});
