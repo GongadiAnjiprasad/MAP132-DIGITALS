@@ -59,6 +59,7 @@ test('first My Drive password setup requires admin authentication and stores onl
   assert.ok(digest);
   assert.notEqual(digest, 'separate-passphrase');
   assert.ok(response.headers.get('Set-Cookie').includes('map132_drive_unlock='));
+  assert.match(response.headers.get('Set-Cookie'), /Max-Age=43200/);
 });
 
 test('valid OAuth callback exchanges the code, encrypts the session and returns to workspace', async () => {
