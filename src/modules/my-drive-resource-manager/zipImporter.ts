@@ -56,10 +56,11 @@ export async function importZip(
     throw new Error('Multi-disk and ZIP64 archives are not supported.');
   }
   if (totalEntries > ARCHIVE_LIMITS.maxEntries) throw new Error('ZIP contains too many entries.');
+  const centralEnd = centralOffset + centralSize;
   let cursor = centralOffset;
   let totalUncompressed = 0;
   for (let index = 0; index < totalEntries; index++) {
-    if (cursor + 46 > view.byteLength || readU32(view, cursor) !== 0x02014b50) {
+    if (cursor + 46 > centralEnd || readU32(view, cursor) !== 0x02014b50) {
       issues.push({ sourceName: file.name, code: 'corrupt-archive', message: 'ZIP central directory entry is corrupt.' });
       break;
     }
@@ -76,7 +77,7 @@ export async function importZip(
     const localOffset = readU32(view, cursor + 42);
     const nameStart = cursor + 46;
     const next = nameStart + nameLength + extraLength + entryCommentLength;
-    if (next > view.byteLength) {
+    if (next > centralEnd) {
       issues.push({ sourceName: file.name, code: 'corrupt-archive', message: 'ZIP entry metadata is truncated.' });
       break;
     }
@@ -101,16 +102,23 @@ export async function importZip(
       cursor = next;
       continue;
     }
-    if (localOffset + 30 > view.byteLength || readU32(view, localOffset) !== 0x04034b50) {
+    if (localOffset + 30 > centralOffset || readU32(view, localOffset) !== 0x04034b50) {
       issues.push({ sourceName: file.name, path, code: 'corrupt-archive', message: 'ZIP local file header is corrupt.' });
       cursor = next;
       continue;
     }
     const localNameLength = readU16(view, localOffset + 26);
     const localExtraLength = readU16(view, localOffset + 28);
-    const dataStart = localOffset + 30 + localNameLength + localExtraLength;
+    const localNameStart = localOffset + 30;
+    const dataStart = localNameStart + localNameLength + localExtraLength;
     const dataEnd = dataStart + compressedSize;
-    if (dataEnd > view.byteLength) {
+    const centralName = new Uint8Array(buffer, nameStart, nameLength);
+    const localName = localNameStart + localNameLength <= centralOffset
+      ? new Uint8Array(buffer, localNameStart, localNameLength)
+      : new Uint8Array();
+    const namesMatch = localNameLength === nameLength && localName.length === centralName.length &&
+      localName.every((byte, nameIndex) => byte === centralName[nameIndex]);
+    if (!namesMatch || dataStart > centralOffset || dataEnd > centralOffset) {
       issues.push({ sourceName: file.name, path, code: 'corrupt-archive', message: 'ZIP file data is truncated.' });
       cursor = next;
       continue;
