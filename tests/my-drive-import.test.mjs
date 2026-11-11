@@ -92,3 +92,20 @@ test('recursively scans nested Drive folders and skips unsupported files', async
     delete globalThis.window;
   }
 });
+
+test('rejects a ZIP whose central directory size excludes its entry metadata', async () => {
+  const bytes = makeStoredZip([{ name: 'Fonts/Anji.ttf', content: 'font-data' }]);
+  const view = new DataView(bytes.buffer);
+  view.setUint32(bytes.byteLength - 22 + 12, 1, true);
+  const result = await importZip(new File([bytes], 'truncated-directory.zip'));
+  assert.equal(result.summary.imported, 0);
+  assert.ok(result.summary.issues.some(issue => issue.code === 'corrupt-archive'));
+});
+
+test('rejects ZIP entries whose local header filename differs from the central directory', async () => {
+  const bytes = makeStoredZip([{ name: 'Fonts/Anji.ttf', content: 'font-data' }]);
+  bytes[30] = 'X'.charCodeAt(0);
+  const result = await importZip(new File([bytes], 'mismatched-name.zip'));
+  assert.equal(result.summary.imported, 0);
+  assert.ok(result.summary.issues.some(issue => issue.code === 'corrupt-archive'));
+});
