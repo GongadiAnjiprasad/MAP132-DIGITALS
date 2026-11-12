@@ -2906,3 +2906,73 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   .site .admin-live-preview,
   .site .admin-preview-card { border-radius: 17px; }
 }
+
+
+/* MAP132 hero and section surfaces — extend the Feedback Studio gold/black rim
+   to the square-corner feature frames across the main landing experience. */
+.site .hero .monitor,
+.site .hero-manifesto,
+.site .services-section .service-card,
+.site .work-card .media-frame,
+.site .contact-panel,
+.site .concept-card,
+.site .demo-showcase-card,
+.site .demo-video-card,
+.site .festival-build-card,
+.site .workspace-library-panel,
+.site .workspace-resource-card {
+  position: relative;
+  border: 1px solid rgba(232,199,122,.34);
+  border-radius: 18px;
+  outline: 1px solid rgba(4,5,7,.92);
+  outline-offset: 1px;
+  box-shadow:
+    inset 0 1px 0 rgba(232,199,122,.42),
+    inset 0 0 0 1px rgba(4,5,7,.62),
+    0 0 0 1px rgba(232,199,122,.14),
+    0 16px 42px rgba(0,0,0,.30);
+}
+.site .hero .monitor {
+  border-color: rgba(232,199,122,.58);
+  box-shadow:
+    inset 0 1px 0 rgba(255,232,184,.55),
+    inset 0 0 0 1px rgba(4,5,7,.82),
+    0 0 0 1px rgba(232,199,122,.24),
+    0 0 34px rgba(232,199,122,.10),
+    0 35px 100px rgba(0,0,0,.68);
+}
+.site .hero-manifesto {
+  border-left: 1px solid rgba(232,199,122,.42);
+  background:
+    linear-gradient(180deg,rgba(232,199,122,.055),transparent 34%),
+    linear-gradient(100deg,rgba(232,199,122,.08),rgba(232,199,122,.015));
+}
+.site .work-card .media-frame {
+  overflow: hidden;
+}
+.site .contact-panel,
+.site .concept-card,
+.site .demo-showcase-card,
+.site .demo-video-card,
+.site .festival-build-card,
+.site .workspace-library-panel,
+.site .workspace-resource-card {
+  background-image:
+    linear-gradient(180deg,rgba(232,199,122,.035),transparent 28%),
+    var(--map132-card-background, linear-gradient(145deg,#1b2029,#11161e));
+}
+@media(max-width:700px) {
+  .site .hero .monitor,
+  .site .hero-manifesto,
+  .site .services-section .service-card,
+  .site .work-card .media-frame,
+  .site .contact-panel,
+  .site .concept-card,
+  .site .demo-showcase-card,
+  .site .demo-video-card,
+  .site .festival-build-card,
+  .site .workspace-library-panel,
+  .site .workspace-resource-card {
+    border-radius: 15px;
+  }
+}
