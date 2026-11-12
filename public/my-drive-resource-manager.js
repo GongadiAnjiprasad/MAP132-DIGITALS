@@ -5,7 +5,7 @@
   if (!panel || panel.dataset.initialized) return;
   panel.dataset.initialized = 'true';
 
-  const state = { authenticated: false, connected: false, busy: false, refreshing: false, assets: [], cursor: null, pickerPromise: null, refreshPromise: null };
+  const state = { authenticated: false, connected: false, busy: false, refreshing: false, assets: [], cursor: null, queueCompleted: 0, pickerPromise: null, refreshPromise: null };
   const status = $('myDriveStatus');
   const loginForm = $('myDriveLoginForm');
   const loginPassword = $('myDriveAdminPassword');
@@ -28,10 +28,11 @@
   function renderQueue(data) {
     const rows = Array.isArray(data.items) ? data.items : [];
     const completed = rows.filter(item => item.status === 'completed').length;
+    const paused = Array.isArray(data.jobs) && data.jobs.some(job => job.status === 'paused');
     const failed = rows.filter(item => item.status === 'failed').length;
     const active = rows.filter(item => item.status === 'copying').length;
     const queued = rows.filter(item => item.status === 'queued').length;
-    queueCount.textContent = rows.length + ' files · ' + completed + ' saved · ' + queued + ' queued' + (active ? ' · ' + active + ' copying' : '') + (failed ? ' · ' + failed + ' failed' : '');
+    queueCount.textContent = (paused ? 'Paused · reconnect Drive · ' : '') + rows.length + ' files · ' + completed + ' saved · ' + queued + ' queued' + (active ? ' · ' + active + ' copying' : '') + (failed ? ' · ' + failed + ' failed' : '');
     queueList.replaceChildren();
     if (!rows.length) { queueList.appendChild(make('p', 'mydrive-empty', 'No background copies yet. Choose a Drive folder to start.')); return; }
     rows.forEach(item => {
@@ -54,7 +55,12 @@
 
   async function loadQueue() {
     if (!state.connected || !state.authenticated) return;
-    try { renderQueue(await request('/api/my-drive/queue')); queuePanel.hidden = false; }
+    try {
+      const data = await request('/api/my-drive/queue');
+      renderQueue(data); queuePanel.hidden = false;
+      const completed = (Array.isArray(data.items) ? data.items : []).filter(item => item.status === 'completed').length;
+      if (completed !== state.queueCompleted) { state.queueCompleted = completed; await loadAssets(false); }
+    }
     catch (error) { queuePanel.hidden = false; queueCount.textContent = 'Queue unavailable'; queueList.replaceChildren(make('p','mydrive-empty',error.message || 'Could not load the background queue.')); }
   }
 
