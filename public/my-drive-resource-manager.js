@@ -160,12 +160,23 @@
         showMessage('Enter your MAP132 Admin password to open My Drive.');
         return;
       }
-      const drive = await request('/api/my-drive/session');
-      state.connected = Boolean(drive.connected);
+      try {
+        const drive = await request('/api/my-drive/session');
+        state.connected = Boolean(drive.connected);
+      } catch (driveError) {
+        // Google Drive may be disconnected/expired while the MAP132 Admin
+        // session is still valid. Do not turn a Drive-session 401 into Admin logout.
+        state.connected = false;
+      }
       $('myDriveConnect').textContent = state.connected ? 'Reconnect Google Drive' : 'Connect Google Drive';
       if (state.connected) {
-        await loadAssets(false);
-        showMessage('Google Drive connected. Your saved resources are ready.');
+        try {
+          await loadAssets(false);
+          showMessage('Google Drive connected. Your saved resources are ready.');
+        } catch (assetError) {
+          state.assets = []; state.cursor = null; renderAssets();
+          showMessage(assetError.message || 'Google Drive resources could not be loaded. Reconnect Google Drive.', true);
+        }
       } else {
         state.assets = []; state.cursor = null; renderAssets();
         showMessage('You are logged in. Connect Google Drive to import and retrieve resources.');
