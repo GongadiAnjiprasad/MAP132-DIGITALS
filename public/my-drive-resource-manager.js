@@ -120,8 +120,8 @@
     } else if (asset.kind === 'video') { const video = make('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.src = assetUrl(asset); video.style.width = '100%'; card.appendChild(video); }
     else if (asset.kind === 'image') { const img = make('img'); img.src = assetUrl(asset); img.alt = asset.name || 'Saved image'; img.loading = 'lazy'; img.style.cssText = 'max-width:100%;max-height:220px;object-fit:contain'; card.appendChild(img); }
     else if (asset.kind === 'font') {
-      const sample = make('div', 'mydrive-font-sample', 'MAP132 DIGITALS · The Final Chapter · తెలుగు'); sample.dataset.fontAsset = asset.id; card.appendChild(sample);
-      const preview = make('button', '', 'Preview font'); preview.type = 'button'; preview.addEventListener('click', () => previewFont(asset, sample, preview)); card.appendChild(preview);
+      const sample = make('div', 'mydrive-font-sample', 'Aa Bb Cc · MAP132 DIGITALS · The Final Chapter · తెలుగు'); sample.dataset.fontAsset = asset.id; card.appendChild(sample);
+      void previewFont(asset, sample);
     } else if (asset.kind === 'template' || asset.kind === 'archive' || asset.kind === 'other') {
       const preview = make('div', 'mydrive-generic-preview'); preview.appendChild(make('strong', '', 'Creative resource preview')); preview.appendChild(make('span', '', (asset.name.split('.').pop() || 'FILE').toUpperCase() + ' · ' + (asset.contentType || 'application file'))); preview.appendChild(make('p', '', 'This editing-project format cannot be rendered directly in the browser. Download it to open in its compatible editing app.')); card.appendChild(preview);
     }
