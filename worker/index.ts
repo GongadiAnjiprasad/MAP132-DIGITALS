@@ -2,6 +2,7 @@ import { FESTIVAL_CALENDAR, getIndiaDateKey } from '../src/modules/seasonal/fest
 import { createFeedbackResponse } from './feedback';
 import { clearMyDriveSession, handleMyDriveOAuth } from '../src/modules/my-drive-resource-manager/driveOAuth';
 import { handleMyDriveAssets } from './myDriveAssets';
+import { handleMyDriveQueue, processMyDriveQueue } from './myDriveQueue.ts';
 interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; GOOGLE_PICKER_API_KEY?: string; MY_DRIVE_SESSION_SECRET?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
 const json=(body:unknown,status=200,headers:HeadersInit={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...Object.fromEntries(new Headers(headers))}});
@@ -52,7 +53,7 @@ async function read(env:Env){
     return {...DEFAULTS,...stored,profile,skills,items,resources,logoPath:typeof stored.logoPath==='string'&&stored.logoPath.startsWith('portfolio/logos/')?stored.logoPath:''};
   }catch{return DEFAULTS;}
 }
-async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;if(path.startsWith('/api/my-drive/')){if(path==='/api/my-drive/logout'&&method==='POST'){const headers=await clearMyDriveSession(req,env);return json({signedOut:true},200,headers);}const oauthCallback=path==='/api/my-drive/oauth/callback'&&method==='GET';if(!oauthCallback&&!await validSession(req,env))return json({error:'MAP132 Admin login required. Sign in to the Admin Dashboard to access My Drive.'},401);}const driveAssetsResponse=await handleMyDriveAssets(req,env);if(driveAssetsResponse)return driveAssetsResponse;const driveOAuthResponse=await handleMyDriveOAuth(req,env);if(driveOAuthResponse)return driveOAuthResponse;
+async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;if(path.startsWith('/api/my-drive/')){if(path==='/api/my-drive/logout'&&method==='POST'){const headers=await clearMyDriveSession(req,env);return json({signedOut:true},200,headers);}const oauthCallback=path==='/api/my-drive/oauth/callback'&&method==='GET';if(!oauthCallback&&!await validSession(req,env))return json({error:'MAP132 Admin login required. Sign in to the Admin Dashboard to access My Drive.'},401);}const driveQueueResponse=await handleMyDriveQueue(req,env);if(driveQueueResponse)return driveQueueResponse;const driveAssetsResponse=await handleMyDriveAssets(req,env);if(driveAssetsResponse)return driveAssetsResponse;const driveOAuthResponse=await handleMyDriveOAuth(req,env);if(driveOAuthResponse)return driveOAuthResponse;
 if(path.startsWith('/api/resources/sounds/')&&path.endsWith('/preview')&&method==='GET'){
   if(!env.FREESOUND_API_KEY)return json({error:'Sound preview is not connected.'},503);
   const id=path.split('/')[4];
@@ -267,6 +268,7 @@ export default {
     catch{return new Response('Website asset service unavailable.',{status:502});}
   },
   async scheduled(controller:ScheduledController,env:Env){
+    try { await processMyDriveQueue(env); } catch { /* Queue retries on the next scheduled tick; keep the festival job independent. */ }
     const today=getIndiaDateKey(new Date(controller.scheduledTime));
     const festival=FESTIVAL_CALENDAR.find(item=>item.date===today);
     if(!festival||!env.AI||!env.MAP132_KV)return;

@@ -5,7 +5,7 @@
   if (!panel || panel.dataset.initialized) return;
   panel.dataset.initialized = 'true';
 
-  const state = { authenticated: false, connected: false, busy: false, refreshing: false, assets: [], cursor: null, pickerPromise: null, refreshPromise: null };
+  const state = { authenticated: false, connected: false, busy: false, refreshing: false, assets: [], cursor: null, queueCompleted: 0, pickerPromise: null, refreshPromise: null };
   const status = $('myDriveStatus');
   const loginForm = $('myDriveLoginForm');
   const loginPassword = $('myDriveAdminPassword');
@@ -15,6 +15,54 @@
   const gate = $('myDriveGate');
   const content = $('myDriveContent');
   const items = $('myDriveItems');
+  const queuePanel = make('section', 'mydrive-download-queue');
+  queuePanel.hidden = true;
+  const queueStyle = make('style');
+  queueStyle.textContent = '.mydrive-download-queue{margin:10px 0 16px;padding:10px 12px;border:1px solid var(--mydrive-border,rgba(196,158,99,.25));border-radius:12px;background:var(--mydrive-panel,rgba(255,255,255,.025));min-width:0}.mydrive-queue-heading{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;margin-bottom:7px}.mydrive-queue-count{font-size:10px;opacity:.72;text-align:right}.mydrive-queue-scroll{max-height:172px;overflow-y:auto;overscroll-behavior:contain;display:grid;gap:5px;padding-right:3px}.mydrive-queue-row{min-width:0;padding:6px 7px;border-radius:8px;background:rgba(128,128,128,.07)}.mydrive-queue-row-top{display:flex;align-items:center;justify-content:space-between;gap:8px;min-width:0}.mydrive-queue-name{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0;flex:1}.mydrive-queue-status{font-size:9px;white-space:nowrap;opacity:.8}.mydrive-queue-track{height:3px;border-radius:4px;background:rgba(128,128,128,.22);overflow:hidden;margin:5px 0 3px}.mydrive-queue-fill{display:block;height:100%;background:linear-gradient(90deg,#c49a58,#f2d39a);transition:width .25s ease}.mydrive-queue-meta{display:block;font-size:9px;opacity:.65;overflow-wrap:anywhere}.mydrive-queue-scroll .mydrive-empty{font-size:11px;margin:5px 0}@media(max-width:600px){.mydrive-download-queue{padding:8px 9px;margin:8px 0 12px}.mydrive-queue-scroll{max-height:150px}.mydrive-queue-heading{font-size:11px}}';
+  queuePanel.innerHTML = '<div class="mydrive-queue-heading"><strong>My Drive · Download Queue</strong><span class="mydrive-queue-count">Waiting for queue…</span></div><div class="mydrive-queue-scroll" aria-live="polite"><p class="mydrive-empty">No background copies yet.</p></div>';
+  queuePanel.appendChild(queueStyle);
+  if (items && items.parentNode) items.parentNode.insertBefore(queuePanel, items);
+  const queueCount = queuePanel.querySelector('.mydrive-queue-count');
+  const queueList = queuePanel.querySelector('.mydrive-queue-scroll');
+
+  function renderQueue(data) {
+    const rows = Array.isArray(data.items) ? data.items : [];
+    const completed = rows.filter(item => item.status === 'completed').length;
+    const paused = Array.isArray(data.jobs) && data.jobs.some(job => job.status === 'paused');
+    const failed = rows.filter(item => item.status === 'failed').length;
+    const active = rows.filter(item => item.status === 'copying').length;
+    const queued = rows.filter(item => item.status === 'queued').length;
+    queueCount.textContent = (paused ? 'Paused · reconnect Drive · ' : '') + rows.length + ' files · ' + completed + ' saved · ' + queued + ' queued' + (active ? ' · ' + active + ' copying' : '') + (failed ? ' · ' + failed + ' failed' : '');
+    queueList.replaceChildren();
+    if (!rows.length) { queueList.appendChild(make('p', 'mydrive-empty', 'No background copies yet. Choose a Drive folder to start.')); return; }
+    rows.forEach(item => {
+      const row = make('div', 'mydrive-queue-row');
+      const top = make('div', 'mydrive-queue-row-top');
+      const name = make('span', 'mydrive-queue-name', item.name || 'Untitled file');
+      name.title = item.sourcePath || item.name || '';
+      const statusText = item.status === 'completed' ? 'Completed' : item.status === 'copying' ? 'Copying' : item.status === 'failed' ? 'Failed' : 'Queued';
+      const status = make('span', 'mydrive-queue-status', statusText);
+      top.append(name, status);
+      const track = make('div', 'mydrive-queue-track');
+      const fill = make('span', 'mydrive-queue-fill');
+      fill.style.width = Math.max(0, Math.min(100, Number(item.progress) || 0)) + '%';
+      track.appendChild(fill);
+      const meta = make('small', 'mydrive-queue-meta', (Number(item.progress) || 0) + '% · ' + sizeText(item.size) + (item.error ? ' · ' + item.error : ''));
+      row.append(top, track, meta);
+      queueList.appendChild(row);
+    });
+  }
+
+  async function loadQueue() {
+    if (!state.authenticated) return;
+    try {
+      const data = await request('/api/my-drive/queue');
+      renderQueue(data); queuePanel.hidden = false;
+      const completed = (Array.isArray(data.items) ? data.items : []).filter(item => item.status === 'completed').length;
+      if (completed !== state.queueCompleted) { state.queueCompleted = completed; await loadAssets(false); }
+    }
+    catch (error) { queuePanel.hidden = false; queueCount.textContent = 'Queue unavailable'; queueList.replaceChildren(make('p','mydrive-empty',error.message || 'Could not load the background queue.')); }
+  }
 
   function showMessage(text, error) {
     status.textContent = text || '';
@@ -197,6 +245,7 @@
       if (state.connected) {
         try {
           await loadAssets(false);
+          await loadQueue();
           showMessage('Google Drive connected. Your saved resources are ready.');
         } catch (assetError) {
           state.assets = []; state.cursor = null; renderAssets();
@@ -204,6 +253,7 @@
         }
       } else {
         state.assets = []; state.cursor = null; renderAssets();
+        await loadQueue();
         showMessage('You are logged in. Connect Google Drive to import and retrieve resources.');
       }
     } catch (error) {
@@ -368,9 +418,19 @@
       } while (pageToken && scanned < 5000);
       showMessage('Scanning selected folder… ' + scanned + ' item(s) checked; ' + candidates.length + ' supported.');
     }
+    let queuedCount = 0, queueError = '';
+    try {
+      for (let offset = 0; offset < candidates.length; offset += 900) {
+        const batch = candidates.slice(offset, offset + 900);
+        const queued = await post('/api/my-drive/queue', { folderId:rootId, folderName:rootName, files:batch });
+        queuedCount += Number(queued.total) || 0;
+      }
+      await loadQueue();
+    } catch (error) { queueError = error.message || 'Background copy queue could not start.'; }
     let saved = 0, skipped = 0, failed = 0;
     for (let index = 0; index < candidates.length; index++) {
       const file = candidates[index];
+      if (!file.name.toLowerCase().endsWith('.zip')) continue; // Other source files are copied by the server-side background queue.
       if (file.size > 100 * 1024 * 1024) { skipped++; continue; }
       try {
         showMessage('Saving ' + (index + 1) + ' of ' + candidates.length + ' · ' + file.category + ' · ' + file.name);
@@ -394,7 +454,7 @@
       } catch (error) { failed++; }
     }
     await loadAssets(false);
-    showMessage('Folder sync complete: ' + saved + ' saved, ' + skipped + ' skipped/duplicate, ' + failed + ' failed. Only the selected folder was scanned.');
+    showMessage('Folder import complete: ' + queuedCount + ' files queued for background copy; ' + saved + ' ZIP-extracted assets saved, ' + skipped + ' skipped/duplicate, ' + failed + ' failed.' + (queueError ? ' Background queue: ' + queueError : '') + ' Only the selected folder was scanned.');
   }
 
   async function openFolderPicker() {
@@ -411,8 +471,11 @@
           if (data.action !== window.google.picker.Action.PICKED) return;
           const folder = data.docs && data.docs[0];
           if (!folder || !folder.id) { setBusy(false); showMessage('No folder was selected.', true); return; }
-          try { await syncSelectedFolder(folder.id, String(folder.name || 'Selected Drive folder')); }
-          catch (error) { showMessage(error.message || 'Folder sync failed.', true); }
+          try {
+            const folderName = String(folder.name || 'Selected Drive folder');
+            await syncSelectedFolder(folder.id, folderName);
+            await loadQueue();
+          } catch (error) { showMessage(error.message || 'Folder sync failed.', true); }
           finally { setBusy(false); }
         }).build();
       picker.setVisible(true);
@@ -607,6 +670,7 @@
     clean.searchParams.delete('myDrive');
     window.history.replaceState({}, '', clean.pathname + clean.search + clean.hash);
   }
+  window.setInterval(() => { if (state.connected && state.authenticated && !state.busy) void loadQueue(); }, 15000);
   window.addEventListener('focus', () => { if (!state.busy) refreshState(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden && !state.busy) refreshState(); });
   refreshState();
