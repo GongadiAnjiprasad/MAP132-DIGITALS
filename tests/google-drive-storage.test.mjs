@@ -21,7 +21,7 @@ test('creates and caches a dedicated MAP132 Drive folder', async () => {
     assert.match(String(url), /www\.googleapis\.com\/drive\/v3\/files/);
     assert.equal(init.method, 'POST');
     const body = JSON.parse(init.body);
-    assert.equal(body.name, 'MAP132 DIGITALS Resources');
+    assert.equal(body.name, 'MAP132 Workspace');
     assert.equal(body.mimeType, 'application/vnd.google-apps.folder');
     return Response.json({ id: 'folder-123' });
   };
@@ -43,7 +43,7 @@ test('uploads resource bytes through a resumable Drive upload session', async ()
       assert.match(String(url), /uploadType=resumable/);
       assert.equal(init.method, 'POST');
       const metadata = JSON.parse(init.body);
-      assert.deepEqual(metadata.parents, ['folder-123']);
+      assert.deepEqual(metadata.parents, ['category-fonts']);
       assert.equal(metadata.name, 'sample.ttf');
       assert.equal(init.headers['X-Upload-Content-Length'], '10');
       return new Response(null, { status: 200, headers: { Location: 'https://upload.example/session/abc' } });
@@ -57,7 +57,7 @@ test('uploads resource bytes through a resumable Drive upload session', async ()
   try {
     const result = await uploadMap132DriveFile('access-token', kv, 'sample.ttf', 'font/ttf', new TextEncoder().encode('font-bytes').buffer);
     assert.equal(result.id, 'drive-file-456');
-    assert.equal(calls.length, 3);
+    assert.equal(calls.length, 4);
   } finally { globalThis.fetch = originalFetch; }
 });
 
