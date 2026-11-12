@@ -54,7 +54,7 @@
   }
 
   async function loadQueue() {
-    if (!state.connected || !state.authenticated) return;
+    if (!state.authenticated) return;
     try {
       const data = await request('/api/my-drive/queue');
       renderQueue(data); queuePanel.hidden = false;
@@ -252,8 +252,8 @@
           showMessage(assetError.message || 'Google Drive resources could not be loaded. Reconnect Google Drive.', true);
         }
       } else {
-        queuePanel.hidden = true;
         state.assets = []; state.cursor = null; renderAssets();
+        await loadQueue();
         showMessage('You are logged in. Connect Google Drive to import and retrieve resources.');
       }
     } catch (error) {
