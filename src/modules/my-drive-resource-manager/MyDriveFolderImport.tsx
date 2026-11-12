@@ -39,46 +39,61 @@ function loadPicker(): Promise<void> {
 }
 
 const contentTypes: Record<string, string> = {
-  ttf: 'font/ttf', otf: 'font/otf', woff: 'font/woff', woff2: 'font/woff2',
+  ttf:'font/ttf', otf:'font/otf', woff:'font/woff', woff2:'font/woff2',
+  mp3:'audio/mpeg', wav:'audio/wav', aac:'audio/aac', m4a:'audio/mp4', ogg:'audio/ogg', flac:'audio/flac',
+  mp4:'video/mp4', mov:'video/quicktime', webm:'video/webm', m4v:'video/x-m4v',
+  jpg:'image/jpeg', jpeg:'image/jpeg', png:'image/png', webp:'image/webp', gif:'image/gif', avif:'image/avif', svg:'image/svg+xml',
+  zip:'application/zip', aep:'application/octet-stream', mogrt:'application/octet-stream',
+  prproj:'application/octet-stream', prfpset:'application/octet-stream', ffx:'application/octet-stream',
+  cube:'application/octet-stream', look:'application/octet-stream', drx:'application/octet-stream',
+  setting:'application/octet-stream', preset:'application/octet-stream', prm:'application/octet-stream',
 };
 
 export default function MyDriveFolderImport({ disabled = false, onImported }: Props) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+
   async function importSelectedFolder(folderId: string, folderName: string) {
-    setMessage('Scanning selected folder and nested subfolders…');
+    setMessage('Scanning only the selected folder and its nested folders…');
     const scan = await listDriveFolderRecursively({ id: folderId, name: folderName }, scanned => {
-      setMessage('Scanning Drive folder… ' + scanned + ' item(s) checked.');
+      setMessage('Scanning selected folder… ' + scanned + ' item(s) checked.');
     });
-    const fonts = scan.candidates.filter(candidate => candidate.assetKind === 'font' && candidate.driveFileId);
-    let imported = 0;
-    const skipped = scan.issues.length + scan.candidates.length - fonts.length;
-    for (let index = 0; index < fonts.length; index++) {
-      const font = fonts[index];
+    let imported = 0, skipped = scan.issues.length, failed = 0;
+    const candidates = scan.candidates.filter(item => item.driveFileId);
+    for (let index = 0; index < candidates.length; index++) {
+      const item = candidates[index];
+      if (item.byteSize && item.byteSize > 100 * 1024 * 1024) { skipped++; continue; }
       try {
-        setMessage('Importing font ' + (index + 1) + ' of ' + fonts.length + ': ' + font.fileName);
-        const bytes = await downloadDriveFile(font.driveFileId!);
+        setMessage('Saving ' + (index + 1) + ' of ' + candidates.length + ' · ' + item.category + ' · ' + item.fileName);
+        const bytes = await downloadDriveFile(item.driveFileId!);
+        if (!bytes.byteLength || bytes.byteLength > 100 * 1024 * 1024) { skipped++; continue; }
         const response = await fetch('/api/my-drive/assets', {
           method: 'POST',
           credentials: 'same-origin',
           headers: {
-            'Content-Type': contentTypes[font.extension] || font.mimeType || 'application/octet-stream',
-            'X-Asset-Name': encodeURIComponent(font.fileName),
+            'Content-Type': contentTypes[item.extension] || item.mimeType || 'application/octet-stream',
+            'X-Asset-Name': encodeURIComponent(item.fileName),
+            'X-Asset-Category': item.category,
+            'X-Asset-Source-Path': encodeURIComponent(item.relativePath),
           },
           body: bytes,
         });
         const result = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(result.error || 'Could not save ' + font.fileName + '.');
-        imported++;
+        if (!response.ok) throw new Error(result.error || 'Could not save ' + item.fileName + '.');
+        if (result.duplicate) skipped++; else imported++;
       } catch (error) {
-        console.error('MAP132 Drive font import item failed:', font.fileName, error);
+        failed++;
+        console.error('MAP132 Drive import item failed:', item.fileName, error);
       }
     }
     await onImported();
-    const skippedCount = skipped + (fonts.length - imported);
-    const issueText = scan.issues.length ? ' ' + scan.issues.length + ' scan issue(s) were reported.' : '';
-    setMessage('Folder import complete: ' + imported + ' font(s) imported, ' + skippedCount + ' skipped. ' + scan.candidates.length + ' supported items found.' + issueText);
+    const categoryCount = new Map<string, number>();
+    for (const item of candidates) categoryCount.set(item.category, (categoryCount.get(item.category) || 0) + 1);
+    const categories = [...categoryCount.entries()].map(([name, count]) => name + ': ' + count).join(' · ');
+    setMessage('Folder sync complete: ' + imported + ' saved, ' + skipped + ' skipped/duplicate, ' + failed + ' failed. ' + categories);
+    if (scan.issues.length) setMessage(current => current + ' ' + scan.issues.length + ' scan issue(s); unsupported files were skipped.');
   }
+
   async function chooseFolder() {
     setBusy(true);
     setMessage('');
@@ -86,18 +101,14 @@ export default function MyDriveFolderImport({ disabled = false, onImported }: Pr
       const configResponse = await fetch('/api/my-drive/picker-config', { credentials: 'same-origin' });
       const config = await configResponse.json();
       if (!configResponse.ok) throw new Error(config.error || 'Could not prepare Google Drive Picker.');
-      if (!config.pickerEnabled || !config.developerKey) throw new Error('Google Picker API key is not configured in Cloudflare. Add GOOGLE_PICKER_API_KEY, then retry.');
+      if (!config.pickerEnabled || !config.developerKey) throw new Error('Google Picker API key is not configured. Complete the Google Drive connection setup first.');
       await loadPicker();
       const view = new window.google.picker.DocsView(window.google.picker.ViewId.FOLDERS)
-        .setIncludeFolders(true)
-        .setSelectFolderEnabled(true)
+        .setIncludeFolders(true).setSelectFolderEnabled(true)
         .setMimeTypes('application/vnd.google-apps.folder');
       const picker = new window.google.picker.PickerBuilder()
-        .addView(view)
-        .setOAuthToken(config.accessToken)
-        .setDeveloperKey(config.developerKey)
-        .setAppId(config.appId)
-        .setTitle('Choose a font folder to import')
+        .addView(view).setOAuthToken(config.accessToken).setDeveloperKey(config.developerKey)
+        .setAppId(config.appId).setTitle('Choose one folder for MAP132 Workspace')
         .setCallback(async (data: any) => {
           if (data.action !== window.google.picker.Action.PICKED) {
             if (data.action === window.google.picker.Action.CANCEL) setBusy(false);
@@ -105,25 +116,22 @@ export default function MyDriveFolderImport({ disabled = false, onImported }: Pr
           }
           const folder = data.docs?.[0];
           if (!folder?.id) { setMessage('No folder was selected.'); setBusy(false); return; }
-          try {
-            await importSelectedFolder(folder.id, String(folder.name || 'Google Drive folder'));
-          } catch (error) {
-            setMessage(error instanceof Error ? error.message : 'Folder import failed.');
-          } finally {
-            setBusy(false);
-          }
-        })
-        .build();
+          try { await importSelectedFolder(folder.id, String(folder.name || 'Selected Drive folder')); }
+          catch (error) { setMessage(error instanceof Error ? error.message : 'Folder sync failed.'); }
+          finally { setBusy(false); }
+        }).build();
       picker.setVisible(true);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Google Picker could not open.');
       setBusy(false);
     }
   }
+
   return <div style={{ display: 'grid', gap: 8, margin: '10px 0' }}>
     <button type="button" className="gold-button" onClick={() => void chooseFolder()} disabled={disabled || busy}>
-      {busy ? 'Importing Drive folder…' : 'Import fonts from Google Drive folder'}
+      {busy ? 'Syncing selected folder…' : 'Choose a Drive folder'}
     </button>
+    <p className="workspace-form-note">Only the folder you select is scanned. Supported files are automatically grouped and copied into category folders in MAP132 Workspace.</p>
     {message && <p className="workspace-form-note" role="status">{message}</p>}
   </div>;
 }
