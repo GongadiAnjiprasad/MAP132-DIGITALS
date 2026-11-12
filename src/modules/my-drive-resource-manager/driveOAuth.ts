@@ -243,7 +243,17 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
         code_verifier: verifier,
       }),
     });
-    if (!tokenResponse.ok) return json({ error: 'Google token exchange failed. Check OAuth client settings and callback URL.' }, 502);
+    if (!tokenResponse.ok) {
+      const providerFailure = await tokenResponse.json().catch(() => ({})) as { error?: unknown; error_description?: unknown };
+      const providerError = String(providerFailure.error || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64) || 'unknown';
+      const providerDescription = String(providerFailure.error_description || '')
+        .replace(/[\u0000-\u001f\u007f]/g, ' ')
+        .replace(/\s+/g, ' ')
+        .trim()
+        .slice(0, 180);
+      const detail = providerDescription ? ': ' + providerDescription : '';
+      return json({ error: 'Google token exchange failed (' + providerError + ')' + detail + '. Check OAuth client settings and callback URL.' }, 502);
+    }
     const token = await tokenResponse.json() as { access_token?: string; expires_in?: number; scope?: string; refresh_token?: string };
     const grantedScopes = String(token.scope || '').split(' ');
     if (!token.access_token || !DRIVE_SCOPES.every(scope => grantedScopes.includes(scope))) {
