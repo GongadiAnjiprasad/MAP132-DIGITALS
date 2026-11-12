@@ -62,7 +62,7 @@ export async function listDriveFolderRecursively(
             candidates.push({
               source: { kind: 'google-drive-folder', sourceId: root.id, displayName: root.name, parentPath: folder.path },
               relativePath: folder.path + '/' + file.name,
-              fileName: file.name, extension, assetKind: kind, fontFormat,
+              fileName: file.name, driveFileId: file.id, extension, assetKind: kind, fontFormat,
               mimeType: file.mimeType, byteSize: file.size ? Number(file.size) : undefined,
               modifiedTime: file.modifiedTime, licence: 'unknown',
             });
