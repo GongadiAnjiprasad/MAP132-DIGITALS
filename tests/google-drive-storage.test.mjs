@@ -36,7 +36,7 @@ test('creates and caches category folders under MAP132 Workspace', async () => {
   const kv = memoryKv({ 'my-drive/storage-folder-id': 'folder-123' });
   const originalFetch = globalThis.fetch;
   globalThis.fetch = async (url, init) => {
-    assert.equal(init.method, 'POST');
+    if (init.method !== 'POST') return Response.json({ id: 'folder-123', name: 'MAP132 Workspace', trashed: false });
     const body = JSON.parse(init.body);
     assert.equal(body.name, 'Sound Effects');
     assert.deepEqual(body.parents, ['folder-123']);
