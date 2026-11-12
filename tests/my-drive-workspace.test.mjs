@@ -21,23 +21,23 @@ test('The main Editor Workspace route opens the persistent Google Drive workspac
   assert.ok(appSource.includes('href="/workspace.html"><Film size={14}/> Editor Workspace'));
 });
 
-test('My Drive password forms include accessible show and hide controls', () => {
-  for (const id of ['myDriveSetupToggle', 'myDriveUnlockToggle']) {
-    assert.ok(rootHtml.includes('id="' + id + '"'));
-  }
-  assert.ok(source.includes('bindPasswordVisibility'));
-  assert.ok(source.includes("input.type = visible ? 'text' : 'password'"));
-  assert.ok(source.includes("button.setAttribute('aria-pressed', String(visible))"));
+test('My Drive uses the Admin Dashboard session with a simple Login and Logout UI', () => {
+  assert.ok(rootHtml.includes('id="myDriveLogin"'));
+  assert.ok(rootHtml.includes('id="myDriveLogout"'));
+  assert.ok(!rootHtml.includes('myDriveSetupForm'));
+  assert.ok(!rootHtml.includes('myDriveUnlockForm'));
+  assert.ok(!rootHtml.includes('myDriveSetupPassword'));
+  assert.ok(!rootHtml.includes('myDriveUnlockPassword'));
+  assert.ok(source.includes("request('/api/admin/session')"));
+  assert.ok(source.includes("post('/api/admin/logout')"));
+  assert.ok(source.includes('async function logout()'));
 });
 
-
-test('My Drive lock status and setup errors are visible before unlock', () => {
-  const statusIndex = rootHtml.indexOf('id="myDriveStatus"');
-  const contentIndex = rootHtml.indexOf('id="myDriveContent"');
-  assert.ok(statusIndex >= 0 && contentIndex > statusIndex, 'Status must render outside the hidden content container');
-  assert.ok(rootHtml.includes('target="_blank" rel="noopener">Open Admin Dashboard'));
-  assert.ok(rootHtml.includes('id="myDriveSetupToggle"'));
-  assert.ok(rootHtml.includes('id="myDriveUnlockToggle"'));
+test('My Drive login gate and content are driven by the active admin session', () => {
+  assert.ok(source.includes('state.authenticated = Boolean(session.authenticated)'));
+  assert.ok(source.includes('gate.hidden = state.authenticated'));
+  assert.ok(source.includes('content.hidden = !state.authenticated'));
+  assert.ok(rootHtml.includes('Login to Admin Dashboard'));
 });
 
 test('Admin dashboard password input has a working show/hide control', () => {
@@ -46,12 +46,9 @@ test('Admin dashboard password input has a working show/hide control', () => {
   assert.ok(appSource.includes("aria-label={showPassword?'Hide password':'Show password'}"));
 });
 
-test('My Drive setup and unlock forms call the protected server-side lock APIs', () => {
-  for (const route of ['/api/my-drive/lock/status', '/api/my-drive/lock/setup', '/api/my-drive/lock/unlock']) {
-    assert.ok(source.includes(route), 'Missing route: ' + route);
-  }
-  assert.ok(source.includes('Admin Dashboard sign-in'));
-  assert.ok(source.includes('index.html#admin'));
+test('My Drive browser script does not call the removed password lock endpoints', () => {
+  assert.doesNotMatch(source, /\/api\/my-drive\/lock/);
+  assert.doesNotMatch(source, /myDriveSetup|myDriveUnlock|myDriveLock/);
 });
 
 test('Google Drive folder import scans the selected folder and uses category asset APIs', () => {
@@ -81,18 +78,19 @@ test('root and published workspace pages remain byte-for-byte synchronized', () 
   assert.ok(rootHtml.includes('MAP132 Workspace'));
   assert.ok(rootHtml.includes('Choose one folder from your Google Drive'));
   assert.ok(rootHtml.includes('id="myDriveRefresh"'));
-  assert.ok(rootHtml.includes('myDriveSetupToggle'));
-  assert.ok(rootHtml.includes('myDriveUnlockToggle'));
+  assert.ok(rootHtml.includes('myDriveLogin'));
+  assert.ok(rootHtml.includes('myDriveLogout'));
 });
 
-test('My Drive password lock remains available when Google OAuth client config is incomplete', async () => {
+test('My Drive server access is bound to the Admin Dashboard session', () => {
   const oauthSource = readFileSync(new URL('../src/modules/my-drive-resource-manager/driveOAuth.ts', import.meta.url), 'utf8');
-  assert.ok(oauthSource.includes('function lockConfigReady(env: DriveEnv): boolean'));
-  assert.ok(oauthSource.includes('return Boolean(env.MAP132_KV && env.MY_DRIVE_SESSION_SECRET && env.MY_DRIVE_SESSION_SECRET.length >= 32)'));
-  assert.ok(oauthSource.includes('return Boolean(lockConfigReady(env) && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET)'));
-  assert.ok(oauthSource.includes('lockEndpoint ? !lockConfigReady(env) : !configReady(env)'));
+  const workerSource = readFileSync(new URL('../worker/index.ts', import.meta.url), 'utf8');
+  assert.ok(oauthSource.includes('async function hasAdminSession'));
+  assert.ok(oauthSource.includes('MAP132 Admin login required'));
+  assert.ok(workerSource.includes("if(!await validSession(req,env))return json({error:'MAP132 Admin login required."));
+  assert.ok(workerSource.includes('clearMyDriveSession(req,env)'));
+  assert.doesNotMatch(oauthSource, /my-drive\/lock\/password-hash|map132_drive_unlock/);
 });
-
 
 test('Google OAuth token exchange exposes only a sanitized provider error for diagnosis', async () => {
   const oauthSource = readFileSync(new URL('../src/modules/my-drive-resource-manager/driveOAuth.ts', import.meta.url), 'utf8');
