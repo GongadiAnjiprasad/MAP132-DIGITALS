@@ -1,5 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
+import { readFileSync } from 'node:fs';
 import { importZip } from '../src/modules/my-drive-resource-manager/zipImporter.ts';
 import { listDriveFolderRecursively } from '../src/modules/my-drive-resource-manager/driveClient.ts';
 
@@ -84,6 +85,7 @@ test('recursively scans nested Drive folders and skips unsupported files', async
     const result = await listDriveFolderRecursively({ id: 'root', name: 'My Library' });
     assert.equal(result.candidates.length, 1);
     assert.equal(result.candidates[0].fontFormat, 'woff2');
+    assert.equal(result.candidates[0].driveFileId, 'font');
     assert.equal(result.candidates[0].relativePath, 'My Library/Fonts/Anji.woff2');
     assert.ok(result.issues.some(issue => issue.code === 'unsupported-file'));
     assert.deepEqual(calls, ['root', 'nested']);
@@ -108,4 +110,12 @@ test('rejects ZIP entries whose local header filename differs from the central d
   const result = await importZip(new File([bytes], 'mismatched-name.zip'));
   assert.equal(result.summary.imported, 0);
   assert.ok(result.summary.issues.some(issue => issue.code === 'corrupt-archive'));
+});
+
+test('Google Drive folder imports use separate bounded requests per file instead of one long Worker invocation', () => {
+  const component = readFileSync(new URL('../src/modules/my-drive-resource-manager/MyDriveFolderImport.tsx', import.meta.url), 'utf8');
+  assert.ok(component.includes('listDriveFolderRecursively'));
+  assert.ok(component.includes('downloadDriveFile(font.driveFileId!'));
+  assert.ok(component.includes("fetch('/api/my-drive/assets'"));
+  assert.doesNotMatch(component, /fetch\('\/api\/my-drive\/import-folder'/);
 });

@@ -23,6 +23,7 @@ export interface ImportCandidate {
   source: ImportSource;
   relativePath: string;
   fileName: string;
+  driveFileId?: string;
   extension: string;
   assetKind: CreativeAssetKind;
   fontFormat?: SupportedFontFormat;
