@@ -162,5 +162,9 @@ test('My Drive resource preview cards use a compact two-column by two-row grid o
   assert.ok(!rootHtml.includes('scroll-snap-type:x proximity'));
   assert.ok(!rootHtml.includes('flex:0 0 clamp(190px,25vw,250px)'));
   assert.ok(rootHtml.includes('max-height:118px'));
+  assert.ok(rootHtml.includes('.mydrive-items-grid>.mydrive-item{padding:6px;gap:4px'));
+  assert.ok(rootHtml.includes('max-height:76px'));
+  assert.ok(rootHtml.includes('min-height:38px'));
+  assert.ok(rootHtml.includes('.mydrive-items-grid{gap:5px;padding-bottom:4px'));
   assert.equal(rootHtml, publishedHtml);
 });
