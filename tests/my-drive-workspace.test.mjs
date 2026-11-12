@@ -154,6 +154,20 @@ test('workspace mobile layout keeps resource cards and action controls aligned',
 });
 
 
+test('Cinematic font previews wait for the real Google Font face before reporting ready', () => {
+  const start = rootHtml.indexOf("function loadFont(f,sample='')");
+  const end = rootHtml.indexOf('async function downloadFont', start);
+  assert.ok(start >= 0 && end > start, 'Font loader must be present');
+  const loader = rootHtml.slice(start, end);
+  assert.ok(loader.includes("link.addEventListener('load'"));
+  assert.ok(loader.includes('await document.fonts.load('));
+  assert.ok(loader.includes("face.status==='loaded'"));
+  assert.ok(loader.includes('fontLoads.set(f,task)'));
+  assert.ok(loader.includes('Preview unavailable'));
+  assert.ok(rootHtml.includes('const loadedFonts=new Set(),fontLoads=new Map()'));
+  assert.equal(rootHtml, publishedHtml);
+});
+
 test('My Drive resource preview cards use a compact two-column by two-row grid on desktop and mobile', () => {
   assert.ok(rootHtml.includes('.mydrive-items-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))'));
   assert.ok(rootHtml.includes('.mydrive-items-grid>.mydrive-item{min-width:0;width:auto'));
