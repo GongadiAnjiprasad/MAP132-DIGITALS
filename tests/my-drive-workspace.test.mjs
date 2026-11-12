@@ -102,3 +102,32 @@ test('Google OAuth token exchange exposes only a sanitized provider error for di
   assert.ok(oauthSource.includes("Google token exchange failed (' + providerError + ')'"));
   assert.doesNotMatch(oauthSource, /console\.(log|error)\(.*(client_secret|refresh_token|code_verifier|access_token)/s);
 });
+
+
+test('active My Drive workspace offers device ZIP selection and recursively imports all supported categories', () => {
+  assert.ok(rootHtml.includes('id="myDriveChooseZip"'));
+  assert.ok(rootHtml.includes('id="myDriveLocalZip"'));
+  assert.ok(rootHtml.includes('accept=".zip,application/zip,application/x-zip-compressed"'));
+  assert.ok(source.includes('async function extractZipResources'));
+  assert.ok(source.includes('Nested ZIP depth exceeds the safe limit'));
+  assert.ok(source.includes('classifyZipResource'));
+  assert.ok(source.includes('uploadResource(asset.file,asset.category,asset.path)'));
+  assert.ok(source.includes('crc32(outBytes)'));
+  assert.ok(rootHtml.includes('saves them into the matching categories'));
+});
+
+test('active My Drive resource cards provide previews or clear format details plus download', () => {
+  assert.ok(source.includes("asset.kind === 'audio'"));
+  assert.ok(source.includes("asset.kind === 'video'"));
+  assert.ok(source.includes("asset.kind === 'image'"));
+  assert.ok(source.includes("asset.kind === 'font'"));
+  assert.ok(source.includes("asset.kind === 'template' || asset.kind === 'archive'"));
+  assert.ok(source.includes("assetUrl(asset, 'download')"));
+  assert.ok(rootHtml.includes('mydrive-generic-preview'));
+});
+
+test('workspace mobile layout keeps resource cards and action controls aligned', () => {
+  assert.ok(rootHtml.includes('@media(max-width:600px)'));
+  assert.ok(rootHtml.includes('.mydrive-items{grid-template-columns:minmax(0,1fr)'));
+  assert.ok(rootHtml.includes('.mydrive-actions button,.mydrive-actions .mydrive-upload'));
+});
