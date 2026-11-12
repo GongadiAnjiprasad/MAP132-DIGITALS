@@ -2830,3 +2830,79 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 
 /* Keep password visibility icons clean and borderless. */
 .login-password-field .password-visibility{border:0!important;outline:0;background:transparent!important;box-shadow:none!important}.login-password-field .password-visibility:hover{border:0!important;background:transparent!important;box-shadow:none!important}.login-password-field .password-visibility:focus-visible{outline:1px solid #d5aa66!important;outline-offset:2px}
+
+
+/* MAP132 premium gold/black rim + capsule refresh — 2026-11-12
+   Restrained layered edging for surfaces; true pill silhouettes for compact controls. */
+:root {
+  --map132-rim-gold: rgba(232,199,122,.52);
+  --map132-rim-gold-soft: rgba(232,199,122,.22);
+  --map132-rim-black: rgba(4,5,7,.88);
+  --map132-pill-radius: 999px;
+}
+.site .service-card,
+.site .work-card,
+.site .hero-manifesto,
+.site .approach-card,
+.site .skill-card,
+.site .admin-card,
+.site .admin-live-preview,
+.site .admin-preview-card,
+.site .feedback-studio {
+  border-radius: 20px;
+  border-color: var(--map132-rim-gold-soft);
+  outline: 1px solid var(--map132-rim-black);
+  outline-offset: 1px;
+  box-shadow:
+    inset 0 1px 0 rgba(232,199,122,.34),
+    0 0 0 1px rgba(232,199,122,.18),
+    0 12px 34px rgba(0,0,0,.24);
+}
+.site .service-card,
+.site .work-card,
+.site .admin-card,
+.site .admin-live-preview,
+.site .admin-preview-card {
+  overflow: hidden;
+}
+.site .portfolio-category-filters button,
+.site .work-category-toolbar .all-work-filter,
+.site .nav-workspace,
+.site .nav-hire,
+.site .gold-button,
+.site .quiet-link,
+.site .feedback-aspects button,
+.site .feedback-close,
+.site .feedback-submit,
+.site .feedback-seal-close,
+.site .feedback-category-grid button,
+.site .source-switch button,
+.site .count-pill,
+.site .service-tags {
+  border-radius: var(--map132-pill-radius);
+}
+.site .portfolio-category-filters button,
+.site .work-category-toolbar .all-work-filter,
+.site .feedback-aspects button,
+.site .source-switch button {
+  padding-inline: 14px;
+}
+.site .feedback-studio {
+  border: 1px solid rgba(213,170,102,.40);
+  outline-color: rgba(4,5,7,.94);
+  box-shadow:
+    inset 0 1px 0 rgba(232,199,122,.28),
+    0 0 0 1px rgba(5,6,8,.92),
+    0 0 0 2px rgba(213,170,102,.16),
+    0 28px 100px rgba(0,0,0,.72);
+}
+@media (max-width: 600px) {
+  .site .service-card,
+  .site .work-card,
+  .site .hero-manifesto,
+  .site .approach-card,
+  .site .skill-card,
+  .site .admin-card,
+  .site .admin-live-preview,
+  .site .admin-preview-card { border-radius: 17px; }
+}
