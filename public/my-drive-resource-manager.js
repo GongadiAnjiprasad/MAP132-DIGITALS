@@ -454,7 +454,7 @@
       } catch (error) { failed++; }
     }
     await loadAssets(false);
-    showMessage('Folder import complete: ' + queuedCount + ' files queued for background copy; ' + saved + ' ZIP-extracted assets saved, ' + skipped + ' skipped/duplicate, ' + failed + ' failed.' + (queueError ? ' Background queue: ' + queueError : ''));
+    showMessage('Folder import complete: ' + queuedCount + ' files queued for background copy; ' + saved + ' ZIP-extracted assets saved, ' + skipped + ' skipped/duplicate, ' + failed + ' failed.' + (queueError ? ' Background queue: ' + queueError : '') + ' Only the selected folder was scanned.');
   }
 
   async function openFolderPicker() {
