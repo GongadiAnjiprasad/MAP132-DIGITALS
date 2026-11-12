@@ -151,6 +151,28 @@
  .mydrive-item video,.mydrive-item img{max-height:68px!important}
  .mydrive-item audio{height:24px}
 }
+
+/* MAP132 Workspace premium rim + capsule controls — 2026-11-12 */
+:root{--map132-ws-rim:rgba(232,199,122,.42);--map132-ws-rim-soft:rgba(232,199,122,.18)}
+.card,.notice,.workspace-resource-card,.workspace-font-preview,.workspace-generic-preview{
+  border-radius:18px;
+  border-color:var(--map132-ws-rim);
+  outline:1px solid rgba(4,5,7,.88);
+  outline-offset:1px;
+  box-shadow:inset 0 1px 0 rgba(232,199,122,.26),0 0 0 1px var(--map132-ws-rim-soft),0 10px 28px rgba(0,0,0,.22)
+}
+.dashboard-link,.back,.gold-button,.workspace-card-actions a,.workspace-card-actions button,
+.workspace-filterbar button,.workspace-device-import .gold-button,.workspace-category button,
+.workspace-tab,.workspace-chip,.workspace-pill{
+  border-radius:999px!important
+}
+.workspace-card-actions a,.workspace-card-actions button,.workspace-filterbar button{
+  padding-inline:14px
+}
+@media(max-width:600px){
+  .card,.notice,.workspace-resource-card,.workspace-font-preview,.workspace-generic-preview{border-radius:16px}
+}
+
 </style></head><body><main class="shell"><header class="top"><a class="brand" href="index.html">MAP<b>132</b> <span style="font-size:10px;color:#aaa;font-weight:400">DIGITALS</span></a><a class="dashboard-link" href="index.html#admin" aria-label="Open protected Admin Dashboard"><span aria-hidden="true">▦</span> Dashboard</a><a class="back" href="index.html">← Back to website</a></header>
 <section class="welcome"><div class="kicker">Private creator area · Workspace</div><h1>Your creative control room.</h1><p>Organise your brand resources, editing references, reusable assets and project links in one place.</p></section>
 <nav class="resource-switcher" aria-label="Choose resource library">
