@@ -132,7 +132,10 @@ test('active My Drive resource cards provide previews or clear format details pl
   assert.ok(source.includes("asset.kind === 'video'"));
   assert.ok(source.includes("asset.kind === 'image'"));
   assert.ok(source.includes("asset.kind === 'font'"));
-  assert.ok(source.includes("'Preview font'"));
+  assert.ok(source.includes('void previewFont(asset, sample)'));
+  assert.ok(!source.includes("'Preview font'"));
+  assert.ok(rootHtml.includes('mydrive-fonts-library .mydrive-items-grid'));
+  assert.ok(rootHtml.includes('minmax(min(100%,220px),1fr)'));
   assert.ok(source.includes('soundEffectSubcategory'));
   assert.ok(source.includes("'Whoosh','Riser','Impact','Boom','Transition','Cinematic Hit'"));
   assert.ok(source.includes("'X-Asset-Subcategory'"));
