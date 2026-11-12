@@ -78,7 +78,8 @@ test('My Drive script never stores passwords or OAuth tokens in browser storage'
 
 test('root and published workspace pages remain byte-for-byte synchronized', () => {
   assert.equal(rootHtml, publishedHtml);
-  assert.ok(rootHtml.includes('copied into your Google Drive folder'));
+  assert.ok(rootHtml.includes('MAP132 Workspace'));
+  assert.ok(rootHtml.includes('Choose one folder from your Google Drive'));
   assert.ok(rootHtml.includes('id="myDriveRefresh"'));
   assert.ok(rootHtml.includes('myDriveSetupToggle'));
   assert.ok(rootHtml.includes('myDriveUnlockToggle'));
