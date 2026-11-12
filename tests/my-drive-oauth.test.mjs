@@ -1,6 +1,6 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
-import { handleMyDriveOAuth } from '../src/modules/my-drive-resource-manager/driveOAuth.ts';
+import { clearMyDriveSession, handleMyDriveOAuth } from '../src/modules/my-drive-resource-manager/driveOAuth.ts';
 
 class MemoryKV {
   values = new Map();
@@ -81,4 +81,16 @@ test('valid OAuth callback exchanges the code, encrypts the session and returns 
     assert.ok(refreshEntry);
     assert.doesNotMatch(refreshEntry, /long-lived-refresh-token/);
   } finally { globalThis.fetch = originalFetch; }
+});
+
+test('Admin logout clears the current Drive session cookie without deleting saved assets', async () => {
+  const e = env();
+  await e.MAP132_KV.put('my-drive/session/browser-session', 'encrypted-session');
+  await e.MAP132_KV.put('my-drive/assets/saved-font', JSON.stringify({ id: 'saved-font', name: 'saved.ttf' }));
+  const headers = await clearMyDriveSession(new Request('https://example.test/api/admin/logout', {
+    headers: { Cookie: 'map132_drive_session=browser-session' },
+  }), e);
+  assert.equal(await e.MAP132_KV.get('my-drive/session/browser-session'), null);
+  assert.ok(await e.MAP132_KV.get('my-drive/assets/saved-font'));
+  assert.match(headers.get('Set-Cookie'), /map132_drive_session=.*Max-Age=0/);
 });
