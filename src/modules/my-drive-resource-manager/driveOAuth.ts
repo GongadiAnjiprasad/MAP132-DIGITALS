@@ -136,18 +136,10 @@ function clearOAuthStateCookie(): string {
   return OAUTH_STATE_COOKIE + '=; HttpOnly; Secure; SameSite=Lax; Path=/api/my-drive/oauth/callback; Max-Age=0';
 }
 
-const UNLOCK_COOKIE = 'map132_drive_unlock';
-const LOCK_TTL = 60 * 60 * 12;
 function readCookie(request: Request, name: string): string | null {
   const item = (request.headers.get('Cookie') || '').split(';').map(part => part.trim()).find(part => part.startsWith(name + '='));
   if (!item) return null;
   try { return decodeURIComponent(item.slice(name.length + 1)); } catch { return null; }
-}
-function unlockCookie(value: string, maxAge: number): string {
-  return UNLOCK_COOKIE + '=' + encodeURIComponent(value) + '; HttpOnly; Secure; SameSite=Strict; Path=/api/my-drive; Max-Age=' + maxAge;
-}
-function clearUnlockCookie(): string {
-  return UNLOCK_COOKIE + '=; HttpOnly; Secure; SameSite=Strict; Path=/api/my-drive; Max-Age=0';
 }
 
 async function hasAdminSession(request: Request, env: DriveEnv): Promise<boolean> {
@@ -166,19 +158,13 @@ async function hasAdminSession(request: Request, env: DriveEnv): Promise<boolean
     return signature === parts[1];
   } catch { return false; }
 }
-async function passwordDigest(password: string, secret: string): Promise<string> {
-  const key = await crypto.subtle.importKey('raw', encoder.encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
-  return b64url(new Uint8Array(await crypto.subtle.sign('HMAC', key, encoder.encode('map132-my-drive-password-v1:' + password))));
-}
-async function isUnlocked(request: Request, env: DriveEnv): Promise<boolean> {
-  const id = readCookie(request, UNLOCK_COOKIE);
-  if (!id || !env.MAP132_KV) return false;
-  return Boolean(await env.MAP132_KV.get('my-drive/unlock/' + id));
-}
-async function unlockResponse(env: DriveEnv): Promise<Response> {
-  const id = randomToken();
-  await env.MAP132_KV!.put('my-drive/unlock/' + id, '1', { expirationTtl: LOCK_TTL });
-  return json({ unlocked: true, expiresIn: LOCK_TTL }, 200, { 'Set-Cookie': unlockCookie(id, LOCK_TTL) });
+export async function clearMyDriveSession(request: Request, env: DriveEnv): Promise<Headers> {
+  const id = cookieValue(request);
+  if (id && env.MAP132_KV) await env.MAP132_KV.delete('my-drive/session/' + id);
+  const headers = new Headers();
+  headers.append('Set-Cookie', clearCookie());
+  headers.append('Set-Cookie', clearOAuthStateCookie());
+  return headers;
 }
 
 /** Handles the server-side, read-only Google Drive OAuth and listing endpoints. */
@@ -187,16 +173,12 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
   const path = url.pathname;
   if (!path.startsWith('/api/my-drive/')) return null;
 
-  const lockEndpoint = path === '/api/my-drive/lock/status' ||
-    path === '/api/my-drive/lock/setup' ||
-    path === '/api/my-drive/lock/unlock' ||
-    path === '/api/my-drive/lock';
-  if (lockEndpoint ? !lockConfigReady(env) : !configReady(env)) {
-    return json({
-      error: lockEndpoint
-        ? 'My Drive password storage is not configured. Add MY_DRIVE_SESSION_SECRET (at least 32 characters) and the MAP132_KV binding.'
-        : 'Google Drive connection is not configured. Add GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, MY_DRIVE_SESSION_SECRET and the MAP132_KV binding.'
-    }, 503);
+  if (!configReady(env)) {
+    return json({ error: 'Google Drive connection is not configured. Add GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, MY_DRIVE_SESSION_SECRET and the MAP132_KV binding.' }, 503);
+  }
+  if (!await hasAdminSession(request, env)) return json({ error: 'MAP132 Admin login required. Sign in to the Admin Dashboard to access My Drive.' }, 401);
+  if (path === '/api/my-drive/logout' && request.method === 'POST') {
+    return json({ signedOut: true }, 200, { 'Set-Cookie': (await clearMyDriveSession(request, env)).get('Set-Cookie') || clearCookie() });
   }
 
   if (path === '/api/my-drive/oauth/start' && request.method === 'POST') {
@@ -273,50 +255,6 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
     headers.append('Set-Cookie', sessionCookie(sessionId, SESSION_RECORD_TTL));
     headers.append('Set-Cookie', clearOAuthStateCookie());
     return new Response(null, { status: 302, headers });
-  }
-
-
-  if (path === '/api/my-drive/lock/status' && request.method === 'GET') {
-    const configured = Boolean(await env.MAP132_KV!.get('my-drive/lock/password-hash'));
-    return json({ configured, unlocked: configured && await isUnlocked(request, env) });
-  }
-
-  if (path === '/api/my-drive/lock/setup' && request.method === 'POST') {
-    if (!await hasAdminSession(request, env)) return json({ error: 'Sign in to the MAP132 admin dashboard before creating the first My Drive password.' }, 403);
-    const body = await request.json().catch(() => ({})) as { password?: string };
-    const password = String(body.password || '');
-    if (password.length < 8 || password.length > 128) return json({ error: 'Choose a password between 8 and 128 characters.' }, 400);
-    const existing = await env.MAP132_KV!.get('my-drive/lock/password-hash');
-    if (existing) return json({ error: 'My Drive password is already set. Unlock it instead.' }, 409);
-    await env.MAP132_KV!.put('my-drive/lock/password-hash', await passwordDigest(password, env.MY_DRIVE_SESSION_SECRET!));
-    return unlockResponse(env);
-  }
-
-  if (path === '/api/my-drive/lock/unlock' && request.method === 'POST') {
-    const ipKey = 'my-drive/lock/attempts/' + (request.headers.get('CF-Connecting-IP') || 'unknown');
-    const attempts = Number(await env.MAP132_KV!.get(ipKey) || '0');
-    if (attempts >= 8) return json({ error: 'Too many attempts. Try again in 15 minutes.' }, 429);
-    const body = await request.json().catch(() => ({})) as { password?: string };
-    const password = String(body.password || '');
-    const expected = await env.MAP132_KV!.get('my-drive/lock/password-hash');
-    if (!expected || password.length > 128 || await passwordDigest(password, env.MY_DRIVE_SESSION_SECRET!) !== expected) {
-      await env.MAP132_KV!.put(ipKey, String(attempts + 1), { expirationTtl: 900 });
-      return json({ error: 'Incorrect My Drive password.' }, 401);
-    }
-    await env.MAP132_KV!.delete(ipKey);
-    return unlockResponse(env);
-  }
-
-  if (path === '/api/my-drive/lock' && request.method === 'POST') {
-    const id = readCookie(request, UNLOCK_COOKIE);
-    if (id) await env.MAP132_KV!.delete('my-drive/unlock/' + id);
-    return json({ locked: true }, 200, { 'Set-Cookie': clearUnlockCookie() });
-  }
-
-  if (path === '/api/my-drive/oauth/callback' && request.method === 'GET') {
-    // OAuth redirects must complete even if the workspace lock session expires mid-consent.
-  } else if (!(path.startsWith('/api/my-drive/lock/') || path === '/api/my-drive/lock') && !await isUnlocked(request, env)) {
-    return json({ error: 'Unlock My Drive before continuing.' }, 423);
   }
 
 
@@ -409,23 +347,7 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
     return json({ connected: Boolean(session), expiresAt: session?.expires_at ?? null });
   }
 
-  if (path === '/api/my-drive/oauth/logout' && request.method === 'POST') {
-    const id = cookieValue(request);
-    if (id) await env.MAP132_KV!.delete('my-drive/session/' + id);
-    const encryptedRefresh = await env.MAP132_KV!.get(REFRESH_TOKEN_KEY);
-    if (encryptedRefresh) {
-      try {
-        const refresh = await decrypt<{ refresh_token: string }>(encryptedRefresh, env.MY_DRIVE_SESSION_SECRET!);
-        await fetch('https://oauth2.googleapis.com/revoke', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-          body: new URLSearchParams({ token: refresh.refresh_token }),
-        });
-      } catch { /* Local credentials are still removed even if Google's revoke endpoint is unavailable. */ }
-      await env.MAP132_KV!.delete(REFRESH_TOKEN_KEY);
-    }
-    return json({ disconnected: true }, 200, { 'Set-Cookie': clearCookie() });
-  }
+
 
 
   if (path.startsWith('/api/my-drive/download/') && request.method === 'GET') {
