@@ -99,6 +99,10 @@ test('My Drive server access is bound to the Admin Dashboard session', () => {
   assert.ok(assetsSource.includes("startsWith('map132_admin='"));
   assert.doesNotMatch(assetsSource, /map132_drive_unlock|my-drive\/unlock\//);
   assert.ok(assetsSource.includes("error:'MAP132 Admin login required.'"));
+  assert.ok(assetsSource.includes('allowedSoundSubcategories'));
+  assert.ok(assetsSource.includes('X-Asset-Source-Path'));
+  assert.ok(assetsSource.includes('existing.subcategory=subcategory'));
+  assert.ok(assetsSource.includes('existing.sourcePath=sourcePath'));
 });
 
 test('Google OAuth token exchange exposes only a sanitized provider error for diagnosis', async () => {
@@ -118,7 +122,7 @@ test('active My Drive workspace offers device ZIP selection and recursively impo
   assert.ok(source.includes('async function extractZipResources'));
   assert.ok(source.includes('Nested ZIP depth exceeds the safe limit'));
   assert.ok(source.includes('classifyZipResource'));
-  assert.ok(source.includes('uploadResource(asset.file,asset.category,asset.path)'));
+  assert.ok(source.includes('uploadResource(asset.file,asset.category,asset.path,asset.subcategory)'));
   assert.ok(source.includes('crc32(outBytes)'));
   assert.ok(rootHtml.includes('saves them into the matching categories'));
 });
@@ -128,6 +132,13 @@ test('active My Drive resource cards provide previews or clear format details pl
   assert.ok(source.includes("asset.kind === 'video'"));
   assert.ok(source.includes("asset.kind === 'image'"));
   assert.ok(source.includes("asset.kind === 'font'"));
+  assert.ok(source.includes("'Preview font'"));
+  assert.ok(source.includes('soundEffectSubcategory'));
+  assert.ok(source.includes("'Whoosh','Riser','Impact','Boom','Transition','Cinematic Hit'"));
+  assert.ok(source.includes("'X-Asset-Subcategory'"));
+  assert.ok(rootHtml.includes('mydrive-library-nav'));
+  assert.ok(rootHtml.includes('Fonts Library'));
+  assert.ok(rootHtml.includes('Sound Effects Library'));
   assert.ok(source.includes("asset.kind === 'template' || asset.kind === 'archive'"));
   assert.ok(source.includes("assetUrl(asset, 'download')"));
   assert.ok(rootHtml.includes('mydrive-generic-preview'));

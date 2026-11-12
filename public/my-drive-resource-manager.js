@@ -78,7 +78,7 @@
   function renderAssets() {
     items.replaceChildren();
     if (!state.assets.length) {
-      items.appendChild(make('p', 'mydrive-empty', 'Choose one Drive folder to build your private category library.'));
+      items.appendChild(make('p', 'mydrive-empty', 'Import a ZIP or choose a Drive folder. Your Fonts and Sound Effects libraries will appear here.'));
       return;
     }
     const categories = ['Sound Effects','Wedding','Birthday','Trailer BGMs','Plugins','Fonts','Images','Videos','Other'];
@@ -86,25 +86,50 @@
       const grouped = state.assets.filter(asset => (asset.category || 'Other') === category);
       if (!grouped.length) return;
       const section = make('section', 'mydrive-category');
-      section.appendChild(make('h3', '', category + ' · ' + grouped.length));
-      const grid = make('div', 'mydrive-items-grid');
-      grouped.forEach(asset => {
-        const card = make('article', 'mydrive-item');
-        card.appendChild(make('strong', '', asset.name || 'Untitled resource'));
-        card.appendChild(make('small', '', String(asset.kind || 'file').toUpperCase() + ' · ' + sizeText(asset.size) + ' · Licence ' + (asset.licenseStatus || 'unverified')));
-        if (asset.kind === 'audio') { const audio = make('audio'); audio.controls = true; audio.preload = 'none'; audio.src = assetUrl(asset); audio.style.width = '100%'; card.appendChild(audio); }
-        else if (asset.kind === 'video') { const video = make('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.src = assetUrl(asset); video.style.width = '100%'; card.appendChild(video); }
-        else if (asset.kind === 'image') { const img = make('img'); img.src = assetUrl(asset); img.alt = asset.name || 'Saved image'; img.loading = 'lazy'; img.style.cssText = 'max-width:100%;max-height:220px;object-fit:contain'; card.appendChild(img); }
-        else if (asset.kind === 'font') { const sample = make('div', 'mydrive-font-sample', 'MAP132 DIGITALS · The Final Chapter · తెలుగు'); sample.dataset.fontAsset = asset.id; card.appendChild(sample); const preview = make('button', '', 'Preview font'); preview.type = 'button'; preview.addEventListener('click', () => previewFont(asset, sample, preview)); card.appendChild(preview); }
-        else if (asset.kind === 'template' || asset.kind === 'archive' || asset.kind === 'other') { const preview = make('div', 'mydrive-generic-preview'); preview.appendChild(make('strong', '', 'Creative resource preview')); preview.appendChild(make('span', '', (asset.name.split('.').pop() || 'FILE').toUpperCase() + ' · ' + (asset.contentType || 'application file'))); preview.appendChild(make('p', '', 'This editing-project format cannot be rendered directly in the browser. Download it to open in its compatible editing app.')); card.appendChild(preview); }
-        const actions = make('div', 'mydrive-actions');
-        const download = make('a', 'mydrive-upload', 'Download'); download.href = assetUrl(asset, 'download'); download.setAttribute('download', asset.name || 'resource');
-        const remove = make('button', '', 'Remove'); remove.type = 'button'; remove.addEventListener('click', () => removeAsset(asset));
-        actions.append(download, remove); card.appendChild(actions); grid.appendChild(card);
-      });
-      section.appendChild(grid); items.appendChild(section);
+      section.id = 'myDriveCategory' + category.replace(/[^a-z0-9]/gi, '');
+      section.appendChild(make('h3', '', (category === 'Fonts' ? 'Fonts Library' : category === 'Sound Effects' ? 'Sound Effects Library' : category) + ' · ' + grouped.length));
+      if (category === 'Sound Effects') {
+        const subcategories = ['Whoosh','Riser','Impact','Boom','Transition','Cinematic Hit','Logo Reveal','Swipe','Punch','Heartbeat','Suspense','Ambient','Action','Horror','Foley','Footsteps','Gunshots','Nature','Crowd','Vehicle','UI','Animal','Water','Fire','Other Effects'];
+        subcategories.forEach(subcategory => {
+          const subset = grouped.filter(asset => (asset.subcategory || soundEffectSubcategory((asset.sourcePath || '') + ' ' + asset.name)) === subcategory);
+          if (!subset.length) return;
+          const subgroup = make('div', 'mydrive-sfx-group');
+          subgroup.appendChild(make('h4', '', subcategory + ' · ' + subset.length));
+          const grid = make('div', 'mydrive-items-grid');
+          subset.forEach(asset => grid.appendChild(renderAssetCard(asset)));
+          subgroup.appendChild(grid); section.appendChild(subgroup);
+        });
+      } else {
+        const grid = make('div', 'mydrive-items-grid');
+        grouped.forEach(asset => grid.appendChild(renderAssetCard(asset)));
+        section.appendChild(grid);
+      }
+      items.appendChild(section);
     });
     if (state.cursor) { const more = make('button', '', 'Load more saved resources'); more.type = 'button'; more.addEventListener('click', loadMore); items.appendChild(more); }
+  }
+
+  function renderAssetCard(asset) {
+    const card = make('article', 'mydrive-item');
+    card.appendChild(make('strong', '', asset.name || 'Untitled resource'));
+    card.appendChild(make('small', '', String(asset.kind || 'file').toUpperCase() + ' · ' + sizeText(asset.size) + ' · Licence ' + (asset.licenseStatus || 'unverified')));
+    if (asset.kind === 'audio') {
+      const audio = make('audio'); audio.controls = true; audio.preload = 'none'; audio.src = assetUrl(asset); audio.style.width = '100%';
+      audio.addEventListener('play', () => { document.querySelectorAll('#myDriveItems audio').forEach(other => { if (other !== audio) other.pause(); }); });
+      card.appendChild(audio);
+    } else if (asset.kind === 'video') { const video = make('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.src = assetUrl(asset); video.style.width = '100%'; card.appendChild(video); }
+    else if (asset.kind === 'image') { const img = make('img'); img.src = assetUrl(asset); img.alt = asset.name || 'Saved image'; img.loading = 'lazy'; img.style.cssText = 'max-width:100%;max-height:220px;object-fit:contain'; card.appendChild(img); }
+    else if (asset.kind === 'font') {
+      const sample = make('div', 'mydrive-font-sample', 'MAP132 DIGITALS · The Final Chapter · తెలుగు'); sample.dataset.fontAsset = asset.id; card.appendChild(sample);
+      const preview = make('button', '', 'Preview font'); preview.type = 'button'; preview.addEventListener('click', () => previewFont(asset, sample, preview)); card.appendChild(preview);
+    } else if (asset.kind === 'template' || asset.kind === 'archive' || asset.kind === 'other') {
+      const preview = make('div', 'mydrive-generic-preview'); preview.appendChild(make('strong', '', 'Creative resource preview')); preview.appendChild(make('span', '', (asset.name.split('.').pop() || 'FILE').toUpperCase() + ' · ' + (asset.contentType || 'application file'))); preview.appendChild(make('p', '', 'This editing-project format cannot be rendered directly in the browser. Download it to open in its compatible editing app.')); card.appendChild(preview);
+    }
+    const actions = make('div', 'mydrive-actions');
+    const download = make('a', 'mydrive-upload', 'Download'); download.href = assetUrl(asset, 'download'); download.setAttribute('download', asset.name || 'resource');
+    const remove = make('button', '', 'Remove'); remove.type = 'button'; remove.addEventListener('click', () => removeAsset(asset));
+    actions.append(download, remove); card.appendChild(actions);
+    return card;
   }
   async function previewFont(asset, sample, button) {
     button.disabled = true;
@@ -262,6 +287,38 @@
     return state.pickerPromise;
   }
 
+  function soundEffectSubcategory(path) {
+    const text = String(path || '').toLowerCase().replace(/[_-]+/g, ' ').replace(/\.[a-z0-9]+$/i, ' ');
+    const rules = [
+      ['Logo Reveal',['logo reveal','logo sting','ident']],
+      ['Cinematic Hit',['cinematic hit','cinematic impact','cinematic boom','epic hit']],
+      ['Heartbeat',['heartbeat','heart beat','pulse']],
+      ['Transition',['transition','transitions','trans']],
+      ['Whoosh',['whoosh','swoosh','whip','swish']],
+      ['Riser',['riser','rising','uplifter','build up','build-up']],
+      ['Impact',['impact','slam','thud','hit']],
+      ['Boom',['boom','explosion','blast','爆']],
+      ['Swipe',['swipe','page turn','drag']],
+      ['Punch',['punch','fist','knock']],
+      ['Suspense',['suspense','tension','thriller','dread']],
+      ['Ambient',['ambient','atmosphere','room tone','drone']],
+      ['Gunshots',['gunshot','gun shot','gunfire','weapon reload','shell casing']],
+      ['Foley',['foley','cloth','leather','handling']],
+      ['Footsteps',['footstep','foot steps','walking','running steps']],
+      ['Action',['action','fight','battle','weapon','gun','chase']],
+      ['Horror',['horror','scary','fear','creepy','monster']],
+      ['Nature',['nature','forest','wind','birds','rain','thunder']],
+      ['Crowd',['crowd','cheer','applause','clapping']],
+      ['Vehicle',['vehicle','car','engine','motor','tyre','tire']],
+      ['UI',['ui sound','interface','notification','click','button']],
+      ['Animal',['animal','dog','cat','horse','bird','wolf']],
+      ['Water',['water','splash','ocean','underwater']],
+      ['Fire',['fire','flame','burning','torch']]
+    ];
+    for (const [label, terms] of rules) if (terms.some(term => text.includes(term))) return label;
+    return 'Other Effects';
+  }
+
   function classifyResource(fileName, relativePath) {
     const ext = (fileName.split('.').pop() || '').toLowerCase();
     const supported = ['ttf','otf','woff','woff2','mp3','wav','aac','m4a','ogg','flac','mp4','mov','webm','m4v','jpg','jpeg','png','webp','gif','avif','svg','zip','aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm'];
@@ -271,13 +328,13 @@
     const font = ['ttf','otf','woff','woff2'].includes(ext), audio = ['mp3','wav','aac','m4a','ogg','flac'].includes(ext);
     const video = ['mp4','mov','webm','m4v'].includes(ext), image = ['jpg','jpeg','png','webp','gif','avif','svg'].includes(ext);
     const plugin = ['aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm'].includes(ext);
-    if (has(['sound effect','sound effects','sfx','whoosh','riser','impact','boom','transition','heartbeat','foley'])) return { category:'Sound Effects', kind:'audio' };
+    if (has(['sound effect','sound effects','sfx','whoosh','riser','impact','boom','transition','heartbeat','foley'])) return { category:'Sound Effects', kind:'audio', subcategory:soundEffectSubcategory(text) };
     if (has(['wedding','marriage','pelli'])) return { category:'Wedding', kind:font?'font':audio?'audio':video?'video':image?'image':'template' };
     if (has(['birthday','bday','birth day'])) return { category:'Birthday', kind:font?'font':audio?'audio':video?'video':image?'image':'template' };
     if (has(['trailer bgm','trailer music','trailer','background music','bgm','cinematic score'])) return { category:'Trailer BGMs', kind:audio?'audio':font?'font':video?'video':image?'image':'archive' };
     if (has(['plugin','plugins','preset pack','presets'])) return { category:'Plugins', kind:plugin?'template':'archive' };
     if (font) return { category:'Fonts', kind:'font' };
-    if (audio) return { category:'Sound Effects', kind:'audio' };
+    if (audio) return { category:'Sound Effects', kind:'audio', subcategory:soundEffectSubcategory(text) };
     if (video) return { category:'Videos', kind:'video' };
     if (image) return { category:'Images', kind:'image' };
     if (plugin || ext === 'zip') return { category:'Plugins', kind:'archive' };
@@ -303,7 +360,7 @@
           if (file.mimeType === 'application/vnd.google-apps.folder') queue.push({ id:file.id, name:file.name, path });
           else {
             const classification = classifyResource(file.name, path);
-            if (classification) candidates.push({ id:file.id, name:file.name, path, category:classification.category, kind:classification.kind, size:Number(file.size||0), mimeType:file.mimeType });
+            if (classification) candidates.push({ id:file.id, name:file.name, path, category:classification.category, kind:classification.kind, subcategory:classification.subcategory, size:Number(file.size||0), mimeType:file.mimeType });
           }
           if (scanned >= 5000) break;
         }
@@ -325,11 +382,11 @@
           const extracted = await extractZipResources(new File([bytes],file.name,{type:'application/zip'}),0,{entries:0,bytes:0});
           skipped += extracted.issues.length;
           for (const asset of extracted.assets) {
-            const result = await uploadResource(asset.file,asset.category,file.path+'/'+asset.path);
+            const result = await uploadResource(asset.file,asset.category,file.path+'/'+asset.path,asset.subcategory);
             if (result.duplicate) skipped++; else saved++;
           }
         } else {
-          const upload = await fetch('/api/my-drive/assets', { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':file.mimeType || 'application/octet-stream', 'X-Asset-Name':encodeURIComponent(file.name), 'X-Asset-Category':file.category, 'X-Asset-Source-Path':encodeURIComponent(file.path) }, body:bytes });
+          const upload = await fetch('/api/my-drive/assets', { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':file.mimeType || 'application/octet-stream', 'X-Asset-Name':encodeURIComponent(file.name), 'X-Asset-Category':file.category, 'X-Asset-Subcategory':file.subcategory || '', 'X-Asset-Source-Path':encodeURIComponent(file.path) }, body:bytes });
           const result = await upload.json().catch(() => ({}));
           if (!upload.ok) throw new Error(result.error || 'Could not save ' + file.name + '.');
           if (result.duplicate) skipped++; else saved++;
@@ -362,13 +419,14 @@
       showMessage('Choose one folder. Only that folder and its nested folders will be scanned.');
     } catch (error) { showMessage(error.message || 'Google Drive folder picker failed.', true); setBusy(false); }
   }
-  async function uploadResource(file, category, relativePath) {
+  async function uploadResource(file, category, relativePath, subcategory) {
     const response = await fetch('/api/my-drive/assets', {
       method: 'POST', credentials: 'same-origin',
       headers: {
         'Content-Type': file.type || 'application/octet-stream',
         'X-Asset-Name': encodeURIComponent(file.name),
         'X-Asset-Category': category || 'Other',
+        'X-Asset-Subcategory': subcategory || '',
         'X-Asset-Source-Path': encodeURIComponent(relativePath || file.name)
       },
       body: file
@@ -389,10 +447,11 @@
     const audio = ['mp3','wav','aac','m4a','ogg','flac'].includes(ext);
     const video = ['mp4','mov','webm','m4v'].includes(ext);
     const image = ['jpg','jpeg','png','webp','gif','avif','svg'].includes(ext);
-    if (has(['sound effect','sound effects','sfx','whoosh','riser','impact','boom','transition','heartbeat','foley'])) return { category:'Sound Effects', kind:'audio' };
+    if (has(['sound effect','sound effects','sfx','whoosh','riser','impact','boom','transition','heartbeat','foley'])) return { category:'Sound Effects', kind:'audio', subcategory:soundEffectSubcategory(text) };
     if (has(['wedding','marriage','pelli'])) return { category:'Wedding', kind:font?'font':audio?'audio':video?'video':image?'image':'template' };
     if (has(['birthday','bday','birth day'])) return { category:'Birthday', kind:font?'font':audio?'audio':video?'video':image?'image':'template' };
     if (has(['trailer bgm','trailer music','trailer','background music','bgm','cinematic score'])) return { category:'Trailer BGMs', kind:audio?'audio':font?'font':video?'video':image?'image':'template' };
+    if (audio) return { category:'Sound Effects', kind:'audio', subcategory:soundEffectSubcategory(text) };
     if (has(['plugin','plugins','preset pack','presets'])) return { category:'Plugins', kind:'template' };
     if (font) return { category:'Fonts', kind:'font' };
     if (audio) return { category:'Sound Effects', kind:'audio' };
@@ -471,7 +530,7 @@
         const classification=classifyZipResource(rawName);
         if(!classification){issues.push(rawName+' · unsupported file skipped');continue;}
         const mimeMap={ttf:'font/ttf',otf:'font/otf',woff:'font/woff',woff2:'font/woff2',mp3:'audio/mpeg',wav:'audio/wav',aac:'audio/aac',m4a:'audio/mp4',ogg:'audio/ogg',flac:'audio/flac',mp4:'video/mp4',mov:'video/quicktime',webm:'video/webm',m4v:'video/x-m4v',jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',gif:'image/gif',avif:'image/avif',svg:'image/svg+xml'};
-        assets.push({file:new File([outBytes],name,{type:mimeMap[ext]||'application/octet-stream'}),category:classification.category,path:rawName});
+        assets.push({file:new File([outBytes],name,{type:mimeMap[ext]||'application/octet-stream'}),category:classification.category,subcategory:classification.subcategory,path:rawName});
       }
     }
     return {assets,issues};
@@ -489,7 +548,7 @@
       for(let index=0;index<extracted.assets.length;index++){
         const asset=extracted.assets[index];
         showMessage('Extracting and saving '+(index+1)+' of '+extracted.assets.length+' · '+asset.category+' · '+asset.file.name);
-        const result=await uploadResource(asset.file,asset.category,asset.path);
+        const result=await uploadResource(asset.file,asset.category,asset.path,asset.subcategory);
         if(result.duplicate)duplicates++;else saved++;
       }
       await loadAssets(false);
