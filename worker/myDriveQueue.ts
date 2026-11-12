@@ -102,18 +102,6 @@ export async function handleMyDriveQueue(req:Request,env:MyDriveQueueEnv):Promis
     }))).flat().filter(Boolean) as QueueItem[];
     return json({jobs:selected,items:items.sort((a,b)=>a.createdAt.localeCompare(b.createdAt))});
   }
-  if (url.pathname === '/api/my-drive/queue/cancel' && req.method === 'POST') {
-    const body=await req.json().catch(()=>({})) as {jobId?:string};
-    const jobId=String(body.jobId||'');
-    if(!/^[a-z0-9-]{36}$/i.test(jobId))return json({error:'Invalid queue job.'},400);
-    const value=await env.MAP132_KV.get(keyJob(jobId));
-    if(!value)return json({error:'Queue job not found.'},404);
-    const job=JSON.parse(value) as QueueJob;
-    if(job.status==='completed')return json({error:'Completed copies cannot be cancelled.'},409);
-    job.status='cancelled';job.updatedAt=new Date().toISOString();
-    await env.MAP132_KV.put(keyJob(jobId),JSON.stringify(job));
-    return json({cancelled:true});
-  }
   return json({error:'Not found'},404);
 }
 
