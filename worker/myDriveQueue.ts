@@ -104,13 +104,19 @@ export async function handleMyDriveQueue(req:Request,env:MyDriveQueueEnv):Promis
   if (url.pathname === '/api/my-drive/queue' && req.method === 'POST') {
     const token = await getMyDriveAccessToken(req,env as any);
     if (!token) return json({error:'Connect Google Drive before starting a background copy.'},401);
-    const body = await req.json().catch(()=>({})) as {folderId?:string;folderName?:string};
+    const body = await req.json().catch(()=>({})) as {folderId?:string;folderName?:string;files?:Array<{id?:string;name?:string;path?:string;category?:string;mimeType?:string;size?:number}>};
     const rootId = String(body.folderId||'');
     const rootName = String(body.folderName||'Selected Drive folder').slice(0,160);
     if (!/^[a-zA-Z0-9_-]{1,256}$/.test(rootId)) return json({error:'Choose a valid Google Drive folder.'},400);
     if (!await env.MAP132_KV.get('my-drive/google-refresh-token')) return json({error:'Background copying needs Google Drive offline permission. Reconnect Google Drive and approve the requested access once.'},409);
-    const files = await scanFolder(token,rootId,rootName);
-    if (!files.length) return json({error:'No supported, copyable files were found in the selected folder.'},404);
+    if (!Array.isArray(body.files) || body.files.length > 900) return json({error:'Queue accepts up to 900 scanned files per folder. Narrow the selected folder and retry.'},413);
+    const categories=new Set(['Sound Effects','Wedding','Birthday','Trailer BGMs','Plugins','Fonts','Images','Videos','Other']);
+    const files=body.files.map(file=>({
+      id:String(file.id||''),name:safeName(String(file.name||'resource')),path:String(file.path||file.name||'resource').slice(0,500),
+      category:categories.has(String(file.category||''))?String(file.category):'Other',
+      mimeType:String(file.mimeType||'application/octet-stream').slice(0,120),size:Math.max(0,Number(file.size)||0)
+    })).filter(file=>/^[a-zA-Z0-9_-]{1,256}$/.test(file.id)&&allowed.has((file.name.split('.').pop()||'').toLowerCase()));
+    if (!files.length) return json({error:'No supported files were supplied for background copying.'},404);
     const jobId = crypto.randomUUID(), now = new Date().toISOString();
     const job:QueueJob = {id:jobId,rootFolderId:rootId,rootFolderName:rootName,status:'queued',total:files.length,completed:0,failed:0,createdAt:now,updatedAt:now};
     await env.MAP132_KV.put(keyJob(jobId),JSON.stringify(job));
