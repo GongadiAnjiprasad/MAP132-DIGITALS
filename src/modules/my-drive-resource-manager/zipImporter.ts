@@ -1,5 +1,6 @@
 import { ARCHIVE_LIMITS, classifyAsset, validateArchiveEntry } from './archivePolicy.ts';
 import type { ImportCandidate, ImportIssue, ImportSummary } from './types';
+import { classifyResource } from './driveClient';
 
 const decoder = new TextDecoder();
 const readU16 = (view: DataView, offset: number) => view.getUint16(offset, true);
@@ -138,7 +139,7 @@ export async function importZip(
             source: { kind: sourceKind, sourceId, displayName: file.name },
             relativePath: decision.normalizedPath, fileName: decision.normalizedPath.split('/').pop()!,
             extension: decision.normalizedPath.split('.').pop()?.toLowerCase() || '',
-            assetKind: kind, fontFormat, byteSize: bytes.byteLength,
+            assetKind: kind, category: classifyResource(decision.normalizedPath.split('/').pop()!, decision.normalizedPath)?.category || 'Other', fontFormat, byteSize: bytes.byteLength,
             licence: 'unknown', contentSha256: hash,
           },
           bytes,
