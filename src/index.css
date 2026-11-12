@@ -2784,3 +2784,46 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
   background: rgba(154,107,44,.08);
   border-color: rgba(128,85,31,.3);
 }
+
+
+/* MAP132 My Drive — compact, readable mobile resource manager */
+.workspace-live-search,.workspace-live-search *{min-width:0;box-sizing:border-box}
+.workspace-live-search{width:100%;max-width:100%;overflow-x:clip}
+.workspace-live-search .workspace-section-title{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.workspace-live-search .workspace-section-title>div{flex:1 1 220px;min-width:0}
+.workspace-live-search .workspace-section-title h3,
+.workspace-live-search .workspace-resource-card h4{overflow-wrap:anywhere;word-break:break-word;line-height:1.35}
+.workspace-device-import{display:flex;flex-wrap:wrap;gap:10px;margin:12px 0;align-items:center}
+.workspace-device-import .gold-button{min-height:42px;justify-content:center;white-space:normal;text-align:center}
+.workspace-file-input{position:absolute!important;width:1px!important;height:1px!important;padding:0!important;margin:-1px!important;overflow:hidden!important;clip:rect(0,0,0,0)!important;white-space:nowrap!important;border:0!important}
+.workspace-resource-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px;align-items:stretch}
+.workspace-resource-card{min-width:0;max-width:100%;overflow:hidden}
+.workspace-resource-card audio,.workspace-resource-card video{display:block;width:100%;max-width:100%;min-width:0}
+.workspace-resource-card img{display:block;margin-inline:auto}
+.workspace-resource-card p,.workspace-resource-card span,.workspace-resource-card small{overflow-wrap:anywhere}
+.workspace-font-preview,.workspace-generic-preview{display:grid;gap:8px;padding:12px;border:1px solid rgba(232,199,122,.2);border-radius:10px;background:rgba(255,255,255,.025)}
+.workspace-font-preview p{font-size:19px;line-height:1.5;overflow-wrap:anywhere}
+.workspace-generic-preview span{font-size:12px;color:#D7BD91}
+.workspace-generic-preview p{font-size:12px;line-height:1.55;color:#AEB4BF}
+.workspace-card-actions{display:flex;gap:9px;flex-wrap:wrap;align-items:center;margin-top:auto;padding-top:12px}
+.workspace-card-actions a,.workspace-card-actions button{min-height:38px;display:inline-flex;align-items:center;justify-content:center;padding:8px 14px;max-width:100%;overflow-wrap:anywhere}
+@media(max-width:600px){
+ .workspace-live-search{padding-inline:0}
+ .workspace-live-search .workspace-section-title{align-items:flex-start;gap:8px}
+ .workspace-live-search .workspace-section-title h3{font-size:clamp(17px,5vw,21px);letter-spacing:-.25px}
+ .workspace-live-search .workspace-form-note{font-size:12px;line-height:1.55}
+ .workspace-filterbar{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+ .workspace-device-import{display:grid;grid-template-columns:1fr;gap:8px;width:100%}
+ .workspace-device-import .gold-button{width:100%;min-height:44px;padding:10px 12px;font-size:13px}
+ .workspace-resource-grid{grid-template-columns:minmax(0,1fr);gap:11px}
+ .workspace-resource-card{padding:13px!important;border-radius:12px}
+ .workspace-resource-card h4{font-size:15px;line-height:1.4;margin:8px 0}
+ .workspace-card-top{font-size:10px;letter-spacing:.2px;flex-wrap:wrap}
+ .workspace-card-actions{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+ .workspace-card-actions a,.workspace-card-actions button{width:100%;font-size:12px;padding:8px 6px}
+}
+@media(max-width:360px){
+ .workspace-live-search .workspace-section-title h3{font-size:17px}
+ .workspace-resource-card{padding:10px!important}
+ .workspace-card-actions{grid-template-columns:1fr}
+}
