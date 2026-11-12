@@ -1,0 +1,146 @@
+/* MAP132 DIGITALS — premium UI/UX refinement for the active five-page HomeSlider.
+   Visual-only layer: preserve React structure, navigation, forms, media and data behaviour. */
+:root{
+  --ms-premium-rim:rgba(232,199,122,.38);
+  --ms-premium-rim-soft:rgba(232,199,122,.18);
+  --ms-premium-surface:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.012));
+}
+.ms-header{
+  border-bottom-color:rgba(232,199,122,.24);
+  box-shadow:0 8px 28px rgba(0,0,0,.16);
+}
+.ms-nav button,.ms-nav a{
+  min-height:42px;
+  padding:9px 12px;
+  border:1px solid transparent;
+  border-radius:999px;
+  transition:color .2s,background .2s,border-color .2s,box-shadow .2s;
+}
+.ms-nav button.active{
+  border-color:var(--ms-premium-rim);
+  background:linear-gradient(110deg,rgba(232,199,122,.16),rgba(232,199,122,.045));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 5px 18px rgba(0,0,0,.16);
+  color:var(--ms-gold2);
+}
+.ms-nav button:hover:not(.active),.ms-nav a:hover{
+  border-color:var(--ms-premium-rim-soft);
+  background:rgba(232,199,122,.07);
+}
+.ms-nav .ms-workspace{
+  border-color:var(--ms-premium-rim);
+  background:rgba(232,199,122,.055);
+}
+.ms-home-showcase{
+  position:relative;
+  border:1px solid var(--ms-premium-rim);
+  border-radius:20px;
+  background:linear-gradient(145deg,rgba(232,199,122,.075),rgba(255,255,255,.018) 42%,rgba(255,255,255,.008));
+  box-shadow:0 24px 65px rgba(0,0,0,.34),inset 0 1px 0 rgba(255,255,255,.11),0 0 0 1px rgba(255,255,255,.025);
+}
+.ms-service-tile{
+  border:1px solid rgba(232,199,122,.22);
+  border-radius:13px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055);
+}
+.ms-service-tile:hover{
+  border-color:rgba(245,220,167,.8);
+  box-shadow:0 9px 24px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.12);
+}
+.ms-primary,.ms-text-button{
+  min-height:44px;
+  border-radius:999px;
+}
+.ms-primary{
+  padding-inline:20px;
+  box-shadow:0 8px 22px rgba(190,143,69,.16),inset 0 1px 0 rgba(255,255,255,.28);
+}
+.ms-text-button{
+  padding:0 14px;
+  border:1px solid var(--ms-premium-rim-soft);
+  background:rgba(255,255,255,.025);
+}
+.ms-project-frame{
+  border:1px solid var(--ms-premium-rim);
+  border-radius:15px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.09),0 12px 28px rgba(0,0,0,.18);
+}
+.ms-project-frame>span,.ms-demo-label{
+  border:1px solid rgba(232,199,122,.32);
+  border-radius:999px;
+}
+.ms-service-detail,.ms-process-grid article,.ms-studio-extra article,.ms-review-card{
+  border:1px solid rgba(232,199,122,.2);
+  border-radius:15px;
+  background:linear-gradient(145deg,rgba(255,255,255,.055),rgba(255,255,255,.014));
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.055);
+}
+.ms-service-detail-image{border-radius:10px;overflow:hidden}
+.ms-skills,.ms-studio-brief,.ms-sample-banner,.ms-service-includes,.ms-home-review-invite,.ms-home-review-feed{
+  border-color:var(--ms-premium-rim);
+  border-radius:17px;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,.07),0 12px 30px rgba(0,0,0,.12);
+}
+.ms-skill-list span{
+  border:1px solid rgba(232,199,122,.22);
+  border-radius:999px;
+  background:rgba(232,199,122,.035);
+}
+.ms-contact-panel{
+  border:1px solid var(--ms-premium-rim);
+  border-radius:20px;
+  background:linear-gradient(145deg,rgba(232,199,122,.07),rgba(255,255,255,.018) 38%,rgba(255,255,255,.012));
+  box-shadow:0 24px 65px rgba(0,0,0,.3),inset 0 1px 0 rgba(255,255,255,.1);
+}
+.ms-contact-links a,.ms-review-feed-foot button,.ms-home-review-invite button{
+  min-height:42px;
+  border-radius:999px;
+  transition:color .2s,background .2s,border-color .2s,transform .2s;
+}
+.ms-contact-links a{
+  border-color:rgba(232,199,122,.25);
+  background:rgba(255,255,255,.025);
+}
+.ms-film-enquiry{border-radius:18px}
+.ms-film-enquiry .ms-enquiry-submit,.ms-enquiry-success .ms-primary{
+  border-radius:999px;
+}
+.ms-arrow,.ms-preview-close{
+  border-radius:50%;
+  box-shadow:0 7px 20px rgba(0,0,0,.24),inset 0 1px 0 rgba(255,255,255,.1);
+}
+.ms-pagination button{
+  border-radius:999px;
+}
+.ms-pagination button.active{
+  background:rgba(232,199,122,.12);
+  box-shadow:inset 0 0 0 1px rgba(232,199,122,.25);
+}
+.ms-footer .ms-studio-link{border-radius:999px}
+.ms-nav button:focus-visible,.ms-nav a:focus-visible,
+.ms-primary:focus-visible,.ms-text-button:focus-visible,
+.ms-service-tile:focus-visible,.ms-contact-links a:focus-visible,
+.ms-contact-panel input:focus-visible,.ms-contact-panel select:focus-visible,
+.ms-contact-panel textarea:focus-visible,.ms-film-enquiry button:focus-visible,
+.ms-pagination button:focus-visible,.ms-arrow:focus-visible,
+.ms-preview-close:focus-visible,.ms-review-feed-foot button:focus-visible,
+.ms-home-review-invite button:focus-visible{
+  outline:2px solid #fff0c6;
+  outline-offset:3px;
+  box-shadow:0 0 0 5px rgba(232,199,122,.2);
+}
+@media(max-width:760px){
+  .ms-header{box-shadow:0 5px 18px rgba(0,0,0,.18)}
+  .ms-nav button,.ms-nav a{min-height:42px;padding:8px 11px}
+  .ms-home-showcase{border-radius:16px;padding:10px}
+  .ms-service-tile{border-radius:11px}
+  .ms-project-frame{border-radius:13px}
+  .ms-service-detail,.ms-process-grid article,.ms-studio-extra article,.ms-review-card{border-radius:13px}
+  .ms-contact-panel{border-radius:16px}
+  .ms-contact-links a{min-height:44px}
+  .ms-text-button{padding-inline:12px}
+}
+@media(prefers-reduced-motion:reduce){
+  .ms-nav button,.ms-nav a,.ms-primary,.ms-text-button,.ms-service-tile,
+  .ms-contact-links a,.ms-review-feed-foot button,.ms-home-review-invite button,
+  .ms-arrow,.ms-preview-close{transition:none!important;animation:none!important}
+}
