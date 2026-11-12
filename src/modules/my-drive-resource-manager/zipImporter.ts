@@ -39,6 +39,7 @@ export async function importZip(
   sourceKind: 'local-zip' | 'google-drive-zip' = 'local-zip',
   sourceId = file.name,
   depth = 0,
+  budget: { entries: number; uncompressedBytes: number } = { entries: 0, uncompressedBytes: 0 },
 ): Promise<{ assets: ImportedAsset[]; summary: ImportSummary }> {
   if (depth > 4) throw new Error('Nested ZIP depth exceeds the safe limit of 4 levels.');
   const issues: ImportIssue[] = [];
@@ -98,6 +99,13 @@ export async function importZip(
       continue;
     }
     totalUncompressed += uncompressedSize;
+    budget.entries += 1;
+    budget.uncompressedBytes += uncompressedSize;
+    if (budget.entries > ARCHIVE_LIMITS.maxEntries || budget.uncompressedBytes > ARCHIVE_LIMITS.maxTotalUncompressedBytes) {
+      issues.push({ sourceName: file.name, path, code: 'archive-limit-exceeded', message: 'Combined nested ZIP contents exceed the safe extraction limit.' });
+      cursor = next;
+      continue;
+    }
     if (directory) { cursor = next; continue; }
     const { kind, fontFormat } = classifyAsset(path);
     if (kind === 'other') {
@@ -134,7 +142,7 @@ export async function importZip(
       const hash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
       if (kind === 'archive') {
         const nestedName = decision.normalizedPath.split('/').pop() || 'nested.zip';
-        const nested = await importZip(new File([bytes], nestedName, { type: 'application/zip' }), sourceKind, sourceId, depth + 1);
+        const nested = await importZip(new File([bytes], nestedName, { type: 'application/zip' }), sourceKind, sourceId, depth + 1, budget);
         for (const nestedAsset of nested.assets) {
           if (seen.has(nestedAsset.candidate.contentSha256 || '')) {
             issues.push({ sourceName: file.name, path: decision.normalizedPath + '/' + nestedAsset.candidate.relativePath, code: 'duplicate', message: 'Duplicate content skipped.' });
