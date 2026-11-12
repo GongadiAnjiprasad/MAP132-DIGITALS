@@ -380,7 +380,8 @@ function MyDriveAssetsPanel(){
     let savedCount=0,archiveCount=0;
     try{
       const uploadOne=async(file:File)=>{
-        const category=classifyResource(file.name)?.category||'Other';\n        const response=await fetch('/api/my-drive/assets',{method:'POST',credentials:'same-origin',headers:{'Content-Type':file.type||'application/octet-stream','X-Asset-Name':encodeURIComponent(file.name),'X-Asset-Category':category},body:file});
+        const category=classifyResource(file.name)?.category||'Other';
+        const response=await fetch('/api/my-drive/assets',{method:'POST',credentials:'same-origin',headers:{'Content-Type':file.type||'application/octet-stream','X-Asset-Name':encodeURIComponent(file.name),'X-Asset-Category':category},body:file});
         const data=await response.json();
         if(!response.ok)throw new Error(data.error||('Could not save '+file.name));
         savedCount++;
