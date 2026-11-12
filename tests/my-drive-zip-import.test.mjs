@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { extractSupportedFontsFromZip } from '../src/modules/my-drive-resource-manager/zipFontImport.ts';
+import { importZip } from '../src/modules/my-drive-resource-manager/zipImporter.ts';
 
 function crc32(bytes) {
   let crc = 0xffffffff;
@@ -18,7 +19,7 @@ function makeZip(entries) {
   let localOffset = 0;
   for (const entry of entries) {
     const name = encoder.encode(entry.name);
-    const data = encoder.encode(entry.content || '');
+    const data = entry.content instanceof Uint8Array ? entry.content : encoder.encode(entry.content || '');
     const crc = crc32(data);
     const local = new Uint8Array(30 + name.length + data.length);
     const lv = new DataView(local.buffer);
@@ -104,4 +105,37 @@ test('extracts fonts from Windows-style nested ZIP paths', async () => {
   const files = await extractSupportedFontsFromZip(zip);
   assert.deepEqual(files.map(file => file.name), ['font.ttf']);
   assert.equal(await files[0].text(), 'windows-path-font');
+});
+
+
+test('imports all supported asset types and recursively extracts nested ZIP archives', async () => {
+  const inner = makeZip([
+    { name: 'Sound Effects/whoosh.mp3', content: 'audio-data' },
+    { name: 'Wedding/ceremony.jpg', content: 'image-data' },
+    { name: 'Fonts/title.ttf', content: 'font-data' },
+  ]);
+  const outer = makeZip([
+    { name: 'Bundles/inner.zip', content: new Uint8Array(await inner.arrayBuffer()) },
+    { name: 'Trailer BGM/impact.wav', content: 'wav-data' },
+  ]);
+  const result = await importZip(outer, 'local-zip', 'outer.zip');
+  assert.equal(result.assets.length, 4);
+  assert.deepEqual(
+    result.assets.map(asset => [asset.candidate.fileName, asset.candidate.category]).sort(),
+    [
+      ['ceremony.jpg', 'Wedding'],
+      ['impact.wav', 'Sound Effects'],
+      ['title.ttf', 'Fonts'],
+      ['whoosh.mp3', 'Sound Effects'],
+    ].sort()
+  );
+  assert.ok(result.assets.some(asset => asset.candidate.relativePath.includes('inner.zip/')));
+});
+
+test('rejects excessive nested ZIP depth', async () => {
+  const archive = makeZip([{ name: 'plain.txt', content: 'not a nested archive' }]);
+  await assert.rejects(
+    () => importZip(archive, 'local-zip', 'deep.zip', 5),
+    /depth exceeds the safe limit/
+  );
 });
