@@ -7,7 +7,10 @@
 
   const state = { authenticated: false, connected: false, busy: false, refreshing: false, assets: [], cursor: null, pickerPromise: null };
   const status = $('myDriveStatus');
-  const loginLink = $('myDriveLogin');
+  const loginForm = $('myDriveLoginForm');
+  const loginPassword = $('myDriveAdminPassword');
+  const loginSubmit = $('myDriveLoginSubmit');
+  const passwordToggle = $('myDrivePasswordToggle');
   const logoutButton = $('myDriveLogout');
   const gate = $('myDriveGate');
   const content = $('myDriveContent');
@@ -44,7 +47,7 @@
 
   function setBusy(value) {
     state.busy = value;
-    ['myDriveConnect', 'myDrivePicker', 'myDriveLogout'].forEach(id => {
+    ['myDriveConnect', 'myDrivePicker', 'myDriveLogout', 'myDriveLoginSubmit'].forEach(id => {
       const button = $(id);
       if (!button) return;
       const requiresConnection = id === 'myDrivePicker';
@@ -143,11 +146,10 @@
       state.authenticated = Boolean(session.authenticated);
       gate.hidden = state.authenticated;
       content.hidden = !state.authenticated;
-      loginLink.hidden = state.authenticated;
       logoutButton.hidden = !state.authenticated;
       if (!state.authenticated) {
         state.connected = false; state.assets = []; state.cursor = null; renderAssets();
-        showMessage('Login to the MAP132 Admin Dashboard to open My Drive.');
+        showMessage('Enter your MAP132 Admin password to open My Drive.');
         return;
       }
       const drive = await request('/api/my-drive/session');
@@ -163,10 +165,26 @@
     } catch (error) {
       state.authenticated = false;
       gate.hidden = false; content.hidden = true;
-      loginLink.hidden = false; logoutButton.hidden = true;
+      logoutButton.hidden = true;
       state.connected = false; state.assets = []; state.cursor = null; renderAssets();
-      showMessage(error.status === 401 ? 'Login to the MAP132 Admin Dashboard to open My Drive.' : (error.message || 'Admin login required. Sign in and refresh this page.'), true);
+      showMessage(error.status === 401 ? 'Enter your MAP132 Admin password to open My Drive.' : (error.message || 'Admin login required. Please try again.'), true);
     } finally { state.refreshing = false; setBusy(false); }
+  }
+
+  async function login(event) {
+    if (event) event.preventDefault();
+    if (state.busy || !loginPassword || !loginPassword.value) return;
+    setBusy(true);
+    showMessage('Signing in to MAP132…');
+    try {
+      await post('/api/admin/login', { password: loginPassword.value });
+      loginPassword.value = '';
+      await refreshState();
+    } catch (error) {
+      showMessage(error.message || 'Admin login failed. Check the password and try again.', true);
+      setBusy(false);
+      if (loginPassword) loginPassword.focus();
+    }
   }
 
   async function logout() {
@@ -175,7 +193,7 @@
     try {
       await post('/api/admin/logout');
       state.authenticated = false; state.connected = false; state.assets = []; state.cursor = null;
-      gate.hidden = false; content.hidden = true; loginLink.hidden = false; logoutButton.hidden = true;
+      gate.hidden = false; content.hidden = true; logoutButton.hidden = true;
       renderAssets();
       showMessage('Logged out. My Drive is now locked.');
     } catch (error) {
@@ -469,6 +487,16 @@
     finally { setBusy(false); }
   }
 
+  if (loginForm) loginForm.addEventListener('submit', login);
+  if (passwordToggle && loginPassword) passwordToggle.addEventListener('click', () => {
+    const reveal = loginPassword.type === 'password';
+    loginPassword.type = reveal ? 'text' : 'password';
+    passwordToggle.setAttribute('aria-label', reveal ? 'Hide password' : 'Show password');
+    passwordToggle.setAttribute('aria-pressed', String(reveal));
+    passwordToggle.innerHTML = reveal
+      ? '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M3 3l18 18M10.6 10.6a2 2 0 0 0 2.8 2.8"/><path d="M9.9 5.2A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a16 16 0 0 1-3.1 3.8M6.2 6.2C3.5 8 2 12 2 12s3.5 7 10 7a10 10 0 0 0 4-.8"/></svg>'
+      : '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg>';
+  });
   $('myDriveConnect').addEventListener('click', connectDrive);
   $('myDrivePicker').addEventListener('click', openFolderPicker);
   $('myDriveChooseZip').addEventListener('click', () => $('myDriveLocalZip').click());

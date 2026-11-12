@@ -16,25 +16,36 @@ test('My Drive remains an independent tab and does not replace Free Sources', as
   await expect(sounds).toBeVisible();
 });
 
-test('Signed-out users see one Login action and cannot access My Drive content', async ({ page }) => {
+test('Signed-out users see inline Admin login and cannot access My Drive content', async ({ page }) => {
   await page.route('**/api/admin/session', route => route.fulfill({
     status: 401, contentType: 'application/json', body: JSON.stringify({ authenticated: false, error: 'Admin session required.' })
   }));
   await page.goto('/workspace.html');
   await page.locator('[data-resource-view="my-drive"]').click();
   await expect(page.locator('#myDriveGate')).toBeVisible();
-  await expect(page.locator('#myDriveLogin')).toHaveAttribute('href', 'index.html#admin');
+  await expect(page.locator('#myDriveLoginForm')).toBeVisible();
+  await expect(page.locator('#myDriveAdminPassword')).toHaveAttribute('type', 'password');
+  await expect(page.locator('#myDriveLoginSubmit')).toHaveText('Login');
   await expect(page.locator('#myDriveContent')).toBeHidden();
   await expect(page.locator('#myDriveLogout')).toBeHidden();
-  await expect(page.locator('#myDriveStatus')).toContainText('Login to the MAP132 Admin Dashboard');
+  await expect(page.locator('#myDriveStatus')).toContainText('Admin password');
 });
 
-test('Admin login session opens My Drive and Logout closes it', async ({ page }) => {
-  let authenticated = true;
+test('Inline Admin login opens My Drive and Logout closes it', async ({ page }) => {
+  let authenticated = false;
   await page.route('**/api/admin/session', route => route.fulfill({
     status: authenticated ? 200 : 401, contentType: 'application/json',
     body: JSON.stringify({ authenticated })
   }));
+  await page.route('**/api/admin/login', async route => {
+    const body = route.request().postDataJSON();
+    if (body.password === 'correct-password') {
+      authenticated = true;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true }) });
+    } else {
+      await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: 'Incorrect admin password.' }) });
+    }
+  });
   await page.route('**/api/my-drive/session', route => route.fulfill({
     status: 200, contentType: 'application/json',
     body: JSON.stringify({ connected: false, expiresAt: null })
@@ -45,12 +56,14 @@ test('Admin login session opens My Drive and Logout closes it', async ({ page })
   });
   await page.goto('/workspace.html');
   await page.locator('[data-resource-view="my-drive"]').click();
+  await page.locator('#myDriveAdminPassword').fill('correct-password');
+  await page.locator('#myDriveLoginSubmit').click();
   await expect(page.locator('#myDriveContent')).toBeVisible();
-  await expect(page.locator('#myDriveLogin')).toBeHidden();
+  await expect(page.locator('#myDriveLoginForm')).toBeHidden();
   await expect(page.locator('#myDriveLogout')).toBeVisible();
   await page.locator('#myDriveLogout').click();
   await expect(page.locator('#myDriveContent')).toBeHidden();
-  await expect(page.locator('#myDriveLogin')).toBeVisible();
+  await expect(page.locator('#myDriveLoginForm')).toBeVisible();
   await expect(page.locator('#myDriveStatus')).toContainText('Logged out');
 });
 
@@ -77,7 +90,7 @@ test('Connected My Drive displays saved persistent assets', async ({ page }) => 
   await expect(page.locator('#myDriveConnect')).toHaveText('Reconnect Google Drive');
 });
 
-test('My Drive tab and login controls fit a narrow mobile viewport', async ({ page }) => {
+test('My Drive tab and inline login controls fit a narrow mobile viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.route('**/api/admin/session', route => route.fulfill({
     status: 401, contentType: 'application/json', body: JSON.stringify({ authenticated: false })
@@ -90,7 +103,8 @@ test('My Drive tab and login controls fit a narrow mobile viewport', async ({ pa
     content: document.documentElement.scrollWidth,
   }));
   expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport + 1);
-  await expect(page.locator('#myDriveLogin')).toBeVisible();
+  await expect(page.locator('#myDriveLoginForm')).toBeVisible();
+  await expect(page.locator('#myDriveAdminPassword')).toBeVisible();
 });
 
 test('Main Editor Workspace navigation opens the persistent My Drive page', async ({ page }) => {
@@ -101,7 +115,7 @@ test('Main Editor Workspace navigation opens the persistent My Drive page', asyn
   await expect(page).toHaveURL(/\/workspace\.html$/);
   await expect(page.locator('#myDrivePanel')).toBeAttached();
   await page.locator('[data-resource-view="my-drive"]').click();
-  await expect(page.locator('#myDriveLogin')).toBeVisible();
+  await expect(page.locator('#myDriveLoginForm')).toBeVisible();
 });
 
 test('Admin dashboard password field can be shown and hidden', async ({ page }) => {
