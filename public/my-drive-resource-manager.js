@@ -161,7 +161,7 @@
       $('myDriveConnect').textContent = state.connected ? 'Reconnect Google Drive' : 'Connect Google Drive';
       if (state.connected) {
         await loadAssets(false);
-        showMessage('Google Drive connected. Saved copies are stored in your MAP132 DIGITALS Resources folder.');
+        showMessage('Google Drive connected. Saved copies are stored in your MAP132 Workspace folder.');
       } else {
         state.assets = []; state.cursor = null; renderAssets();
         showMessage('My Drive unlocked. Connect Google Drive to import and retrieve persistent resources.');
@@ -403,7 +403,7 @@
         saved++;
       }
       await loadAssets(false);
-      showMessage('ZIP import complete: ' + saved + ' font(s) saved permanently to your MAP132 DIGITALS Resources folder.');
+      showMessage('ZIP import complete: ' + saved + ' font(s) saved permanently to your MAP132 Workspace folder.');
     } catch (error) { showMessage(error.message || 'ZIP import failed.', true); }
     finally {
       setBusy(false);
@@ -426,7 +426,7 @@
     try {
       await request('/api/my-drive/assets/' + encodeURIComponent(asset.id), { method: 'DELETE' });
       await loadAssets(false);
-      showMessage('Resource removed from your MAP132 DIGITALS Resources folder.');
+      showMessage('Resource removed from your MAP132 Workspace folder.');
     } catch (error) { showMessage(error.message || 'Could not remove this resource.', true); }
     finally { setBusy(false); }
   }
