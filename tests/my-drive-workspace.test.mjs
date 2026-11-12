@@ -99,6 +99,10 @@ test('My Drive server access is bound to the Admin Dashboard session', () => {
   assert.ok(assetsSource.includes("startsWith('map132_admin='"));
   assert.doesNotMatch(assetsSource, /map132_drive_unlock|my-drive\/unlock\//);
   assert.ok(assetsSource.includes("error:'MAP132 Admin login required.'"));
+  assert.ok(assetsSource.includes('allowedSoundSubcategories'));
+  assert.ok(assetsSource.includes('X-Asset-Source-Path'));
+  assert.ok(assetsSource.includes('existing.subcategory=subcategory'));
+  assert.ok(assetsSource.includes('existing.sourcePath=sourcePath'));
 });
 
 test('Google OAuth token exchange exposes only a sanitized provider error for diagnosis', async () => {
