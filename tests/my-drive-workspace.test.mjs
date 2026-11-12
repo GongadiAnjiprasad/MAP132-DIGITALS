@@ -24,7 +24,7 @@ test('The main Editor Workspace route opens the persistent Google Drive workspac
 });
 
 test('My Drive uses the Admin Dashboard session with a simple Login and Logout UI', () => {
-  assert.ok(rootHtml.includes('id="myDriveLogin"'));
+  assert.ok(rootHtml.includes('id="myDriveLoginForm"'));
   assert.ok(rootHtml.includes('id="myDriveLogout"'));
   assert.ok(!rootHtml.includes('myDriveSetupForm'));
   assert.ok(!rootHtml.includes('myDriveUnlockForm'));
@@ -39,7 +39,7 @@ test('My Drive login gate and content are driven by the active admin session', (
   assert.ok(source.includes('state.authenticated = Boolean(session.authenticated)'));
   assert.ok(source.includes('gate.hidden = state.authenticated'));
   assert.ok(source.includes('content.hidden = !state.authenticated'));
-  assert.ok(rootHtml.includes('Login to Admin Dashboard'));
+  assert.ok(rootHtml.includes('Login to MAP132 My Drive'));
 });
 
 test('Admin dashboard password input has a working show/hide control', () => {
