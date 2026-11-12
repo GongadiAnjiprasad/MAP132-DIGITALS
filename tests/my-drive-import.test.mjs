@@ -116,7 +116,8 @@ test('Google Drive folder imports use separate bounded requests per file instead
   const component = readFileSync(new URL('../src/modules/my-drive-resource-manager/MyDriveFolderImport.tsx', import.meta.url), 'utf8');
   assert.ok(component.includes('listDriveFolderRecursively'));
   assert.ok(component.includes('downloadDriveFile(item.driveFileId!'));
-  assert.ok(component.includes("fetch('/api/my-drive/assets'"));\n  assert.ok(component.includes("'X-Asset-Category': item.category"));
+  assert.ok(component.includes("fetch('/api/my-drive/assets'"));
+  assert.ok(component.includes("'X-Asset-Category': item.category"));
   assert.doesNotMatch(component, /fetch\('\/api\/my-drive\/import-folder'/);
 });
 
