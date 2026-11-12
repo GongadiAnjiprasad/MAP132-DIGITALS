@@ -13,8 +13,8 @@ const EXTENSION_KIND: Record<string, CreativeAssetKind> = {
   mp3: 'audio', wav: 'audio', aac: 'audio', m4a: 'audio', ogg: 'audio', flac: 'audio',
   mp4: 'video', mov: 'video', webm: 'video', m4v: 'video',
   jpg: 'image', jpeg: 'image', png: 'image', webp: 'image', gif: 'image', avif: 'image',
-  aep: 'template', mogrt: 'template', prproj: 'template', psd: 'template', ai: 'template',
-  cube: 'texture', lut: 'texture', exr: 'texture', tiff: 'texture',
+  aep: 'template', mogrt: 'template', prproj: 'template', prfpset: 'template', ffx: 'template', drx: 'template', setting: 'template', preset: 'template', prm: 'template', psd: 'template', ai: 'template',
+  cube: 'texture', lut: 'texture', look: 'texture', exr: 'texture', tiff: 'texture', svg: 'image',
   zip: 'archive',
 };
 
