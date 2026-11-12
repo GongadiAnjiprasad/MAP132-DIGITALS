@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { downloadDriveFile, listDriveFolderRecursively } from './driveClient';
+import { importZip } from './zipImporter';
 
 type Props = { disabled?: boolean; onImported: () => Promise<void> | void };
 
@@ -64,23 +65,45 @@ export default function MyDriveFolderImport({ disabled = false, onImported }: Pr
       const item = candidates[index];
       if (item.byteSize && item.byteSize > 100 * 1024 * 1024) { skipped++; continue; }
       try {
-        setMessage('Saving ' + (index + 1) + ' of ' + candidates.length + ' · ' + item.category + ' · ' + item.fileName);
+        setMessage((item.extension === 'zip' ? 'Extracting ZIP ' : 'Saving ') + (index + 1) + ' of ' + candidates.length + ' · ' + item.category + ' · ' + item.fileName);
         const bytes = await downloadDriveFile(item.driveFileId!);
         if (!bytes.byteLength || bytes.byteLength > 100 * 1024 * 1024) { skipped++; continue; }
-        const response = await fetch('/api/my-drive/assets', {
-          method: 'POST',
-          credentials: 'same-origin',
-          headers: {
-            'Content-Type': contentTypes[item.extension] || item.mimeType || 'application/octet-stream',
-            'X-Asset-Name': encodeURIComponent(item.fileName),
-            'X-Asset-Category': item.category,
-            'X-Asset-Source-Path': encodeURIComponent(item.relativePath),
-          },
-          body: bytes,
-        });
-        const result = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(result.error || 'Could not save ' + item.fileName + '.');
-        if (result.duplicate) skipped++; else imported++;
+        if (item.extension === 'zip') {
+          const archive = new File([bytes], item.fileName, { type: 'application/zip' });
+          const extracted = await importZip(archive, 'google-drive-zip', item.driveFileId!);
+          skipped += extracted.summary.skipped + extracted.summary.duplicates;
+          for (const asset of extracted.assets) {
+            const extractedFile = new File([asset.bytes], asset.candidate.fileName, { type: contentTypes[asset.candidate.extension] || 'application/octet-stream' });
+            const upload = await fetch('/api/my-drive/assets', {
+              method: 'POST', credentials: 'same-origin',
+              headers: {
+                'Content-Type': contentTypes[asset.candidate.extension] || 'application/octet-stream',
+                'X-Asset-Name': encodeURIComponent(asset.candidate.fileName),
+                'X-Asset-Category': asset.candidate.category,
+                'X-Asset-Source-Path': encodeURIComponent(item.relativePath + '/' + asset.candidate.relativePath),
+              },
+              body: extractedFile,
+            });
+            const result = await upload.json().catch(() => ({}));
+            if (!upload.ok) throw new Error(result.error || 'Could not save extracted ' + asset.candidate.fileName + '.');
+            if (result.duplicate) skipped++; else imported++;
+          }
+        } else {
+          const response = await fetch('/api/my-drive/assets', {
+            method: 'POST',
+            credentials: 'same-origin',
+            headers: {
+              'Content-Type': contentTypes[item.extension] || item.mimeType || 'application/octet-stream',
+              'X-Asset-Name': encodeURIComponent(item.fileName),
+              'X-Asset-Category': item.category,
+              'X-Asset-Source-Path': encodeURIComponent(item.relativePath),
+            },
+            body: bytes,
+          });
+          const result = await response.json().catch(() => ({}));
+          if (!response.ok) throw new Error(result.error || 'Could not save ' + item.fileName + '.');
+          if (result.duplicate) skipped++; else imported++;
+        }
       } catch (error) {
         failed++;
         console.error('MAP132 Drive import item failed:', item.fileName, error);
