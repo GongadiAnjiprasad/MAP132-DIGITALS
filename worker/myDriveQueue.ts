@@ -187,6 +187,11 @@ export async function processMyDriveQueue(env:MyDriveQueueEnv):Promise<void> {
       }
       item.targetFileId=copiedId;item.status='completed';item.progress=100;
       await env.MAP132_KV.put(PREFIX+'source-copy/'+item.sourceFileId,copiedId);
+      const ext=(item.name.split('.').pop()||'').toLowerCase();
+      const kind=['ttf','otf','woff','woff2'].includes(ext)?'font':['mp3','wav','aac','ogg','m4a','flac'].includes(ext)?'audio':['mp4','webm','mov','m4v'].includes(ext)?'video':['jpg','jpeg','png','webp','gif','avif','svg'].includes(ext)?'image':['aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm'].includes(ext)?'template':'archive';
+      const contentType=item.mimeType||'application/octet-stream';
+      const asset={id:item.id,name:item.name,kind,category:item.category,sourcePath:item.sourcePath,size:item.size,contentType,storedAt:new Date().toISOString(),licenseStatus:'unverified',source:'google-drive-background-copy',originalDriveFileId:item.sourceFileId,driveFileId:copiedId};
+      await env.MAP132_KV.put('my-drive/assets/'+item.id,JSON.stringify(asset));
       delete item.error;
     }catch(error){
       item.attempts=(item.attempts||0)+1;
