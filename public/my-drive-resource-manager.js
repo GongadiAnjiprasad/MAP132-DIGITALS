@@ -5,7 +5,7 @@
   if (!panel || panel.dataset.initialized) return;
   panel.dataset.initialized = 'true';
 
-  const state = { authenticated: false, connected: false, busy: false, assets: [], cursor: null, pickerPromise: null };
+  const state = { authenticated: false, connected: false, busy: false, refreshing: false, assets: [], cursor: null, pickerPromise: null };
   const status = $('myDriveStatus');
   const loginLink = $('myDriveLogin');
   const logoutButton = $('myDriveLogout');
@@ -136,6 +136,8 @@
   }
 
   async function refreshState() {
+    if (state.refreshing) return;
+    state.refreshing = true;
     try {
       const session = await request('/api/admin/session');
       state.authenticated = Boolean(session.authenticated);
@@ -164,7 +166,7 @@
       loginLink.hidden = false; logoutButton.hidden = true;
       state.connected = false; state.assets = []; state.cursor = null; renderAssets();
       showMessage(error.status === 401 ? 'Login to the MAP132 Admin Dashboard to open My Drive.' : (error.message || 'Admin login required. Sign in and refresh this page.'), true);
-    } finally { setBusy(false); }
+    } finally { state.refreshing = false; setBusy(false); }
   }
 
   async function logout() {
