@@ -20,9 +20,9 @@ async function adminCookie(password) {
 
 test('OAuth start sets a browser-bound state cookie and PKCE challenge', async () => {
   const e = env();
-  await e.MAP132_KV.put('my-drive/unlock/unlock-id', '1');
+  const cookie = await adminCookie(e.ADMIN_PASSWORD);
   const response = await handleMyDriveOAuth(new Request('https://example.test/api/my-drive/oauth/start', {
-    method: 'POST', headers: { Cookie: 'map132_drive_unlock=unlock-id' },
+    method: 'POST', headers: { Cookie: cookie },
   }), e);
   assert.equal(response.status, 200);
   const data = await response.json();
@@ -44,22 +44,17 @@ test('OAuth callback rejects a state cookie from a different browser session', a
   } finally { globalThis.fetch = originalFetch; }
 });
 
-test('first My Drive password setup requires admin authentication and stores only an HMAC digest', async () => {
+test('all My Drive routes require the active Admin Dashboard session', async () => {
   const e = env();
-  const denied = await handleMyDriveOAuth(new Request('https://example.test/api/my-drive/lock/setup', {
-    method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'separate-passphrase' }),
-  }), e);
-  assert.equal(denied.status, 403);
+  const denied = await handleMyDriveOAuth(new Request('https://example.test/api/my-drive/oauth/start', { method: 'POST' }), e);
+  assert.equal(denied.status, 401);
+  assert.match((await denied.json()).error, /Admin login required/);
   const cookie = await adminCookie(e.ADMIN_PASSWORD);
-  const response = await handleMyDriveOAuth(new Request('https://example.test/api/my-drive/lock/setup', {
-    method: 'POST', headers: { Cookie: cookie, 'Content-Type': 'application/json' }, body: JSON.stringify({ password: 'separate-passphrase' }),
+  const allowed = await handleMyDriveOAuth(new Request('https://example.test/api/my-drive/oauth/start', {
+    method: 'POST', headers: { Cookie: cookie },
   }), e);
-  assert.equal(response.status, 200);
-  const digest = await e.MAP132_KV.get('my-drive/lock/password-hash');
-  assert.ok(digest);
-  assert.notEqual(digest, 'separate-passphrase');
-  assert.ok(response.headers.get('Set-Cookie').includes('map132_drive_unlock='));
-  assert.match(response.headers.get('Set-Cookie'), /Max-Age=43200/);
+  assert.equal(allowed.status, 200);
+  assert.ok((await allowed.json()).authorizationUrl);
 });
 
 test('valid OAuth callback exchanges the code, encrypts the session and returns to workspace', async () => {
@@ -74,7 +69,7 @@ test('valid OAuth callback exchanges the code, encrypts the session and returns 
   }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   try {
     const response = await handleMyDriveOAuth(new Request('https://example.test/api/my-drive/oauth/callback?code=auth-code&state=browser-state', {
-      headers: { Cookie: 'map132_drive_oauth_state=browser-state' },
+      headers: { Cookie: 'map132_drive_oauth_state=browser-state; ' + await adminCookie(e.ADMIN_PASSWORD) },
     }), e);
     assert.equal(response.status, 302);
     assert.match(response.headers.get('Location'), /\/workspace\.html\?myDrive=connected/);
