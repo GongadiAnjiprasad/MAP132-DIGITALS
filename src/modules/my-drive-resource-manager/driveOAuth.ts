@@ -163,7 +163,6 @@ export async function clearMyDriveSession(request: Request, env: DriveEnv): Prom
   if (id && env.MAP132_KV) await env.MAP132_KV.delete('my-drive/session/' + id);
   const headers = new Headers();
   headers.append('Set-Cookie', clearCookie());
-  headers.append('Set-Cookie', clearOAuthStateCookie());
   return headers;
 }
 
