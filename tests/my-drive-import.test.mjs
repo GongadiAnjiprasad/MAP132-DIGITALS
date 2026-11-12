@@ -2,7 +2,7 @@ import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { importZip } from '../src/modules/my-drive-resource-manager/zipImporter.ts';
-import { listDriveFolderRecursively } from '../src/modules/my-drive-resource-manager/driveClient.ts';
+import { listDriveFolderRecursively, classifyResource } from '../src/modules/my-drive-resource-manager/driveClient.ts';
 
 function crc32(bytes) {
   let crc = 0xffffffff;
@@ -115,7 +115,20 @@ test('rejects ZIP entries whose local header filename differs from the central d
 test('Google Drive folder imports use separate bounded requests per file instead of one long Worker invocation', () => {
   const component = readFileSync(new URL('../src/modules/my-drive-resource-manager/MyDriveFolderImport.tsx', import.meta.url), 'utf8');
   assert.ok(component.includes('listDriveFolderRecursively'));
-  assert.ok(component.includes('downloadDriveFile(font.driveFileId!'));
+  assert.ok(component.includes('downloadDriveFile(item.driveFileId!'));
   assert.ok(component.includes("fetch('/api/my-drive/assets'"));
+  assert.ok(component.includes("'X-Asset-Category': item.category"));
   assert.doesNotMatch(component, /fetch\('\/api\/my-drive\/import-folder'/);
+});
+
+
+test('automatically classifies MAP132 resources by folder and file naming', () => {
+  assert.equal(classifyResource('whoosh.wav', 'Assets/Sound Effects')?.category, 'Sound Effects');
+  assert.equal(classifyResource('wedding-invite.mp4', 'Wedding')?.category, 'Wedding');
+  assert.equal(classifyResource('birthday-song.mp3', 'Birthday')?.category, 'Birthday');
+  assert.equal(classifyResource('hero-trailer-bgm.mp3', 'Music')?.category, 'Trailer BGMs');
+  assert.equal(classifyResource('cinematic-pack.zip', 'Plugins')?.category, 'Plugins');
+  assert.equal(classifyResource('title.otf', 'Fonts')?.category, 'Fonts');
+  assert.equal(classifyResource('sample.mp4', 'Clips')?.category, 'Videos');
+  assert.equal(classifyResource('readme.txt', 'Misc') , null);
 });

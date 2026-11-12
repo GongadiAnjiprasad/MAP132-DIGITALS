@@ -441,11 +441,10 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
     const metadata = await metadataResponse.json() as { name?: string; mimeType?: string; size?: string };
     const name = String(metadata.name || '');
     const extension = name.split('.').pop()?.toLowerCase() || '';
-    const isFont = ['ttf', 'otf', 'woff', 'woff2'].includes(extension);
-    const isZip = extension === 'zip' || ['application/zip', 'application/x-zip-compressed'].includes(String(metadata.mimeType || '').toLowerCase());
-    if (!isFont && !isZip) return json({ error: 'Only supported font files and ZIP archives can be imported.' }, 415);
+    const supported = new Set(['ttf','otf','woff','woff2','mp3','wav','aac','m4a','ogg','flac','mp4','webm','mov','m4v','jpg','jpeg','png','webp','gif','avif','svg','zip','aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm']);
+    if (!supported.has(extension)) return json({ error: 'This file type is not supported for MAP132 Workspace import.' }, 415);
     const size = Number(metadata.size || 0);
-    const maxBytes = isZip ? 300 * 1024 * 1024 : 25 * 1024 * 1024;
+    const maxBytes = extension === 'zip' ? 300 * 1024 * 1024 : 100 * 1024 * 1024;
     if (!Number.isFinite(size) || size < 0 || size > maxBytes) return json({ error: 'The selected file exceeds its import size limit.' }, 413);
     const downloadUrl = new URL('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(fileId));
     downloadUrl.searchParams.set('alt', 'media');

@@ -2,7 +2,8 @@ import { getMyDriveAccessToken } from '../src/modules/my-drive-resource-manager/
 import { uploadMap132DriveFile, downloadMap132DriveFile, deleteMap132DriveFile } from './googleDriveStorage.ts';
 interface AssetEnv { MAP132_KV?: KVNamespace; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; MY_DRIVE_SESSION_SECRET?: string; }
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
-const allowedExt=new Set(['ttf','otf','woff','woff2','mp3','wav','ogg','m4a','mp4','webm','mov','jpg','jpeg','png','webp','gif','zip']);
+const allowedExt=new Set(['ttf','otf','woff','woff2','mp3','wav','aac','ogg','m4a','flac','mp4','webm','mov','m4v','jpg','jpeg','png','webp','gif','avif','svg','zip','aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm']);
+const allowedCategories=new Set(['Sound Effects','Wedding','Birthday','Trailer BGMs','Plugins','Fonts','Images','Videos','Other']);
 const maxBytes=100*1024*1024;
 function safeName(value:string){return value.replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,120)||'asset';}
 async function authorized(req:Request,env:AssetEnv){
@@ -39,12 +40,17 @@ export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Resp
   if(!bytes.byteLength||bytes.byteLength>maxBytes)return json({error:'Resource size is empty or exceeds the 100 MB limit.'},413);
   const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));
   const sha=[...digest].map(b=>b.toString(16).padStart(2,'0')).join('');
+  const duplicateId=await env.MAP132_KV.get('my-drive/asset-sha/'+sha);
+  if(duplicateId){const existing=await env.MAP132_KV.get('my-drive/assets/'+duplicateId);if(existing)return json({saved:false,duplicate:true,asset:JSON.parse(existing)},200);}
   const id=crypto.randomUUID(),key='my-drive/assets/'+id;
-  const kind=['ttf','otf','woff','woff2'].includes(ext)?'font':['mp3','wav','ogg','m4a'].includes(ext)?'audio':['mp4','webm','mov'].includes(ext)?'video':['jpg','jpeg','png','webp','gif'].includes(ext)?'image':'archive';
-  const asset={id,name:filename,kind,size:bytes.byteLength,sha256:sha,contentType:contentType||'application/octet-stream',storedAt:new Date().toISOString(),licenseStatus:'unverified',source:'user-import'};
-  const driveFile=await uploadMap132DriveFile(accessToken,env.MAP132_KV,filename,asset.contentType,bytes);
+  const categoryHeader=req.headers.get('X-Asset-Category')||'Other';
+  const category=allowedCategories.has(categoryHeader)?categoryHeader:'Other';
+  const kind=['ttf','otf','woff','woff2'].includes(ext)?'font':['mp3','wav','aac','ogg','m4a','flac'].includes(ext)?'audio':['mp4','webm','mov','m4v'].includes(ext)?'video':['jpg','jpeg','png','webp','gif','avif','svg'].includes(ext)?'image':['aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm'].includes(ext)?'template':'archive';
+  const asset={id,name:filename,kind,category,size:bytes.byteLength,sha256:sha,contentType:contentType||'application/octet-stream',storedAt:new Date().toISOString(),licenseStatus:'unverified',source:'user-import'};
+  const driveFile=await uploadMap132DriveFile(accessToken,env.MAP132_KV,filename,asset.contentType,bytes,category);
   (asset as typeof asset & {driveFileId?:string}).driveFileId=driveFile.id;
   await env.MAP132_KV.put(key,JSON.stringify(asset));
+  await env.MAP132_KV.put('my-drive/asset-sha/'+sha,id);
   return json({saved:true,asset},201);
  }
  const match=path.match(/^\/api\/my-drive\/assets\/([a-z0-9-]+)(?:\/(preview|download))?$/i);
@@ -71,6 +77,7 @@ export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Resp
    }
   }
   await env.MAP132_KV.delete(key);
+  if(asset.sha256)await env.MAP132_KV.delete('my-drive/asset-sha/'+asset.sha256);
   return json({deleted:true});
  }
  return json({error:'Not found'},404);

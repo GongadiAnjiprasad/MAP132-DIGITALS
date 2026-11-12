@@ -54,16 +54,21 @@ test('My Drive setup and unlock forms call the protected server-side lock APIs',
   assert.ok(source.includes('index.html#admin'));
 });
 
-test('Google Drive folder import and ZIP font import use persistent asset APIs', () => {
-  for (const route of ['/api/my-drive/oauth/start', '/api/my-drive/picker-config', '/api/my-drive/import-folder', '/api/my-drive/assets']) {
+test('Google Drive folder import scans the selected folder and uses category asset APIs', () => {
+  for (const route of ['/api/my-drive/oauth/start', '/api/my-drive/picker-config', '/api/my-drive/files', '/api/my-drive/download/', '/api/my-drive/assets']) {
     assert.ok(source.includes(route), 'Missing route: ' + route);
   }
-  assert.match(source, /ttf.*otf.*woff.*woff2/);
+  assert.ok(source.includes('syncSelectedFolder'));
+  assert.ok(source.includes('Only the selected folder was scanned.'));
+  assert.ok(source.includes('X-Asset-Category'));
+  assert.ok(source.includes('Sound Effects'));
+  assert.ok(source.includes('Trailer BGMs'));
   assert.ok(source.includes('DecompressionStream'));
   assert.ok(source.includes('crc32'));
-  assert.ok(source.includes('MAP132 DIGITALS Resources'));
-  assert.ok(!source.includes('/api/my-drive/files'));
-  assert.ok(!source.includes('/api/my-drive/download/'));
+  assert.ok(source.includes('MAP132 Workspace'));
+  assert.ok(!source.includes('/api/my-drive/import-folder'));
+  assert.ok(!source.includes('myDriveDisconnect'));
+  assert.ok(!source.includes('myDriveBrowse'));
 });
 
 test('My Drive script never stores passwords or OAuth tokens in browser storage', () => {
@@ -73,7 +78,8 @@ test('My Drive script never stores passwords or OAuth tokens in browser storage'
 
 test('root and published workspace pages remain byte-for-byte synchronized', () => {
   assert.equal(rootHtml, publishedHtml);
-  assert.ok(rootHtml.includes('copied into your Google Drive folder'));
+  assert.ok(rootHtml.includes('MAP132 Workspace'));
+  assert.ok(rootHtml.includes('Choose one folder from your Google Drive'));
   assert.ok(rootHtml.includes('id="myDriveRefresh"'));
   assert.ok(rootHtml.includes('myDriveSetupToggle'));
   assert.ok(rootHtml.includes('myDriveUnlockToggle'));
