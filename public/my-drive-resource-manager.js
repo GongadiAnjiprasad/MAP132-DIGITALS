@@ -163,7 +163,7 @@
       gate.hidden = false; content.hidden = true;
       loginLink.hidden = false; logoutButton.hidden = true;
       state.connected = false; state.assets = []; state.cursor = null; renderAssets();
-      showMessage(error.message || 'Admin login required. Sign in and refresh this page.', true);
+      showMessage(error.status === 401 ? 'Login to the MAP132 Admin Dashboard to open My Drive.' : (error.message || 'Admin login required. Sign in and refresh this page.'), true);
     } finally { setBusy(false); }
   }
 
