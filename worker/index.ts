@@ -268,7 +268,7 @@ export default {
     catch{return new Response('Website asset service unavailable.',{status:502});}
   },
   async scheduled(controller:ScheduledController,env:Env){
-    await processMyDriveQueue(env);
+    try { await processMyDriveQueue(env); } catch { /* Queue retries on the next scheduled tick; keep the festival job independent. */ }
     const today=getIndiaDateKey(new Date(controller.scheduledTime));
     const festival=FESTIVAL_CALENDAR.find(item=>item.date===today);
     if(!festival||!env.AI||!env.MAP132_KV)return;
