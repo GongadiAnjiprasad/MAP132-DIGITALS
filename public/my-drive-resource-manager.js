@@ -303,7 +303,17 @@
       ['Suspense',['suspense','tension','thriller','dread']],
       ['Ambient',['ambient','atmosphere','room tone','drone']],
       ['Action',['action','fight','battle','weapon','gun','chase']],
-      ['Horror',['horror','scary','fear','creepy','monster']]
+      ['Horror',['horror','scary','fear','creepy','monster']],
+      ['Foley',['foley','cloth','leather','handling']],
+      ['Footsteps',['footstep','foot steps','walking','running steps']],
+      ['Gunshots',['gunshot','gun shot','gunfire','weapon reload','shell casing']],
+      ['Nature',['nature','forest','wind','birds','rain','thunder']],
+      ['Crowd',['crowd','cheer','applause','clapping']],
+      ['Vehicle',['vehicle','car','engine','motor','tyre','tire']],
+      ['UI',['ui sound','interface','notification','click','button']],
+      ['Animal',['animal','dog','cat','horse','bird','wolf']],
+      ['Water',['water','splash','ocean','underwater']],
+      ['Fire',['fire','flame','burning','torch']]
     ];
     for (const [label, terms] of rules) if (terms.some(term => text.includes(term))) return label;
     return 'Other Effects';
@@ -324,7 +334,7 @@
     if (has(['trailer bgm','trailer music','trailer','background music','bgm','cinematic score'])) return { category:'Trailer BGMs', kind:audio?'audio':font?'font':video?'video':image?'image':'archive' };
     if (has(['plugin','plugins','preset pack','presets'])) return { category:'Plugins', kind:plugin?'template':'archive' };
     if (font) return { category:'Fonts', kind:'font' };
-    if (audio) return { category:'Sound Effects', kind:'audio' };
+    if (audio) return { category:'Sound Effects', kind:'audio', subcategory:soundEffectSubcategory(text) };
     if (video) return { category:'Videos', kind:'video' };
     if (image) return { category:'Images', kind:'image' };
     if (plugin || ext === 'zip') return { category:'Plugins', kind:'archive' };
@@ -437,10 +447,11 @@
     const audio = ['mp3','wav','aac','m4a','ogg','flac'].includes(ext);
     const video = ['mp4','mov','webm','m4v'].includes(ext);
     const image = ['jpg','jpeg','png','webp','gif','avif','svg'].includes(ext);
-    if (audio) return { category:'Sound Effects', kind:'audio', subcategory:soundEffectSubcategory(text) };
+    if (has(['sound effect','sound effects','sfx','whoosh','riser','impact','boom','transition','heartbeat','foley'])) return { category:'Sound Effects', kind:'audio', subcategory:soundEffectSubcategory(text) };
     if (has(['wedding','marriage','pelli'])) return { category:'Wedding', kind:font?'font':audio?'audio':video?'video':image?'image':'template' };
     if (has(['birthday','bday','birth day'])) return { category:'Birthday', kind:font?'font':audio?'audio':video?'video':image?'image':'template' };
     if (has(['trailer bgm','trailer music','trailer','background music','bgm','cinematic score'])) return { category:'Trailer BGMs', kind:audio?'audio':font?'font':video?'video':image?'image':'template' };
+    if (audio) return { category:'Sound Effects', kind:'audio', subcategory:soundEffectSubcategory(text) };
     if (has(['plugin','plugins','preset pack','presets'])) return { category:'Plugins', kind:'template' };
     if (font) return { category:'Fonts', kind:'font' };
     if (audio) return { category:'Sound Effects', kind:'audio' };
