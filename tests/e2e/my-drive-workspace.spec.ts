@@ -97,6 +97,23 @@ test('Inline Admin login persists the HttpOnly session cookie across real same-o
   expect(logoutRequests).toBe(1);
 });
 
+test('A disconnected Google Drive session does not log out MAP132 Admin', async ({ page }) => {
+  await page.route('**/api/admin/session', route => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true })
+  }));
+  await page.route('**/api/my-drive/session', route => route.fulfill({
+    status: 401, contentType: 'application/json',
+    body: JSON.stringify({ error: 'Google Drive session expired. Reconnect Google Drive.' })
+  }));
+  await page.goto('/workspace.html');
+  await page.locator('[data-resource-view="my-drive"]').click();
+  await expect(page.locator('#myDriveContent')).toBeVisible();
+  await expect(page.locator('#myDriveLoginForm')).toBeHidden();
+  await expect(page.locator('#myDriveLogout')).toBeVisible();
+  await expect(page.locator('#myDriveConnect')).toHaveText('Connect Google Drive');
+  await expect(page.locator('#myDriveStatus')).toContainText('You are logged in');
+});
+
 test('Connected My Drive displays saved persistent assets', async ({ page }) => {
   await page.route('**/api/admin/session', route => route.fulfill({
     status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true })
