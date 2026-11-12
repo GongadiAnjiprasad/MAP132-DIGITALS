@@ -418,6 +418,12 @@
       } while (pageToken && scanned < 5000);
       showMessage('Scanning selected folder… ' + scanned + ' item(s) checked; ' + candidates.length + ' supported.');
     }
+    let queuedCount = 0, queueError = '';
+    try {
+      const queued = await post('/api/my-drive/queue', { folderId:rootId, folderName:rootName, files:candidates });
+      queuedCount = Number(queued.total) || 0;
+      await loadQueue();
+    } catch (error) { queueError = error.message || 'Background copy queue could not start.'; }
     let saved = 0, skipped = 0, failed = 0;
     for (let index = 0; index < candidates.length; index++) {
       const file = candidates[index];
@@ -445,7 +451,7 @@
       } catch (error) { failed++; }
     }
     await loadAssets(false);
-    showMessage('Folder sync complete: ' + saved + ' saved, ' + skipped + ' skipped/duplicate, ' + failed + ' failed. Only the selected folder was scanned.');
+    showMessage('Folder import complete: ' + queuedCount + ' files queued for background copy; ' + saved + ' ZIP-extracted assets saved, ' + skipped + ' skipped/duplicate, ' + failed + ' failed.' + (queueError ? ' Background queue: ' + queueError : ''));
   }
 
   async function openFolderPicker() {
@@ -464,13 +470,6 @@
           if (!folder || !folder.id) { setBusy(false); showMessage('No folder was selected.', true); return; }
           try {
             const folderName = String(folder.name || 'Selected Drive folder');
-            try {
-              const queued = await post('/api/my-drive/queue', { folderId: folder.id, folderName });
-              await loadQueue();
-              showMessage((queued.total || 0) + ' files added to the background copy queue. Copies continue even when this website is closed.');
-            } catch (queueError) {
-              showMessage('Background queue could not start: ' + (queueError.message || 'Unknown error') + '. ZIP extraction will continue while this page stays open.', true);
-            }
             await syncSelectedFolder(folder.id, folderName);
             await loadQueue();
           } catch (error) { showMessage(error.message || 'Folder sync failed.', true); }
