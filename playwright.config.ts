@@ -11,12 +11,12 @@ export default defineConfig({
   projects: [
     {
       name: 'mobile-chromium',
-      testMatch: ['mobile-swipe.spec.ts', 'ambient-service-theme.mobile.spec.ts', 'work-feedback.mobile.spec.ts', 'select-work.spec.ts', 'my-drive-workspace.spec.ts', 'premium-uiux.spec.ts'],
+      testMatch: ['mobile-swipe.spec.ts', 'ambient-service-theme.mobile.spec.ts', 'work-feedback.mobile.spec.ts', 'select-work.spec.ts', 'my-drive-workspace.spec.ts', 'premium-uiux.spec.ts', 'elite-light-theme.spec.ts'],
       use: { ...devices['iPhone 13'], browserName: 'chromium' },
     },
     {
       name: 'desktop-chromium',
-      testMatch: ['responsive-layout.spec.ts', 'theme-toggle.spec.ts', 'ambient-service-theme.spec.ts', 'work-feedback.spec.ts', 'select-work.spec.ts', 'my-drive-workspace.spec.ts', 'premium-uiux.spec.ts'],
+      testMatch: ['responsive-layout.spec.ts', 'theme-toggle.spec.ts', 'ambient-service-theme.spec.ts', 'work-feedback.spec.ts', 'select-work.spec.ts', 'my-drive-workspace.spec.ts', 'premium-uiux.spec.ts', 'elite-light-theme.spec.ts'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
   ],
