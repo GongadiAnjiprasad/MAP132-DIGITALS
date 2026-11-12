@@ -6,6 +6,7 @@ const rootHtml = readFileSync(new URL('../workspace.html', import.meta.url), 'ut
 const publishedHtml = readFileSync(new URL('../public/workspace.html', import.meta.url), 'utf8');
 const source = readFileSync(new URL('../public/my-drive-resource-manager.js', import.meta.url), 'utf8');
 const appSource = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
+const cssSource = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
 
 test('My Drive is a separate workspace tab and its browser script is loaded', () => {
   assert.ok(rootHtml.includes('data-resource-view="my-drive"'));
@@ -44,6 +45,7 @@ test('Admin dashboard password input has a working show/hide control', () => {
   assert.ok(appSource.includes("type={showPassword?'text':'password'}"));
   assert.ok(appSource.includes("onClick={()=>setShowPassword(v=>!v)}"));
   assert.ok(appSource.includes("aria-label={showPassword?'Hide password':'Show password'}"));
+  assert.match(cssSource, /\.login-password-field \.password-visibility\{[^}]*border:0!important/);
 });
 
 test('My Drive browser script does not call the removed password lock endpoints', () => {
