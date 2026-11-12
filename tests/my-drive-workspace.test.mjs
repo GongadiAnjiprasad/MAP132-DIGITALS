@@ -78,3 +78,11 @@ test('root and published workspace pages remain byte-for-byte synchronized', () 
   assert.ok(rootHtml.includes('myDriveSetupToggle'));
   assert.ok(rootHtml.includes('myDriveUnlockToggle'));
 });
+
+test('My Drive password lock remains available when Google OAuth client config is incomplete', async () => {
+  const oauthSource = readFileSync(new URL('../src/modules/my-drive-resource-manager/driveOAuth.ts', import.meta.url), 'utf8');
+  assert.ok(oauthSource.includes('function lockConfigReady(env: DriveEnv): boolean'));
+  assert.ok(oauthSource.includes('return Boolean(env.MAP132_KV && env.MY_DRIVE_SESSION_SECRET && env.MY_DRIVE_SESSION_SECRET.length >= 32)'));
+  assert.ok(oauthSource.includes('return Boolean(lockConfigReady(env) && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET)'));
+  assert.ok(oauthSource.includes('lockEndpoint ? !lockConfigReady(env) : !configReady(env)'));
+});
