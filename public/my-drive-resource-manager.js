@@ -420,8 +420,11 @@
     }
     let queuedCount = 0, queueError = '';
     try {
-      const queued = await post('/api/my-drive/queue', { folderId:rootId, folderName:rootName, files:candidates });
-      queuedCount = Number(queued.total) || 0;
+      for (let offset = 0; offset < candidates.length; offset += 900) {
+        const batch = candidates.slice(offset, offset + 900);
+        const queued = await post('/api/my-drive/queue', { folderId:rootId, folderName:rootName, files:batch });
+        queuedCount += Number(queued.total) || 0;
+      }
       await loadQueue();
     } catch (error) { queueError = error.message || 'Background copy queue could not start.'; }
     let saved = 0, skipped = 0, failed = 0;
