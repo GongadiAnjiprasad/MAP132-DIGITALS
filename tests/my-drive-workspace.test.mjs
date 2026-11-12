@@ -91,6 +91,7 @@ test('My Drive server access is bound to the Admin Dashboard session', () => {
   assert.ok(oauthSource.includes('MAP132 Admin login required'));
   assert.ok(workerSource.includes("if(!oauthCallback&&!await validSession(req,env))return json({error:'MAP132 Admin login required."));
   assert.ok(workerSource.includes('clearMyDriveSession(req,env)'));
+  assert.ok(workerSource.includes('SameSite=Lax; Path=/; Max-Age='), 'Admin session cookie must survive a top-level return navigation into My Drive');
   assert.ok(workerSource.includes("path==='/api/my-drive/oauth/callback'&&method==='GET'"));
   assert.doesNotMatch(oauthSource, /my-drive\/lock\/password-hash|map132_drive_unlock/);
 });
