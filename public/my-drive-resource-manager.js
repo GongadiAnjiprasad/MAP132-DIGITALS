@@ -454,7 +454,6 @@
   unlockForm.addEventListener('submit', event => passwordAction(event, '/api/my-drive/lock/unlock', 'myDriveUnlockPassword'));
   $('myDriveConnect').addEventListener('click', connectDrive);
   $('myDrivePicker').addEventListener('click', openFolderPicker);
-  $('myDriveBrowse').addEventListener('click', openFolderPicker);
   $('myDriveLocalZip').addEventListener('change', event => { const file = event.target.files && event.target.files[0]; if (file) void importZip(file); });
   $('myDriveLock').addEventListener('click', async () => {
     setBusy(true);
@@ -466,4 +465,16 @@
     } catch (error) { showMessage(error.message || 'Could not lock My Drive.', true); }
     finally { setBusy(false); }
   });
-;
+  const refreshButton = $('myDriveRefresh');
+  if (refreshButton) refreshButton.addEventListener('click', () => { setBusy(true); refreshState(); });
+
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('myDrive') === 'connected' || params.get('myDrive') === 'cancelled') {
+    const tab = document.querySelector('[data-resource-view="my-drive"]');
+    if (tab) tab.click();
+    const clean = new URL(window.location.href);
+    clean.searchParams.delete('myDrive');
+    window.history.replaceState({}, '', clean.pathname + clean.search + clean.hash);
+  }
+  refreshState();
+})();
