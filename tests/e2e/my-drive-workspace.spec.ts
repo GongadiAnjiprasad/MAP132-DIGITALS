@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 
-test('My Drive is an independent tab and does not replace Free Sources', async ({ page }) => {
+test('My Drive remains an independent tab and does not replace Free Sources', async ({ page }) => {
   await page.goto('/workspace.html');
   const sounds = page.locator('[data-resource-panel="sounds"]');
   const fonts = page.locator('[data-resource-panel="fonts"]');
@@ -16,31 +16,47 @@ test('My Drive is an independent tab and does not replace Free Sources', async (
   await expect(sounds).toBeVisible();
 });
 
-test('My Drive setup explains the admin sign-in requirement when the setup API rejects it', async ({ page }) => {
-  await page.route('**/api/my-drive/lock/status', route => route.fulfill({
-    status: 200, contentType: 'application/json',
-    body: JSON.stringify({ configured: false, unlocked: false })
-  }));
-  await page.route('**/api/my-drive/lock/setup', route => route.fulfill({
-    status: 403, contentType: 'application/json',
-    body: JSON.stringify({ error: 'Sign in to the MAP132 admin dashboard before creating the first My Drive password.' })
+test('Signed-out users see one Login action and cannot access My Drive content', async ({ page }) => {
+  await page.route('**/api/admin/session', route => route.fulfill({
+    status: 401, contentType: 'application/json', body: JSON.stringify({ authenticated: false, error: 'Admin session required.' })
   }));
   await page.goto('/workspace.html');
   await page.locator('[data-resource-view="my-drive"]').click();
-  await expect(page.locator('#myDriveSetupForm')).toBeVisible();
-  await expect(page.locator('#myDriveStatus')).toBeVisible();
-  await expect(page.locator('.mydrive-admin-link')).toHaveAttribute('target', '_blank');
-  await page.locator('#myDriveSetupPassword').fill('test-password-123');
-  await page.locator('#myDriveSetupForm button[type="submit"]').click();
-  await expect(page.locator('#myDriveStatus')).toContainText('Admin sign-in required');
-  await expect(page.locator('#myDriveStatus a')).toHaveAttribute('href', 'index.html#admin');
-  await expect(page.locator('#myDriveStatus a')).toHaveAttribute('target', '_blank');
+  await expect(page.locator('#myDriveGate')).toBeVisible();
+  await expect(page.locator('#myDriveLogin')).toHaveAttribute('href', 'index.html#admin');
+  await expect(page.locator('#myDriveContent')).toBeHidden();
+  await expect(page.locator('#myDriveLogout')).toBeHidden();
+  await expect(page.locator('#myDriveStatus')).toContainText('Login to the MAP132 Admin Dashboard');
 });
 
-test('connected My Drive displays saved persistent assets and refreshes the library', async ({ page }) => {
-  await page.route('**/api/my-drive/lock/status', route => route.fulfill({
+test('Admin login session opens My Drive and Logout closes it', async ({ page }) => {
+  let authenticated = true;
+  await page.route('**/api/admin/session', route => route.fulfill({
+    status: authenticated ? 200 : 401, contentType: 'application/json',
+    body: JSON.stringify({ authenticated })
+  }));
+  await page.route('**/api/my-drive/session', route => route.fulfill({
     status: 200, contentType: 'application/json',
-    body: JSON.stringify({ configured: true, unlocked: true })
+    body: JSON.stringify({ connected: false, expiresAt: null })
+  }));
+  await page.route('**/api/admin/logout', async route => {
+    authenticated = false;
+    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ signedOut: true }) });
+  });
+  await page.goto('/workspace.html');
+  await page.locator('[data-resource-view="my-drive"]').click();
+  await expect(page.locator('#myDriveContent')).toBeVisible();
+  await expect(page.locator('#myDriveLogin')).toBeHidden();
+  await expect(page.locator('#myDriveLogout')).toBeVisible();
+  await page.locator('#myDriveLogout').click();
+  await expect(page.locator('#myDriveContent')).toBeHidden();
+  await expect(page.locator('#myDriveLogin')).toBeVisible();
+  await expect(page.locator('#myDriveStatus')).toContainText('Logged out');
+});
+
+test('Connected My Drive displays saved persistent assets', async ({ page }) => {
+  await page.route('**/api/admin/session', route => route.fulfill({
+    status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true })
   }));
   await page.route('**/api/my-drive/session', route => route.fulfill({
     status: 200, contentType: 'application/json',
@@ -61,8 +77,11 @@ test('connected My Drive displays saved persistent assets and refreshes the libr
   await expect(page.locator('#myDriveConnect')).toHaveText('Reconnect Google Drive');
 });
 
-test('My Drive tab and controls fit a narrow mobile viewport', async ({ page }) => {
+test('My Drive tab and login controls fit a narrow mobile viewport', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
+  await page.route('**/api/admin/session', route => route.fulfill({
+    status: 401, contentType: 'application/json', body: JSON.stringify({ authenticated: false })
+  }));
   await page.goto('/workspace.html');
   await page.locator('[data-resource-view="my-drive"]').click();
   await expect(page.locator('#myDrivePanel')).toBeVisible();
@@ -71,55 +90,19 @@ test('My Drive tab and controls fit a narrow mobile viewport', async ({ page }) 
     content: document.documentElement.scrollWidth,
   }));
   expect(dimensions.content).toBeLessThanOrEqual(dimensions.viewport + 1);
-  await expect(page.locator('#myDriveSetupForm')).toBeVisible();
+  await expect(page.locator('#myDriveLogin')).toBeVisible();
 });
 
-
-test('main Editor Workspace navigation opens the persistent My Drive page', async ({ page }) => {
+test('Main Editor Workspace navigation opens the persistent My Drive page', async ({ page }) => {
+  await page.route('**/api/admin/session', route => route.fulfill({
+    status: 401, contentType: 'application/json', body: JSON.stringify({ authenticated: false })
+  }));
   await page.goto('/index.html#workspace');
   await expect(page).toHaveURL(/\/workspace\.html$/);
   await expect(page.locator('#myDrivePanel')).toBeAttached();
   await page.locator('[data-resource-view="my-drive"]').click();
-  await expect(page.locator('#myDriveSetupForm')).toBeVisible();
+  await expect(page.locator('#myDriveLogin')).toBeVisible();
 });
-
-test('My Drive create-password field can be shown and hidden', async ({ page }) => {
-  await page.route('**/api/my-drive/lock/status', route => route.fulfill({
-    status: 200, contentType: 'application/json',
-    body: JSON.stringify({ configured: false, unlocked: false })
-  }));
-  await page.goto('/workspace.html');
-  await page.locator('[data-resource-view="my-drive"]').click();
-  const password = page.locator('#myDriveSetupPassword');
-  const toggle = page.locator('#myDriveSetupToggle');
-  await expect(password).toHaveAttribute('type', 'password');
-  await toggle.click();
-  await expect(password).toHaveAttribute('type', 'text');
-  await expect(toggle).toHaveAttribute('aria-label', 'Hide password');
-  await toggle.click();
-  await expect(password).toHaveAttribute('type', 'password');
-  await expect(toggle).toHaveAttribute('aria-label', 'Show password');
-});
-
-test('My Drive unlock-password field can be shown and hidden', async ({ page }) => {
-  await page.route('**/api/my-drive/lock/status', route => route.fulfill({
-    status: 200, contentType: 'application/json',
-    body: JSON.stringify({ configured: true, unlocked: false })
-  }));
-  await page.goto('/workspace.html');
-  await page.locator('[data-resource-view="my-drive"]').click();
-  const password = page.locator('#myDriveUnlockPassword');
-  const toggle = page.locator('#myDriveUnlockToggle');
-  await expect(password).toBeVisible();
-  await expect(password).toHaveAttribute('type', 'password');
-  await toggle.click();
-  await expect(password).toHaveAttribute('type', 'text');
-  await expect(toggle).toHaveAttribute('aria-pressed', 'true');
-  await toggle.click();
-  await expect(password).toHaveAttribute('type', 'password');
-  await expect(toggle).toHaveAttribute('aria-pressed', 'false');
-});
-
 
 test('Admin dashboard password field can be shown and hidden', async ({ page }) => {
   await page.route('**/api/admin/session', route => route.fulfill({

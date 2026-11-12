@@ -5,10 +5,10 @@
   if (!panel || panel.dataset.initialized) return;
   panel.dataset.initialized = 'true';
 
-  const state = { configured: false, unlocked: false, connected: false, busy: false, assets: [], cursor: null, pickerPromise: null };
+  const state = { authenticated: false, connected: false, busy: false, refreshing: false, assets: [], cursor: null, pickerPromise: null };
   const status = $('myDriveStatus');
-  const setupForm = $('myDriveSetupForm');
-  const unlockForm = $('myDriveUnlockForm');
+  const loginLink = $('myDriveLogin');
+  const logoutButton = $('myDriveLogout');
   const gate = $('myDriveGate');
   const content = $('myDriveContent');
   const items = $('myDriveItems');
@@ -16,15 +16,6 @@
   function showMessage(text, error) {
     status.textContent = text || '';
     status.dataset.error = error ? 'true' : 'false';
-    if (error && /admin dashboard|sign in/i.test(text)) {
-      const link = document.createElement('a');
-      link.href = 'index.html#admin';
-      link.target = '_blank';
-      link.rel = 'noopener';
-      link.textContent = ' Open Admin Dashboard';
-      link.style.cssText = 'color:var(--gold);margin-left:6px';
-      status.appendChild(link);
-    }
   }
 
   async function request(path, options) {
@@ -53,7 +44,7 @@
 
   function setBusy(value) {
     state.busy = value;
-    ['myDriveConnect', 'myDrivePicker', 'myDriveLock'].forEach(id => {
+    ['myDriveConnect', 'myDrivePicker', 'myDriveLogout'].forEach(id => {
       const button = $(id);
       if (!button) return;
       const requiresConnection = id === 'myDrivePicker';
@@ -63,7 +54,6 @@
     if (zip) zip.disabled = value || !state.connected;
     const zipButton = $('myDriveChooseZip');
     if (zipButton) zipButton.disabled = value || !state.connected;
-    [setupForm, unlockForm].forEach(form => form && form.querySelectorAll('input,button').forEach(el => { el.disabled = value; }));
   }
 
   function make(tag, className, text) {
@@ -131,7 +121,7 @@
   }
 
   async function loadAssets(append) {
-    if (!state.connected || !state.unlocked) return;
+    if (!state.connected || !state.authenticated) return;
     const query = '/api/my-drive/assets?limit=50' + (append && state.cursor ? '&cursor=' + encodeURIComponent(state.cursor) : '');
     const data = await request(query);
     const incoming = Array.isArray(data.assets) ? data.assets : [];
@@ -146,47 +136,50 @@
   }
 
   async function refreshState() {
+    if (state.refreshing) return;
+    state.refreshing = true;
     try {
-      const lock = await request('/api/my-drive/lock/status');
-      state.configured = Boolean(lock.configured);
-      state.unlocked = Boolean(lock.unlocked);
-      gate.hidden = state.unlocked;
-      setupForm.hidden = state.configured;
-      unlockForm.hidden = !state.configured;
-      content.hidden = !state.unlocked;
-      if (!state.unlocked) {
+      const session = await request('/api/admin/session');
+      state.authenticated = Boolean(session.authenticated);
+      gate.hidden = state.authenticated;
+      content.hidden = !state.authenticated;
+      loginLink.hidden = state.authenticated;
+      logoutButton.hidden = !state.authenticated;
+      if (!state.authenticated) {
         state.connected = false; state.assets = []; state.cursor = null; renderAssets();
-        showMessage(state.configured ? 'My Drive is locked. Enter your separate My Drive password.' : 'First-time setup needs an active MAP132 Admin Dashboard sign-in. Create your separate My Drive password after signing in.');
+        showMessage('Login to the MAP132 Admin Dashboard to open My Drive.');
         return;
       }
-      const session = await request('/api/my-drive/session');
-      state.connected = Boolean(session.connected);
+      const drive = await request('/api/my-drive/session');
+      state.connected = Boolean(drive.connected);
       $('myDriveConnect').textContent = state.connected ? 'Reconnect Google Drive' : 'Connect Google Drive';
       if (state.connected) {
         await loadAssets(false);
-        showMessage('Google Drive connected. Saved copies are stored in your MAP132 Workspace folder.');
+        showMessage('Google Drive connected. Your saved resources are ready.');
       } else {
         state.assets = []; state.cursor = null; renderAssets();
-        showMessage('My Drive unlocked. Connect Google Drive to import and retrieve persistent resources.');
+        showMessage('You are logged in. Connect Google Drive to import and retrieve resources.');
       }
     } catch (error) {
-      showMessage(error.message || 'Could not check My Drive status. Refresh and try again.', true);
-    } finally { setBusy(false); }
+      state.authenticated = false;
+      gate.hidden = false; content.hidden = true;
+      loginLink.hidden = false; logoutButton.hidden = true;
+      state.connected = false; state.assets = []; state.cursor = null; renderAssets();
+      showMessage(error.status === 401 ? 'Login to the MAP132 Admin Dashboard to open My Drive.' : (error.message || 'Admin login required. Sign in and refresh this page.'), true);
+    } finally { state.refreshing = false; setBusy(false); }
   }
 
-  async function passwordAction(event, path, inputId) {
-    event.preventDefault();
-    const input = $(inputId);
+  async function logout() {
+    if (state.busy) return;
     setBusy(true);
-    showMessage(path.endsWith('/setup') ? 'Creating your separate My Drive password…' : 'Unlocking My Drive…');
     try {
-      await post(path, { password: input.value });
-      input.value = '';
-      await refreshState();
-      showMessage(path.endsWith('/setup') ? 'My Drive password created and unlocked.' : 'My Drive unlocked.');
+      await post('/api/admin/logout');
+      state.authenticated = false; state.connected = false; state.assets = []; state.cursor = null;
+      gate.hidden = false; content.hidden = true; loginLink.hidden = false; logoutButton.hidden = true;
+      renderAssets();
+      showMessage('Logged out. My Drive is now locked.');
     } catch (error) {
-      if (error.status === 403) showMessage('Admin sign-in required before first-time setup. Open Dashboard, sign in, then return here.', true);
-      else showMessage(error.message || 'Password action failed.', true);
+      showMessage(error.message || 'Could not log out. Please retry.', true);
     } finally { setBusy(false); }
   }
 
@@ -476,41 +469,12 @@
     finally { setBusy(false); }
   }
 
-  function bindPasswordVisibility(inputId, buttonId) {
-    const input = $(inputId), button = $(buttonId);
-    if (!input || !button) return;
-    button.addEventListener('click', () => {
-      const visible = input.type === 'password';
-      input.type = visible ? 'text' : 'password';
-      button.setAttribute('aria-label', visible ? 'Hide password' : 'Show password');
-      button.setAttribute('title', visible ? 'Hide password' : 'Show password');
-      button.setAttribute('aria-pressed', String(visible));
-      const open = button.querySelector('[data-eye-open]');
-      const closed = button.querySelector('[data-eye-closed]');
-      if (open) open.hidden = visible;
-      if (closed) closed.hidden = !visible;
-      input.focus({ preventScroll: true });
-    });
-  }
-  bindPasswordVisibility('myDriveSetupPassword', 'myDriveSetupToggle');
-  bindPasswordVisibility('myDriveUnlockPassword', 'myDriveUnlockToggle');
-
-  setupForm.addEventListener('submit', event => passwordAction(event, '/api/my-drive/lock/setup', 'myDriveSetupPassword'));
-  unlockForm.addEventListener('submit', event => passwordAction(event, '/api/my-drive/lock/unlock', 'myDriveUnlockPassword'));
   $('myDriveConnect').addEventListener('click', connectDrive);
   $('myDrivePicker').addEventListener('click', openFolderPicker);
   $('myDriveChooseZip').addEventListener('click', () => $('myDriveLocalZip').click());
   $('myDriveLocalZip').addEventListener('change', event => { const file = event.target.files && event.target.files[0]; if (file) void importZip(file); });
-  $('myDriveLock').addEventListener('click', async () => {
-    setBusy(true);
-    try {
-      await post('/api/my-drive/lock');
-      state.unlocked = false; state.connected = false; state.assets = []; state.cursor = null;
-      gate.hidden = false; content.hidden = true; setupForm.hidden = true; unlockForm.hidden = false; renderAssets();
-      showMessage('My Drive locked. Enter your separate password to unlock it again.');
-    } catch (error) { showMessage(error.message || 'Could not lock My Drive.', true); }
-    finally { setBusy(false); }
-  });
+  if (logoutButton) logoutButton.addEventListener('click', logout);
+
   const refreshButton = $('myDriveRefresh');
   if (refreshButton) refreshButton.addEventListener('click', () => { setBusy(true); refreshState(); });
 
@@ -522,5 +486,7 @@
     clean.searchParams.delete('myDrive');
     window.history.replaceState({}, '', clean.pathname + clean.search + clean.hash);
   }
+  window.addEventListener('focus', () => { if (!state.busy) refreshState(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !state.busy) refreshState(); });
   refreshState();
 })();
