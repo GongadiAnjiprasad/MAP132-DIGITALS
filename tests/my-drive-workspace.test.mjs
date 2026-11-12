@@ -95,6 +95,10 @@ test('My Drive server access is bound to the Admin Dashboard session', () => {
   assert.ok(workerSource.includes('SameSite=Lax; Path=/; Max-Age='), 'Admin session cookie must survive a top-level return navigation into My Drive');
   assert.ok(workerSource.includes("path==='/api/my-drive/oauth/callback'&&method==='GET'"));
   assert.doesNotMatch(oauthSource, /my-drive\/lock\/password-hash|map132_drive_unlock/);
+  const assetsSource = readFileSync(new URL('../worker/myDriveAssets.ts', import.meta.url), 'utf8');
+  assert.ok(assetsSource.includes("startsWith('map132_admin='"));
+  assert.doesNotMatch(assetsSource, /map132_drive_unlock|my-drive\/unlock\//);
+  assert.ok(assetsSource.includes("error:'MAP132 Admin login required.'"));
 });
 
 test('Google OAuth token exchange exposes only a sanitized provider error for diagnosis', async () => {
