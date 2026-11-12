@@ -29,7 +29,7 @@ This module must not change the existing Free Sources implementation or the curr
 
 - OAuth authorization uses a least-privilege read-only scope and a state/PKCE-protected flow. Access tokens must not be placed in URLs, localStorage, or committed source.
 - The Google OAuth client secret and My Drive session encryption secret are Cloudflare Worker secrets, never committed to Git.
-- Every `/api/my-drive/*` operation must validate the signed `map132_admin` session server-side; hiding the UI is not an authorization boundary.
+- Every `/api/my-drive/*` operation must validate the signed `map132_admin` session server-side; the Google OAuth callback is the sole exception and must validate the one-time state cookie and PKCE verifier created during an authenticated Admin session. Hiding the UI is not an authorization boundary.
 - Admin logout clears the current browser's My Drive access cookie/session. Google refresh-token records and imported assets are not destructively removed by ordinary MAP132 logout.
 - ZIP processing must reject absolute paths, traversal, symlinks, encrypted entries and unsupported compression methods. Enforce entry-count, per-file, total-uncompressed-size and compression-ratio limits before extraction.
 - Use MIME sniffing / file signature checks where practical; do not trust file extensions alone.
