@@ -89,8 +89,9 @@ test('My Drive server access is bound to the Admin Dashboard session', () => {
   const workerSource = readFileSync(new URL('../worker/index.ts', import.meta.url), 'utf8');
   assert.ok(oauthSource.includes('async function hasAdminSession'));
   assert.ok(oauthSource.includes('MAP132 Admin login required'));
-  assert.ok(workerSource.includes("if(!await validSession(req,env))return json({error:'MAP132 Admin login required."));
+  assert.ok(workerSource.includes("if(!oauthCallback&&!await validSession(req,env))return json({error:'MAP132 Admin login required."));
   assert.ok(workerSource.includes('clearMyDriveSession(req,env)'));
+  assert.ok(workerSource.includes("path==='/api/my-drive/oauth/callback'&&method==='GET'"));
   assert.doesNotMatch(oauthSource, /my-drive\/lock\/password-hash|map132_drive_unlock/);
 });
 
