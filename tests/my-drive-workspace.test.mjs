@@ -7,6 +7,7 @@ const publishedHtml = readFileSync(new URL('../public/workspace.html', import.me
 const source = readFileSync(new URL('../public/my-drive-resource-manager.js', import.meta.url), 'utf8');
 const appSource = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
 const cssSource = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+const assetsSource = readFileSync(new URL('../worker/myDriveAssets.ts', import.meta.url), 'utf8');
 
 test('My Drive is a separate workspace tab and its browser script is loaded', () => {
   assert.ok(rootHtml.includes('data-resource-view="my-drive"'));
