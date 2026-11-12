@@ -4,7 +4,7 @@ interface AssetEnv { MAP132_KV?: KVNamespace; GOOGLE_CLIENT_ID?: string; GOOGLE_
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const allowedExt=new Set(['ttf','otf','woff','woff2','mp3','wav','aac','ogg','m4a','flac','mp4','webm','mov','m4v','jpg','jpeg','png','webp','gif','avif','svg','zip','aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm']);
 const allowedCategories=new Set(['Sound Effects','Wedding','Birthday','Trailer BGMs','Plugins','Fonts','Images','Videos','Other']);
-const allowedSoundSubcategories=new Set(['Whoosh','Riser','Impact','Boom','Transition','Cinematic Hit','Logo Reveal','Swipe','Punch','Heartbeat','Suspense','Ambient','Action','Horror','Other Effects']);
+const allowedSoundSubcategories=new Set(['Whoosh','Riser','Impact','Boom','Transition','Cinematic Hit','Logo Reveal','Swipe','Punch','Heartbeat','Suspense','Ambient','Action','Horror','Foley','Footsteps','Gunshots','Nature','Crowd','Vehicle','UI','Animal','Water','Fire','Other Effects']);
 const maxBytes=100*1024*1024;
 function safeName(value:string){return value.replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,120)||'asset';}
 async function authorized(req:Request,env:AssetEnv){
