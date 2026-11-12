@@ -401,6 +401,16 @@
     return { category:'Plugins', kind:'template' };
   }
 
+  // CRC-32 (IEEE 802.3) used to verify extracted ZIP entry bytes.
+  function crc32(bytes) {
+    let crc = 0xffffffff;
+    for (const byte of bytes) {
+      crc ^= byte;
+      for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
+    }
+    return (crc ^ 0xffffffff) >>> 0;
+  }
+
   async function extractZipResources(file, depth, budget) {
     depth = depth || 0;
     budget = budget || { entries:0, bytes:0 };
