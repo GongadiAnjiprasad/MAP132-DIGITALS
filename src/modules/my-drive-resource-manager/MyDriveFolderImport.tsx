@@ -64,7 +64,6 @@ export default function MyDriveFolderImport({ disabled = false, onImported }: Pr
           headers: {
             'Content-Type': contentTypes[font.extension] || font.mimeType || 'application/octet-stream',
             'X-Asset-Name': encodeURIComponent(font.fileName),
-            'Content-Length': String(bytes.byteLength),
           },
           body: bytes,
         });
