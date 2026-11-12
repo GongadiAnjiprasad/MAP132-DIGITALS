@@ -53,15 +53,27 @@ export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Resp
   if(!bytes.byteLength||bytes.byteLength>maxBytes)return json({error:'Resource size is empty or exceeds the 100 MB limit.'},413);
   const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));
   const sha=[...digest].map(b=>b.toString(16).padStart(2,'0')).join('');
-  const duplicateId=await env.MAP132_KV.get('my-drive/asset-sha/'+sha);
-  if(duplicateId){const existing=await env.MAP132_KV.get('my-drive/assets/'+duplicateId);if(existing)return json({saved:false,duplicate:true,asset:JSON.parse(existing)},200);}
-  const id=crypto.randomUUID(),key='my-drive/assets/'+id;
   const categoryHeader=req.headers.get('X-Asset-Category')||'Other';
   const category=allowedCategories.has(categoryHeader)?categoryHeader:'Other';
   const kind=['ttf','otf','woff','woff2'].includes(ext)?'font':['mp3','wav','aac','ogg','m4a','flac'].includes(ext)?'audio':['mp4','webm','mov','m4v'].includes(ext)?'video':['jpg','jpeg','png','webp','gif','avif','svg'].includes(ext)?'image':['aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm'].includes(ext)?'template':'archive';
   const requestedSubcategory=req.headers.get('X-Asset-Subcategory')||'';
   const subcategory=category==='Sound Effects'&&allowedSoundSubcategories.has(requestedSubcategory)?requestedSubcategory:(category==='Sound Effects'?'Other Effects':undefined);
-  const asset={id,name:filename,kind,category,...(subcategory?{subcategory}:{}),size:bytes.byteLength,sha256:sha,contentType:contentType||'application/octet-stream',storedAt:new Date().toISOString(),licenseStatus:'unverified',source:'user-import'};
+  let sourcePath=filename;
+  try{sourcePath=decodeURIComponent(req.headers.get('X-Asset-Source-Path')||filename).slice(0,500);}catch{}
+  const duplicateId=await env.MAP132_KV.get('my-drive/asset-sha/'+sha);
+  if(duplicateId){
+   const existingValue=await env.MAP132_KV.get('my-drive/assets/'+duplicateId);
+   if(existingValue){
+    const existing=JSON.parse(existingValue);
+    let updated=false;
+    if(category==='Sound Effects'&&existing.category==='Sound Effects'&&!existing.subcategory&&subcategory){existing.subcategory=subcategory;updated=true;}
+    if(!existing.sourcePath&&sourcePath){existing.sourcePath=sourcePath;updated=true;}
+    if(updated)await env.MAP132_KV.put('my-drive/assets/'+duplicateId,JSON.stringify(existing));
+    return json({saved:false,duplicate:true,asset:existing},200);
+   }
+  }
+  const id=crypto.randomUUID(),key='my-drive/assets/'+id;
+  const asset={id,name:filename,kind,category,...(subcategory?{subcategory}:{}),sourcePath,size:bytes.byteLength,sha256:sha,contentType:contentType||'application/octet-stream',storedAt:new Date().toISOString(),licenseStatus:'unverified',source:'user-import'};
   const driveFile=await uploadMap132DriveFile(accessToken,env.MAP132_KV,filename,asset.contentType,bytes,category);
   (asset as typeof asset & {driveFileId?:string}).driveFileId=driveFile.id;
   await env.MAP132_KV.put(key,JSON.stringify(asset));
