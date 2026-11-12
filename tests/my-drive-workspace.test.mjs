@@ -154,12 +154,13 @@ test('workspace mobile layout keeps resource cards and action controls aligned',
 });
 
 
-test('My Drive previews use compact side-by-side horizontal scrolling shelves on desktop and mobile', () => {
-  assert.ok(rootHtml.includes('.mydrive-items-grid{display:flex'));
-  assert.ok(rootHtml.includes('overflow-x:auto'));
-  assert.ok(rootHtml.includes('scroll-snap-type:x proximity'));
-  assert.ok(rootHtml.includes('flex:0 0 clamp(190px,25vw,250px)'));
-  assert.ok(rootHtml.includes('flex-basis:clamp(176px,68vw,220px)'));
+test('My Drive resource preview cards use a compact two-column by two-row grid on desktop and mobile', () => {
+  assert.ok(rootHtml.includes('.mydrive-items-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))'));
+  assert.ok(rootHtml.includes('.mydrive-items-grid>.mydrive-item{min-width:0;width:auto'));
+  assert.ok(rootHtml.includes('@media(max-width:600px)'));
+  assert.ok(rootHtml.includes('.mydrive-items-grid{grid-template-columns:repeat(2,minmax(0,1fr))'));
+  assert.ok(!rootHtml.includes('scroll-snap-type:x proximity'));
+  assert.ok(!rootHtml.includes('flex:0 0 clamp(190px,25vw,250px)'));
   assert.ok(rootHtml.includes('max-height:118px'));
   assert.equal(rootHtml, publishedHtml);
 });
