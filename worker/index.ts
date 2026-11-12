@@ -1,6 +1,6 @@
 import { FESTIVAL_CALENDAR, getIndiaDateKey } from '../src/modules/seasonal/festivalCalendar';
 import { createFeedbackResponse } from './feedback';
-import { handleMyDriveOAuth } from '../src/modules/my-drive-resource-manager/driveOAuth';
+import { clearMyDriveSession, handleMyDriveOAuth } from '../src/modules/my-drive-resource-manager/driveOAuth';
 import { handleMyDriveAssets } from './myDriveAssets';
 interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; GOOGLE_PICKER_API_KEY?: string; MY_DRIVE_SESSION_SECRET?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
@@ -52,7 +52,7 @@ async function read(env:Env){
     return {...DEFAULTS,...stored,profile,skills,items,resources,logoPath:typeof stored.logoPath==='string'&&stored.logoPath.startsWith('portfolio/logos/')?stored.logoPath:''};
   }catch{return DEFAULTS;}
 }
-async function api(req:Request,env:Env){const driveAssetsResponse=await handleMyDriveAssets(req,env);if(driveAssetsResponse)return driveAssetsResponse;const driveOAuthResponse=await handleMyDriveOAuth(req,env);if(driveOAuthResponse)return driveOAuthResponse;const url=new URL(req.url),path=url.pathname,method=req.method;
+async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;if(path.startsWith('/api/my-drive/')){if(path==='/api/my-drive/logout'&&method==='POST'){const headers=await clearMyDriveSession(req,env);return json({signedOut:true},200,headers);}if(!await validSession(req,env))return json({error:'MAP132 Admin login required. Sign in to the Admin Dashboard to access My Drive.'},401);}const driveAssetsResponse=await handleMyDriveAssets(req,env);if(driveAssetsResponse)return driveAssetsResponse;const driveOAuthResponse=await handleMyDriveOAuth(req,env);if(driveOAuthResponse)return driveOAuthResponse;
 if(path.startsWith('/api/resources/sounds/')&&path.endsWith('/preview')&&method==='GET'){
   if(!env.FREESOUND_API_KEY)return json({error:'Sound preview is not connected.'},503);
   const id=path.split('/')[4];
@@ -197,7 +197,7 @@ if(path==='/api/reviews'&&method==='GET'){if(!env.MAP132_KV)return json({reviews
 if(path==='/api/portfolio'&&method==='GET'){const content=await read(env);for(const item of content.items||[])if(item.path&&env.MAP132_MEDIA){item.mediaUrl='/media/'+encodeURIComponent(item.path);}content.logoUrl=content.logoPath?'/media/'+encodeURIComponent(content.logoPath):'/resources/Logo.png';return json({content});}
 if(path==='/api/admin/session'&&method==='GET'){const authenticated=await validSession(req,env);return json({authenticated},authenticated?200:401);}
 if(path==='/api/admin/login'&&method==='POST'){let stage='check admin secret';try{if(!env.ADMIN_PASSWORD)return json({error:'Admin password secret is not configured in Cloudflare.'},503);stage='parse login request';let body:any;try{body=await req.json();}catch{return json({error:'Invalid request.'},400);}stage='validate password';if(typeof body.password!=='string'||body.password!==env.ADMIN_PASSWORD)return json({error:'Incorrect admin password.'},401);stage='create session payload';const payload=toBase64Url(encoder.encode(JSON.stringify({exp:Date.now()+8*60*60*1000})));stage='sign session token';const signed=await signature(payload,env.ADMIN_PASSWORD);const token=payload+'.'+signed;stage='create login response';return json({authenticated:true},200,{ 'Set-Cookie':sessionCookie(token,8*60*60) });}catch(error){const detail=error instanceof Error?error.message:'Unknown error';const name=error instanceof Error?error.name:'Error';return json({error:'Admin login failed at stage "'+stage+'" ('+name+'): '+detail},500);}}
-if(path==='/api/admin/logout'&&method==='POST')return json({signedOut:true},200,{'Set-Cookie':sessionCookie('',0)});
+if(path==='/api/admin/logout'&&method==='POST'){const headers=await clearMyDriveSession(req,env);headers.append('Set-Cookie',sessionCookie('',0));return json({signedOut:true},200,headers);}
 if(!await validSession(req,env))return json({error:'Admin session required.'},401);
 
 if(path==='/api/admin/feedback'&&method==='GET'){
