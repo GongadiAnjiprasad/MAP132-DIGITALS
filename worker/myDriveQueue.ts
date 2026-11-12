@@ -92,7 +92,7 @@ async function scanFolder(token:string, rootId:string, rootName:string):Promise<
         if (scanned >= 1500 || files.length >= 900) break;
       }
       pageToken = page.nextPageToken || '';
-    } while (pageToken && scanned < 1500 && files.length < 1200);
+    } while (pageToken && scanned < 1500 && files.length < 900);
   }
   return files;
 }
@@ -175,9 +175,9 @@ export async function processMyDriveQueue(env:MyDriveQueueEnv):Promise<void> {
       if(!copiedId){
         const q = "appProperties has { key='map132SourceFileId' and value='"+item.sourceFileId+"' } and trashed=false";
         const lookup = new URL('https://www.googleapis.com/drive/v3/files');
-        lookup.searchParams.set('q',q);lookup.searchParams.set('pageSize','1');lookup.searchParams.set('fields','files(id)');
+        lookup.searchParams.set('q',q);lookup.searchParams.set('pageSize','1');lookup.searchParams.set('fields','files(id,size)');
         const found = await fetch(lookup,{headers:{Authorization:'Bearer '+token,Accept:'application/json'}});
-        if(found.ok){const result=await found.json() as {files?:Array<{id:string}>};copiedId=result.files?.[0]?.id||null;}
+        if(found.ok){const result=await found.json() as {files?:Array<{id:string;size?:string}>};copiedId=result.files?.[0]?.id||null;}
       }
       if(!copiedId){
         const parent=await ensureMap132CategoryFolder(token,env.MAP132_KV,item.category);
@@ -186,10 +186,15 @@ export async function processMyDriveQueue(env:MyDriveQueueEnv):Promise<void> {
           body:JSON.stringify({name:item.name,parents:[parent],appProperties:{map132SourceFileId:item.sourceFileId,map132QueueItemId:item.id}})
         });
         if(!response.ok)throw new Error(response.status===403?'Google Drive does not allow copying this source file.':response.status===404?'The source file is no longer available.':'Google Drive copy failed ('+response.status+').');
-        const copied=await response.json() as {id?:string};
+        const copied=await response.json() as {id?:string;size?:string};
         if(!copied.id)throw new Error('Google Drive did not confirm the copied file.');
+        if(item.size>0&&Number(copied.size)!==item.size)throw new Error('Copied file size does not match the source. It will be retried.');
         copiedId=copied.id;
       }
+      const verify=await fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(copiedId)+'?fields=id,size,trashed',{headers:{Authorization:'Bearer '+token,Accept:'application/json'}});
+      if(!verify.ok)throw new Error('Could not verify the copied file in Google Drive.');
+      const verified=await verify.json() as {id?:string;size?:string;trashed?:boolean};
+      if(!verified.id||verified.trashed||(item.size>0&&Number(verified.size)!==item.size))throw new Error('Copied file failed size or availability verification. It will be retried.');
       item.targetFileId=copiedId;item.status='completed';item.progress=100;
       await env.MAP132_KV.put(PREFIX+'source-copy/'+item.sourceFileId,copiedId);
       const ext=(item.name.split('.').pop()||'').toLowerCase();
