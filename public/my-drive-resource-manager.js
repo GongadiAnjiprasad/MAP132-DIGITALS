@@ -471,6 +471,7 @@
   $('myDrivePicker').addEventListener('click', openFolderPicker);
   $('myDriveChooseZip').addEventListener('click', () => $('myDriveLocalZip').click());
   $('myDriveLocalZip').addEventListener('change', event => { const file = event.target.files && event.target.files[0]; if (file) void importZip(file); });
+  if (logoutButton) logoutButton.addEventListener('click', logout);
 
   const refreshButton = $('myDriveRefresh');
   if (refreshButton) refreshButton.addEventListener('click', () => { setBusy(true); refreshState(); });
