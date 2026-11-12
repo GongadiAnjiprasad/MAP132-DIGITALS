@@ -144,3 +144,11 @@
   .ms-contact-links a,.ms-review-feed-foot button,.ms-home-review-invite button,
   .ms-arrow,.ms-preview-close{transition:none!important;animation:none!important}
 }
+
+/* Preserve the active pager's visible filled state required by swipe navigation. */
+.ms-pagination button.active{
+  background-image:linear-gradient(135deg,rgba(245,220,167,.96),rgba(232,199,122,.9));
+  background-color:rgba(232,199,122,.12);
+  border-color:var(--ms-gold);
+  color:#17130d;
+}
