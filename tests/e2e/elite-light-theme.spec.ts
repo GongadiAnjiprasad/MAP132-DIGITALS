@@ -40,7 +40,7 @@ for (const viewport of viewports) {
     expect(palette.primary.radius).toBe('999px');
     expect(palette.primary.background).toBe('rgb(128, 85, 31)');
     expect(palette.service.background).toBe('rgb(255, 255, 255)');
-    expect(palette.service.radius).toBe('17px');
+    expect(palette.service.radius).toBe(viewport.width <= 760 ? '14px' : '17px');
     expect(palette.contact.background).toBe('rgb(255, 255, 255)');
     expect(palette.bodyWidth).toBeLessThanOrEqual(viewport.width + 2);
   });
