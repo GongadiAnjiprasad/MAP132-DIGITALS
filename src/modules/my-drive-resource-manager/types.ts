@@ -12,6 +12,8 @@ export type CreativeAssetKind =
 
 export type SupportedFontFormat = 'ttf' | 'otf' | 'woff' | 'woff2';
 
+export type ResourceCategory = 'Sound Effects' | 'Wedding' | 'Birthday' | 'Trailer BGMs' | 'Plugins' | 'Fonts' | 'Images' | 'Videos' | 'Other';
+
 export interface ImportSource {
   kind: MyDriveSourceKind;
   sourceId: string;
@@ -26,6 +28,7 @@ export interface ImportCandidate {
   driveFileId?: string;
   extension: string;
   assetKind: CreativeAssetKind;
+  category: ResourceCategory;
   fontFormat?: SupportedFontFormat;
   mimeType?: string;
   byteSize?: number;
