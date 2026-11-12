@@ -175,7 +175,8 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
   if (!configReady(env)) {
     return json({ error: 'Google Drive connection is not configured. Add GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, MY_DRIVE_SESSION_SECRET and the MAP132_KV binding.' }, 503);
   }
-  if (!await hasAdminSession(request, env)) return json({ error: 'MAP132 Admin login required. Sign in to the Admin Dashboard to access My Drive.' }, 401);
+  const oauthCallback = path === '/api/my-drive/oauth/callback' && request.method === 'GET';
+  if (!oauthCallback && !await hasAdminSession(request, env)) return json({ error: 'MAP132 Admin login required. Sign in to the Admin Dashboard to access My Drive.' }, 401);
   if (path === '/api/my-drive/logout' && request.method === 'POST') {
     return json({ signedOut: true }, 200, { 'Set-Cookie': (await clearMyDriveSession(request, env)).get('Set-Cookie') || clearCookie() });
   }
