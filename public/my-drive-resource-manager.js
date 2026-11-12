@@ -5,7 +5,7 @@
   if (!panel || panel.dataset.initialized) return;
   panel.dataset.initialized = 'true';
 
-  const state = { authenticated: false, connected: false, busy: false, refreshing: false, assets: [], cursor: null, pickerPromise: null };
+  const state = { authenticated: false, connected: false, busy: false, refreshing: false, assets: [], cursor: null, pickerPromise: null, refreshPromise: null };
   const status = $('myDriveStatus');
   const loginForm = $('myDriveLoginForm');
   const loginPassword = $('myDriveAdminPassword');
@@ -138,9 +138,17 @@
     renderAssets();
   }
 
-  async function refreshState() {
+  async function refreshState(force) {
+    // A login can complete while the initial signed-out session check is still in flight.
+    // Wait for that stale check, then perform a fresh check with the newly-set cookie.
+    if (state.refreshing) {
+      if (!force || !state.refreshPromise) return;
+      await state.refreshPromise;
+    }
     if (state.refreshing) return;
     state.refreshing = true;
+    let finishRefresh;
+    state.refreshPromise = new Promise(resolve => { finishRefresh = resolve; });
     try {
       const session = await request('/api/admin/session');
       state.authenticated = Boolean(session.authenticated);
@@ -168,7 +176,12 @@
       logoutButton.hidden = true;
       state.connected = false; state.assets = []; state.cursor = null; renderAssets();
       showMessage(error.status === 401 ? 'Enter your MAP132 Admin password to open My Drive.' : (error.message || 'Admin login required. Please try again.'), true);
-    } finally { state.refreshing = false; setBusy(false); }
+    } finally {
+      state.refreshing = false;
+      state.refreshPromise = null;
+      setBusy(false);
+      finishRefresh();
+    }
   }
 
   async function login(event) {
@@ -179,7 +192,7 @@
     try {
       await post('/api/admin/login', { password: loginPassword.value });
       loginPassword.value = '';
-      await refreshState();
+      await refreshState(true);
     } catch (error) {
       showMessage(error.message || 'Admin login failed. Check the password and try again.', true);
       setBusy(false);

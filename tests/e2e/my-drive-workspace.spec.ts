@@ -133,3 +133,58 @@ test('Admin dashboard password field can be shown and hidden', async ({ page }) 
   await expect(password).toHaveAttribute('type', 'password');
   await expect(toggle).toHaveAttribute('aria-label', 'Show password');
 });
+
+
+test('Inline Admin login retries session check if the initial signed-out check is still in flight', async ({ page }) => {
+  let authenticated = false;
+  let sessionCalls = 0;
+  let signalInitialSessionStarted: (() => void) | undefined;
+  let releaseInitialSession: (() => void) | undefined;
+  const initialSessionStarted = new Promise<void>(resolve => { signalInitialSessionStarted = resolve; });
+  const initialSessionGate = new Promise<void>(resolve => { releaseInitialSession = resolve; });
+
+  await page.route('**/api/admin/session', async route => {
+    sessionCalls += 1;
+    if (sessionCalls === 1) {
+      const wasAuthenticated = authenticated;
+      signalInitialSessionStarted?.();
+      await initialSessionGate;
+      await route.fulfill({
+        status: wasAuthenticated ? 200 : 401,
+        contentType: 'application/json',
+        body: JSON.stringify({ authenticated: wasAuthenticated })
+      });
+      return;
+    }
+    await route.fulfill({
+      status: authenticated ? 200 : 401,
+      contentType: 'application/json',
+      body: JSON.stringify({ authenticated })
+    });
+  });
+  await page.route('**/api/admin/login', async route => {
+    authenticated = route.request().postDataJSON().password === 'correct-password';
+    await route.fulfill({
+      status: authenticated ? 200 : 401,
+      contentType: 'application/json',
+      body: JSON.stringify({ authenticated, error: authenticated ? undefined : 'Incorrect admin password.' })
+    });
+  });
+  await page.route('**/api/my-drive/session', route => route.fulfill({
+    status: 200, contentType: 'application/json',
+    body: JSON.stringify({ connected: false, expiresAt: null })
+  }));
+
+  await page.goto('/workspace.html');
+  await page.locator('[data-resource-view="my-drive"]').click();
+  await initialSessionStarted;
+  await page.locator('#myDriveAdminPassword').fill('correct-password');
+  await page.locator('#myDriveLoginSubmit').click();
+  await expect(page.locator('#myDriveLoginSubmit')).toBeDisabled();
+  releaseInitialSession?.();
+
+  await expect(page.locator('#myDriveContent')).toBeVisible();
+  await expect(page.locator('#myDriveLoginForm')).toBeHidden();
+  await expect(page.locator('#myDriveStatus')).toContainText('Connect Google Drive');
+  expect(sessionCalls).toBeGreaterThanOrEqual(2);
+});
