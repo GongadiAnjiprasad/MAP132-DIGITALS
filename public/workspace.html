@@ -129,6 +129,28 @@
  .mydrive-item img{max-height:96px!important}
 }
 
+
+/* My Drive: reduce oversized resource card whitespace while retaining 2x2 layout and controls. */
+.mydrive-category{margin:12px 0 14px}
+.mydrive-category>h3{margin-bottom:6px;font-size:14px}
+.mydrive-items-grid{gap:6px;padding:0 0 6px}
+.mydrive-items-grid>.mydrive-item{padding:6px;gap:4px;border-radius:10px}
+.mydrive-item strong{font-size:10px;line-height:1.25}
+.mydrive-item small{font-size:8px;line-height:1.25}
+.mydrive-item audio{height:26px}
+.mydrive-item video{max-height:76px}
+.mydrive-item img{max-height:76px!important}
+.mydrive-item .mydrive-font-sample{min-height:38px;font-size:clamp(14px,1.6vw,18px);line-height:1.2;padding:0}
+.mydrive-item .mydrive-generic-preview{padding:5px;gap:3px}
+.mydrive-item .mydrive-generic-preview p{font-size:9px;line-height:1.25}
+.mydrive-item .mydrive-actions{gap:4px;margin-top:2px}
+.mydrive-item .mydrive-actions>*{padding:5px 4px;font-size:9px;min-height:28px}
+@media(max-width:600px){
+ .mydrive-items-grid{gap:5px;padding-bottom:4px}
+ .mydrive-items-grid>.mydrive-item{padding:5px}
+ .mydrive-item video,.mydrive-item img{max-height:68px!important}
+ .mydrive-item audio{height:24px}
+}
 </style></head><body><main class="shell"><header class="top"><a class="brand" href="index.html">MAP<b>132</b> <span style="font-size:10px;color:#aaa;font-weight:400">DIGITALS</span></a><a class="dashboard-link" href="index.html#admin" aria-label="Open protected Admin Dashboard"><span aria-hidden="true">▦</span> Dashboard</a><a class="back" href="index.html">← Back to website</a></header>
 <section class="welcome"><div class="kicker">Private creator area · Workspace</div><h1>Your creative control room.</h1><p>Organise your brand resources, editing references, reusable assets and project links in one place.</p></section>
 <nav class="resource-switcher" aria-label="Choose resource library">
