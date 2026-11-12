@@ -320,7 +320,7 @@
     const mime = { ttf: 'font/ttf', otf: 'font/otf', woff: 'font/woff', woff2: 'font/woff2' }[ext];
     const response = await fetch('/api/my-drive/assets', {
       method: 'POST', credentials: 'same-origin',
-      headers: { 'Content-Type': mime || file.type || 'application/octet-stream', 'X-Asset-Name': encodeURIComponent(file.name) },
+      headers: { 'Content-Type': mime || file.type || 'application/octet-stream', 'X-Asset-Name': encodeURIComponent(file.name), 'X-Asset-Category': 'Fonts' },
       body: file
     });
     const data = await response.json().catch(() => ({}));
@@ -466,27 +466,4 @@
     } catch (error) { showMessage(error.message || 'Could not lock My Drive.', true); }
     finally { setBusy(false); }
   });
-  $('myDriveDisconnect').addEventListener('click', async () => {
-    if (!window.confirm('Disconnect Google Drive? Saved copies remain in your Google Drive account, but MAP132 will remove its stored authorization.')) return;
-    setBusy(true);
-    try {
-      await post('/api/my-drive/oauth/logout');
-      state.connected = false; state.assets = []; state.cursor = null; renderAssets();
-      showMessage('Google Drive disconnected. Your saved files remain in your account.');
-      await refreshState();
-    } catch (error) { showMessage(error.message || 'Could not disconnect Google Drive.', true); }
-    finally { setBusy(false); }
-  });
-  const refreshButton = $('myDriveRefresh');
-  if (refreshButton) refreshButton.addEventListener('click', () => { setBusy(true); refreshState(); });
-
-  const params = new URLSearchParams(window.location.search);
-  if (params.get('myDrive') === 'connected' || params.get('myDrive') === 'cancelled') {
-    const tab = document.querySelector('[data-resource-view="my-drive"]');
-    if (tab) tab.click();
-    const clean = new URL(window.location.href);
-    clean.searchParams.delete('myDrive');
-    window.history.replaceState({}, '', clean.pathname + clean.search + clean.hash);
-  }
-  refreshState();
-})();
+;
