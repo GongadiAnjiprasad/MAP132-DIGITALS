@@ -86,3 +86,13 @@ test('My Drive password lock remains available when Google OAuth client config i
   assert.ok(oauthSource.includes('return Boolean(lockConfigReady(env) && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET)'));
   assert.ok(oauthSource.includes('lockEndpoint ? !lockConfigReady(env) : !configReady(env)'));
 });
+
+
+test('Google OAuth token exchange exposes only a sanitized provider error for diagnosis', async () => {
+  const oauthSource = readFileSync(new URL('../src/modules/my-drive-resource-manager/driveOAuth.ts', import.meta.url), 'utf8');
+  assert.ok(oauthSource.includes("const providerFailure = await tokenResponse.json().catch(() => ({}))"));
+  assert.ok(oauthSource.includes(".replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64)"));
+  assert.ok(oauthSource.includes(".slice(0, 180)"));
+  assert.ok(oauthSource.includes("Google token exchange failed (' + providerError + ')'"));
+  assert.doesNotMatch(oauthSource, /console\\.(log|error)\\(.*(client_secret|refresh_token|code_verifier|access_token)/s);
+});
