@@ -84,8 +84,12 @@ function clearCookie(): string {
   return COOKIE + '=; HttpOnly; Secure; SameSite=Lax; Path=/api/my-drive; Max-Age=0';
 }
 
+function lockConfigReady(env: DriveEnv): boolean {
+  return Boolean(env.MAP132_KV && env.MY_DRIVE_SESSION_SECRET && env.MY_DRIVE_SESSION_SECRET.length >= 32);
+}
+
 function configReady(env: DriveEnv): boolean {
-  return Boolean(env.MAP132_KV && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET && env.MY_DRIVE_SESSION_SECRET && env.MY_DRIVE_SESSION_SECRET.length >= 32);
+  return Boolean(lockConfigReady(env) && env.GOOGLE_CLIENT_ID && env.GOOGLE_CLIENT_SECRET);
 }
 
 async function readSession(request: Request, env: DriveEnv): Promise<{ access_token: string; expires_at: number } | null> {
@@ -183,8 +187,16 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
   const path = url.pathname;
   if (!path.startsWith('/api/my-drive/')) return null;
 
-  if (!configReady(env)) {
-    return json({ error: 'My Drive connection is not configured. Add the required Worker secrets and MAP132_KV binding.' }, 503);
+  const lockEndpoint = path === '/api/my-drive/lock/status' ||
+    path === '/api/my-drive/lock/setup' ||
+    path === '/api/my-drive/lock/unlock' ||
+    path === '/api/my-drive/lock';
+  if (lockEndpoint ? !lockConfigReady(env) : !configReady(env)) {
+    return json({
+      error: lockEndpoint
+        ? 'My Drive password storage is not configured. Add MY_DRIVE_SESSION_SECRET (at least 32 characters) and the MAP132_KV binding.'
+        : 'Google Drive connection is not configured. Add GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, MY_DRIVE_SESSION_SECRET and the MAP132_KV binding.'
+    }, 503);
   }
 
   if (path === '/api/my-drive/oauth/start' && request.method === 'POST') {
