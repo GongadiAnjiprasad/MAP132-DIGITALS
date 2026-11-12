@@ -247,8 +247,8 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
       const providerFailure = await tokenResponse.json().catch(() => ({})) as { error?: unknown; error_description?: unknown };
       const providerError = String(providerFailure.error || 'unknown').replace(/[^a-zA-Z0-9_-]/g, '').slice(0, 64) || 'unknown';
       const providerDescription = String(providerFailure.error_description || '')
-        .replace(/[\\u0000-\\u001f\\u007f]/g, ' ')
-        .replace(/\\s+/g, ' ')
+        .replace(/[\u0000-\u001f\u007f]/g, ' ')
+        .replace(/\s+/g, ' ')
         .trim()
         .slice(0, 180);
       const detail = providerDescription ? ': ' + providerDescription : '';
