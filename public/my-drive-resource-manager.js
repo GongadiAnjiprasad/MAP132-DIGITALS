@@ -53,10 +53,10 @@
 
   function setBusy(value) {
     state.busy = value;
-    ['myDriveConnect', 'myDrivePicker', 'myDriveBrowse', 'myDriveLock', 'myDriveDisconnect'].forEach(id => {
+    ['myDriveConnect', 'myDrivePicker', 'myDriveLock'].forEach(id => {
       const button = $(id);
       if (!button) return;
-      const requiresConnection = ['myDrivePicker', 'myDriveBrowse', 'myDriveDisconnect'].includes(id);
+      const requiresConnection = id === 'myDrivePicker';
       button.disabled = value || (requiresConnection && !state.connected);
     });
     const zip = $('myDriveLocalZip');
@@ -83,46 +83,33 @@
   function renderAssets() {
     items.replaceChildren();
     if (!state.assets.length) {
-      items.appendChild(make('p', 'mydrive-empty', 'No saved resources yet. Import a Drive font folder or a ZIP archive from your device.'));
+      items.appendChild(make('p', 'mydrive-empty', 'Choose one Drive folder to build your private category library.'));
+      return;
     }
-    state.assets.forEach(asset => {
-      const card = make('article', 'mydrive-item');
-      card.appendChild(make('strong', '', asset.name || 'Untitled resource'));
-      card.appendChild(make('small', '', String(asset.kind || 'file').toUpperCase() + ' · ' + sizeText(asset.size) + ' · Licence ' + (asset.licenseStatus || 'unverified') + ' · Saved ' + (asset.storedAt ? new Date(asset.storedAt).toLocaleString() : 'date unavailable')));
-      if (asset.kind === 'audio') {
-        const audio = make('audio'); audio.controls = true; audio.preload = 'none'; audio.src = assetUrl(asset); audio.style.width = '100%'; card.appendChild(audio);
-      } else if (asset.kind === 'video') {
-        const video = make('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.src = assetUrl(asset); video.style.width = '100%'; card.appendChild(video);
-      } else if (asset.kind === 'image') {
-        const img = make('img'); img.src = assetUrl(asset); img.alt = asset.name || 'Saved image'; img.loading = 'lazy'; img.style.cssText = 'max-width:100%;max-height:220px;object-fit:contain'; card.appendChild(img);
-      } else if (asset.kind === 'font') {
-        const sample = make('div', 'mydrive-font-sample', 'MAP132 DIGITALS · The Final Chapter · తెలుగు');
-        sample.dataset.fontAsset = asset.id;
-        card.appendChild(sample);
-        const preview = make('button', '', 'Preview font');
-        preview.type = 'button';
-        preview.addEventListener('click', () => previewFont(asset, sample, preview));
-        card.appendChild(preview);
-      }
-      const actions = make('div', 'mydrive-actions');
-      const download = make('a', 'mydrive-upload', 'Download');
-      download.href = assetUrl(asset, 'download');
-      download.setAttribute('download', asset.name || 'resource');
-      const remove = make('button', '', 'Remove');
-      remove.type = 'button';
-      remove.addEventListener('click', () => removeAsset(asset));
-      actions.append(download, remove);
-      card.appendChild(actions);
-      items.appendChild(card);
+    const categories = ['Sound Effects','Wedding','Birthday','Trailer BGMs','Plugins','Fonts','Images','Videos','Other'];
+    categories.forEach(category => {
+      const grouped = state.assets.filter(asset => (asset.category || 'Other') === category);
+      if (!grouped.length) return;
+      const section = make('section', 'mydrive-category');
+      section.appendChild(make('h3', '', category + ' · ' + grouped.length));
+      const grid = make('div', 'mydrive-items-grid');
+      grouped.forEach(asset => {
+        const card = make('article', 'mydrive-item');
+        card.appendChild(make('strong', '', asset.name || 'Untitled resource'));
+        card.appendChild(make('small', '', String(asset.kind || 'file').toUpperCase() + ' · ' + sizeText(asset.size) + ' · Licence ' + (asset.licenseStatus || 'unverified')));
+        if (asset.kind === 'audio') { const audio = make('audio'); audio.controls = true; audio.preload = 'none'; audio.src = assetUrl(asset); audio.style.width = '100%'; card.appendChild(audio); }
+        else if (asset.kind === 'video') { const video = make('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.src = assetUrl(asset); video.style.width = '100%'; card.appendChild(video); }
+        else if (asset.kind === 'image') { const img = make('img'); img.src = assetUrl(asset); img.alt = asset.name || 'Saved image'; img.loading = 'lazy'; img.style.cssText = 'max-width:100%;max-height:220px;object-fit:contain'; card.appendChild(img); }
+        else if (asset.kind === 'font') { const sample = make('div', 'mydrive-font-sample', 'MAP132 DIGITALS · The Final Chapter · తెలుగు'); sample.dataset.fontAsset = asset.id; card.appendChild(sample); const preview = make('button', '', 'Preview font'); preview.type = 'button'; preview.addEventListener('click', () => previewFont(asset, sample, preview)); card.appendChild(preview); }
+        const actions = make('div', 'mydrive-actions');
+        const download = make('a', 'mydrive-upload', 'Download'); download.href = assetUrl(asset, 'download'); download.setAttribute('download', asset.name || 'resource');
+        const remove = make('button', '', 'Remove'); remove.type = 'button'; remove.addEventListener('click', () => removeAsset(asset));
+        actions.append(download, remove); card.appendChild(actions); grid.appendChild(card);
+      });
+      section.appendChild(grid); items.appendChild(section);
     });
-    if (state.cursor) {
-      const more = make('button', '', 'Load more saved resources');
-      more.type = 'button';
-      more.addEventListener('click', loadMore);
-      items.appendChild(more);
-    }
+    if (state.cursor) { const more = make('button', '', 'Load more saved resources'); more.type = 'button'; more.addEventListener('click', loadMore); items.appendChild(more); }
   }
-
   async function previewFont(asset, sample, button) {
     button.disabled = true;
     try {
@@ -237,42 +224,97 @@
     return state.pickerPromise;
   }
 
+  function classifyResource(fileName, relativePath) {
+    const ext = (fileName.split('.').pop() || '').toLowerCase();
+    const supported = ['ttf','otf','woff','woff2','mp3','wav','aac','m4a','ogg','flac','mp4','mov','webm','m4v','jpg','jpeg','png','webp','gif','avif','svg','zip','aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm'];
+    if (!supported.includes(ext)) return null;
+    const text = (String(relativePath || '') + ' ' + fileName).toLowerCase().replace(/[_-]+/g, ' ');
+    const has = words => words.some(word => text.includes(word));
+    const font = ['ttf','otf','woff','woff2'].includes(ext), audio = ['mp3','wav','aac','m4a','ogg','flac'].includes(ext);
+    const video = ['mp4','mov','webm','m4v'].includes(ext), image = ['jpg','jpeg','png','webp','gif','avif','svg'].includes(ext);
+    const plugin = ['aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm'].includes(ext);
+    if (has(['sound effect','sound effects','sfx','whoosh','riser','impact','boom','transition','heartbeat','foley'])) return { category:'Sound Effects', kind:'audio' };
+    if (has(['wedding','marriage','pelli'])) return { category:'Wedding', kind:font?'font':audio?'audio':video?'video':image?'image':'template' };
+    if (has(['birthday','bday','birth day'])) return { category:'Birthday', kind:font?'font':audio?'audio':video?'video':image?'image':'template' };
+    if (has(['trailer bgm','trailer music','trailer','background music','bgm','cinematic score'])) return { category:'Trailer BGMs', kind:audio?'audio':font?'font':video?'video':image?'image':'archive' };
+    if (has(['plugin','plugins','preset pack','presets'])) return { category:'Plugins', kind:plugin?'template':'archive' };
+    if (font) return { category:'Fonts', kind:'font' };
+    if (audio) return { category:'Sound Effects', kind:'audio' };
+    if (video) return { category:'Videos', kind:'video' };
+    if (image) return { category:'Images', kind:'image' };
+    if (plugin || ext === 'zip') return { category:'Plugins', kind:'archive' };
+    return null;
+  }
+
+  async function syncSelectedFolder(rootId, rootName) {
+    const queue = [{ id:rootId, name:rootName, path:rootName }], visited = new Set(), candidates = [];
+    let scanned = 0;
+    while (queue.length && scanned < 5000) {
+      const folder = queue.shift();
+      if (visited.has(folder.id)) continue;
+      visited.add(folder.id);
+      let pageToken = '';
+      do {
+        const url = new URL('/api/my-drive/files', window.location.origin);
+        url.searchParams.set('parentId', folder.id);
+        if (pageToken) url.searchParams.set('pageToken', pageToken);
+        const page = await request(url.toString());
+        for (const file of page.files || []) {
+          scanned++;
+          const path = folder.path + '/' + file.name;
+          if (file.mimeType === 'application/vnd.google-apps.folder') queue.push({ id:file.id, name:file.name, path });
+          else {
+            const classification = classifyResource(file.name, path);
+            if (classification) candidates.push({ id:file.id, name:file.name, path, category:classification.category, kind:classification.kind, size:Number(file.size||0), mimeType:file.mimeType });
+          }
+          if (scanned >= 5000) break;
+        }
+        pageToken = page.nextPageToken || '';
+      } while (pageToken && scanned < 5000);
+      showMessage('Scanning selected folder… ' + scanned + ' item(s) checked; ' + candidates.length + ' supported.');
+    }
+    let saved = 0, skipped = 0, failed = 0;
+    for (let index = 0; index < candidates.length; index++) {
+      const file = candidates[index];
+      if (file.size > 100 * 1024 * 1024) { skipped++; continue; }
+      try {
+        showMessage('Saving ' + (index + 1) + ' of ' + candidates.length + ' · ' + file.category + ' · ' + file.name);
+        const response = await fetch('/api/my-drive/download/' + encodeURIComponent(file.id), { credentials:'same-origin', cache:'no-store' });
+        if (!response.ok) throw new Error('Could not download ' + file.name + ' from the selected folder.');
+        const bytes = await response.arrayBuffer();
+        if (!bytes.byteLength || bytes.byteLength > 100 * 1024 * 1024) { skipped++; continue; }
+        const upload = await fetch('/api/my-drive/assets', { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':file.mimeType || 'application/octet-stream', 'X-Asset-Name':encodeURIComponent(file.name), 'X-Asset-Category':file.category }, body:bytes });
+        const result = await upload.json().catch(() => ({}));
+        if (!upload.ok) throw new Error(result.error || 'Could not save ' + file.name + '.');
+        if (result.duplicate) skipped++; else saved++;
+      } catch (error) { failed++; }
+    }
+    await loadAssets(false);
+    showMessage('Folder sync complete: ' + saved + ' saved, ' + skipped + ' skipped/duplicate, ' + failed + ' failed. Only the selected folder was scanned.');
+  }
+
   async function openFolderPicker() {
     if (!state.connected || state.busy) return;
-    setBusy(true);
-    showMessage('Preparing Google Drive folder picker…');
+    setBusy(true); showMessage('Preparing Google Drive folder picker…');
     try {
       const config = await request('/api/my-drive/picker-config');
       if (!config.pickerEnabled || !config.developerKey) throw new Error('Google Picker API key is not configured in Cloudflare.');
       await loadPicker();
-      const view = new window.google.picker.DocsView(window.google.picker.ViewId.FOLDERS)
-        .setIncludeFolders(true).setSelectFolderEnabled(true).setMimeTypes('application/vnd.google-apps.folder');
-      const picker = new window.google.picker.PickerBuilder()
-        .addView(view).setOAuthToken(config.accessToken).setDeveloperKey(config.developerKey)
-        .setAppId(config.appId).setTitle('Choose a font folder to import')
+      const view = new window.google.picker.DocsView(window.google.picker.ViewId.FOLDERS).setIncludeFolders(true).setSelectFolderEnabled(true).setMimeTypes('application/vnd.google-apps.folder');
+      const picker = new window.google.picker.PickerBuilder().addView(view).setOAuthToken(config.accessToken).setDeveloperKey(config.developerKey).setAppId(config.appId).setTitle('Choose one folder for MAP132 Workspace')
         .setCallback(async data => {
-          if (data.action === window.google.picker.Action.CANCEL) {
-            setBusy(false); showMessage('Folder selection cancelled.'); return;
-          }
+          if (data.action === window.google.picker.Action.CANCEL) { setBusy(false); showMessage('Folder selection cancelled.'); return; }
           if (data.action !== window.google.picker.Action.PICKED) return;
-          const folderId = data.docs && data.docs[0] && data.docs[0].id;
-          if (!folderId) { setBusy(false); showMessage('No folder was selected.', true); return; }
-          try {
-            showMessage('Scanning the selected folder and nested subfolders for TTF, OTF, WOFF and WOFF2 fonts…');
-            const result = await post('/api/my-drive/import-folder', { folderId });
-            await loadAssets(false);
-            showMessage('Folder scan complete: ' + result.importedCount + ' font(s) saved; ' + result.skippedCount + ' skipped; ' + result.scannedCount + ' files scanned.');
-          } catch (error) { showMessage(error.message || 'Folder import failed.', true); }
+          const folder = data.docs && data.docs[0];
+          if (!folder || !folder.id) { setBusy(false); showMessage('No folder was selected.', true); return; }
+          try { await syncSelectedFolder(folder.id, String(folder.name || 'Selected Drive folder')); }
+          catch (error) { showMessage(error.message || 'Folder sync failed.', true); }
           finally { setBusy(false); }
         }).build();
       picker.setVisible(true);
-      showMessage('Choose a Google Drive folder. Nested subfolders will be scanned automatically.');
-    } catch (error) {
-      showMessage(error.message || 'Google Drive folder picker failed.', true);
-      setBusy(false);
-    }
+      showMessage('Choose one folder. Only that folder and its nested folders will be scanned.');
+    } catch (error) { showMessage(error.message || 'Google Drive folder picker failed.', true); setBusy(false); }
   }
-
   async function uploadFont(file) {
     const ext = (file.name.split('.').pop() || '').toLowerCase();
     const mime = { ttf: 'font/ttf', otf: 'font/otf', woff: 'font/woff', woff2: 'font/woff2' }[ext];
