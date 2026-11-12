@@ -484,5 +484,7 @@
     clean.searchParams.delete('myDrive');
     window.history.replaceState({}, '', clean.pathname + clean.search + clean.hash);
   }
+  window.addEventListener('focus', () => { if (!state.busy) refreshState(); });
+  document.addEventListener('visibilitychange', () => { if (!document.hidden && !state.busy) refreshState(); });
   refreshState();
 })();
