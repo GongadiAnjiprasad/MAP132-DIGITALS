@@ -60,43 +60,6 @@ async function refreshToken(env:MyDriveQueueEnv):Promise<string|null> {
   } catch { return null; }
 }
 
-async function scanFolder(token:string, rootId:string, rootName:string):Promise<Array<{id:string;name:string;path:string;category:string;mimeType:string;size:number}>> {
-  const folders = [{id:rootId,path:rootName}];
-  const visited = new Set<string>();
-  const files:Array<{id:string;name:string;path:string;category:string;mimeType:string;size:number}> = [];
-  let scanned = 0;
-  while (folders.length && visited.size < 500 && scanned < 1500 && files.length < 900) {
-    const folder = folders.shift()!;
-    if (visited.has(folder.id)) continue;
-    visited.add(folder.id);
-    let pageToken = '';
-    do {
-      const url = new URL('https://www.googleapis.com/drive/v3/files');
-      url.searchParams.set('q', "'" + folder.id.replace(/'/g,"\\'") + "' in parents and trashed = false");
-      url.searchParams.set('pageSize','100');
-      url.searchParams.set('orderBy','folder,name');
-      url.searchParams.set('fields','nextPageToken,files(id,name,mimeType,size,capabilities(canCopy))');
-      if (pageToken) url.searchParams.set('pageToken',pageToken);
-      const response = await fetch(url,{headers:{Authorization:'Bearer '+token,Accept:'application/json'}});
-      if (!response.ok) throw new Error('Google Drive folder scan failed ('+response.status+').');
-      const page = await response.json() as {nextPageToken?:string;files?:Array<{id:string;name:string;mimeType:string;size?:string;capabilities?:{canCopy?:boolean}}>};
-      for (const file of page.files || []) {
-        scanned++;
-        const path = folder.path + '/' + file.name;
-        if (file.mimeType === FOLDER_MIME) {
-          if (folders.length + visited.size < 500) folders.push({id:file.id,path});
-        } else {
-          const category = classifyMyDriveQueueResource(file.name,path);
-          if (category && file.capabilities?.canCopy !== false) files.push({id:file.id,name:file.name,path,category,mimeType:file.mimeType||'application/octet-stream',size:Number(file.size||0)});
-        }
-        if (scanned >= 1500 || files.length >= 900) break;
-      }
-      pageToken = page.nextPageToken || '';
-    } while (pageToken && scanned < 1500 && files.length < 900);
-  }
-  return files;
-}
-
 export async function handleMyDriveQueue(req:Request,env:MyDriveQueueEnv):Promise<Response|null> {
   const url = new URL(req.url);
   if (!url.pathname.startsWith('/api/my-drive/queue')) return null;
