@@ -69,7 +69,7 @@ test('valid OAuth callback exchanges the code, encrypts the session and returns 
   }), { status: 200, headers: { 'Content-Type': 'application/json' } });
   try {
     const response = await handleMyDriveOAuth(new Request('https://example.test/api/my-drive/oauth/callback?code=auth-code&state=browser-state', {
-      headers: { Cookie: 'map132_drive_oauth_state=browser-state; ' + await adminCookie(e.ADMIN_PASSWORD) },
+      headers: { Cookie: 'map132_drive_oauth_state=browser-state' },
     }), e);
     assert.equal(response.status, 302);
     assert.match(response.headers.get('Location'), /\/workspace\.html\?myDrive=connected/);
