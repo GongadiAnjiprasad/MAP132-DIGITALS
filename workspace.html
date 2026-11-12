@@ -98,6 +98,37 @@
 }
 @media(max-width:360px){.mydrive-item{padding:10px}.mydrive-actions button{font-size:12px}}
  .mydrive-password-toggle{border:0!important;outline:0;background:transparent!important;box-shadow:none!important;padding:4px;color:var(--gold);cursor:pointer}.mydrive-password-toggle:hover{border:0!important;background:transparent!important;box-shadow:none!important;color:#f2d4a1}.mydrive-password-toggle:focus-visible{outline:1px solid var(--gold)!important;outline-offset:2px}
+
+/* My Drive compact horizontal preview shelves */
+.mydrive-items{display:block;margin-top:14px}
+.mydrive-category{min-width:0;margin:18px 0 24px}
+.mydrive-category>h3{margin:0 0 10px;font-size:16px}
+.mydrive-items-grid{display:flex;gap:10px;overflow-x:auto;overflow-y:hidden;padding:2px 2px 12px;scroll-snap-type:x proximity;scrollbar-width:thin;overscroll-behavior-inline:contain;-webkit-overflow-scrolling:touch}
+.mydrive-items-grid>.mydrive-item{flex:0 0 clamp(190px,25vw,250px);width:clamp(190px,25vw,250px);max-width:82vw;min-height:0;padding:11px;scroll-snap-align:start}
+.mydrive-sfx-group{min-width:0}
+.mydrive-sfx-group h4{margin:10px 0 8px;font-size:12px}
+.mydrive-item strong{font-size:11px;line-height:1.4}
+.mydrive-item small{font-size:9px;line-height:1.4}
+.mydrive-item audio{height:34px}
+.mydrive-item video{max-height:118px;object-fit:contain;background:#050608}
+.mydrive-item img{max-height:112px!important;object-fit:contain}
+.mydrive-item .mydrive-font-sample{min-height:58px;font-size:clamp(17px,2vw,22px);line-height:1.35;padding-top:4px}
+.mydrive-item .mydrive-generic-preview{padding:8px;gap:4px}
+.mydrive-item .mydrive-generic-preview p{font-size:10px;line-height:1.4}
+.mydrive-item .mydrive-actions{display:flex;gap:7px;margin:4px 0 0}
+.mydrive-item .mydrive-actions>*{flex:1;min-width:0;text-align:center;padding:7px 8px;font-size:10px}
+.mydrive-items-grid::-webkit-scrollbar{height:6px}
+.mydrive-items-grid::-webkit-scrollbar-thumb{background:#d7b47766;border-radius:99px}
+@media(max-width:600px){
+ .mydrive-items{display:block}
+ .mydrive-items-grid{gap:8px;padding-bottom:10px}
+ .mydrive-items-grid>.mydrive-item{flex-basis:clamp(176px,68vw,220px);width:clamp(176px,68vw,220px);max-width:78vw;padding:10px}
+ .mydrive-item strong{font-size:11px}
+ .mydrive-item small{font-size:9px}
+ .mydrive-item video{max-height:100px}
+ .mydrive-item img{max-height:96px!important}
+}
+
 </style></head><body><main class="shell"><header class="top"><a class="brand" href="index.html">MAP<b>132</b> <span style="font-size:10px;color:#aaa;font-weight:400">DIGITALS</span></a><a class="dashboard-link" href="index.html#admin" aria-label="Open protected Admin Dashboard"><span aria-hidden="true">▦</span> Dashboard</a><a class="back" href="index.html">← Back to website</a></header>
 <section class="welcome"><div class="kicker">Private creator area · Workspace</div><h1>Your creative control room.</h1><p>Organise your brand resources, editing references, reusable assets and project links in one place.</p></section>
 <nav class="resource-switcher" aria-label="Choose resource library">

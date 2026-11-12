@@ -152,3 +152,14 @@ test('workspace mobile layout keeps resource cards and action controls aligned',
   assert.ok(rootHtml.includes('.mydrive-items{grid-template-columns:minmax(0,1fr)'));
   assert.ok(rootHtml.includes('.mydrive-actions button,.mydrive-actions .mydrive-upload'));
 });
+
+
+test('My Drive previews use compact side-by-side horizontal scrolling shelves on desktop and mobile', () => {
+  assert.ok(rootHtml.includes('.mydrive-items-grid{display:flex'));
+  assert.ok(rootHtml.includes('overflow-x:auto'));
+  assert.ok(rootHtml.includes('scroll-snap-type:x proximity'));
+  assert.ok(rootHtml.includes('flex:0 0 clamp(190px,25vw,250px)'));
+  assert.ok(rootHtml.includes('flex-basis:clamp(176px,68vw,220px)'));
+  assert.ok(rootHtml.includes('max-height:118px'));
+  assert.equal(rootHtml, publishedHtml);
+});
