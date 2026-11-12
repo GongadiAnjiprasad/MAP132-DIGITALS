@@ -5,7 +5,7 @@ import HomeSlider from './HomeSlider';
 import IndianFestivalAtmosphere from './modules/seasonal/IndianFestivalAtmosphere';
 import MyDriveFolderImport from './modules/my-drive-resource-manager/MyDriveFolderImport';
 import { classifyResource } from './modules/my-drive-resource-manager/driveClient';
-import { extractSupportedFontsFromZip } from './modules/my-drive-resource-manager/zipFontImport';
+import { importZip } from './modules/my-drive-resource-manager/zipImporter';
 import {
   ArrowDownRight, ArrowRight, Check, ChevronRight, Film, LayoutDashboard, Clapperboard, MonitorSmartphone,
   Facebook, Instagram, Linkedin, Mail, MessageCircle, Play, Plus, Save, Send, ShieldCheck, Sparkles,
@@ -337,9 +337,11 @@ function SoundResultCard({sound}:{sound:any}){
   </article>;
 }
 function MyDriveAssetsPanel(){
-  type SavedAsset={id:string;name:string;kind:'font'|'audio'|'video'|'image'|'archive'|'template';category?:string;size:number;contentType:string;storedAt:string;licenseStatus:string;};
+  type SavedAsset={id:string;name:string;kind:'font'|'audio'|'video'|'image'|'archive'|'template'|'texture'|'other';category?:string;size:number;contentType:string;storedAt:string;licenseStatus:string;};
   const [configured,setConfigured]=useState(false),[unlocked,setUnlocked]=useState(false),[connected,setConnected]=useState(false);
   const [password,setPassword]=useState(''),[assets,setAssets]=useState<SavedAsset[]>([]),[assetsCursor,setAssetsCursor]=useState<string|null>(null),[busy,setBusy]=useState(false),[message,setMessage]=useState('');
+  const deviceFilesInput=useRef<HTMLInputElement|null>(null),deviceZipInput=useRef<HTMLInputElement|null>(null);
+  const [fontPreviewStatus,setFontPreviewStatus]=useState<Record<string,string>>({});
   async function refresh(){
     try{
       const lock=await fetch('/api/my-drive/lock/status',{credentials:'same-origin'}),lockData=await lock.json();
@@ -377,31 +379,47 @@ function MyDriveAssetsPanel(){
   async function importFiles(files:FileList|null){
     if(!files?.length)return;
     setBusy(true);setMessage('Preparing selected resources for secure storage…');
-    let savedCount=0,archiveCount=0;
+    let savedCount=0,archiveCount=0,skippedCount=0;
     try{
-      const uploadOne=async(file:File)=>{
-        const category=classifyResource(file.name)?.category||'Other';
-        const response=await fetch('/api/my-drive/assets',{method:'POST',credentials:'same-origin',headers:{'Content-Type':file.type||'application/octet-stream','X-Asset-Name':encodeURIComponent(file.name),'X-Asset-Category':category},body:file});
+      const uploadOne=async(file:File,categoryOverride?:string,relativePath?:string)=>{
+        const category=categoryOverride||classifyResource(file.name,relativePath||'')?.category||'Other';
+        const response=await fetch('/api/my-drive/assets',{method:'POST',credentials:'same-origin',headers:{'Content-Type':file.type||'application/octet-stream','X-Asset-Name':encodeURIComponent(file.name),'X-Asset-Category':category,'X-Asset-Source-Path':encodeURIComponent(relativePath||file.name)},body:file});
         const data=await response.json();
         if(!response.ok)throw new Error(data.error||('Could not save '+file.name));
-        savedCount++;
+        if(data.duplicate)skippedCount++;else savedCount++;
       };
       for(const file of Array.from(files)){
-        if(file.name.toLowerCase().endsWith('.zip')){
+        if(file.name.toLowerCase().endsWith('.zip')||file.type==='application/zip'){
           archiveCount++;
-          setMessage('Extracting supported fonts from '+file.name+'…');
-          const fonts=await extractSupportedFontsFromZip(file);
-          if(!fonts.length)continue;
-          for(const font of fonts){setMessage('Saving extracted font '+font.name+'…');await uploadOne(font);}
+          setMessage('Scanning '+file.name+' and nested ZIP archives…');
+          const extracted=await importZip(file,'local-zip',file.name);
+          skippedCount+=extracted.summary.skipped+extracted.summary.duplicates;
+          if(!extracted.assets.length){setMessage('No supported resources found in '+file.name+'.');continue;}
+          for(let index=0;index<extracted.assets.length;index++){
+            const asset=extracted.assets[index];
+            setMessage('Extracting and saving '+(index+1)+' of '+extracted.assets.length+' · '+asset.candidate.category+' · '+asset.candidate.fileName);
+            const extractedFile=new File([asset.bytes],asset.candidate.fileName,{type:asset.candidate.mimeType||'application/octet-stream'});
+            await uploadOne(extractedFile,asset.candidate.category,asset.candidate.relativePath);
+          }
         }else{
-          setMessage('Saving '+file.name+' to persistent storage…');
+          setMessage('Saving '+file.name+' to MAP132 Workspace…');
           await uploadOne(file);
         }
       }
       await refresh();
-      setMessage('Import complete. '+savedCount+' resource(s) saved'+(archiveCount?' from '+archiveCount+' ZIP archive(s).':'.'));
+      setMessage('Import complete: '+savedCount+' saved, '+skippedCount+' skipped/duplicate'+(archiveCount?' · '+archiveCount+' ZIP archive(s) scanned, including nested ZIPs.':'.'));
     }catch(error){setMessage(error instanceof Error?error.message:'Resource import failed.');}
     finally{setBusy(false);}
+  }
+  async function previewFont(asset:SavedAsset){
+    setFontPreviewStatus(current=>({...current,[asset.id]:'Loading preview…'}));
+    try{
+      const response=await fetch(assetUrl(asset),{credentials:'same-origin',cache:'no-store'});
+      if(!response.ok)throw new Error('Font preview could not be loaded.');
+      const blob=await response.blob(),family='MAP132-Font-'+asset.id.replace(/[^a-z0-9]/gi,'');
+      const face=new FontFace(family,await blob.arrayBuffer());await face.load();document.fonts.add(face);
+      setFontPreviewStatus(current=>({...current,[asset.id]:'Preview ready'}));
+    }catch(error){setFontPreviewStatus(current=>({...current,[asset.id]:error instanceof Error?error.message:'Preview unavailable'}));}
   }
   async function removeAsset(asset:SavedAsset){
     if(!window.confirm('Remove '+asset.name+' from your saved My Drive resources?'))return;
@@ -413,10 +431,15 @@ function MyDriveAssetsPanel(){
     {!configured?<div className="workspace-empty"><b>Set your separate My Drive password</b><p>First setup requires an active MAP132 admin dashboard session. Choose a password of at least 8 characters.</p><form onSubmit={e=>{e.preventDefault();void passwordAction('/api/my-drive/lock/setup')}}><label>New My Drive password<input type="password" autoComplete="new-password" minLength={8} maxLength={128} required value={password} onChange={e=>setPassword(e.target.value)}/></label><button className="gold-button" type="submit" disabled={busy}>{busy?'Setting up…':'Set password'}</button></form></div>:!unlocked?<div className="workspace-empty"><b>My Drive is locked</b><form onSubmit={e=>{e.preventDefault();void passwordAction('/api/my-drive/lock/unlock')}}><label>My Drive password<input type="password" autoComplete="current-password" required maxLength={128} value={password} onChange={e=>setPassword(e.target.value)}/></label><button className="gold-button" type="submit" disabled={busy}>{busy?'Unlocking…':'Unlock My Drive'}</button></form></div>:<>
       <div className="workspace-filterbar"><span className="count-pill">{connected?'GOOGLE DRIVE CONNECTED':'GOOGLE DRIVE NOT CONNECTED'}</span><button type="button" className="gold-button" onClick={()=>void connectDrive()} disabled={busy}>{connected?'Reconnect Google Drive':'Connect Google Drive'}</button></div>
       {connected&&<MyDriveFolderImport disabled={busy} onImported={refresh}/ >}
-      <label className="gold-button" style={{display:'inline-flex',alignItems:'center',gap:8,margin:'12px 0',cursor:busy?'wait':'pointer'}}>Import files from device<input type="file" multiple accept=".ttf,.otf,.woff,.woff2,.mp3,.wav,.aac,.ogg,.m4a,.flac,.mp4,.webm,.mov,.m4v,.jpg,.jpeg,.png,.webp,.gif,.avif,.svg,.zip,.aep,.mogrt,.prproj,.prfpset,.ffx,.cube,.look,.drx,.setting,.preset,.prm" style={{display:'none'}} disabled={busy} onChange={e=>{void importFiles(e.currentTarget.files);e.currentTarget.value='';}}/></label>
-      <p className="workspace-form-note">Supported: fonts, sound effects, music, video, images, project templates and plugin packs. Individual file limit is 100 MB. Google Drive imports scan only the selected folder and nested subfolders, then automatically group files into category folders in MAP132 Workspace. ZIP extraction currently supports font files.</p>
+      <div className="workspace-device-import">
+        <button type="button" className="gold-button" onClick={()=>deviceFilesInput.current?.click()} disabled={busy}>Import files from device</button>
+        <button type="button" className="gold-button workspace-zip-import" onClick={()=>deviceZipInput.current?.click()} disabled={busy}>Import ZIP from device</button>
+        <input ref={deviceFilesInput} className="workspace-file-input" type="file" multiple accept=".ttf,.otf,.woff,.woff2,.mp3,.wav,.aac,.ogg,.m4a,.flac,.mp4,.webm,.mov,.m4v,.jpg,.jpeg,.png,.webp,.gif,.avif,.svg,.aep,.mogrt,.prproj,.prfpset,.ffx,.cube,.look,.drx,.setting,.preset,.prm" disabled={busy} onChange={e=>{void importFiles(e.currentTarget.files);e.currentTarget.value='';}}/>
+        <input ref={deviceZipInput} className="workspace-file-input" type="file" accept=".zip,application/zip,application/x-zip-compressed" disabled={busy} onChange={e=>{void importFiles(e.currentTarget.files);e.currentTarget.value='';}}/>
+      </div>
+      <p className="workspace-form-note">ZIP import scans all folders and nested ZIPs, safely extracts supported fonts, audio, video, images, templates and creative files, then saves each item into its MAP132 category. Unsupported, encrypted or unsafe archive entries are skipped. Per-file storage limit: 100 MB.</p>
       <div className="workspace-section-title"><h3>Saved resources</h3><span>{assets.length} LOADED ITEMS</span></div>
-      {assets.length===0?<div className="workspace-empty"><b>No saved resources yet</b><p>Choose one Drive folder or import files from your device to build your private category library.</p></div>:<div style={{display:'grid',gap:22}}>{Array.from(new Set(assets.map(asset=>asset.category||'Other'))).sort((a,b)=>a.localeCompare(b)).map(category=><section key={category} aria-label={category}><div className="workspace-section-title"><h3>{category}</h3><span>{assets.filter(asset=>(asset.category||'Other')===category).length} ITEMS</span></div><div className="workspace-resource-grid">{assets.filter(asset=>(asset.category||'Other')===category).map(asset=><article className="workspace-resource-card" key={asset.id}><div className="workspace-card-top"><span>{asset.kind.toUpperCase()} · {(asset.size/1024/1024).toFixed(2)} MB</span><span>{asset.licenseStatus.toUpperCase()}</span></div><h4>{asset.name}</h4><p>Saved {new Date(asset.storedAt).toLocaleString()}</p>{asset.kind==='audio'&&<audio controls preload="metadata" src={assetUrl(asset)} />}{asset.kind==='video'&&<video controls playsInline preload="metadata" src={assetUrl(asset)} style={{width:'100%'}}/>}{asset.kind==='image'&&<img src={assetUrl(asset)} alt={asset.name} style={{maxWidth:'100%',maxHeight:240,objectFit:'contain'}}/>}{asset.kind==='font'&&<p style={{fontFamily:'sans-serif'}}>Font file saved. Download to install and preview in editing software.</p>}<div className="workspace-card-actions"><a href={assetUrl(asset,'download')}>Download</a><button type="button" onClick={()=>void removeAsset(asset)} disabled={busy}>Remove</button></div></article>)}</div></section>)}</div>}
+      {assets.length===0?<div className="workspace-empty"><b>No saved resources yet</b><p>Choose one Drive folder or import files from your device to build your private category library.</p></div>:<div style={{display:'grid',gap:22}}>{Array.from(new Set(assets.map(asset=>asset.category||'Other'))).sort((a,b)=>a.localeCompare(b)).map(category=><section key={category} aria-label={category}><div className="workspace-section-title"><h3>{category}</h3><span>{assets.filter(asset=>(asset.category||'Other')===category).length} ITEMS</span></div><div className="workspace-resource-grid">{assets.filter(asset=>(asset.category||'Other')===category).map(asset=><article className="workspace-resource-card" key={asset.id}><div className="workspace-card-top"><span>{asset.kind.toUpperCase()} · {(asset.size/1024/1024).toFixed(2)} MB</span><span>{asset.licenseStatus.toUpperCase()}</span></div><h4>{asset.name}</h4><p>Saved {new Date(asset.storedAt).toLocaleString()}</p>{asset.kind==='audio'&&<audio controls preload="metadata" src={assetUrl(asset)} />}{asset.kind==='video'&&<video controls playsInline preload="metadata" src={assetUrl(asset)} style={{width:'100%',maxHeight:240}}/>}{asset.kind==='image'&&<img src={assetUrl(asset)} alt={asset.name} loading="lazy" style={{width:'100%',maxWidth:'100%',maxHeight:240,objectFit:'contain'}}/>}{asset.kind==='font'&&<div className="workspace-font-preview"><p style={{fontFamily:fontPreviewStatus[asset.id]==='Preview ready'?'MAP132-Font-'+asset.id.replace(/[^a-z0-9]/gi,''):'sans-serif'}}>MAP132 DIGITALS · The Final Chapter · తెలుగు</p><button type="button" className="gold-button" onClick={()=>void previewFont(asset)} disabled={busy}>Preview font</button>{fontPreviewStatus[asset.id]&&<small>{fontPreviewStatus[asset.id]}</small>}</div>}{!['audio','video','image','font'].includes(asset.kind)&&<div className="workspace-generic-preview"><b>{asset.kind==='template'?'Creative project / template':asset.kind==='texture'?'Texture / LUT resource':'File preview'}</b><span>{asset.name.split('.').pop()?.toUpperCase()||'FILE'} · {asset.contentType||'Unknown format'}</span><p>Browser cannot render this editing-project format directly. File details are shown here; download to open it in its compatible editing app.</p></div>}<div className="workspace-card-actions"><a href={assetUrl(asset,'download')} download={asset.name}>Download</a><button type="button" onClick={()=>void removeAsset(asset)} disabled={busy}>Remove</button></div></article>)}</div></section>)}</div>}
       {assetsCursor&&<button type="button" className="gold-button" style={{marginTop:12}} onClick={()=>void loadMoreAssets()} disabled={busy}>{busy?'Loading…':'Load more resources'}</button>}
       <button type="button" className="admin-nav" style={{width:'auto',marginTop:12}} onClick={async()=>{setBusy(true);try{await fetch('/api/my-drive/lock',{method:'POST',credentials:'same-origin'});setUnlocked(false);setAssets([]);setAssetsCursor(null);setMessage('My Drive locked.');}finally{setBusy(false);}}} disabled={busy}>Lock My Drive</button>
     </>}

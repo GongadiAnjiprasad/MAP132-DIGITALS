@@ -61,6 +61,8 @@
     });
     const zip = $('myDriveLocalZip');
     if (zip) zip.disabled = value || !state.connected;
+    const zipButton = $('myDriveChooseZip');
+    if (zipButton) zipButton.disabled = value || !state.connected;
     [setupForm, unlockForm].forEach(form => form && form.querySelectorAll('input,button').forEach(el => { el.disabled = value; }));
   }
 
@@ -101,6 +103,7 @@
         else if (asset.kind === 'video') { const video = make('video'); video.controls = true; video.playsInline = true; video.preload = 'metadata'; video.src = assetUrl(asset); video.style.width = '100%'; card.appendChild(video); }
         else if (asset.kind === 'image') { const img = make('img'); img.src = assetUrl(asset); img.alt = asset.name || 'Saved image'; img.loading = 'lazy'; img.style.cssText = 'max-width:100%;max-height:220px;object-fit:contain'; card.appendChild(img); }
         else if (asset.kind === 'font') { const sample = make('div', 'mydrive-font-sample', 'MAP132 DIGITALS · The Final Chapter · తెలుగు'); sample.dataset.fontAsset = asset.id; card.appendChild(sample); const preview = make('button', '', 'Preview font'); preview.type = 'button'; preview.addEventListener('click', () => previewFont(asset, sample, preview)); card.appendChild(preview); }
+        else if (asset.kind === 'template' || asset.kind === 'archive' || asset.kind === 'other') { const preview = make('div', 'mydrive-generic-preview'); preview.appendChild(make('strong', '', 'Creative resource preview')); preview.appendChild(make('span', '', (asset.name.split('.').pop() || 'FILE').toUpperCase() + ' · ' + (asset.contentType || 'application file'))); preview.appendChild(make('p', '', 'This editing-project format cannot be rendered directly in the browser. Download it to open in its compatible editing app.')); card.appendChild(preview); }
         const actions = make('div', 'mydrive-actions');
         const download = make('a', 'mydrive-upload', 'Download'); download.href = assetUrl(asset, 'download'); download.setAttribute('download', asset.name || 'resource');
         const remove = make('button', '', 'Remove'); remove.type = 'button'; remove.addEventListener('click', () => removeAsset(asset));
@@ -283,10 +286,19 @@
         if (!response.ok) throw new Error('Could not download ' + file.name + ' from the selected folder.');
         const bytes = await response.arrayBuffer();
         if (!bytes.byteLength || bytes.byteLength > 100 * 1024 * 1024) { skipped++; continue; }
-        const upload = await fetch('/api/my-drive/assets', { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':file.mimeType || 'application/octet-stream', 'X-Asset-Name':encodeURIComponent(file.name), 'X-Asset-Category':file.category }, body:bytes });
-        const result = await upload.json().catch(() => ({}));
-        if (!upload.ok) throw new Error(result.error || 'Could not save ' + file.name + '.');
-        if (result.duplicate) skipped++; else saved++;
+        if (file.name.toLowerCase().endsWith('.zip')) {
+          const extracted = await extractZipResources(new File([bytes],file.name,{type:'application/zip'}),0,{entries:0,bytes:0});
+          skipped += extracted.issues.length;
+          for (const asset of extracted.assets) {
+            const result = await uploadResource(asset.file,asset.category,file.path+'/'+asset.path);
+            if (result.duplicate) skipped++; else saved++;
+          }
+        } else {
+          const upload = await fetch('/api/my-drive/assets', { method:'POST', credentials:'same-origin', headers:{ 'Content-Type':file.mimeType || 'application/octet-stream', 'X-Asset-Name':encodeURIComponent(file.name), 'X-Asset-Category':file.category, 'X-Asset-Source-Path':encodeURIComponent(file.path) }, body:bytes });
+          const result = await upload.json().catch(() => ({}));
+          if (!upload.ok) throw new Error(result.error || 'Could not save ' + file.name + '.');
+          if (result.duplicate) skipped++; else saved++;
+        }
       } catch (error) { failed++; }
     }
     await loadAssets(false);
@@ -315,95 +327,128 @@
       showMessage('Choose one folder. Only that folder and its nested folders will be scanned.');
     } catch (error) { showMessage(error.message || 'Google Drive folder picker failed.', true); setBusy(false); }
   }
-  async function uploadFont(file) {
-    const ext = (file.name.split('.').pop() || '').toLowerCase();
-    const mime = { ttf: 'font/ttf', otf: 'font/otf', woff: 'font/woff', woff2: 'font/woff2' }[ext];
+  async function uploadResource(file, category, relativePath) {
     const response = await fetch('/api/my-drive/assets', {
       method: 'POST', credentials: 'same-origin',
-      headers: { 'Content-Type': mime || file.type || 'application/octet-stream', 'X-Asset-Name': encodeURIComponent(file.name), 'X-Asset-Category': 'Fonts' },
+      headers: {
+        'Content-Type': file.type || 'application/octet-stream',
+        'X-Asset-Name': encodeURIComponent(file.name),
+        'X-Asset-Category': category || 'Other',
+        'X-Asset-Source-Path': encodeURIComponent(relativePath || file.name)
+      },
       body: file
     });
     const data = await response.json().catch(() => ({}));
     if (!response.ok) throw new Error(data.error || ('Could not save ' + file.name));
+    return data;
   }
 
-  function crc32(bytes) {
-    let crc = 0xffffffff;
-    for (const byte of bytes) {
-      crc ^= byte;
-      for (let bit = 0; bit < 8; bit++) crc = (crc >>> 1) ^ ((crc & 1) ? 0xedb88320 : 0);
-    }
-    return (crc ^ 0xffffffff) >>> 0;
+  function classifyZipResource(path) {
+    const name = path.split('/').pop() || path;
+    const ext = (name.split('.').pop() || '').toLowerCase();
+    const supported = ['ttf','otf','woff','woff2','mp3','wav','aac','m4a','ogg','flac','mp4','mov','webm','m4v','jpg','jpeg','png','webp','gif','avif','svg','aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm'];
+    if (!supported.includes(ext)) return null;
+    const text = path.toLowerCase().replace(/[_-]+/g, ' ');
+    const has = words => words.some(word => text.includes(word));
+    const font = ['ttf','otf','woff','woff2'].includes(ext);
+    const audio = ['mp3','wav','aac','m4a','ogg','flac'].includes(ext);
+    const video = ['mp4','mov','webm','m4v'].includes(ext);
+    const image = ['jpg','jpeg','png','webp','gif','avif','svg'].includes(ext);
+    if (has(['sound effect','sound effects','sfx','whoosh','riser','impact','boom','transition','heartbeat','foley'])) return { category:'Sound Effects', kind:'audio' };
+    if (has(['wedding','marriage','pelli'])) return { category:'Wedding', kind:font?'font':audio?'audio':video?'video':image?'image':'template' };
+    if (has(['birthday','bday','birth day'])) return { category:'Birthday', kind:font?'font':audio?'audio':video?'video':image?'image':'template' };
+    if (has(['trailer bgm','trailer music','trailer','background music','bgm','cinematic score'])) return { category:'Trailer BGMs', kind:audio?'audio':font?'font':video?'video':image?'image':'template' };
+    if (has(['plugin','plugins','preset pack','presets'])) return { category:'Plugins', kind:'template' };
+    if (font) return { category:'Fonts', kind:'font' };
+    if (audio) return { category:'Sound Effects', kind:'audio' };
+    if (video) return { category:'Videos', kind:'video' };
+    if (image) return { category:'Images', kind:'image' };
+    return { category:'Plugins', kind:'template' };
   }
 
-  async function extractFonts(file) {
-    if (file.size > 300 * 1024 * 1024) throw new Error('ZIP archive exceeds the 300 MB limit.');
+  async function extractZipResources(file, depth, budget) {
+    depth = depth || 0;
+    budget = budget || { entries:0, bytes:0 };
+    if (depth > 4) throw new Error('Nested ZIP depth exceeds the safe limit of 4 levels.');
+    if (file.size > 100 * 1024 * 1024) throw new Error('ZIP archive exceeds the 100 MB device import limit.');
     const buffer = await file.arrayBuffer(), view = new DataView(buffer), bytes = new Uint8Array(buffer);
     const minEnd = Math.max(0, bytes.length - 22 - 65535);
     let end = -1;
     for (let i = bytes.length - 22; i >= minEnd; i--) if (view.getUint32(i, true) === 0x06054b50) { end = i; break; }
     if (end < 0) throw new Error('ZIP directory is missing or invalid.');
-    const count = view.getUint16(end + 10, true), directorySize = view.getUint32(end + 12, true);
-    let offset = view.getUint32(end + 16, true);
-    if (count === 0xffff || directorySize === 0xffffffff || offset === 0xffffffff) throw new Error('ZIP64 archives are not supported yet.');
-    if (count > 1000 || offset + directorySize > end) throw new Error('ZIP archive exceeds the supported entry count or has an invalid directory.');
-    const decoder = new TextDecoder('utf-8', { fatal: false }), fonts = [];
-    let total = 0;
+    const disk = view.getUint16(end + 4, true), centralDisk = view.getUint16(end + 6, true);
+    const diskEntries = view.getUint16(end + 8, true), count = view.getUint16(end + 10, true);
+    const directorySize = view.getUint32(end + 12, true), directoryOffset = view.getUint32(end + 16, true);
+    if (disk || centralDisk || diskEntries !== count || count === 0xffff || directorySize === 0xffffffff || directoryOffset === 0xffffffff) throw new Error('Multi-disk and ZIP64 archives are not supported.');
+    if (count > 2000 || directoryOffset + directorySize > end) throw new Error('ZIP archive exceeds the supported entry count or has an invalid directory.');
+    const decoder = new TextDecoder('utf-8', { fatal:false }), assets = [], issues = [];
+    let offset = directoryOffset, localTotal = 0;
     for (let index = 0; index < count; index++) {
-      if (offset + 46 > bytes.length || view.getUint32(offset, true) !== 0x02014b50) throw new Error('ZIP central directory contains an invalid entry.');
-      const flags = view.getUint16(offset + 8, true), method = view.getUint16(offset + 10, true);
-      const expectedCrc = view.getUint32(offset + 16, true), compressedSize = view.getUint32(offset + 20, true);
-      const size = view.getUint32(offset + 24, true), nameLength = view.getUint16(offset + 28, true);
-      const extraLength = view.getUint16(offset + 30, true), commentLength = view.getUint16(offset + 32, true);
-      const attrs = view.getUint32(offset + 38, true), localOffset = view.getUint32(offset + 42, true);
-      const next = offset + 46 + nameLength + extraLength + commentLength;
-      if (next > bytes.length) throw new Error('ZIP entry metadata is truncated.');
-      const rawName = decoder.decode(bytes.subarray(offset + 46, offset + 46 + nameLength)).replace(/\\/g, '/');
-      offset = next;
-      const parts = rawName.split('/'), name = parts[parts.length - 1], ext = (name.split('.').pop() || '').toLowerCase();
-      if (rawName.startsWith('/') || parts.some(part => part === '..') || rawName.endsWith('/') || ((attrs >>> 16) & 0xf000) === 0xa000) continue;
-      if (!['ttf', 'otf', 'woff', 'woff2'].includes(ext) || (flags & 1)) continue;
-      if (compressedSize === 0xffffffff || size === 0xffffffff || localOffset === 0xffffffff) throw new Error('ZIP64 font entries are not supported yet.');
-      if (size > 25 * 1024 * 1024 || total + size > 250 * 1024 * 1024) throw new Error('ZIP font contents exceed the per-file or total import limit.');
-      if (method !== 0 && method !== 8) continue;
-      if (localOffset + 30 > bytes.length || view.getUint32(localOffset, true) !== 0x04034b50) throw new Error('ZIP local file header is invalid.');
-      const localFlags = view.getUint16(localOffset + 6, true), localMethod = view.getUint16(localOffset + 8, true);
-      const localNameLength = view.getUint16(localOffset + 26, true), localExtraLength = view.getUint16(localOffset + 28, true);
-      const localName = decoder.decode(bytes.subarray(localOffset + 30, localOffset + 30 + localNameLength)).replace(/\\/g, '/');
-      if (localName !== rawName || localMethod !== method || localFlags !== flags) throw new Error('ZIP local and central directory records do not match.');
-      const start = localOffset + 30 + localNameLength + localExtraLength, finish = start + compressedSize;
-      if (finish > bytes.length) throw new Error('ZIP font data is truncated.');
-      const compressed = bytes.slice(start, finish);
+      if (offset + 46 > directoryOffset + directorySize || view.getUint32(offset, true) !== 0x02014b50) throw new Error('ZIP central directory contains an invalid entry.');
+      const madeBy=view.getUint16(offset+4,true), flags=view.getUint16(offset+8,true), method=view.getUint16(offset+10,true);
+      const expectedCrc=view.getUint32(offset+16,true), compressedSize=view.getUint32(offset+20,true), size=view.getUint32(offset+24,true);
+      const nameLength=view.getUint16(offset+28,true), extraLength=view.getUint16(offset+30,true), commentLength=view.getUint16(offset+32,true);
+      const attrs=view.getUint32(offset+38,true), localOffset=view.getUint32(offset+42,true);
+      const nameStart=offset+46, next=nameStart+nameLength+extraLength+commentLength;
+      if(next>directoryOffset+directorySize) throw new Error('ZIP entry metadata is truncated.');
+      const rawName=decoder.decode(bytes.subarray(nameStart,nameStart+nameLength)).replace(/\\/g,'/');
+      offset=next;
+      const parts=rawName.split('/'), name=parts[parts.length-1]||'';
+      const unixMode=(madeBy>>8)===3?attrs>>>16:0;
+      if(!rawName||rawName.startsWith('/')||/^[a-zA-Z]:/.test(rawName)||parts.some(part=>part==='..')||rawName.endsWith('/')||(unixMode&0xf000)===0xa000||(flags&1)) { issues.push(rawName+' · unsafe, encrypted or directory entry skipped'); continue; }
+      if(method!==0&&method!==8){issues.push(rawName+' · unsupported compression skipped');continue;}
+      if(compressedSize===0xffffffff||size===0xffffffff||localOffset===0xffffffff) throw new Error('ZIP64 entries are not supported.');
+      const ratio=compressedSize>0?size/compressedSize:(size?Infinity:1);
+      if(size>25*1024*1024||ratio>100||budget.entries+1>2000||budget.bytes+size>250*1024*1024){issues.push(rawName+' · archive safety limit skipped');continue;}
+      budget.entries++;budget.bytes+=size;localTotal+=size;
+      if(localOffset+30>bytes.length||view.getUint32(localOffset,true)!==0x04034b50) throw new Error('ZIP local file header is invalid.');
+      const localFlags=view.getUint16(localOffset+6,true),localMethod=view.getUint16(localOffset+8,true);
+      const localNameLength=view.getUint16(localOffset+26,true),localExtraLength=view.getUint16(localOffset+28,true);
+      const localName=decoder.decode(bytes.subarray(localOffset+30,localOffset+30+localNameLength)).replace(/\\/g,'/');
+      if(localName!==rawName||localMethod!==method||localFlags!==flags) throw new Error('ZIP local and central directory records do not match.');
+      const dataStart=localOffset+30+localNameLength+localExtraLength,dataEnd=dataStart+compressedSize;
+      if(dataEnd>bytes.length) throw new Error('ZIP file data is truncated.');
+      const compressed=bytes.slice(dataStart,dataEnd);
       let output;
-      if (method === 0) output = compressed.buffer.slice(compressed.byteOffset, compressed.byteOffset + compressed.byteLength);
+      if(method===0) output=compressed.buffer.slice(compressed.byteOffset,compressed.byteOffset+compressed.byteLength);
       else {
-        if (typeof DecompressionStream === 'undefined') throw new Error('This browser does not support ZIP deflate extraction. Use a current Chrome version.');
-        try { output = await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer(); }
-        catch (_) { throw new Error('A font inside this ZIP could not be decompressed.'); }
+        if(typeof DecompressionStream==='undefined') throw new Error('This browser does not support safe ZIP deflate extraction. Update Chrome and retry.');
+        output=await new Response(new Blob([compressed]).stream().pipeThrough(new DecompressionStream('deflate-raw'))).arrayBuffer();
       }
-      if (output.byteLength !== size || crc32(new Uint8Array(output)) !== expectedCrc) throw new Error('Extracted ZIP font failed its size or CRC integrity check.');
-      total += output.byteLength;
-      const mime = ext === 'woff' ? 'font/woff' : ext === 'woff2' ? 'font/woff2' : ext === 'otf' ? 'font/otf' : 'font/ttf';
-      fonts.push(new File([output], name, { type: mime }));
+      const outBytes=new Uint8Array(output);
+      if(outBytes.byteLength!==size||crc32(outBytes)!==expectedCrc) throw new Error('ZIP entry failed size or CRC integrity validation.');
+      const ext=(name.split('.').pop()||'').toLowerCase();
+      if(ext==='zip'){
+        const nested=await extractZipResources(new File([outBytes],name,{type:'application/zip'}),depth+1,budget);
+        nested.assets.forEach(asset=>assets.push({...asset,path:rawName+'/'+asset.path}));
+        issues.push(...nested.issues);
+      } else {
+        const classification=classifyZipResource(rawName);
+        if(!classification){issues.push(rawName+' · unsupported file skipped');continue;}
+        const mimeMap={ttf:'font/ttf',otf:'font/otf',woff:'font/woff',woff2:'font/woff2',mp3:'audio/mpeg',wav:'audio/wav',aac:'audio/aac',m4a:'audio/mp4',ogg:'audio/ogg',flac:'audio/flac',mp4:'video/mp4',mov:'video/quicktime',webm:'video/webm',m4v:'video/x-m4v',jpg:'image/jpeg',jpeg:'image/jpeg',png:'image/png',webp:'image/webp',gif:'image/gif',avif:'image/avif',svg:'image/svg+xml'};
+        assets.push({file:new File([outBytes],name,{type:mimeMap[ext]||'application/octet-stream'}),category:classification.category,path:rawName});
+      }
     }
-    return fonts;
+    return {assets,issues};
   }
 
   async function importZip(file) {
-    if (!file || state.busy || !state.connected) return;
+    if (!file || state.busy) return;
+    if (!state.connected) { showMessage('Connect Google Drive first so extracted files can be saved into MAP132 Workspace.', true); return; }
     setBusy(true);
     try {
-      showMessage('Scanning ZIP archive recursively for TTF, OTF, WOFF and WOFF2 files…');
-      const fonts = await extractFonts(file);
-      if (!fonts.length) throw new Error('No supported font files were found in this ZIP. Unsupported files are skipped.');
-      let saved = 0;
-      for (const font of fonts) {
-        showMessage('Saving font ' + (saved + 1) + ' of ' + fonts.length + ': ' + font.name);
-        await uploadFont(font);
-        saved++;
+      showMessage('Scanning ZIP and nested ZIP archives for supported resources…');
+      const extracted = await extractZipResources(file,0,{entries:0,bytes:0});
+      if (!extracted.assets.length) throw new Error('No supported resources were found in this ZIP. Unsupported or unsafe entries were skipped.');
+      let saved=0,duplicates=0;
+      for(let index=0;index<extracted.assets.length;index++){
+        const asset=extracted.assets[index];
+        showMessage('Extracting and saving '+(index+1)+' of '+extracted.assets.length+' · '+asset.category+' · '+asset.file.name);
+        const result=await uploadResource(asset.file,asset.category,asset.path);
+        if(result.duplicate)duplicates++;else saved++;
       }
       await loadAssets(false);
-      showMessage('ZIP import complete: ' + saved + ' font(s) saved permanently to your MAP132 Workspace folder.');
+      showMessage('ZIP import complete: '+saved+' saved, '+duplicates+' duplicate(s), '+extracted.issues.length+' skipped item(s). Nested ZIPs were scanned automatically.');
     } catch (error) { showMessage(error.message || 'ZIP import failed.', true); }
     finally {
       setBusy(false);
@@ -454,6 +499,7 @@
   unlockForm.addEventListener('submit', event => passwordAction(event, '/api/my-drive/lock/unlock', 'myDriveUnlockPassword'));
   $('myDriveConnect').addEventListener('click', connectDrive);
   $('myDrivePicker').addEventListener('click', openFolderPicker);
+  $('myDriveChooseZip').addEventListener('click', () => $('myDriveLocalZip').click());
   $('myDriveLocalZip').addEventListener('change', event => { const file = event.target.files && event.target.files[0]; if (file) void importZip(file); });
   $('myDriveLock').addEventListener('click', async () => {
     setBusy(true);

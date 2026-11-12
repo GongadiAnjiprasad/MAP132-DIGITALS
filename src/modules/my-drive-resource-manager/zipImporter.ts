@@ -5,6 +5,12 @@ import { classifyResource } from './driveClient';
 const decoder = new TextDecoder();
 const readU16 = (view: DataView, offset: number) => view.getUint16(offset, true);
 const readU32 = (view: DataView, offset: number) => view.getUint32(offset, true);
+const MIME_TYPES: Record<string, string> = {
+  ttf: 'font/ttf', otf: 'font/otf', woff: 'font/woff', woff2: 'font/woff2',
+  mp3: 'audio/mpeg', wav: 'audio/wav', aac: 'audio/aac', m4a: 'audio/mp4', ogg: 'audio/ogg', flac: 'audio/flac',
+  mp4: 'video/mp4', mov: 'video/quicktime', webm: 'video/webm', m4v: 'video/x-m4v',
+  jpg: 'image/jpeg', jpeg: 'image/jpeg', png: 'image/png', webp: 'image/webp', gif: 'image/gif', avif: 'image/avif', svg: 'image/svg+xml',
+};
 
 function findEndRecord(view: DataView): number {
   const min = Math.max(0, view.byteLength - 22 - 65_535);
@@ -38,7 +44,10 @@ export async function importZip(
   file: File,
   sourceKind: 'local-zip' | 'google-drive-zip' = 'local-zip',
   sourceId = file.name,
+  depth = 0,
+  budget: { entries: number; uncompressedBytes: number } = { entries: 0, uncompressedBytes: 0 },
 ): Promise<{ assets: ImportedAsset[]; summary: ImportSummary }> {
+  if (depth > 4) throw new Error('Nested ZIP depth exceeds the safe limit of 4 levels.');
   const issues: ImportIssue[] = [];
   const assets: ImportedAsset[] = [];
   const seen = new Set<string>();
@@ -96,9 +105,16 @@ export async function importZip(
       continue;
     }
     totalUncompressed += uncompressedSize;
+    budget.entries += 1;
+    budget.uncompressedBytes += uncompressedSize;
+    if (budget.entries > ARCHIVE_LIMITS.maxEntries || budget.uncompressedBytes > ARCHIVE_LIMITS.maxTotalUncompressedBytes) {
+      issues.push({ sourceName: file.name, path, code: 'archive-limit-exceeded', message: 'Combined nested ZIP contents exceed the safe extraction limit.' });
+      cursor = next;
+      continue;
+    }
     if (directory) { cursor = next; continue; }
     const { kind, fontFormat } = classifyAsset(path);
-    if (kind === 'other' || kind === 'archive') {
+    if (kind === 'other') {
       issues.push({ sourceName: file.name, path, code: 'unsupported-file', message: 'Unsupported file type; skipped.' });
       cursor = next;
       continue;
@@ -130,20 +146,44 @@ export async function importZip(
       if (bytes.byteLength !== uncompressedSize || crc32(bytes) !== expectedCrc) throw new Error('CRC or uncompressed size mismatch.');
       const digest = await crypto.subtle.digest('SHA-256', bytes);
       const hash = Array.from(new Uint8Array(digest), b => b.toString(16).padStart(2, '0')).join('');
-      if (seen.has(hash)) {
+      if (kind === 'archive') {
+        const nestedName = decision.normalizedPath.split('/').pop() || 'nested.zip';
+        const nested = await importZip(new File([bytes], nestedName, { type: 'application/zip' }), sourceKind, sourceId, depth + 1, budget);
+        for (const nestedAsset of nested.assets) {
+          if (seen.has(nestedAsset.candidate.contentSha256 || '')) {
+            issues.push({ sourceName: file.name, path: decision.normalizedPath + '/' + nestedAsset.candidate.relativePath, code: 'duplicate', message: 'Duplicate content skipped.' });
+          } else {
+            seen.add(nestedAsset.candidate.contentSha256 || '');
+            assets.push({
+              ...nestedAsset,
+              candidate: {
+                ...nestedAsset.candidate,
+                relativePath: decision.normalizedPath + '/' + nestedAsset.candidate.relativePath,
+                source: { kind: sourceKind, sourceId, displayName: file.name },
+              },
+            });
+          }
+        }
+        issues.push(...nested.summary.issues);
+      } else if (seen.has(hash)) {
         issues.push({ sourceName: file.name, path, code: 'duplicate', message: 'Duplicate content skipped.' });
       } else {
-        seen.add(hash);
-        assets.push({
-          candidate: {
-            source: { kind: sourceKind, sourceId, displayName: file.name },
-            relativePath: decision.normalizedPath, fileName: decision.normalizedPath.split('/').pop()!,
-            extension: decision.normalizedPath.split('.').pop()?.toLowerCase() || '',
-            assetKind: kind, category: classifyResource(decision.normalizedPath.split('/').pop()!, decision.normalizedPath)?.category || 'Other', fontFormat, byteSize: bytes.byteLength,
-            licence: 'unknown', contentSha256: hash,
-          },
-          bytes,
-        });
+        const resource = classifyResource(decision.normalizedPath.split('/').pop()!, decision.normalizedPath);
+        if (!resource) {
+          issues.push({ sourceName: file.name, path, code: 'unsupported-file', message: 'Unsupported file type; skipped.' });
+        } else {
+          seen.add(hash);
+          assets.push({
+            candidate: {
+              source: { kind: sourceKind, sourceId, displayName: file.name },
+              relativePath: decision.normalizedPath, fileName: decision.normalizedPath.split('/').pop()!,
+              extension: decision.normalizedPath.split('.').pop()?.toLowerCase() || '',
+              assetKind: resource.kind, category: resource.category, fontFormat, mimeType: MIME_TYPES[decision.normalizedPath.split('.').pop()?.toLowerCase() || ''] || 'application/octet-stream', byteSize: bytes.byteLength,
+              licence: 'unknown', contentSha256: hash,
+            },
+            bytes,
+          });
+        }
       }
     } catch (error) {
       issues.push({ sourceName: file.name, path, code: 'corrupt-archive', message: error instanceof Error ? error.message : 'Could not extract ZIP entry.' });
