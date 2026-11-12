@@ -3,6 +3,7 @@ import { createRoot } from 'react-dom/client';
 import App from './App';
 import './index.css';
 import './HomeSlider.css';
+import './HomeSliderPremium.css';
 
 type BoundaryState = { error: Error | null };
 
