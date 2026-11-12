@@ -1,24 +1,36 @@
 import { getMyDriveAccessToken } from '../src/modules/my-drive-resource-manager/driveOAuth.ts';
 import { uploadMap132DriveFile, downloadMap132DriveFile, deleteMap132DriveFile } from './googleDriveStorage.ts';
-interface AssetEnv { MAP132_KV?: KVNamespace; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; MY_DRIVE_SESSION_SECRET?: string; }
+interface AssetEnv { MAP132_KV?: KVNamespace; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; MY_DRIVE_SESSION_SECRET?: string; ADMIN_PASSWORD?: string; }
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const allowedExt=new Set(['ttf','otf','woff','woff2','mp3','wav','aac','ogg','m4a','flac','mp4','webm','mov','m4v','jpg','jpeg','png','webp','gif','avif','svg','zip','aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm']);
 const allowedCategories=new Set(['Sound Effects','Wedding','Birthday','Trailer BGMs','Plugins','Fonts','Images','Videos','Other']);
 const maxBytes=100*1024*1024;
 function safeName(value:string){return value.replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,120)||'asset';}
 async function authorized(req:Request,env:AssetEnv){
- const cookies=(req.headers.get('Cookie')||'').split(';').map(x=>x.trim());
- const unlock=cookies.find(x=>x.startsWith('map132_drive_unlock='))?.slice('map132_drive_unlock='.length);
- const drive=cookies.find(x=>x.startsWith('map132_drive_session='))?.slice('map132_drive_session='.length);
- if(!unlock||!drive||!env.MAP132_KV)return false;
- try {const u=decodeURIComponent(unlock),d=decodeURIComponent(drive);return Boolean(await env.MAP132_KV.get('my-drive/unlock/'+u)&&await env.MAP132_KV.get('my-drive/session/'+d));}catch{return false;}
+ if(!env.ADMIN_PASSWORD)return false;
+ const raw=(req.headers.get('Cookie')||'').split(';').map(x=>x.trim()).find(x=>x.startsWith('map132_admin='))?.slice('map132_admin='.length);
+ if(!raw)return false;
+ const parts=raw.split('.');
+ if(parts.length!==2)return false;
+ try{
+  const base64=parts[0].replace(/-/g,'+').replace(/_/g,'/');
+  const padded=base64+'='.repeat((4-(base64.length%4))%4);
+  const payload=JSON.parse(atob(padded));
+  if(!Number.isFinite(payload.exp)||payload.exp<Date.now())return false;
+  const encoder=new TextEncoder();
+  const key=await crypto.subtle.importKey('raw',encoder.encode(env.ADMIN_PASSWORD),{name:'HMAC',hash:'SHA-256'},false,['sign']);
+  const signatureBytes=new Uint8Array(await crypto.subtle.sign('HMAC',key,encoder.encode(parts[0])));
+  let binary='';for(const byte of signatureBytes)binary+=String.fromCharCode(byte);
+  const signature=btoa(binary).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/g,'');
+  return signature===parts[1];
+ }catch{return false;}
 }
 /** Durable private My Drive resource storage. Source Drive files remain read-only. */
 export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Response|null>{
  const url=new URL(req.url),path=url.pathname;
  if(!path.startsWith('/api/my-drive/assets'))return null;
  if(!env.MAP132_KV)return json({error:'My Drive metadata storage is not configured. Bind MAP132_KV.'},503);
- if(!await authorized(req,env))return json({error:'Unlock My Drive and connect Google Drive before accessing saved resources.'},423);
+ if(!await authorized(req,env))return json({error:'MAP132 Admin login required.'},401);
  const accessToken=await getMyDriveAccessToken(req,env);
  if(!accessToken)return json({error:'Google Drive session expired. Reconnect Google Drive and try again.'},401);
  if(path==='/api/my-drive/assets'&&req.method==='GET'){

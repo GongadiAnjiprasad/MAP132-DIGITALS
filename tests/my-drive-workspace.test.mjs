@@ -7,6 +7,7 @@ const publishedHtml = readFileSync(new URL('../public/workspace.html', import.me
 const source = readFileSync(new URL('../public/my-drive-resource-manager.js', import.meta.url), 'utf8');
 const appSource = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
 const cssSource = readFileSync(new URL('../src/index.css', import.meta.url), 'utf8');
+const assetsSource = readFileSync(new URL('../worker/myDriveAssets.ts', import.meta.url), 'utf8');
 
 test('My Drive is a separate workspace tab and its browser script is loaded', () => {
   assert.ok(rootHtml.includes('data-resource-view="my-drive"'));
@@ -94,6 +95,10 @@ test('My Drive server access is bound to the Admin Dashboard session', () => {
   assert.ok(workerSource.includes('SameSite=Lax; Path=/; Max-Age='), 'Admin session cookie must survive a top-level return navigation into My Drive');
   assert.ok(workerSource.includes("path==='/api/my-drive/oauth/callback'&&method==='GET'"));
   assert.doesNotMatch(oauthSource, /my-drive\/lock\/password-hash|map132_drive_unlock/);
+  const assetsSource = readFileSync(new URL('../worker/myDriveAssets.ts', import.meta.url), 'utf8');
+  assert.ok(assetsSource.includes("startsWith('map132_admin='"));
+  assert.doesNotMatch(assetsSource, /map132_drive_unlock|my-drive\/unlock\//);
+  assert.ok(assetsSource.includes("error:'MAP132 Admin login required.'"));
 });
 
 test('Google OAuth token exchange exposes only a sanitized provider error for diagnosis', async () => {
