@@ -31,40 +31,70 @@ test('Signed-out users see inline Admin login and cannot access My Drive content
   await expect(page.locator('#myDriveStatus')).toContainText('Admin password');
 });
 
-test('Inline Admin login opens My Drive and Logout closes it', async ({ page }) => {
-  let authenticated = false;
-  await page.route('**/api/admin/session', route => route.fulfill({
-    status: authenticated ? 200 : 401, contentType: 'application/json',
-    body: JSON.stringify({ authenticated })
-  }));
+test('Inline Admin login persists the HttpOnly session cookie across real same-origin requests and Logout clears it', async ({ page }) => {
+  const cookieValue = 'browser-session-regression-token';
+  let loginRequests = 0;
+  let sessionRequests = 0;
+  let logoutRequests = 0;
+
+  await page.route('**/api/admin/session', async route => {
+    sessionRequests += 1;
+    const cookie = route.request().headers()['cookie'] || '';
+    const authenticated = cookie.split(';').some(part => part.trim() === 'map132_admin=' + cookieValue);
+    await route.fulfill({
+      status: authenticated ? 200 : 401,
+      contentType: 'application/json',
+      body: JSON.stringify({ authenticated })
+    });
+  });
   await page.route('**/api/admin/login', async route => {
+    loginRequests += 1;
     const body = route.request().postDataJSON();
-    if (body.password === 'correct-password') {
-      authenticated = true;
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ authenticated: true }) });
-    } else {
+    if (body.password !== 'correct-password') {
       await route.fulfill({ status: 401, contentType: 'application/json', body: JSON.stringify({ error: 'Incorrect admin password.' }) });
+      return;
     }
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'Set-Cookie': 'map132_admin=' + cookieValue + '; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=28800' },
+      body: JSON.stringify({ authenticated: true })
+    });
   });
   await page.route('**/api/my-drive/session', route => route.fulfill({
     status: 200, contentType: 'application/json',
     body: JSON.stringify({ connected: false, expiresAt: null })
   }));
   await page.route('**/api/admin/logout', async route => {
-    authenticated = false;
-    await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ signedOut: true }) });
+    logoutRequests += 1;
+    const cookie = route.request().headers()['cookie'] || '';
+    expect(cookie).toContain('map132_admin=' + cookieValue);
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      headers: { 'Set-Cookie': 'map132_admin=; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age=0' },
+      body: JSON.stringify({ signedOut: true })
+    });
   });
+
   await page.goto('/workspace.html');
   await page.locator('[data-resource-view="my-drive"]').click();
   await page.locator('#myDriveAdminPassword').fill('correct-password');
   await page.locator('#myDriveLoginSubmit').click();
+
   await expect(page.locator('#myDriveContent')).toBeVisible();
   await expect(page.locator('#myDriveLoginForm')).toBeHidden();
   await expect(page.locator('#myDriveLogout')).toBeVisible();
+  await expect.poll(async () => (await page.context().cookies()).some(cookie => cookie.name === 'map132_admin' && cookie.value === cookieValue && cookie.httpOnly && cookie.secure)).toBe(true);
+  expect(loginRequests).toBe(1);
+  expect(sessionRequests).toBeGreaterThanOrEqual(2);
+
   await page.locator('#myDriveLogout').click();
   await expect(page.locator('#myDriveContent')).toBeHidden();
   await expect(page.locator('#myDriveLoginForm')).toBeVisible();
   await expect(page.locator('#myDriveStatus')).toContainText('Logged out');
+  await expect.poll(async () => (await page.context().cookies()).some(cookie => cookie.name === 'map132_admin' && cookie.value === '')).toBe(false);
+  expect(logoutRequests).toBe(1);
 });
 
 test('Connected My Drive displays saved persistent assets', async ({ page }) => {
