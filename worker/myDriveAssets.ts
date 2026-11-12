@@ -21,7 +21,7 @@ async function authorized(req:Request,env:AssetEnv){
   const key=await crypto.subtle.importKey('raw',encoder.encode(env.ADMIN_PASSWORD),{name:'HMAC',hash:'SHA-256'},false,['sign']);
   const signatureBytes=new Uint8Array(await crypto.subtle.sign('HMAC',key,encoder.encode(parts[0])));
   let binary='';for(const byte of signatureBytes)binary+=String.fromCharCode(byte);
-  const signature=btoa(binary).replace(/\\+/g,'-').replace(/\\//g,'_').replace(/=+$/g,'');
+  const signature=btoa(binary).replace(/\+/g,'-').replace(/\//g,'_').replace(/=+$/g,'');
   return signature===parts[1];
  }catch{return false;}
 }
