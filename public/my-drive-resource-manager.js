@@ -89,9 +89,9 @@
       section.id = 'myDriveCategory' + category.replace(/[^a-z0-9]/gi, '');
       section.appendChild(make('h3', '', (category === 'Fonts' ? 'Fonts Library' : category === 'Sound Effects' ? 'Sound Effects Library' : category) + ' · ' + grouped.length));
       if (category === 'Sound Effects') {
-        const subcategories = ['Whoosh','Riser','Impact','Boom','Transition','Cinematic Hit','Logo Reveal','Swipe','Punch','Heartbeat','Suspense','Ambient','Action','Horror','Other Effects'];
+        const subcategories = ['Whoosh','Riser','Impact','Boom','Transition','Cinematic Hit','Logo Reveal','Swipe','Punch','Heartbeat','Suspense','Ambient','Action','Horror','Foley','Footsteps','Gunshots','Nature','Crowd','Vehicle','UI','Animal','Water','Fire','Other Effects'];
         subcategories.forEach(subcategory => {
-          const subset = grouped.filter(asset => (asset.subcategory || 'Other Effects') === subcategory);
+          const subset = grouped.filter(asset => (asset.subcategory || soundEffectSubcategory(asset.name)) === subcategory);
           if (!subset.length) return;
           const subgroup = make('div', 'mydrive-sfx-group');
           subgroup.appendChild(make('h4', '', subcategory + ' · ' + subset.length));
