@@ -40,12 +40,17 @@ export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Resp
   if(!bytes.byteLength||bytes.byteLength>maxBytes)return json({error:'Resource size is empty or exceeds the 100 MB limit.'},413);
   const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));
   const sha=[...digest].map(b=>b.toString(16).padStart(2,'0')).join('');
+  const duplicateId=await env.MAP132_KV.get('my-drive/asset-sha/'+sha);
+  if(duplicateId){const existing=await env.MAP132_KV.get('my-drive/assets/'+duplicateId);if(existing)return json({saved:false,duplicate:true,asset:JSON.parse(existing)},200);}
   const id=crypto.randomUUID(),key='my-drive/assets/'+id;
-  const kind=['ttf','otf','woff','woff2'].includes(ext)?'font':['mp3','wav','ogg','m4a'].includes(ext)?'audio':['mp4','webm','mov'].includes(ext)?'video':['jpg','jpeg','png','webp','gif'].includes(ext)?'image':'archive';
-  const asset={id,name:filename,kind,size:bytes.byteLength,sha256:sha,contentType:contentType||'application/octet-stream',storedAt:new Date().toISOString(),licenseStatus:'unverified',source:'user-import'};
-  const driveFile=await uploadMap132DriveFile(accessToken,env.MAP132_KV,filename,asset.contentType,bytes);
+  const categoryHeader=req.headers.get('X-Asset-Category')||'Other';
+  const category=allowedCategories.has(categoryHeader)?categoryHeader:'Other';
+  const kind=['ttf','otf','woff','woff2'].includes(ext)?'font':['mp3','wav','aac','ogg','m4a','flac'].includes(ext)?'audio':['mp4','webm','mov','m4v'].includes(ext)?'video':['jpg','jpeg','png','webp','gif','avif','svg'].includes(ext)?'image':['aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm'].includes(ext)?'template':'archive';
+  const asset={id,name:filename,kind,category,size:bytes.byteLength,sha256:sha,contentType:contentType||'application/octet-stream',storedAt:new Date().toISOString(),licenseStatus:'unverified',source:'user-import'};
+  const driveFile=await uploadMap132DriveFile(accessToken,env.MAP132_KV,filename,asset.contentType,bytes,category);
   (asset as typeof asset & {driveFileId?:string}).driveFileId=driveFile.id;
   await env.MAP132_KV.put(key,JSON.stringify(asset));
+  await env.MAP132_KV.put('my-drive/asset-sha/'+sha,id);
   return json({saved:true,asset},201);
  }
  const match=path.match(/^\/api\/my-drive\/assets\/([a-z0-9-]+)(?:\/(preview|download))?$/i);
@@ -72,6 +77,7 @@ export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Resp
    }
   }
   await env.MAP132_KV.delete(key);
+  if(asset.sha256)await env.MAP132_KV.delete('my-drive/asset-sha/'+asset.sha256);
   return json({deleted:true});
  }
  return json({error:'Not found'},404);
