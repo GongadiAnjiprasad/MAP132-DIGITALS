@@ -4,6 +4,7 @@ import App from './App';
 import './index.css';
 import './HomeSlider.css';
 import './HomeSliderPremium.css';
+import './HomeSliderLightPremium.css';
 
 type BoundaryState = { error: Error | null };
 

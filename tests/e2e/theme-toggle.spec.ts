@@ -67,9 +67,9 @@ test('light theme keeps the homepage MAP132 logo and supporting text readable', 
       };
     });
     expect(textColours.gold).toBe('#80551f');
-    expect(textColours.homeProof).toBe('rgb(98, 93, 84)');
-    expect(textColours.footer).toBe('rgb(98, 93, 84)');
-    expect(textColours.placeholder).toBe('rgb(111, 109, 101)');
+    expect(textColours.homeProof).toBe('rgb(96, 104, 115)');
+    expect(textColours.footer).toBe('rgb(89, 97, 108)');
+    expect(textColours.placeholder).toBe('rgb(104, 113, 125)');
   }
 });
 
