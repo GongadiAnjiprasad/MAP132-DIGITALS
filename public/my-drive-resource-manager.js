@@ -15,6 +15,45 @@
   const gate = $('myDriveGate');
   const content = $('myDriveContent');
   const items = $('myDriveItems');
+  const queuePanel = make('section', 'mydrive-download-queue');
+  queuePanel.hidden = true;
+  queuePanel.innerHTML = '<div class="mydrive-queue-heading"><strong>My Drive · Download Queue</strong><span class="mydrive-queue-count">Waiting for queue…</span></div><div class="mydrive-queue-scroll" aria-live="polite"><p class="mydrive-empty">No background copies yet.</p></div>';
+  if (items && items.parentNode) items.parentNode.insertBefore(queuePanel, items);
+  const queueCount = queuePanel.querySelector('.mydrive-queue-count');
+  const queueList = queuePanel.querySelector('.mydrive-queue-scroll');
+
+  function renderQueue(data) {
+    const rows = Array.isArray(data.items) ? data.items : [];
+    const completed = rows.filter(item => item.status === 'completed').length;
+    const failed = rows.filter(item => item.status === 'failed').length;
+    const active = rows.filter(item => item.status === 'copying').length;
+    const queued = rows.filter(item => item.status === 'queued').length;
+    queueCount.textContent = rows.length + ' files · ' + completed + ' saved · ' + queued + ' queued' + (active ? ' · ' + active + ' copying' : '') + (failed ? ' · ' + failed + ' failed' : '');
+    queueList.replaceChildren();
+    if (!rows.length) { queueList.appendChild(make('p', 'mydrive-empty', 'No background copies yet. Choose a Drive folder to start.')); return; }
+    rows.forEach(item => {
+      const row = make('div', 'mydrive-queue-row');
+      const top = make('div', 'mydrive-queue-row-top');
+      const name = make('span', 'mydrive-queue-name', item.name || 'Untitled file');
+      name.title = item.sourcePath || item.name || '';
+      const statusText = item.status === 'completed' ? 'Completed' : item.status === 'copying' ? 'Copying' : item.status === 'failed' ? 'Failed' : 'Queued';
+      const status = make('span', 'mydrive-queue-status', statusText);
+      top.append(name, status);
+      const track = make('div', 'mydrive-queue-track');
+      const fill = make('span', 'mydrive-queue-fill');
+      fill.style.width = Math.max(0, Math.min(100, Number(item.progress) || 0)) + '%';
+      track.appendChild(fill);
+      const meta = make('small', 'mydrive-queue-meta', (Number(item.progress) || 0) + '% · ' + sizeText(item.size) + (item.error ? ' · ' + item.error : ''));
+      row.append(top, track, meta);
+      queueList.appendChild(row);
+    });
+  }
+
+  async function loadQueue() {
+    if (!state.connected || !state.authenticated) return;
+    try { renderQueue(await request('/api/my-drive/queue')); queuePanel.hidden = false; }
+    catch (error) { queuePanel.hidden = false; queueCount.textContent = 'Queue unavailable'; queueList.replaceChildren(make('p','mydrive-empty',error.message || 'Could not load the background queue.')); }
+  }
 
   function showMessage(text, error) {
     status.textContent = text || '';
@@ -197,12 +236,14 @@
       if (state.connected) {
         try {
           await loadAssets(false);
+          await loadQueue();
           showMessage('Google Drive connected. Your saved resources are ready.');
         } catch (assetError) {
           state.assets = []; state.cursor = null; renderAssets();
           showMessage(assetError.message || 'Google Drive resources could not be loaded. Reconnect Google Drive.', true);
         }
       } else {
+        queuePanel.hidden = true;
         state.assets = []; state.cursor = null; renderAssets();
         showMessage('You are logged in. Connect Google Drive to import and retrieve resources.');
       }
@@ -371,6 +412,7 @@
     let saved = 0, skipped = 0, failed = 0;
     for (let index = 0; index < candidates.length; index++) {
       const file = candidates[index];
+      if (!file.name.toLowerCase().endsWith('.zip')) continue; // Other source files are copied by the server-side background queue.
       if (file.size > 100 * 1024 * 1024) { skipped++; continue; }
       try {
         showMessage('Saving ' + (index + 1) + ' of ' + candidates.length + ' · ' + file.category + ' · ' + file.name);
@@ -411,8 +453,18 @@
           if (data.action !== window.google.picker.Action.PICKED) return;
           const folder = data.docs && data.docs[0];
           if (!folder || !folder.id) { setBusy(false); showMessage('No folder was selected.', true); return; }
-          try { await syncSelectedFolder(folder.id, String(folder.name || 'Selected Drive folder')); }
-          catch (error) { showMessage(error.message || 'Folder sync failed.', true); }
+          try {
+            const folderName = String(folder.name || 'Selected Drive folder');
+            try {
+              const queued = await post('/api/my-drive/queue', { folderId: folder.id, folderName });
+              await loadQueue();
+              showMessage((queued.total || 0) + ' files added to the background copy queue. Copies continue even when this website is closed.');
+            } catch (queueError) {
+              showMessage('Background queue could not start: ' + (queueError.message || 'Unknown error') + '. ZIP extraction will continue while this page stays open.', true);
+            }
+            await syncSelectedFolder(folder.id, folderName);
+            await loadQueue();
+          } catch (error) { showMessage(error.message || 'Folder sync failed.', true); }
           finally { setBusy(false); }
         }).build();
       picker.setVisible(true);
@@ -607,6 +659,7 @@
     clean.searchParams.delete('myDrive');
     window.history.replaceState({}, '', clean.pathname + clean.search + clean.hash);
   }
+  window.setInterval(() => { if (state.connected && state.authenticated && !state.busy) void loadQueue(); }, 15000);
   window.addEventListener('focus', () => { if (!state.busy) refreshState(); });
   document.addEventListener('visibilitychange', () => { if (!document.hidden && !state.busy) refreshState(); });
   refreshState();
