@@ -12,7 +12,7 @@ type QueueItem = {
   id: string; jobId: string; sourceFileId: string; name: string; sourcePath: string;
   category: string; mimeType: string; size: number;
   status: 'queued' | 'copying' | 'completed' | 'failed';
-  progress: number; targetFileId?: string; error?: string;
+  progress: number; targetFileId?: string; error?: string; attempts?: number;
   createdAt: string; updatedAt: string;
 };
 type QueueJob = { id: string; rootFolderId: string; rootFolderName: string; status: string; total: number; completed: number; failed: number; createdAt: string; updatedAt: string };
@@ -65,7 +65,7 @@ async function scanFolder(token:string, rootId:string, rootName:string):Promise<
   const visited = new Set<string>();
   const files:Array<{id:string;name:string;path:string;category:string;mimeType:string;size:number}> = [];
   let scanned = 0;
-  while (folders.length && visited.size < 500 && scanned < 1500 && files.length < 1200) {
+  while (folders.length && visited.size < 500 && scanned < 1500 && files.length < 900) {
     const folder = folders.shift()!;
     if (visited.has(folder.id)) continue;
     visited.add(folder.id);
@@ -89,7 +89,7 @@ async function scanFolder(token:string, rootId:string, rootName:string):Promise<
           const category = classify(file.name,path);
           if (category && file.capabilities?.canCopy !== false) files.push({id:file.id,name:file.name,path,category,mimeType:file.mimeType||'application/octet-stream',size:Number(file.size||0)});
         }
-        if (scanned >= 1500 || files.length >= 1200) break;
+        if (scanned >= 1500 || files.length >= 900) break;
       }
       pageToken = page.nextPageToken || '';
     } while (pageToken && scanned < 1500 && files.length < 1200);
@@ -155,18 +155,26 @@ export async function processMyDriveQueue(env:MyDriveQueueEnv):Promise<void> {
   for(const jobKey of jobs.keys){
     const jobValue=await env.MAP132_KV.get(jobKey.name);if(!jobValue)continue;
     let job:QueueJob;try{job=JSON.parse(jobValue);}catch{continue;}
-    if(job.status==='cancelled'||job.status==='completed'||job.status==='failed')continue;
+    if(job.status==='cancelled'||job.status==='completed'||job.status==='completed-with-errors'||job.status==='failed')continue;
     const entries=await env.MAP132_KV.list({prefix:PREFIX+'items/'+job.id+'/',limit:1000});
-    const queued=entries.keys[0];if(!queued)continue;
-    const raw=await env.MAP132_KV.get(queued.name);if(!raw)continue;
-    let item:QueueItem;try{item=JSON.parse(raw);}catch{continue;}
-    if(item.status==='completed'||item.status==='failed')continue;
-    item.status='copying';item.updatedAt=new Date().toISOString();await env.MAP132_KV.put(queued.name,JSON.stringify(item));
+    let next:{key:string;item:QueueItem}|null=null;
+    for(const entry of entries.keys){
+      const raw=await env.MAP132_KV.get(entry.name);if(!raw)continue;
+      try{const item=JSON.parse(raw) as QueueItem;if(item.status==='queued'||item.status==='copying'){next={key:entry.name,item};break;}}catch{}
+    }
+    if(!next)continue;
+    const {key,item}=next;
+    item.status='copying';item.updatedAt=new Date().toISOString();await env.MAP132_KV.put(key,JSON.stringify(item));
     try{
-      const duplicate=await env.MAP132_KV.get(PREFIX+'source-copy/'+item.sourceFileId);
-      if(duplicate){
-        item.targetFileId=duplicate;item.status='completed';item.progress=100;
-      }else{
+      let copiedId=await env.MAP132_KV.get(PREFIX+'source-copy/'+item.sourceFileId);
+      if(!copiedId){
+        const q = "appProperties has { key='map132SourceFileId' and value='"+item.sourceFileId+"' } and trashed=false";
+        const lookup = new URL('https://www.googleapis.com/drive/v3/files');
+        lookup.searchParams.set('q',q);lookup.searchParams.set('pageSize','1');lookup.searchParams.set('fields','files(id)');
+        const found = await fetch(lookup,{headers:{Authorization:'Bearer '+token,Accept:'application/json'}});
+        if(found.ok){const result=await found.json() as {files?:Array<{id:string}>};copiedId=result.files?.[0]?.id||null;}
+      }
+      if(!copiedId){
         const parent=await ensureMap132CategoryFolder(token,env.MAP132_KV,item.category);
         const response=await fetch('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(item.sourceFileId)+'/copy?fields=id,name,mimeType,size,parents',{
           method:'POST',headers:{Authorization:'Bearer '+token,'Content-Type':'application/json'},
@@ -175,19 +183,23 @@ export async function processMyDriveQueue(env:MyDriveQueueEnv):Promise<void> {
         if(!response.ok)throw new Error(response.status===403?'Google Drive does not allow copying this source file.':response.status===404?'The source file is no longer available.':'Google Drive copy failed ('+response.status+').');
         const copied=await response.json() as {id?:string};
         if(!copied.id)throw new Error('Google Drive did not confirm the copied file.');
-        item.targetFileId=copied.id;item.status='completed';item.progress=100;
-        await env.MAP132_KV.put(PREFIX+'source-copy/'+item.sourceFileId,copied.id);
+        copiedId=copied.id;
       }
+      item.targetFileId=copiedId;item.status='completed';item.progress=100;
+      await env.MAP132_KV.put(PREFIX+'source-copy/'+item.sourceFileId,copiedId);
       delete item.error;
     }catch(error){
-      item.status='failed';item.error=error instanceof Error?error.message:'Copy failed.';
+      item.attempts=(item.attempts||0)+1;
+      item.error=error instanceof Error?error.message:'Copy failed.';
+      item.status=item.attempts>=5?'failed':'queued';
     }
-    item.updatedAt=new Date().toISOString();await env.MAP132_KV.put(queued.name,JSON.stringify(item));
+    item.updatedAt=new Date().toISOString();await env.MAP132_KV.put(key,JSON.stringify(item));
     const allKeys=await env.MAP132_KV.list({prefix:PREFIX+'items/'+job.id+'/',limit:1000});
-    const all=await Promise.all(allKeys.keys.map(async key=>{const v=await env.MAP132_KV!.get(key.name);try{return v?JSON.parse(v) as QueueItem:null;}catch{return null;}}));
+    const all=await Promise.all(allKeys.keys.map(async entry=>{const v=await env.MAP132_KV!.get(entry.name);try{return v?JSON.parse(v) as QueueItem:null;}catch{return null;}}));
     job.completed=all.filter(x=>x?.status==='completed').length;
     job.failed=all.filter(x=>x?.status==='failed').length;
-    job.status=job.completed+job.failed>=job.total?(job.failed?'completed-with-errors':'completed'):'running';
+    const pending=all.filter(x=>x&&x.status!=='completed'&&x.status!=='failed').length;
+    job.status=pending?'running':job.failed?'completed-with-errors':'completed';
     job.updatedAt=new Date().toISOString();await env.MAP132_KV.put(keyJob(job.id),JSON.stringify(job));
     return;
   }
