@@ -2,7 +2,8 @@ import { getMyDriveAccessToken } from '../src/modules/my-drive-resource-manager/
 import { uploadMap132DriveFile, downloadMap132DriveFile, deleteMap132DriveFile } from './googleDriveStorage.ts';
 interface AssetEnv { MAP132_KV?: KVNamespace; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; MY_DRIVE_SESSION_SECRET?: string; }
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
-const allowedExt=new Set(['ttf','otf','woff','woff2','mp3','wav','ogg','m4a','mp4','webm','mov','jpg','jpeg','png','webp','gif','zip']);
+const allowedExt=new Set(['ttf','otf','woff','woff2','mp3','wav','aac','ogg','m4a','flac','mp4','webm','mov','m4v','jpg','jpeg','png','webp','gif','avif','svg','zip','aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm']);
+const allowedCategories=new Set(['Sound Effects','Wedding','Birthday','Trailer BGMs','Plugins','Fonts','Images','Videos','Other']);
 const maxBytes=100*1024*1024;
 function safeName(value:string){return value.replace(/[^a-zA-Z0-9._-]/g,'_').slice(0,120)||'asset';}
 async function authorized(req:Request,env:AssetEnv){
