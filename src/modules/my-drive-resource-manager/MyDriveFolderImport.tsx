@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { downloadDriveFile, listDriveFolderRecursively } from './driveClient';
 
 type Props = { disabled?: boolean; onImported: () => Promise<void> | void };
 
@@ -37,9 +38,48 @@ function loadPicker(): Promise<void> {
   return pickerScriptPromise;
 }
 
+const contentTypes: Record<string, string> = {
+  ttf: 'font/ttf', otf: 'font/otf', woff: 'font/woff', woff2: 'font/woff2',
+};
+
 export default function MyDriveFolderImport({ disabled = false, onImported }: Props) {
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  async function importSelectedFolder(folderId: string, folderName: string) {
+    setMessage('Scanning selected folder and nested subfolders…');
+    const scan = await listDriveFolderRecursively({ id: folderId, name: folderName }, scanned => {
+      setMessage('Scanning Drive folder… ' + scanned + ' item(s) checked.');
+    });
+    const fonts = scan.candidates.filter(candidate => candidate.assetKind === 'font' && candidate.driveFileId);
+    let imported = 0;
+    const skipped = scan.issues.length + scan.candidates.length - fonts.length;
+    for (let index = 0; index < fonts.length; index++) {
+      const font = fonts[index];
+      try {
+        setMessage('Importing font ' + (index + 1) + ' of ' + fonts.length + ': ' + font.fileName);
+        const bytes = await downloadDriveFile(font.driveFileId!);
+        const response = await fetch('/api/my-drive/assets', {
+          method: 'POST',
+          credentials: 'same-origin',
+          headers: {
+            'Content-Type': contentTypes[font.extension] || font.mimeType || 'application/octet-stream',
+            'X-Asset-Name': encodeURIComponent(font.fileName),
+            'Content-Length': String(bytes.byteLength),
+          },
+          body: bytes,
+        });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.error || 'Could not save ' + font.fileName + '.');
+        imported++;
+      } catch (error) {
+        console.error('MAP132 Drive font import item failed:', font.fileName, error);
+      }
+    }
+    await onImported();
+    const skippedCount = skipped + (fonts.length - imported);
+    const issueText = scan.issues.length ? ' ' + scan.issues.length + ' scan issue(s) were reported.' : '';
+    setMessage('Folder import complete: ' + imported + ' font(s) imported, ' + skippedCount + ' skipped. ' + scan.candidates.length + ' supported items found.' + issueText);
+  }
   async function chooseFolder() {
     setBusy(true);
     setMessage('');
@@ -64,20 +104,10 @@ export default function MyDriveFolderImport({ disabled = false, onImported }: Pr
             if (data.action === window.google.picker.Action.CANCEL) setBusy(false);
             return;
           }
-          const folderId = data.docs?.[0]?.id;
-          if (!folderId) { setMessage('No folder was selected.'); setBusy(false); return; }
+          const folder = data.docs?.[0];
+          if (!folder?.id) { setMessage('No folder was selected.'); setBusy(false); return; }
           try {
-            setMessage('Scanning selected folder and nested subfolders for fonts…');
-            const response = await fetch('/api/my-drive/import-folder', {
-              method: 'POST',
-              credentials: 'same-origin',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ folderId }),
-            });
-            const result = await response.json();
-            if (!response.ok) throw new Error(result.error || 'Folder import failed.');
-            await onImported();
-            setMessage('Folder scan complete: ' + result.importedCount + ' font(s) imported, ' + result.skippedCount + ' skipped. ' + result.scannedCount + ' files scanned.');
+            await importSelectedFolder(folder.id, String(folder.name || 'Google Drive folder'));
           } catch (error) {
             setMessage(error instanceof Error ? error.message : 'Folder import failed.');
           } finally {
@@ -93,7 +123,7 @@ export default function MyDriveFolderImport({ disabled = false, onImported }: Pr
   }
   return <div style={{ display: 'grid', gap: 8, margin: '10px 0' }}>
     <button type="button" className="gold-button" onClick={() => void chooseFolder()} disabled={disabled || busy}>
-      {busy ? 'Preparing folder import…' : 'Import fonts from Google Drive folder'}
+      {busy ? 'Importing Drive folder…' : 'Import fonts from Google Drive folder'}
     </button>
     {message && <p className="workspace-form-note" role="status">{message}</p>}
   </div>;
