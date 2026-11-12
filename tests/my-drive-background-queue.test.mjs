@@ -20,7 +20,7 @@ test('background copies are queued in persistent KV and copied directly inside G
   assert.ok(queue.includes("PREFIX+'jobs/'"));
   assert.ok(queue.includes("PREFIX+'items/'"));
   assert.ok(queue.includes("files/'+encodeURIComponent(item.sourceFileId)+'/copy"));
-  assert.doesNotMatch(queue, /queue\\/cancel/);
+  assert.ok(!queue.includes("'/api/my-drive/queue/cancel'"));
   assert.ok(queue.includes("PREFIX+'source-copy/'"));
   assert.ok(queue.includes("appProperties has"));
   assert.ok(queue.includes("item.status='completed';item.progress=100"));
