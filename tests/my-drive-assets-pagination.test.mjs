@@ -6,7 +6,7 @@ import { handleMyDriveAssets } from '../worker/myDriveAssets.ts';
 globalThis.crypto ??= webcrypto;
 
 const SESSION_SECRET = 'test-only-my-drive-session-secret-32-bytes';
-const COOKIE = 'map132_drive_unlock=unlock-id; map132_drive_session=session-id';
+const ADMIN_PASSWORD = 'test-only-admin-password';
 
 function memoryKv(initial = {}) {
   const values = new Map(Object.entries(initial));
@@ -25,6 +25,17 @@ function memoryKv(initial = {}) {
   };
 }
 
+function base64url(bytes) {
+  return Buffer.from(bytes).toString('base64url');
+}
+
+async function adminCookie(password = ADMIN_PASSWORD) {
+  const payload = base64url(Buffer.from(JSON.stringify({ exp: Date.now() + 60 * 60 * 1000 })));
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(password), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const signature = new Uint8Array(await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(payload)));
+  return 'map132_admin=' + payload + '.' + base64url(signature);
+}
+
 async function encryptedSession(secret) {
   const digest = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(secret));
   const key = await crypto.subtle.importKey('raw', digest, { name: 'AES-GCM' }, false, ['encrypt']);
@@ -34,26 +45,48 @@ async function encryptedSession(secret) {
   return Buffer.from(new Uint8Array([...iv, ...new Uint8Array(ciphertext)])).toString('base64url');
 }
 
-test('My Drive saved resources endpoint returns subsequent KV pages when cursor is supplied', async () => {
+test('My Drive saved resources use the Admin session and Google Drive session, without a separate unlock cookie', async () => {
   const kv = memoryKv({
-    'my-drive/unlock/unlock-id': 'unlocked',
     'my-drive/session/session-id': await encryptedSession(SESSION_SECRET),
     'my-drive/assets/asset-1': JSON.stringify({ id: 'asset-1', name: 'first.ttf' }),
     'my-drive/assets/asset-2': JSON.stringify({ id: 'asset-2', name: 'second.ttf' }),
     'my-drive/assets/asset-3': JSON.stringify({ id: 'asset-3', name: 'third.ttf' }),
   });
-  const env = { MAP132_KV: kv, MY_DRIVE_SESSION_SECRET: SESSION_SECRET };
-  const first = await handleMyDriveAssets(new Request('https://example.test/api/my-drive/assets?limit=2', { headers: { Cookie: COOKIE } }), env);
+  const env = { MAP132_KV: kv, MY_DRIVE_SESSION_SECRET: SESSION_SECRET, ADMIN_PASSWORD };
+  const cookie = (await adminCookie()) + '; map132_drive_session=session-id';
+  const first = await handleMyDriveAssets(new Request('https://example.test/api/my-drive/assets?limit=2', { headers: { Cookie: cookie } }), env);
   assert.ok(first);
   assert.equal(first.status, 200);
   const firstPage = await first.json();
   assert.deepEqual(firstPage.assets.map(asset => asset.id), ['asset-1', 'asset-2']);
   assert.ok(firstPage.cursor);
 
-  const second = await handleMyDriveAssets(new Request('https://example.test/api/my-drive/assets?limit=2&cursor=' + encodeURIComponent(firstPage.cursor), { headers: { Cookie: COOKIE } }), env);
+  const second = await handleMyDriveAssets(new Request('https://example.test/api/my-drive/assets?limit=2&cursor=' + encodeURIComponent(firstPage.cursor), { headers: { Cookie: cookie } }), env);
   assert.ok(second);
   assert.equal(second.status, 200);
   const secondPage = await second.json();
   assert.deepEqual(secondPage.assets.map(asset => asset.id), ['asset-3']);
   assert.equal(secondPage.cursor, null);
+});
+
+test('A legacy My Drive unlock cookie cannot replace a valid Admin session', async () => {
+  const kv = memoryKv({
+    'my-drive/unlock/old-unlock-id': 'unlocked',
+    'my-drive/session/session-id': await encryptedSession(SESSION_SECRET),
+  });
+  const env = { MAP132_KV: kv, MY_DRIVE_SESSION_SECRET: SESSION_SECRET, ADMIN_PASSWORD };
+  const response = await handleMyDriveAssets(new Request('https://example.test/api/my-drive/assets', {
+    headers: { Cookie: 'map132_drive_unlock=old-unlock-id; map132_drive_session=session-id' },
+  }), env);
+  assert.equal(response.status, 401);
+  assert.deepEqual(await response.json(), { error: 'MAP132 Admin login required.' });
+});
+
+test('A valid Admin session without Google Drive connection receives a reconnect response', async () => {
+  const env = { MAP132_KV: memoryKv(), MY_DRIVE_SESSION_SECRET: SESSION_SECRET, ADMIN_PASSWORD };
+  const response = await handleMyDriveAssets(new Request('https://example.test/api/my-drive/assets', {
+    headers: { Cookie: await adminCookie() },
+  }), env);
+  assert.equal(response.status, 401);
+  assert.deepEqual(await response.json(), { error: 'Google Drive session expired. Reconnect Google Drive and try again.' });
 });
