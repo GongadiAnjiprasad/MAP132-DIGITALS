@@ -25,7 +25,7 @@ const keyJob = (id:string) => PREFIX + 'jobs/' + id;
 const keyItem = (job:string,id:string) => PREFIX + 'items/' + job + '/' + id;
 const safeName = (value:string) => value.replace(/[\\/\\\\]/g,'_').replace(/[^a-zA-Z0-9._ -]/g,'_').slice(0,120) || 'resource';
 
-function classify(name:string, path:string): string | null {
+export function classifyMyDriveQueueResource(name:string, path:string): string | null {
   const ext = (name.split('.').pop() || '').toLowerCase();
   if (!allowed.has(ext)) return null;
   const text = (path + ' ' + name).toLowerCase().replace(/[_-]+/g,' ');
@@ -86,7 +86,7 @@ async function scanFolder(token:string, rootId:string, rootName:string):Promise<
         if (file.mimeType === FOLDER_MIME) {
           if (folders.length + visited.size < 500) folders.push({id:file.id,path});
         } else {
-          const category = classify(file.name,path);
+          const category = classifyMyDriveQueueResource(file.name,path);
           if (category && file.capabilities?.canCopy !== false) files.push({id:file.id,name:file.name,path,category,mimeType:file.mimeType||'application/octet-stream',size:Number(file.size||0)});
         }
         if (scanned >= 1500 || files.length >= 900) break;
@@ -108,6 +108,7 @@ export async function handleMyDriveQueue(req:Request,env:MyDriveQueueEnv):Promis
     const rootId = String(body.folderId||'');
     const rootName = String(body.folderName||'Selected Drive folder').slice(0,160);
     if (!/^[a-zA-Z0-9_-]{1,256}$/.test(rootId)) return json({error:'Choose a valid Google Drive folder.'},400);
+    if (!await env.MAP132_KV.get('my-drive/google-refresh-token')) return json({error:'Background copying needs Google Drive offline permission. Reconnect Google Drive and approve the requested access once.'},409);
     const files = await scanFolder(token,rootId,rootName);
     if (!files.length) return json({error:'No supported, copyable files were found in the selected folder.'},404);
     const jobId = crypto.randomUUID(), now = new Date().toISOString();
@@ -150,7 +151,11 @@ export async function handleMyDriveQueue(req:Request,env:MyDriveQueueEnv):Promis
 export async function processMyDriveQueue(env:MyDriveQueueEnv):Promise<void> {
   if(!env.MAP132_KV)return;
   const token=await refreshToken(env);
-  if(!token)return;
+  if(!token){
+    const pending=await env.MAP132_KV.list({prefix:PREFIX+'jobs/',limit:50});
+    for(const entry of pending.keys){const raw=await env.MAP132_KV.get(entry.name);if(!raw)continue;try{const job=JSON.parse(raw) as QueueJob;if(!['completed','completed-with-errors','failed','cancelled'].includes(job.status)){(job as any).status='paused';(job as any).lastError='Google Drive background authorization needs reconnecting.';job.updatedAt=new Date().toISOString();await env.MAP132_KV.put(entry.name,JSON.stringify(job));}}catch{}}
+    return;
+  }
   const jobs=await env.MAP132_KV.list({prefix:PREFIX+'jobs/',limit:50});
   for(const jobKey of jobs.keys){
     const jobValue=await env.MAP132_KV.get(jobKey.name);if(!jobValue)continue;
