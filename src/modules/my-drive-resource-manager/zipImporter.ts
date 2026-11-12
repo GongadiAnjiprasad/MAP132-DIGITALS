@@ -1,6 +1,6 @@
 import { ARCHIVE_LIMITS, classifyAsset, validateArchiveEntry } from './archivePolicy.ts';
 import type { ImportCandidate, ImportIssue, ImportSummary } from './types';
-import { classifyResource } from './driveClient';
+import { classifyResource } from './driveClient.ts';
 
 const decoder = new TextDecoder();
 const readU16 = (view: DataView, offset: number) => view.getUint16(offset, true);
