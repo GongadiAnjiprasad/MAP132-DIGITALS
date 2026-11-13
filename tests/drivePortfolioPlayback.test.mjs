@@ -42,9 +42,9 @@ test('Admin Drive sync reuses the existing folder scanner and warns about public
   assert.ok(moduleUi.includes("fetch('/api/my-drive/portfolio-folder'"));
   assert.ok(worker.includes('async function syncDrivePortfolioFromFolder'));
   assert.ok(worker.includes('await syncDrivePortfolioFromFolder(env)'));
-  assert.ok(wrangler.includes('crons = [\"*/5 * * * *\", \"35 18 * * *\"]'));
-  assert.ok(worker.includes(\"if(controller.cron==='*/5 * * * *')\"));
-  assert.ok(worker.includes(\"if(controller.cron!=='35 18 * * *')return\"));
+  assert.ok(wrangler.includes('crons = ["*/5 * * * *", "35 18 * * *"]'));
+  assert.ok(worker.includes("if(controller.cron==='*/5 * * * *')"));
+  assert.ok(worker.includes("if(controller.cron!=='35 18 * * *')return"));
   assert.ok(oauth.includes("path === '/api/my-drive/portfolio-folder' && request.method === 'PUT'"));
   assert.ok(moduleUi.includes('Source Drive files are not changed.'));
   assert.ok(moduleUi.includes('Every supported video found in this selected folder becomes publicly playable'));
