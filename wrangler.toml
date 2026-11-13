@@ -11,7 +11,7 @@ id = "132f9ac025434a89a7d73a83328e20bf"
 binding = "AI"
 
 [triggers]
-crons = ["35 18 * * *"]
+crons = ["*/5 * * * *"]
 
 [assets]
 directory = "./dist"
