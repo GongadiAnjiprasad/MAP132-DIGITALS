@@ -60,13 +60,20 @@ async function api(req:Request,env:Env){const url=new URL(req.url),path=url.path
  if(!published)return json({error:'This video is not published in the MAP132 portfolio.'},404);
  const accessToken=await getPublishedDriveAccessToken(env);
  if(!accessToken)return json({error:'Google Drive playback is unavailable. Reconnect Google Drive from the Admin Dashboard.'},503);
+ const authHeaders={Authorization:'Bearer '+accessToken,Accept:'application/json'};
+ const metadataUrl=new URL('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(fileId));
+ metadataUrl.searchParams.set('fields','id,mimeType,trashed');
+ const metadataResponse=await fetch(metadataUrl,{headers:authHeaders});
+ if(!metadataResponse.ok)return json({error:'Google Drive could not verify this published video.'},metadataResponse.status===404?404:502);
+ const metadata=await metadataResponse.json() as {id?:string;mimeType?:string;trashed?:boolean};
+ if(metadata.trashed||!String(metadata.mimeType||'').startsWith('video/'))return json({error:'The published Drive item is not an available video file.'},415);
  const upstreamUrl=new URL('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(fileId));
  upstreamUrl.searchParams.set('alt','media');
  const upstreamHeaders:Record<string,string>={Authorization:'Bearer '+accessToken,Accept:'*/*'};
  const range=req.headers.get('Range');
  if(range)upstreamHeaders.Range=range;
  const upstream=await fetch(upstreamUrl,{headers:upstreamHeaders});
- if(!upstream.ok||!upstream.body)return json({error:'Google Drive could not stream this published video.'},upstream.status===404?404:502);
+ if(!upstream.ok||!upstream.body)return json({error:'Google Drive could not stream this published video.'},upstream.status===404?404:upstream.status===416?416:502);
  const headers=new Headers({
   'Content-Type':upstream.headers.get('Content-Type')||'video/mp4',
   'Cache-Control':'public, max-age=60, stale-while-revalidate=300',
