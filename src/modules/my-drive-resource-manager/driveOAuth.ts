@@ -385,6 +385,34 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
   }
 
 
+  if (path === '/api/my-drive/portfolio-folder' && request.method === 'GET') {
+    const session = await readSession(request, env);
+    if (!session) return json({ error: 'Connect Google Drive again to continue.' }, 401);
+    const stored = await env.MAP132_KV!.get('my-drive/portfolio-folder');
+    if (!stored) return json({ folder: null });
+    try { return json({ folder: JSON.parse(stored) }); }
+    catch { return json({ error: 'Saved portfolio folder settings are invalid.' }, 500); }
+  }
+
+  if (path === '/api/my-drive/portfolio-folder' && request.method === 'PUT') {
+    const session = await readSession(request, env);
+    if (!session) return json({ error: 'Connect Google Drive again to continue.' }, 401);
+    const body = await request.json().catch(() => ({})) as { id?: string; name?: string };
+    const id = String(body.id || '');
+    const name = String(body.name || '').trim().slice(0, 180);
+    if (!/^[a-zA-Z0-9_-]{1,256}$/.test(id) || !name) return json({ error: 'Choose a valid Google Drive folder.' }, 400);
+    const metadataUrl = new URL('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(id));
+    metadataUrl.searchParams.set('fields', 'id,name,mimeType,trashed');
+    const metadataResponse = await fetch(metadataUrl, { headers: { Authorization: 'Bearer ' + session.access_token, Accept: 'application/json' } });
+    if (!metadataResponse.ok) return json({ error: 'Google Drive could not verify this folder.' }, metadataResponse.status === 404 ? 404 : 502);
+    const metadata = await metadataResponse.json() as { id?: string; name?: string; mimeType?: string; trashed?: boolean };
+    if (metadata.trashed || metadata.mimeType !== 'application/vnd.google-apps.folder') return json({ error: 'The selected Drive item is not an available folder.' }, 400);
+    const folder = { id, name: String(metadata.name || name) };
+    await env.MAP132_KV!.put('my-drive/portfolio-folder', JSON.stringify(folder));
+    return json({ saved: true, folder });
+  }
+
+
 
 
   if (path.startsWith('/api/my-drive/download/') && request.method === 'GET') {
