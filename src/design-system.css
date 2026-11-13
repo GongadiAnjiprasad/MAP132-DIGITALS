@@ -1,0 +1,87 @@
+/* MAP132 DIGITALS — shared design system
+   Shared visual foundations for the public portfolio, admin dashboard and creator workspace.
+   Keep service-specific glow colours and intentional media controls as component variants. */
+:root{
+  --map132-font-body:"DM Sans",sans-serif;
+  --map132-font-display:"Manrope",sans-serif;
+  --map132-bg:#090B10;
+  --map132-surface:#11151D;
+  --map132-surface-raised:#171D27;
+  --map132-accent:#E8C77A;
+  --map132-accent-strong:#F5DCA7;
+  --map132-text:#F4F0E8;
+  --map132-muted:#A8A9AD;
+  --map132-border:rgba(232,199,122,.20);
+  --map132-border-soft:rgba(232,199,122,.12);
+  --map132-radius-control:999px;
+  --map132-radius-input:10px;
+  --map132-radius-card:16px;
+  --map132-radius-panel:20px;
+  --map132-control-height:44px;
+  --map132-focus:0 0 0 3px rgba(232,199,122,.22);
+  --map132-shadow-card:0 12px 30px rgba(0,0,0,.20);
+}
+:where(body,button,input,select,textarea){font-family:var(--map132-font-body)}
+:where(button,input,select,textarea){font-size:inherit}
+:where(button,a,input,select,textarea,[tabindex]):focus-visible{
+  outline:2px solid var(--map132-accent-strong);
+  outline-offset:3px;
+}
+
+/* Public portfolio — dark and light themes share the same sizing and shape language. */
+.map132-slider-site{
+  --ms-bg:var(--map132-bg);
+  --ms-panel:var(--map132-surface);
+  --ms-panel2:var(--map132-surface-raised);
+  --ms-gold:var(--map132-accent);
+  --ms-gold2:var(--map132-accent-strong);
+  --ms-text:var(--map132-text);
+  --ms-muted:var(--map132-muted);
+  --ms-line:var(--map132-border);
+  font-family:var(--map132-font-body);
+}
+.map132-slider-site :is(h1,h2,h3,h4,.ms-brand b){font-family:var(--map132-font-display)}
+.map132-slider-site :is(.ms-primary,.ms-text-button,.ms-nav button,.ms-nav a,.ms-contact-links a,.ms-pagination button,.ms-review-tabs button,.ms-review-feed-foot button,.ms-home-review-invite button,.ms-film-enquiry button){
+  min-height:var(--map132-control-height);
+  border-radius:var(--map132-radius-control);
+}
+.map132-slider-site :is(.ms-primary,.ms-text-button){padding-inline:18px}
+.map132-slider-site :is(.ms-home-showcase,.ms-contact-panel){border-radius:var(--map132-radius-panel)}
+.map132-slider-site :is(.ms-service-detail,.ms-process-grid article,.ms-studio-extra article,.ms-review-card,.ms-project-card){
+  border-radius:var(--map132-radius-card);
+}
+.map132-slider-site :is(.ms-contact-panel input,.ms-contact-panel select,.ms-contact-panel textarea,.ms-film-enquiry input,.ms-film-enquiry select,.ms-film-enquiry textarea){
+  min-height:var(--map132-control-height);
+  border-radius:var(--map132-radius-input);
+  font-family:var(--map132-font-body);
+}
+.map132-slider-site :is(.ms-contact-panel textarea,.ms-film-enquiry textarea){min-height:112px}
+.map132-slider-site :is(.work-category-tabs button,.ms-pagination button,.ms-review-tabs button){font-family:var(--map132-font-body)}
+.map132-slider-site .ms-project-frame{border-radius:15px}
+
+/* Admin dashboard — retain existing layout and semantic colour states. */
+.admin-shell,.admin-main,.admin-side,.admin-card,.login-card{font-family:var(--map132-font-body)}
+.admin-shell :is(h1,h2,h3,.admin-top h1,.card-heading){font-family:var(--map132-font-display)}
+.admin-shell :is(.admin-card,.login-card,.workspace-preview-dialog,.workspace-resource-card,.workspace-font-preview,.workspace-generic-preview){
+  border-radius:var(--map132-radius-card);
+}
+.admin-shell :is(.admin-nav,.workspace-library-nav button,.workspace-cinematic-filters button,.workspace-filterbar button){
+  border-radius:var(--map132-radius-control);
+}
+.admin-shell :is(.save-button,.gold-button,.delete-button,.workspace-card-actions button,.workspace-card-actions a){
+  min-height:var(--map132-control-height);
+  border-radius:var(--map132-radius-control);
+  font-family:var(--map132-font-body);
+}
+.admin-shell :is(input:not([type=checkbox]):not([type=radio]),select,textarea){
+  min-height:var(--map132-control-height);
+  border-radius:var(--map132-radius-input);
+  font-family:var(--map132-font-body);
+}
+.admin-shell textarea{min-height:112px}
+.admin-shell :is(.admin-card,.login-card){box-shadow:var(--map132-shadow-card)}
+
+/* Respect reduced-motion preferences and preserve service-specific ambient accents. */
+@media(prefers-reduced-motion:reduce){
+  .map132-slider-site :is(button,a){scroll-behavior:auto;transition:none}
+}

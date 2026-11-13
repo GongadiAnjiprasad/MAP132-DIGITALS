@@ -12,7 +12,8 @@ test('Selected Work keeps all six category tabs available on the same page', () 
   assert.ok(home.includes('work-category-tabs'));
   assert.ok(home.includes('aria-label="Choose a project category"'));
   assert.ok(homeCss.includes('.ms-work-page .work-category-tabs'));
-  assert.ok(homeCss.includes('position:sticky'));
+  assert.match(homeCss, /\.ms-work-page \.work-category-tabs\s*\{[^}]*position:\s*static/s);
+  assert.doesNotMatch(homeCss, /\.ms-work-page \.work-category-tabs\s*\{[^}]*position:\s*sticky/s);
 });
 
 test('Selecting a category filters the real project data without a separate showcase jump', () => {
@@ -57,4 +58,15 @@ test('All six category choices are arranged in a three-column, two-row grid', ()
   assert.ok(homeCss.includes('grid-template-columns: repeat(3, minmax(0, 1fr))'));
   assert.ok(homeCss.includes('.ms-work-page .work-category-tabs'));
   assert.ok(homeCss.includes('overflow: visible'));
+});
+
+
+test('Selected Work scroll layout keeps tabs, results, project media and pagination in normal document flow', () => {
+  assert.match(homeCss, /\.ms-work-page \.work-category-tabs\s*\{[^}]*position:\s*static/s);
+  assert.match(homeCss, /\.ms-work-results-heading\s*\{[^}]*display:\s*flex/s);
+  assert.match(homeCss, /\.ms-project-frame\s*\{[^}]*position:\s*relative/s);
+  assert.match(homeCss, /\.ms-project-frame\s*\{[^}]*overflow:\s*hidden/s);
+  assert.match(homeCss, /\.ms-work-pagination\s*\{[^}]*display:\s*flex/s);
+  assert.ok(home.includes('<div className="ms-project-grid">'));
+  assert.ok(home.includes('<ProjectPreview item={item}/>'));
 });

@@ -3085,3 +3085,58 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+
+/* Feedback CTA: keep the F launcher truly circular while collapsed. */
+.feedback-launch.royal-feedback-launch{
+  width:48px;height:48px;min-width:48px;min-height:48px;
+  border-radius:50%;padding:0;overflow:visible;
+}
+.feedback-launch.royal-feedback-launch::before{
+  width:48px;height:48px;border-radius:50%;transform:none;
+}
+.feedback-launch.royal-feedback-launch .feedback-mark{
+  top:0;right:0;width:48px;height:48px;transform:none;
+  font-size:21px;line-height:1;
+}
+.feedback-launch.royal-feedback-launch .feedback-launch-text{display:none}
+.feedback-launch.royal-feedback-launch.is-expanded{
+  width:150px;height:54px;min-width:150px;min-height:54px;border-radius:999px;
+}
+.feedback-launch.royal-feedback-launch.is-expanded::before{
+  width:150px;height:54px;border-radius:999px;transform:scaleX(1);
+}
+.feedback-launch.royal-feedback-launch.is-expanded .feedback-mark{
+  right:auto;left:16px;width:22px;height:100%;transform:none;
+}
+.feedback-launch.royal-feedback-launch.is-expanded .feedback-launch-text{
+  display:block;left:49px;opacity:1;transform:none;
+}
+.feedback-launch.royal-feedback-launch:hover{transform:translateY(-2px)}
+.feedback-launch.royal-feedback-launch:focus-visible{outline:2px solid #f5dca7;outline-offset:4px}
+
+/* Disabled Send Feedback remains clearly readable in both theme modes. */
+.feedback-drawer .feedback-submit,
+.feedback-drawer .feedback-submit:disabled{
+  min-height:48px;color:#17130d!important;
+  background:linear-gradient(135deg,#f5dca7,#d5aa66)!important;
+  border:1px solid #8d642d!important;
+  text-shadow:none!important;-webkit-text-fill-color:#17130d;
+  opacity:1!important;filter:none!important;
+}
+.feedback-drawer .feedback-submit:disabled{
+  cursor:not-allowed;opacity:.86!important;
+  background:linear-gradient(135deg,#e7d3ad,#c6a36d)!important;
+  box-shadow:0 2px 0 #80501f,inset 0 1px #ffffff99!important;
+}
+.feedback-drawer .feedback-submit:disabled svg{opacity:1}
+.map132-slider-site[data-theme="light"] .feedback-drawer .feedback-submit,
+.map132-slider-site[data-theme="light"] .feedback-drawer .feedback-submit:disabled{
+  color:#17130d!important;-webkit-text-fill-color:#17130d;
+  opacity:1!important;filter:none!important;
+}
+@media(max-width:600px){
+  .feedback-launch.royal-feedback-launch{width:46px;height:46px;min-width:46px;min-height:46px}
+  .feedback-launch.royal-feedback-launch::before{width:46px;height:46px}
+  .feedback-launch.royal-feedback-launch .feedback-mark{width:46px;height:46px}
+}

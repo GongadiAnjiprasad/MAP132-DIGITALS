@@ -1497,8 +1497,8 @@
 
 /* Same-page Selected Work gallery: compact category tabs stay available while visitors browse projects. */
 .ms-work-page .work-category-tabs{
-  position:sticky;top:0;z-index:8;display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;
-  padding:10px 2px 12px;margin:0 0 18px;background:linear-gradient(180deg,var(--ms-page-bg, #0b1019) 78%,transparent);
+  position:static;z-index:auto;display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;
+  padding:10px 2px 12px;margin:0 0 18px;background:transparent;
   scrollbar-width:thin;scrollbar-color:var(--ms-gold) transparent;
 }
 .ms-work-page .work-category-tab{
@@ -1814,4 +1814,126 @@
 .map132-slider-site[data-theme="light"] .ms-contact-panel textarea::placeholder {
   color: #6f6d65;
   opacity: 1;
+}
+
+
+/* Compact circular pagination controls — shared dark/light geometry. */
+.map132-slider-site .ms-controls{gap:clamp(8px,1.4vw,16px)}
+.map132-slider-site .ms-pagination{gap:6px}
+.map132-slider-site .ms-pagination button{
+  width:28px;height:28px;min-width:28px;min-height:28px;padding:0;
+  display:grid;place-items:center;border:1px solid var(--ms-line);
+  border-radius:50%;background:transparent;color:var(--ms-muted);
+  line-height:1;font-size:9px;opacity:1;
+}
+.map132-slider-site .ms-pagination button.active{
+  border-color:var(--ms-gold);background:rgba(232,199,122,.16);
+  color:var(--ms-gold);box-shadow:inset 0 0 0 1px rgba(232,199,122,.16);
+}
+.map132-slider-site .ms-pagination button:focus-visible{outline:2px solid var(--ms-gold);outline-offset:2px}
+.map132-slider-site .ms-work-pagination{gap:10px}
+.map132-slider-site .ms-work-pagination button{border-radius:999px}
+@media(max-width:760px){
+  .map132-slider-site .ms-controls{gap:7px}
+  .map132-slider-site .ms-pagination{gap:4px}
+  .map132-slider-site .ms-pagination button{width:26px;height:26px;min-width:26px;min-height:26px}
+  .map132-slider-site .ms-current-label{min-width:0;font-size:8px}
+}
+
+
+/* Selected page number: solid gold fill and dark readable numeral (Playwright regression). */
+.map132-slider-site .ms-pagination button.active{
+  background:linear-gradient(135deg,#f5dca7,#d5aa66);
+  background-image:linear-gradient(135deg,#f5dca7,#d5aa66);
+  color:#17130d;
+  border-color:#e8c77a;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 0 10px rgba(232,199,122,.16);
+}
+
+
+/* Keep the Selected Work category controls in view while its project list scrolls. */
+.ms-work-page .ms-work-category-sticky {
+  position: sticky;
+  top: 0;
+  z-index: 30;
+  margin: 0 calc(-1 * clamp(22px, 6vw, 92px)) 18px;
+  padding: 0 clamp(22px, 6vw, 92px) 10px;
+  background: linear-gradient(180deg, rgba(9, 11, 16, .99), rgba(9, 11, 16, .94));
+  border-bottom: 1px solid var(--ms-line);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+}
+.ms-work-page .ms-work-category-sticky .work-category-toolbar {
+  margin: 0;
+}
+.ms-work-page .ms-work-category-sticky .work-category-tabs {
+  margin: 8px 0 0;
+  padding: 4px 0 2px;
+}
+.map132-slider-site[data-theme="light"] .ms-work-page .ms-work-category-sticky {
+  background: linear-gradient(180deg, rgba(250, 248, 243, .99), rgba(250, 248, 243, .95));
+}
+@media (max-width: 760px) {
+  .ms-work-page .ms-work-category-sticky {
+    margin-left: -17px;
+    margin-right: -17px;
+    padding: 0 17px 9px;
+  }
+  .ms-work-page .ms-work-category-sticky .work-category-tabs {
+    margin-top: 7px;
+    padding: 3px 0 1px;
+  }
+}
+
+/* Compact circular page numbers: visible on both dark and light themes. */
+.map132-slider-site .ms-controls .ms-pagination button {
+  box-sizing: border-box;
+  flex: 0 0 28px;
+  width: 28px !important;
+  min-width: 28px;
+  max-width: 28px;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  border: 1px solid rgba(232, 199, 122, .38);
+  border-radius: 50%;
+  background: transparent;
+  color: #b9b5aa;
+  font-size: 10px;
+  line-height: 1;
+  transition: color .18s ease, background .18s ease, border-color .18s ease, box-shadow .18s ease;
+}
+.map132-slider-site .ms-controls .ms-pagination button.active {
+  border-color: var(--ms-gold);
+  background: linear-gradient(135deg, var(--ms-gold2), var(--ms-gold));
+  color: #17130d;
+  box-shadow: 0 0 0 3px rgba(232, 199, 122, .12), 0 0 16px rgba(232, 199, 122, .2);
+}
+.map132-slider-site .ms-controls .ms-pagination button:focus-visible {
+  outline: 2px solid var(--ms-gold2);
+  outline-offset: 3px;
+}
+@media (max-width: 760px) {
+  .map132-slider-site .ms-controls .ms-pagination { gap: 6px; }
+  .map132-slider-site .ms-controls .ms-pagination button {
+    flex: 0 0 26px;
+    width: 26px !important;
+    min-width: 26px;
+    max-width: 26px;
+    height: 26px !important;
+    min-height: 26px !important;
+    max-height: 26px;
+    font-size: 9px;
+  }
+}
+
+/* Mobile sticky category bar: cover the page's top padding so scrolled content cannot show above it. */
+@media (max-width: 760px) {
+  .ms-work-page .ms-work-category-sticky {
+    top: -22px;
+    padding-top: 22px;
+  }
 }

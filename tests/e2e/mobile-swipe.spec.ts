@@ -166,13 +166,13 @@ test('swiping updates a clearly selected page in both navigation indicators', as
 
   await expect(headerActive).toHaveText('Home');
   await expect(headerActive).toHaveAttribute('aria-current', 'page');
-  await expect(pagerActive).toContainText('01');
+  await expect(pagerActive).toContainText('1');
 
   await dispatchTouchSwipe(page, '.ms-home-copy', 'left');
 
   await expect(page.locator('.ms-nav button.active')).toHaveText('Selected Work');
   await expect(page.locator('.ms-nav button.active')).toHaveAttribute('aria-current', 'page');
-  await expect(page.locator('.ms-pagination button.active')).toContainText('02');
+  await expect(page.locator('.ms-pagination button.active')).toContainText('2');
   await page.waitForTimeout(750);
 
   // Advancing to the final page must bring its selected header label into view

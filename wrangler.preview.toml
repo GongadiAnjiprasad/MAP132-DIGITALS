@@ -1,0 +1,11 @@
+name = "map132-digitals-preview"
+main = "worker/preview.ts"
+compatibility_date = "2026-10-31"
+workers_dev = true
+
+# Intentionally no production KV, R2, secrets, variables, or cron bindings.
+# The preview serves the built frontend and blocks backend/media requests.
+[assets]
+directory = "./dist"
+binding = "ASSETS"
+run_worker_first = ["/api/*", "/media/*"]
