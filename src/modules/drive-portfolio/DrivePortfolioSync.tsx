@@ -104,8 +104,9 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
       const result = await response.json().catch(() => ({}));
       if (!response.ok) throw new Error(result.error || 'Could not create the MAP132 Drive folders.');
       const created = result.folder as SavedFolder;
-      setFolder(created);
       setMessage('Drive structure ready: MAP132 Portfolio with ' + Number(result.folderCount || 0) + ' category folders. Starting video sync…');
+      if (folder?.id === created.id) void syncRef.current(created);
+      else setFolder(created);
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Could not create the MAP132 Drive folders.');
       setBusy(false);
