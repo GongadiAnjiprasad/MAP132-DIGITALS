@@ -83,6 +83,8 @@ export async function syncDrivePortfolioFromFolder(
   const previousForFolder = currentItems.filter(item => item.driveFolderId === root.id);
   const mapped = buildDrivePortfolioItems(candidates, root.id, currentItems);
   const nextItems = [...mapped, ...currentItems.filter(item => item.driveFolderId !== root.id)];
+  const mappedFileIds = new Set(mapped.map(item => item.driveFileId));
+  const removed = previousForFolder.filter(item => item.driveFileId && !mappedFileIds.has(item.driveFileId)).length;
   await env.MAP132_KV.put('portfolio/content', JSON.stringify({ ...current, items: nextItems }));
-  return { published: mapped.length, removed: Math.max(0, previousForFolder.length - mapped.length), scanned };
+  return { published: mapped.length, removed, scanned };
 }
