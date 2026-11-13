@@ -42,3 +42,51 @@
  panel.querySelector('[data-rt-open-my-drive]').addEventListener('click',()=>{const b=document.querySelector('[data-resource-view="my-drive"]');if(b)b.click();window.scrollTo({top:document.getElementById('myDrivePanel').offsetTop-20,behavior:'smooth'})});
  showTab('timeline');
 })();
+
+/* Ramayanam Audio Library: load once from the user's already-imported Drive assets. */
+(()=> {
+ const panel=document.getElementById('ramayanamStudio');
+ const grid=document.getElementById('rtLibraryAssets');
+ if(!panel||!grid)return;
+ const status=document.getElementById('rtLibraryStatus');
+ const refresh=document.getElementById('rtLibraryRefresh');
+ const cats=[...panel.querySelectorAll('[data-library-cat]')];
+ let assets=[],active='all',loaded=false;
+ const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+ const classify=x=>{
+  const value=[x.category,x.subcategory,x.name,x.filename].filter(Boolean).join(' ').toLowerCase();
+  if(/shloka|chant|mantra|stotra|sloka/.test(value))return 'shloka';
+  if(/dialogue|voice|speech|narration|vocal/.test(value))return 'dialogue';
+  if(/bgm|background|score|music|orchestral|theme/.test(value))return 'bgm';
+  if(/sfx|sound effect|whoosh|impact|boom|conch|bell|battle/.test(value))return 'sfx';
+  if(/final mix|trailer mix|master mix|final audio/.test(value))return 'mix';
+  return 'other';
+ };
+ const label={dialogue:'Dialogues',shloka:'Shlokas & chants',bgm:'Background music',sfx:'Sound effects',mix:'Final mix',other:'Other / unclassified'};
+ function render(){
+  const list=assets.filter(x=>active==='all'||classify(x)===active);
+  if(!list.length){grid.innerHTML='<div class="rt-library-empty">No audio in this category yet. Import your authorised MP3/WAV files once through My Drive; they will appear here automatically after refresh.</div>';return;}
+  grid.innerHTML=list.map(x=>{
+   const name=x.name||x.filename||'Audio asset';
+   const format=(name.match(/\.([a-z0-9]{2,5})$/i)||[])[1]||x.mimeType?.split('/').pop()||'format not reported';
+   return '<article class="rt-audio-card"><strong>'+safe(name)+'</strong><small>'+safe(label[classify(x)])+' · '+safe(String(format).toUpperCase())+' · '+safe(x.licenseStatus||'licence not verified')+'</small><audio controls preload="none" src="/api/my-drive/assets/'+encodeURIComponent(x.id)+'/preview"></audio><a href="/api/my-drive/assets/'+encodeURIComponent(x.id)+'/download" download="'+safe(name)+'">Download</a></article>';
+  }).join('');
+  grid.querySelectorAll('audio').forEach(a=>a.addEventListener('play',()=>document.querySelectorAll('audio').forEach(other=>{if(other!==a)other.pause()})));
+ }
+ async function load(force=false){
+  status.textContent='Loading your saved audio library…';
+  try{
+   const r=await fetch('/api/my-drive/assets?limit=100',{credentials:'same-origin',cache:'no-store'});
+   const data=await r.json();
+   if(!r.ok)throw new Error(data.error||'Connect My Drive first, then refresh.');
+   assets=(data.assets||[]).filter(x=>x.kind==='audio');
+   loaded=true;
+   status.textContent=assets.length+' saved audio file(s) · Original Drive files unchanged.';
+   render();
+  }catch(e){status.textContent=e.message||'Could not load your Drive audio.';grid.innerHTML='';}
+ }
+ cats.forEach(b=>b.addEventListener('click',()=>{active=b.dataset.libraryCat;cats.forEach(x=>x.classList.toggle('active',x===b));if(loaded)render();}));
+ if(refresh)refresh.addEventListener('click',()=>load(true));
+ const libraryTab=panel.querySelector('[data-rt-tab="library"]');
+ if(libraryTab)libraryTab.addEventListener('click',()=>{if(!loaded)load();});
+})();
