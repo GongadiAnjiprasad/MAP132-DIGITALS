@@ -6,24 +6,37 @@ const rootWorkspace = readFileSync(new URL('../workspace.html', import.meta.url)
 const publicWorkspace = readFileSync(new URL('../public/workspace.html', import.meta.url), 'utf8');
 const studio = readFileSync(new URL('../public/ramayanam-trailer-studio.js', import.meta.url), 'utf8');
 
-test('Ramayanam Trailer Studio is available as a separate Editor Workspace tab', () => {
-  assert.equal(rootWorkspace, publicWorkspace, 'workspace source and public mirror must stay identical');
+test('Ramayanam Audio Library is a separate Editor Workspace tab and workspace mirrors match', () => {
+  assert.equal(rootWorkspace, publicWorkspace);
   assert.match(publicWorkspace, /data-resource-view="trailer"/);
   assert.match(publicWorkspace, /data-resource-panel="trailer"/);
   assert.match(publicWorkspace, /ramayanam-trailer-studio\.js/);
 });
 
-test('Trailer Studio includes the 90-second scene cue sheet and copyable dialogue library', () => {
-  assert.match(studio, /00:00–00:09/);
-  assert.match(studio, /01:25–01:30/);
-  assert.match(studio, /Gita 4\.7/);
-  assert.match(studio, /Gita 4\.8/);
-  assert.match(studio, /writeText\(item\.text\)/);
+test('All nine character-combination scene categories and six mood filters are available', () => {
+  for (const category of ['hero-intro','villain-intro','heroine-intro','hero-villain','hero-heroine','villain-heroine','hanuman-sena','emotional','action-climax']) {
+    assert.match(publicWorkspace, new RegExp('data-library-cat="' + category + '"'));
+  }
+  for (const mood of ['mass','royal','emotional','devotional','suspense','action']) {
+    assert.match(publicWorkspace, new RegExp('data-library-mood="' + mood + '"'));
+  }
 });
 
-test('Trailer Studio uses existing eligible SFX and private Drive audio routes', () => {
-  assert.match(studio, /\/api\/resources\/sounds\?query=/);
+test('Library loads actual private Drive audio, supports preview/download and single-active playback', () => {
   assert.match(studio, /\/api\/my-drive\/assets\?limit=100/);
   assert.match(studio, /\/api\/my-drive\/assets\//);
+  assert.match(studio, /audio\.addEventListener\('play'/);
   assert.match(studio, /data-rt-open-my-drive/);
+  assert.match(publicWorkspace, /id="rtLibraryRefresh"/);
+});
+
+test('My Drive, Cinematic Sounds and Cinematic Fonts workspace panels are preserved', () => {
+  for (const marker of ['id="myDrivePanel"','id="cinematic-sfx"','id="cinematic-fonts"','id="myDriveLoginForm"','id="myDriveChooseZip"']) {
+    assert.ok(publicWorkspace.includes(marker), 'Missing preserved workspace element: ' + marker);
+  }
+});
+
+test('No text dialogue, copy, or manual SFX search controls remain in Ramayanam library', () => {
+  const section = publicWorkspace.slice(publicWorkspace.indexOf('id="ramayanamStudio"'), publicWorkspace.indexOf('id="cinematic-sfx"'));
+  assert.doesNotMatch(section, /data-rt-tab="dialogue"|data-copy-dialogue|rtSfxForm|Find sound effects|Copy dialogue/i);
 });
