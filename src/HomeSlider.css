@@ -1497,8 +1497,8 @@
 
 /* Same-page Selected Work gallery: compact category tabs stay available while visitors browse projects. */
 .ms-work-page .work-category-tabs{
-  position:sticky;top:0;z-index:8;display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;
-  padding:10px 2px 12px;margin:0 0 18px;background:linear-gradient(180deg,var(--ms-page-bg, #0b1019) 78%,transparent);
+  position:static;z-index:auto;display:flex;gap:8px;overflow-x:auto;overscroll-behavior-x:contain;
+  padding:10px 2px 12px;margin:0 0 18px;background:transparent;
   scrollbar-width:thin;scrollbar-color:var(--ms-gold) transparent;
 }
 .ms-work-page .work-category-tab{
