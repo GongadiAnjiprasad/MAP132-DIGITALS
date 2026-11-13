@@ -8,7 +8,7 @@ Publish videos from one dedicated Google Drive folder into MAP132 DIGITALS Selec
 2. Connect Google Drive using the existing OAuth flow.
 3. In Portfolio Manager, choose one dedicated Selected Work folder with Google Picker.
 4. The module recursively scans that folder and nested folders, filters supported video files, maps folder/file names to the existing portfolio categories, and publishes the resulting records.
-5. The selected folder ID and name are stored in MAP132 KV through an Admin-authenticated API. The dashboard re-syncs when opened or refocused, and a Cloudflare Worker Cron trigger re-syncs the folder every five minutes even when the dashboard is closed.
+5. The selected folder ID and name are stored in MAP132 KV through an Admin-authenticated API. The dashboard re-syncs when opened or refocused, and a dedicated Cloudflare Worker Cron trigger re-syncs the folder every five minutes even when the dashboard is closed. The existing festival automation remains on its original daily 18:35 UTC schedule; the two Cron handlers are kept separate.
 6. Use Sync now to request an immediate refresh.
 
 ## Playback and access boundary
