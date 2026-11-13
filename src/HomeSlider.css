@@ -1929,3 +1929,11 @@
     font-size: 9px;
   }
 }
+
+/* Mobile sticky category bar: cover the page's top padding so scrolled content cannot show above it. */
+@media (max-width: 760px) {
+  .ms-work-page .ms-work-category-sticky {
+    top: -22px;
+    padding-top: 22px;
+  }
+}
