@@ -43,6 +43,14 @@ jobs:
         run: npm run build
       - name: Validate Cloudflare Worker bundle
         run: npx --yes wrangler@4 deploy --dry-run
+      - name: Deploy isolated preview Worker
+        if: github.event_name == 'pull_request'
+        uses: cloudflare/wrangler-action@v3
+        with:
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          wranglerVersion: "4.160.1"
+          command: deploy --config wrangler.preview.toml
       - name: Deploy Worker and static website
         if: github.event_name != 'pull_request'
         uses: cloudflare/wrangler-action@v3
