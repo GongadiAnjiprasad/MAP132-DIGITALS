@@ -66,6 +66,8 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
     setMessage('Scanning the selected Drive folder and nested folders…');
     try {
       const scan = await listDriveFolderRecursively(selected, count => setMessage('Scanning Drive… ' + count + ' file(s) checked.'));
+      const blockingIssues = scan.issues.filter(issue => issue.code === 'drive-permission-denied' || issue.code === 'archive-limit-exceeded');
+      if (blockingIssues.length) throw new Error('Drive scan was incomplete. Existing published videos were kept. ' + blockingIssues[0].message);
       const videos = scan.candidates.filter(candidate => candidate.assetKind === 'video');
       const mapped = buildDrivePortfolioItems(videos, selected.id, existingRef.current);
       await publishRef.current(mapped, selected.id);
