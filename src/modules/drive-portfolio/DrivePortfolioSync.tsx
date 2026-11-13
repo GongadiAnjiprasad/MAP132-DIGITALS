@@ -142,10 +142,16 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
     <div className="card-heading"><div><p className="kicker">M19 / SELECTED WORK · GOOGLE DRIVE</p><h2 id="drive-portfolio-sync-title">Automatic Drive video sync</h2></div></div>
     <p className="admin-hint">Choose one dedicated portfolio folder. Videos in its nested folders are added to Selected Work using their folder names to detect categories. The dashboard checks the folder once when Portfolio Manager is opened or a folder is selected. Use Sync now whenever you want to refresh it; no extra background schedule is used.</p>
     <p className="admin-hint"><b>Publishing notice:</b> Every supported video found in this selected folder becomes publicly playable on MAP132 DIGITALS. Keep private/client-confidential videos outside this folder. Source Drive files are not changed.</p>
-    <div className="form-row">
-      <div><b>{folder ? folder.name : 'No portfolio folder selected'}</b>{lastSynced && <p className="admin-hint">Last sync: {lastSynced}</p>}</div>
-      <button type="button" className="gold-button" disabled={busy} onClick={() => void chooseFolder()}>{busy ? 'Syncing…' : folder ? 'Change Drive folder' : 'Choose Drive folder'}</button>
-      {folder && <button type="button" className="gold-button" disabled={busy} onClick={() => void syncRef.current(folder)}>Sync now</button>}
+    <div className="drive-portfolio-controls">
+      <div className="drive-portfolio-folder">
+        <span className="drive-portfolio-folder-label">CONNECTED FOLDER</span>
+        <b title={folder?.name || undefined}>{folder ? folder.name : 'No portfolio folder selected'}</b>
+        {lastSynced && <p className="admin-hint">Last sync: {lastSynced}</p>}
+      </div>
+      <div className="drive-portfolio-actions">
+        <button type="button" className="gold-button" disabled={busy} onClick={() => void chooseFolder()}>{busy ? 'Syncing…' : folder ? 'Change Drive folder' : 'Choose Drive folder'}</button>
+        {folder && <button type="button" className="gold-button drive-sync-secondary" disabled={busy} onClick={() => void syncRef.current(folder)}>Sync now</button>}
+      </div>
     </div>
     {message && <p className="admin-hint" role="status">{message}</p>}
   </section>;
