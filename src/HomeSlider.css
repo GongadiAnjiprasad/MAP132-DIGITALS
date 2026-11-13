@@ -1887,9 +1887,14 @@
 
 /* Compact circular page numbers: visible on both dark and light themes. */
 .map132-slider-site .ms-controls .ms-pagination button {
+  box-sizing: border-box;
   flex: 0 0 28px;
-  width: 28px;
-  height: 28px;
+  width: 28px !important;
+  min-width: 28px;
+  max-width: 28px;
+  height: 28px !important;
+  min-height: 28px !important;
+  max-height: 28px;
   display: grid;
   place-items: center;
   padding: 0;
@@ -1914,9 +1919,13 @@
 @media (max-width: 760px) {
   .map132-slider-site .ms-controls .ms-pagination { gap: 6px; }
   .map132-slider-site .ms-controls .ms-pagination button {
-    flex-basis: 26px;
-    width: 26px;
-    height: 26px;
+    flex: 0 0 26px;
+    width: 26px !important;
+    min-width: 26px;
+    max-width: 26px;
+    height: 26px !important;
+    min-height: 26px !important;
+    max-height: 26px;
     font-size: 9px;
   }
 }
