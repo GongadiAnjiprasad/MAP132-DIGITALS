@@ -40,8 +40,8 @@ test('Scene guide stays visible even when no Drive audio has been connected', ()
   for (const marker of ['90-second scene guide','Hero introduction','Villain introduction','Heroine introduction','Hero vs Villain','Hero vs Heroine','Villain controls Heroine','Hanuman Sena','Emotional / Separation','Action / Climax']) {
     assert.ok(publicWorkspace.includes(marker), 'Missing scene guide content: ' + marker);
   }
-  assert.match(studio, /No audio files are connected to this library yet/);
-  assert.match(studio, /Open My Drive to add audio/);
+  assert.match(studio, /official-source track entries ready/);
+  assert.match(studio, /My Drive audio not connected/);
 });
 
 test('Trailer Studio layout prevents grid and long-label overflow on mobile', () => {
