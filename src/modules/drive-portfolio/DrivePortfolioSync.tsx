@@ -94,6 +94,25 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
     if (folder) void syncRef.current(folder);
   }, [folder?.id]);
 
+  async function createPortfolioFolders() {
+    setBusy(true);
+    setMessage('Creating MAP132 Portfolio and checking its six category folders…');
+    try {
+      const response = await fetch('/api/my-drive/create-portfolio-folders', {
+        method: 'POST', credentials: 'same-origin', headers: { Accept: 'application/json' },
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || 'Could not create the MAP132 Drive folders.');
+      const created = result.folder as SavedFolder;
+      setMessage('Drive structure ready: MAP132 Portfolio with ' + Number(result.folderCount || 0) + ' category folders. Starting video sync…');
+      if (folder?.id === created.id) void syncRef.current(created);
+      else setFolder(created);
+    } catch (error) {
+      setMessage(error instanceof Error ? error.message : 'Could not create the MAP132 Drive folders.');
+      setBusy(false);
+    }
+  }
+
   async function chooseFolder() {
     setBusy(true);
     setMessage('');
@@ -144,6 +163,7 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
     <p className="admin-hint"><b>Publishing notice:</b> Every supported video found in this selected folder becomes publicly playable on MAP132 DIGITALS. Keep private/client-confidential videos outside this folder. Source Drive files are not changed.</p>
     <div className="form-row">
       <div><b>{folder ? folder.name : 'No portfolio folder selected'}</b>{lastSynced && <p className="admin-hint">Last sync: {lastSynced}</p>}</div>
+      <button type="button" className="gold-button" disabled={busy} onClick={() => void createPortfolioFolders()}>{busy ? 'Working…' : 'Create MAP132 Drive folders'}</button>
       <button type="button" className="gold-button" disabled={busy} onClick={() => void chooseFolder()}>{busy ? 'Syncing…' : folder ? 'Change Drive folder' : 'Choose Drive folder'}</button>
       {folder && <button type="button" className="gold-button" disabled={busy} onClick={() => void syncRef.current(folder)}>Sync now</button>}
     </div>

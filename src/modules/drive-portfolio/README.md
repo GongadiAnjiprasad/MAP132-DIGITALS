@@ -6,7 +6,7 @@ Publish videos from one dedicated Google Drive folder into MAP132 DIGITALS Selec
 ## User flow
 1. Sign in to the existing MAP132 Admin Dashboard.
 2. Connect Google Drive using the existing OAuth flow.
-3. In Portfolio Manager, choose one dedicated Selected Work folder with Google Picker.
+3. In Portfolio Manager, use **Create MAP132 Drive folders** to create or reuse `MAP132 Portfolio` and its six category folders in My Drive, or choose an existing folder with Google Picker.
 4. The module recursively scans that folder and nested folders, filters supported video files, maps folder/file names to the existing portfolio categories, and publishes the resulting records.
 5. The selected folder ID and name are stored in the existing MAP132 KV namespace through an Admin-authenticated API. The dashboard scans once when Portfolio Manager opens or a folder is selected; use Sync now for an on-demand refresh. No additional background Cron is installed, avoiding 288 unnecessary scheduled Worker runs per day. The existing festival automation remains on its original daily 18:35 UTC schedule.
 6. Use Sync now to request an immediate refresh.
@@ -19,7 +19,7 @@ Publish videos from one dedicated Google Drive folder into MAP132 DIGITALS Selec
 - Every supported video in the selected folder is intentionally public on MAP132. Keep private/client-confidential files outside that folder.
 - Removing a video from the selected folder removes its synced portfolio record on the next successful sync. Unrelated/manual portfolio entries and other folders remain untouched.
 
-## Category mapping
+## Automatic folder creation\n- The Admin Dashboard calls an Admin-authenticated Worker endpoint using the existing Google Drive OAuth session.\n- The endpoint idempotently finds or creates the `MAP132 Portfolio` root folder and six category folders beneath it; it reuses exact-name folders already present under the expected parent.\n- The root folder is saved as the selected portfolio folder in the existing KV namespace. No video files are moved or uploaded by folder creation.\n- The Google Drive OAuth flow already requests the `drive.file` scope in addition to read access; if Google requires renewed consent, the dashboard should ask the user to reconnect.\n\n## Category mapping
 The current portfolio categories are retained for compatibility:
 - Cinematic / trailer / teaser → Cinematic Films
 - Wedding / marriage / pelli → Wedding & Events
