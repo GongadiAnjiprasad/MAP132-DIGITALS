@@ -1839,3 +1839,13 @@
   .map132-slider-site .ms-pagination button{width:26px;height:26px;min-width:26px;min-height:26px}
   .map132-slider-site .ms-current-label{min-width:0;font-size:8px}
 }
+
+
+/* Selected page number: solid gold fill and dark readable numeral (Playwright regression). */
+.map132-slider-site .ms-pagination button.active{
+  background:linear-gradient(135deg,#f5dca7,#d5aa66);
+  background-image:linear-gradient(135deg,#f5dca7,#d5aa66);
+  color:#17130d;
+  border-color:#e8c77a;
+  box-shadow:inset 0 0 0 1px rgba(255,255,255,.16),0 0 10px rgba(232,199,122,.16);
+}
