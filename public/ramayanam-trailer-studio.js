@@ -54,7 +54,7 @@
  let assets=[],active='all',loaded=false;
  const safe=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
  const classify=x=>{
-  const value=[x.category,x.subcategory,x.name,x.filename].filter(Boolean).join(' ').toLowerCase();
+  const value=[x.category,x.subcategory,x.name,x.filename,x.sourcePath].filter(Boolean).join(' ').toLowerCase();
   if(/shloka|chant|mantra|stotra|sloka/.test(value))return 'shloka';
   if(/dialogue|voice|speech|narration|vocal/.test(value))return 'dialogue';
   if(/bgm|background|score|music|orchestral|theme/.test(value))return 'bgm';
@@ -76,12 +76,20 @@
  async function load(force=false){
   status.textContent='Loading your saved audio library…';
   try{
-   const r=await fetch('/api/my-drive/assets?limit=100',{credentials:'same-origin',cache:'no-store'});
-   const data=await r.json();
-   if(!r.ok)throw new Error(data.error||'Connect My Drive first, then refresh.');
-   assets=(data.assets||[]).filter(x=>x.kind==='audio');
+   let cursor=null,all=[],pages=0;
+   do{
+    const url='/api/my-drive/assets?limit=100'+(cursor?'&cursor='+encodeURIComponent(cursor):'');
+    const r=await fetch(url,{credentials:'same-origin',cache:'no-store'});
+    const data=await r.json().catch(()=>({}));
+    if(!r.ok)throw new Error(data.error||'Connect My Drive first, then refresh.');
+    all=all.concat(Array.isArray(data.assets)?data.assets:[]);
+    cursor=typeof data.cursor==='string'&&data.cursor?data.cursor:null;
+    pages++;
+   }while(cursor&&pages<100);
+   const seen=new Set();
+   assets=all.filter(x=>x.kind==='audio'&&x.id&&!seen.has(x.id)&&seen.add(x.id));
    loaded=true;
-   status.textContent=assets.length+' saved audio file(s) · Original Drive files unchanged.';
+   status.textContent=assets.length+' saved audio file(s) · '+(cursor?'More than 100 pages; refresh again to continue.':'All available pages loaded.')+' Original Drive files unchanged.';
    render();
   }catch(e){status.textContent=e.message||'Could not load your Drive audio.';grid.innerHTML='';}
  }
