@@ -2,6 +2,8 @@ import { FESTIVAL_CALENDAR, getIndiaDateKey } from '../src/modules/seasonal/fest
 import { createFeedbackResponse } from './feedback';
 import { clearMyDriveSession, getPublishedDriveAccessToken, handleMyDriveOAuth } from '../src/modules/my-drive-resource-manager/driveOAuth';
 import { handleMyDriveAssets } from './myDriveAssets';
+import { buildDrivePortfolioItems } from '../src/modules/drive-portfolio/drivePortfolio';
+import type { ImportCandidate } from '../src/modules/my-drive-resource-manager/types';
 interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; GOOGLE_PICKER_API_KEY?: string; MY_DRIVE_SESSION_SECRET?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
 const json=(body:unknown,status=200,headers:HeadersInit={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...Object.fromEntries(new Headers(headers))}});
@@ -51,6 +53,63 @@ async function read(env:Env){
     })):[]; 
     return {...DEFAULTS,...stored,profile,skills,items,resources,logoPath:typeof stored.logoPath==='string'&&stored.logoPath.startsWith('portfolio/logos/')?stored.logoPath:''};
   }catch{return DEFAULTS;}
+}
+async function syncDrivePortfolioFromFolder(env:Env){
+ if(!env.MAP132_KV)return;
+ const saved=await env.MAP132_KV.get('my-drive/portfolio-folder');
+ if(!saved)return;
+ let folder:{id:string;name:string};
+ try{folder=JSON.parse(saved);}catch{throw new Error('Saved Drive portfolio folder settings are invalid.');}
+ if(!/^[a-zA-Z0-9_-]{1,256}$/.test(folder.id)||!folder.name)throw new Error('Saved Drive portfolio folder settings are invalid.');
+ const accessToken=await getPublishedDriveAccessToken(env);
+ if(!accessToken)throw new Error('Google Drive refresh token is unavailable; reconnect Google Drive from the Admin Dashboard.');
+ const queue:Array<{id:string;path:string}>=[{id:folder.id,path:folder.name}];
+ const visited=new Set<string>();
+ const candidates:ImportCandidate[]=[];
+ const videoExtensions=new Set(['mp4','webm','mov','m4v']);
+ let scanned=0;
+ while(queue.length){
+  const current=queue.shift()!;
+  if(visited.has(current.id))continue;
+  visited.add(current.id);
+  if(visited.size>500)throw new Error('Drive portfolio scan stopped at the 500-folder safety limit.');
+  let pageToken='';
+  do{
+   const listUrl=new URL('https://www.googleapis.com/drive/v3/files');
+   listUrl.searchParams.set('q',"'"+current.id+"' in parents and trashed = false");
+   listUrl.searchParams.set('pageSize','100');
+   listUrl.searchParams.set('orderBy','folder,name');
+   listUrl.searchParams.set('fields','nextPageToken,files(id,name,mimeType,size,modifiedTime)');
+   if(pageToken)listUrl.searchParams.set('pageToken',pageToken);
+   const response=await fetch(listUrl,{headers:{Authorization:'Bearer '+accessToken,Accept:'application/json'}});
+   if(!response.ok)throw new Error('Google Drive portfolio folder scan failed ('+response.status+').');
+   const page=await response.json() as {nextPageToken?:string;files?:Array<{id:string;name:string;mimeType:string;size?:string;modifiedTime?:string}>};
+   for(const file of page.files||[]){
+    scanned++;
+    const relativePath=current.path+'/'+file.name;
+    if(file.mimeType==='application/vnd.google-apps.folder'){
+     queue.push({id:file.id,path:relativePath});
+    }else{
+     const extension=file.name.includes('.')?file.name.split('.').pop()!.toLowerCase():'';
+     if(videoExtensions.has(extension)&&String(file.mimeType||'').startsWith('video/')){
+      candidates.push({
+       source:{kind:'google-drive-folder',sourceId:folder.id,displayName:folder.name,parentPath:current.path},
+       relativePath,fileName:file.name,driveFileId:file.id,extension,assetKind:'video',
+       category:'Videos',mimeType:file.mimeType,byteSize:file.size?Number(file.size):undefined,
+       modifiedTime:file.modifiedTime,licence:'unknown',
+      });
+     }
+    }
+    if(scanned>=5000)throw new Error('Drive portfolio scan stopped at the 5,000-item safety limit; existing published videos were kept.');
+   }
+   pageToken=page.nextPageToken||'';
+  }while(pageToken);
+ }
+ const content=await read(env);
+ const mapped=buildDrivePortfolioItems(candidates,folder.id,content.items||[]);
+ const retained=(content.items||[]).filter((item:any)=>item.driveFolderId!==folder.id);
+ const next={...content,items:[...mapped,...retained]};
+ if(JSON.stringify(next)!==JSON.stringify(content))await env.MAP132_KV.put('portfolio/content',JSON.stringify(next));
 }
 async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;if(path.startsWith('/api/portfolio/video/')&&method==='GET'){
  const fileId=path.slice('/api/portfolio/video/'.length);
@@ -299,6 +358,8 @@ export default {
     catch{return new Response('Website asset service unavailable.',{status:502});}
   },
   async scheduled(controller:ScheduledController,env:Env){
+    try{await syncDrivePortfolioFromFolder(env);}
+    catch(error){console.error('Drive portfolio scheduled sync failed:',error instanceof Error?error.message:'Unknown error');}
     const today=getIndiaDateKey(new Date(controller.scheduledTime));
     const festival=FESTIVAL_CALENDAR.find(item=>item.date===today);
     if(!festival||!env.AI||!env.MAP132_KV)return;
