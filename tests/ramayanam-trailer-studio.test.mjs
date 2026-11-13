@@ -25,7 +25,7 @@ test('All nine character-combination scene categories and six mood filters are a
 test('Library loads actual private Drive audio, supports preview/download and single-active playback', () => {
   assert.match(studio, /\/api\/my-drive\/assets\?limit=100/);
   assert.match(studio, /\/api\/my-drive\/assets\//);
-  assert.match(studio, /audio\.addEventListener\('play'/);
+  assert.match(studio, /querySelectorAll\('audio'\)\.forEach\(a=>a\.addEventListener\('play'/);
   assert.match(studio, /data-rt-open-my-drive/);
   assert.match(publicWorkspace, /id="rtLibraryRefresh"/);
 });
