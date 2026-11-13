@@ -137,6 +137,7 @@ test('Original ZIP archives are backed up unchanged inside the existing protecte
   assert.ok(source.includes('await loadZipBackups()'));
   assert.ok(source.includes('/api/my-drive/zip-backups/'));
   assert.ok(assetsSource.includes("path==='/api/my-drive/zip-backups'&&req.method==='POST'"));
+  assert.ok(assetsSource.includes("!path.startsWith('/api/my-drive/zip-backups')" ) === false || assetsSource.includes("&&!path.startsWith('/api/my-drive/zip-backups')"), 'ZIP backup API paths must pass the handler route guard');
   assert.ok(assetsSource.includes("path==='/api/my-drive/zip-backups'&&req.method==='GET'"));
   assert.ok(assetsSource.includes('ensureMap132ZipBackupFolder'));
   assert.ok(assetsSource.includes('uploadMap132DriveFileToFolder'));
