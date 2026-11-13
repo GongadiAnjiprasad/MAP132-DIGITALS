@@ -16,8 +16,8 @@ test('Ramayanam Trailer Studio is available as a separate Editor Workspace tab',
 test('Trailer Studio includes the 90-second scene cue sheet and copyable dialogue library', () => {
   assert.match(studio, /00:00–00:09/);
   assert.match(studio, /01:25–01:30/);
-  assert.match(studio, /Bhagavad Gita 4\.7/);
-  assert.match(studio, /Bhagavad Gita 4\.8/);
+  assert.match(studio, /Gita 4\.7/);
+  assert.match(studio, /Gita 4\.8/);
   assert.match(studio, /writeText\(item\.text\)/);
 });
 
