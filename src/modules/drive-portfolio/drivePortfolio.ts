@@ -16,16 +16,21 @@ export type DrivePortfolioItem = {
 
 const VIDEO_EXTENSIONS = new Set(['mp4', 'webm', 'mov', 'm4v']);
 
+function categoryFromText(value: string): string | null {
+  const text = value.toLowerCase().replace(/[_-]+/g, ' ');
+  if (/(wedding|marriage|pelli)/.test(text)) return 'Wedding & Events';
+  if (/(birthday|bday|birth day)/.test(text)) return 'Birthday Films';
+  if (/(advert|\bads?\b|promotion|promo|brand)/.test(text)) return 'Brand Promotions';
+  if (/(\bai\b|artificial intelligence|generative)/.test(text)) return 'AI Video Creation';
+  if (/(reel|instagram|\binsta\b|shorts?)/.test(text)) return 'Reels & Shorts';
+  if (/(youtube|podcast|interview)/.test(text)) return 'YouTube Videos';
+  if (/(cinematic|trailer|teaser)/.test(text)) return 'Cinematic Films';
+  return null;
+}
+
 export function drivePortfolioCategory(relativePath: string, fileName: string): string {
-  const value = (relativePath + ' ' + fileName).toLowerCase().replace(/[_-]+/g, ' ');
-  if (/(wedding|marriage|pelli)/.test(value)) return 'Wedding & Events';
-  if (/(birthday|bday|birth day)/.test(value)) return 'Birthday Films';
-  if (/(advert|\bads?\b|promotion|promo|brand)/.test(value)) return 'Brand Promotions';
-  if (/(\bai\b|artificial intelligence|generative)/.test(value)) return 'AI Video Creation';
-  if (/(reel|instagram|\binsta\b|shorts?)/.test(value)) return 'Reels & Shorts';
-  if (/(youtube|podcast|interview)/.test(value)) return 'YouTube Videos';
-  if (/(cinematic|trailer|teaser)/.test(value)) return 'Cinematic Films';
-  return 'Other Projects';
+  const folderPath = relativePath.replace(/\/[^/]*$/, '');
+  return categoryFromText(folderPath) || categoryFromText(fileName) || 'Other Projects';
 }
 
 function titleFromFileName(name: string): string {
