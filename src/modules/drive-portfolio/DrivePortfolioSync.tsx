@@ -42,12 +42,8 @@ function loadPicker(): Promise<void> {
   return pickerScriptPromise;
 }
 
-const STORAGE_KEY = 'map132-drive-selected-work-folder-v1';
-
 export default function DrivePortfolioSync({ existingItems, onPublish }: Props) {
-  const [folder, setFolder] = useState<SavedFolder | null>(() => {
-    try { return JSON.parse(localStorage.getItem(STORAGE_KEY) || 'null') as SavedFolder | null; } catch { return null; }
-  });
+  const [folder, setFolder] = useState<SavedFolder | null>(null);
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [lastSynced, setLastSynced] = useState('');
@@ -58,6 +54,17 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
 
   useEffect(() => { existingRef.current = existingItems; }, [existingItems]);
   useEffect(() => { publishRef.current = onPublish; }, [onPublish]);
+  useEffect(() => {
+    let active = true;
+    fetch('/api/my-drive/portfolio-folder', { credentials: 'same-origin' })
+      .then(async response => {
+        const result = await response.json();
+        if (!response.ok) throw new Error(result.error || 'Could not load the saved Drive portfolio folder.');
+        if (active && result.folder?.id && result.folder?.name) setFolder(result.folder as SavedFolder);
+      })
+      .catch(error => { if (active) setMessage(error instanceof Error ? error.message : 'Could not load the saved Drive portfolio folder.'); });
+    return () => { active = false; };
+  }, []);
 
   syncRef.current = async selected => {
     if (inFlightRef.current) return;
@@ -120,9 +127,21 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
           const selected = data.docs?.[0];
           if (!selected?.id) { setMessage('No folder was selected.'); setBusy(false); return; }
           const next = { id: String(selected.id), name: String(selected.name || 'Selected Work') };
-          localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-          if (folder?.id === next.id) void syncRef.current(next);
-          else setFolder(next);
+          void (async () => {
+            const saveResponse = await fetch('/api/my-drive/portfolio-folder', {
+              method: 'PUT', credentials: 'same-origin',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify(next),
+            });
+            const saved = await saveResponse.json().catch(() => ({}));
+            if (!saveResponse.ok) throw new Error(saved.error || 'Could not save the selected Drive folder.');
+            const confirmed = saved.folder as SavedFolder;
+            if (folder?.id === confirmed.id) void syncRef.current(confirmed);
+            else setFolder(confirmed);
+          })().catch(error => {
+            setMessage(error instanceof Error ? error.message : 'Could not save the selected Drive folder.');
+            setBusy(false);
+          });
         }).build();
       picker.setVisible(true);
     } catch (error) {
