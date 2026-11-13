@@ -95,7 +95,7 @@ const shell = `<!doctype html>
 .head{max-width:1500px;margin:auto;padding:15px 24px;display:flex;align-items:center;justify-content:space-between;gap:18px}
 .brand{display:flex;align-items:center;gap:12px;min-width:0}.brand img{width:46px;height:46px;object-fit:contain}.brand b{display:block;font-size:14px;letter-spacing:.16em}.brand small{display:block;margin-top:4px;color:#aebbd0;font-size:10px;letter-spacing:.08em}
 .status{display:flex;align-items:center;gap:8px;padding:8px 12px;border:1px solid #ffffff24;border-radius:999px;color:#c9d5e7;font-size:11px;white-space:nowrap}.dot{width:7px;height:7px;border-radius:50%;background:#69d6a4;box-shadow:0 0 12px #69d6a4}
-main{max-width:1500px;margin:auto;padding:22px 24px 26px}.intro{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:17px}.eyebrow{color:#ffcb78;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}.intro h1{margin:7px 0 5px;font-size:clamp(22px,3vw,32px);letter-spacing:-.04em}.intro p{margin:0;color:#aab6c8;font-size:13px;line-height:1.5}.controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.controls span{margin-right:5px;color:#91a0b6;font-size:11px}.controls button{border:1px solid #ffffff25;background:#111a29;color:#dce5f2;padding:9px 13px;border-radius:9px;font-size:11px;font-weight:750;cursor:pointer}.controls button[aria-pressed=true]{background:#ffcb78;border-color:#ffcb78;color:#17120a}.frame-wrap{min-height:520px;height:calc(100vh - 225px);max-height:1000px;overflow:auto;border:1px solid #ffffff26;border-radius:16px;background:#151b25;box-shadow:0 24px 80px #0008;padding:12px;display:flex;justify-content:center;align-items:stretch}.frame{width:100%;height:100%;border:1px solid #ffffff2a;border-radius:8px;background:#101113;transition:width .25s ease;flex:0 0 auto}.frame.mobile{width:390px;max-width:100%;border-radius:28px;border:7px solid #222c3b}.frame.tablet{width:768px;max-width:100%;border-radius:18px;border:6px solid #222c3b}.foot{display:flex;justify-content:space-between;gap:12px;margin-top:11px;color:#8190a5;font-size:10px;line-height:1.5}.foot strong{color:#ffcb78;font-weight:700}
+main{max-width:1500px;margin:auto;padding:22px 24px 26px}.intro{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;margin-bottom:17px}.eyebrow{color:#ffcb78;font-size:10px;font-weight:800;letter-spacing:.18em;text-transform:uppercase}.intro h1{margin:7px 0 5px;font-size:clamp(22px,3vw,32px);letter-spacing:-.04em}.intro p{margin:0;color:#aab6c8;font-size:13px;line-height:1.5}.controls{display:flex;align-items:center;gap:7px;flex-wrap:wrap}.controls span{margin-right:5px;color:#91a0b6;font-size:11px}.controls button{border:1px solid #ffffff25;background:#111a29;color:#dce5f2;padding:9px 13px;border-radius:9px;font-size:11px;font-weight:750;cursor:pointer}.controls button[aria-pressed=true]{background:#ffcb78;border-color:#ffcb78;color:#17120a}.frame-wrap{min-height:520px;height:calc(100vh - 225px);max-height:1000px;overflow:hidden;border:1px solid #ffffff26;border-radius:16px;background:#151b25;box-shadow:0 24px 80px #0008;padding:12px;display:flex;justify-content:center;align-items:stretch}.frame{width:100%;height:100%;border:1px solid #ffffff2a;border-radius:8px;background:#101113;transition:width .25s ease;flex:0 0 auto}.frame.mobile{width:390px;max-width:100%;border-radius:28px;border:7px solid #222c3b}.frame.tablet{width:768px;max-width:100%;border-radius:18px;border:6px solid #222c3b}.foot{display:flex;justify-content:space-between;gap:12px;margin-top:11px;color:#8190a5;font-size:10px;line-height:1.5}.foot strong{color:#ffcb78;font-weight:700}
 @media(max-width:700px){.head{padding:12px 14px}.brand img{width:38px;height:38px}.brand b{font-size:11px}.brand small{font-size:9px}.status{font-size:9px;padding:7px 9px}main{padding:18px 12px}.intro{display:block}.controls{margin-top:14px}.frame-wrap{height:calc(100vh - 255px);min-height:460px;padding:7px;border-radius:12px}.foot{display:block}.foot span{display:block;margin-top:4px}}
 </style>
 </head>
@@ -177,14 +177,27 @@ export default {
     const assetRequest = new Request(assetUrl.toString(), request);
     const response = await env.ASSETS.fetch(assetRequest);
     const contentType = response.headers.get("content-type") || "";
-    if (!contentType.includes("text/html") || isEmbeddedSite) return response;
+    if (!contentType.includes("text/html")) return response;
 
-    return new HTMLRewriter()
-      .on("body", {
+    const rewriter = new HTMLRewriter();
+    if (isEmbeddedSite) {
+      rewriter.on("head", {
+        element(element) {
+          element.append(`<style>
+            html { scroll-behavior: auto !important; scroll-padding-top: 12px !important; }
+            body { overflow-x: hidden !important; }
+            .nav { position: relative !important; top: auto !important; z-index: 2 !important; }
+            [id], section { scroll-margin-top: 12px !important; }
+          </style>`, { html: true });
+        },
+      });
+    } else {
+      rewriter.on("body", {
         element(element) {
           element.prepend(previewBanner, { html: true });
         },
-      })
-      .transform(response);
+      });
+    }
+    return rewriter.transform(response);
   },
 };
