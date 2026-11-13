@@ -1,5 +1,5 @@
 import type { ImportCandidate } from '../src/modules/my-drive-resource-manager/types';
-import { buildDrivePortfolioItems, type ExistingDrivePortfolioItem } from '../src/modules/drive-portfolio/drivePortfolio';
+import { buildDrivePortfolioItems, type ExistingDrivePortfolioItem } from '../src/modules/drive-portfolio/drivePortfolio.ts';
 
 type KV = { get(key: string): Promise<string | null>; put(key: string, value: string): Promise<void> };
 type Env = { MAP132_KV?: KV };
