@@ -8,7 +8,7 @@ Publish videos from one dedicated Google Drive folder into MAP132 DIGITALS Selec
 2. Connect Google Drive using the existing OAuth flow.
 3. In Portfolio Manager, choose one dedicated Selected Work folder with Google Picker.
 4. The module recursively scans that folder and nested folders, filters supported video files, maps folder/file names to the existing portfolio categories, and publishes the resulting records.
-5. The selected folder ID is stored in browser local storage (it is not an OAuth credential). The module re-syncs when the portfolio manager opens, when the tab regains focus, and every five minutes while the portfolio manager remains open.
+5. The selected folder ID and name are stored in MAP132 KV through an Admin-authenticated API. The dashboard re-syncs when opened or refocused, and a Cloudflare Worker Cron trigger re-syncs the folder every five minutes even when the dashboard is closed.
 6. Use Sync now to request an immediate refresh.
 
 ## Playback and access boundary
@@ -31,7 +31,7 @@ The current portfolio categories are retained for compatibility:
 - Other names → Other Projects
 
 ## Dependencies and rollout gates
-- Reuses the existing Drive client, Google OAuth, Google Picker configuration, Admin session, KV-backed portfolio content, and HomeSlider Selected Work media renderer.
+- Reuses the existing Drive client, Google OAuth, Google Picker configuration, Admin session, KV-backed portfolio content, and HomeSlider Selected Work media renderer. The scheduled Worker reads the persisted folder selection and refreshes portfolio metadata independently of an open browser session.
 - Google OAuth must have a stored refresh token and read access to the chosen folder. If the stored refresh token is absent/revoked, reconnect Google Drive from the Admin Dashboard.
 - GOOGLE_PICKER_API_KEY, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, MY_DRIVE_SESSION_SECRET, and MAP132_KV must be configured as already required by My Drive.
 - Run focused unit tests, all existing unit tests, Playwright mobile tests, production build, and Worker dry-run before merging. PR runs must not deploy.
