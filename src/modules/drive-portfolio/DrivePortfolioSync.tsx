@@ -54,11 +54,14 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
   const existingRef = useRef<ExistingDrivePortfolioItem[]>(existingItems);
   const publishRef = useRef(onPublish);
   const syncRef = useRef<(selected: SavedFolder) => Promise<void>>(async () => {});
+  const inFlightRef = useRef(false);
 
   useEffect(() => { existingRef.current = existingItems; }, [existingItems]);
   useEffect(() => { publishRef.current = onPublish; }, [onPublish]);
 
   syncRef.current = async selected => {
+    if (inFlightRef.current) return;
+    inFlightRef.current = true;
     setBusy(true);
     setMessage('Scanning the selected Drive folder and nested folders…');
     try {
@@ -73,6 +76,7 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
     } catch (error) {
       setMessage(error instanceof Error ? error.message : 'Google Drive sync failed.');
     } finally {
+      inFlightRef.current = false;
       setBusy(false);
     }
   };
@@ -115,7 +119,8 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
           if (!selected?.id) { setMessage('No folder was selected.'); setBusy(false); return; }
           const next = { id: String(selected.id), name: String(selected.name || 'Selected Work') };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-          setFolder(next);
+          if (folder?.id === next.id) void syncRef.current(next);
+          else setFolder(next);
         }).build();
       picker.setVisible(true);
     } catch (error) {
