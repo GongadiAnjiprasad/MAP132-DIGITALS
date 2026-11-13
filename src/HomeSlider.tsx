@@ -13,7 +13,7 @@ import { formatFeedbackTimestamp } from './modules/feedback/feedbackTimestamp';
 
 type PortfolioItem = {
   id: string; title: string; category: string; description: string;
-  kind: 'video' | 'image' | 'link'; url?: string; mediaUrl?: string;
+  kind: 'video' | 'image' | 'link'; url?: string; mediaUrl?: string; driveFileId?: string; driveFolderId?: string;
   source?: 'upload' | 'youtube' | 'drive' | 'other';
 };
 type PublicReview = {id:string;kind:'Website Experience'|'Work feedback';service:string;rating:number;message:string;response?:string;responseType?:string;responseLanguage?:string;createdAt:string};
@@ -85,14 +85,14 @@ function mediaEmbed(item: PortfolioItem) {
     const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
     return match ? 'https://www.youtube-nocookie.com/embed/' + match[1] : '';
   }
-  if (item.source === 'drive') {
+  if (item.source === 'drive' && !item.driveFileId) {
     const match = url.match(/\/file\/d\/([\w-]+)/) || url.match(/[?&]id=([\w-]+)/);
     return match ? 'https://drive.google.com/file/d/' + match[1] + '/preview' : '';
   }
   return '';
 }
 function ProjectPreview({ item }: { item: PortfolioItem }) {
-  const src = item.mediaUrl || safeLink(item.url || '');
+  const src = item.driveFileId ? '/api/portfolio/video/' + encodeURIComponent(item.driveFileId) : item.mediaUrl || safeLink(item.url || '');
   const embed = mediaEmbed(item);
   if (embed) return <iframe className="ms-project-media" src={embed} title={item.title} loading="lazy" allow="autoplay; encrypted-media; picture-in-picture" allowFullScreen />;
   if (item.kind === 'video' && src) return <video className="ms-project-media" src={src} controls playsInline preload="metadata" />;
