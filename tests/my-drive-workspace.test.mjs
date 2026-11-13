@@ -127,6 +127,29 @@ test('active My Drive workspace offers device ZIP selection and recursively impo
   assert.ok(rootHtml.includes('saves them into the matching categories'));
 });
 
+test('Original ZIP archives are backed up unchanged inside the existing protected My Drive before extraction', () => {
+  assert.ok(rootHtml.includes('Original ZIP Backups'));
+  assert.ok(rootHtml.includes('id="myDriveZipBackups"'));
+  assert.ok(rootHtml.includes('MAP132 Workspace → ZIP Backups'));
+  assert.equal(rootHtml, publishedHtml);
+  assert.ok(source.includes("fetch('/api/my-drive/zip-backups'"));
+  assert.ok(source.includes('Saving the original ZIP archive to your Google Drive backup folder'));
+  assert.ok(source.includes('await loadZipBackups()'));
+  assert.ok(source.includes('/api/my-drive/zip-backups/'));
+  assert.ok(assetsSource.includes("path==='/api/my-drive/zip-backups'&&req.method==='POST'"));
+  assert.ok(assetsSource.includes("path==='/api/my-drive/zip-backups'&&req.method==='GET'"));
+  assert.ok(assetsSource.includes('ensureMap132ZipBackupFolder'));
+  assert.ok(assetsSource.includes('uploadMap132DriveFileToFolder'));
+  assert.ok(assetsSource.includes('my-drive/zip-backup-sha/'));
+  assert.ok(assetsSource.includes('backup.driveFileId'));
+  const storageSource = readFileSync(new URL('../worker/googleDriveStorage.ts', import.meta.url), 'utf8');
+  assert.ok(storageSource.includes("name: 'ZIP Backups'"));
+  assert.ok(storageSource.includes("name: 'MAP132 Workspace'"));
+  assert.ok(storageSource.includes('uploadType=resumable'));
+  assert.ok(storageSource.includes('export async function uploadMap132DriveFileToFolder'));
+  assert.ok(!source.includes('localStorage'));
+});
+
 test('active My Drive resource cards provide previews or clear format details plus download', () => {
   assert.ok(source.includes("asset.kind === 'audio'"));
   assert.ok(source.includes("asset.kind === 'video'"));
