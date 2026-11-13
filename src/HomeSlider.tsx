@@ -384,17 +384,19 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
 
         <section ref={workPageRef} className="ms-page ms-work-page" aria-label="Selected work">
           <div className="ms-page-heading"><div><p className="ms-kicker">PORTFOLIO / VISUAL STUDIES</p><h2>Choose your <em>work.</em></h2></div><p>Select the type of video you want to explore. Each category opens its matching projects and creative samples.</p></div>
-          <div className="work-category-toolbar">
-            <span>EXPLORE BY CATEGORY</span>
-            <button type="button" className={activeProjectCategory === 'All Projects' ? 'all-work-filter active' : 'all-work-filter'} aria-pressed={activeProjectCategory === 'All Projects'} onClick={() => selectWorkCategory('All Projects')}>View all projects <ArrowRight size={14}/></button>
-          </div>
-          <div className="work-category-tabs" role="group" aria-label="Choose a project category">
-            {workCategoryCards.map(category => {
-              const count = content.items.filter(item => category.pattern.test(item.category)).length;
-              return <button type="button" key={category.id} className={activeProjectCategory === category.id ? 'work-category-tab active' : 'work-category-tab'} aria-pressed={activeProjectCategory === category.id} onClick={() => selectWorkCategory(category.id)}>
-                <span>{category.id}</span><small>{count} {count === 1 ? 'PROJECT' : 'PROJECTS'}</small>
-              </button>;
-            })}
+          <div className="ms-work-category-sticky">
+            <div className="work-category-toolbar">
+              <span>EXPLORE BY CATEGORY</span>
+              <button type="button" className={activeProjectCategory === 'All Projects' ? 'all-work-filter active' : 'all-work-filter'} aria-pressed={activeProjectCategory === 'All Projects'} onClick={() => selectWorkCategory('All Projects')}>View all projects <ArrowRight size={14}/></button>
+            </div>
+            <div className="work-category-tabs" role="group" aria-label="Choose a project category">
+              {workCategoryCards.map(category => {
+                const count = content.items.filter(item => category.pattern.test(item.category)).length;
+                return <button type="button" key={category.id} className={activeProjectCategory === category.id ? 'work-category-tab active' : 'work-category-tab'} aria-pressed={activeProjectCategory === category.id} onClick={() => selectWorkCategory(category.id)}>
+                  <span>{category.id}</span><small>{count} {count === 1 ? 'PROJECT' : 'PROJECTS'}</small>
+                </button>;
+              })}
+            </div>
           </div>
           {activeProjectCategory === null && <div className="ms-work-prompt"><Sparkles size={17}/><span>Select a category to display all matching videos here. Switch categories anytime using the tabs above.</span></div>}
           {activeProjectCategory !== null && <div className="ms-work-results-heading">
@@ -475,7 +477,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     </div>}
     <div className="ms-controls">
       <button type="button" className="ms-arrow" aria-label="Previous page" onClick={() => goTo(active - 1)} disabled={active === 0}><ArrowLeft size={19}/></button>
-      <div className="ms-pagination">{pages.map((page,index)=><button type="button" key={page} className={active===index?'active':''} aria-label={page} aria-current={active===index?'page':undefined} onClick={() => goTo(index)}><span>{String(index+1).padStart(2,'0')}</span></button>)}</div>
+      <div className="ms-pagination">{pages.map((page,index)=><button type="button" key={page} className={active===index?'active':''} aria-label={page} aria-current={active===index?'page':undefined} onClick={() => goTo(index)}><span>{index+1}</span></button>)}</div>
       <span className="ms-current-label">{String(active+1).padStart(2,'0')} <i>/</i> {String(pages.length).padStart(2,'0')} · {pages[active]}</span>
       <button type="button" className="ms-arrow ms-next" aria-label="Next page" onClick={() => goTo(active + 1)} disabled={active === pages.length - 1}><ArrowRight size={19}/></button>
     </div>
