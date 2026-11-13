@@ -100,3 +100,68 @@ export async function deleteMap132DriveFile(token: string, fileId: string): Prom
   const response = await fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(fileId), { method: 'DELETE', headers: auth(token) });
   return response.status === 204 || response.status === 200 || response.status === 404;
 }
+
+
+/** Dedicated archive folder inside the existing MAP132 Workspace folder. */
+export async function ensureMap132ZipBackupFolder(token: string, kv: KVNamespace): Promise<string> {
+  const key = 'my-drive/zip-backup-folder-id';
+  const cached = await kv.get(key);
+  if (cached) {
+    const check = await fetch('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(cached) + '?fields=id,trashed,mimeType', { headers: auth(token) });
+    if (check.ok) {
+      const item = await check.json() as { id?: string; trashed?: boolean; mimeType?: string };
+      if (item.id && !item.trashed && item.mimeType === FOLDER_MIME) return item.id;
+    }
+    await kv.delete(key);
+  }
+  const parentId = await ensureMap132DriveFolder(token, kv);
+  const escaped = 'ZIP Backups'.replace(/'/g, "\\'");
+  const listUrl = new URL('https://www.googleapis.com/drive/v3/files');
+  listUrl.searchParams.set('q', "'" + parentId + "' in parents and name = '" + escaped + "' and mimeType = '" + FOLDER_MIME + "' and trashed = false");
+  listUrl.searchParams.set('pageSize', '10');
+  listUrl.searchParams.set('fields', 'files(id,name,mimeType)');
+  const listing = await fetch(listUrl, { headers: auth(token) });
+  if (!listing.ok) throw new Error('Google Drive could not check the ZIP Backups folder.');
+  const found = await listing.json() as { files?: Array<{ id?: string }> };
+  let folderId = found.files?.find(item => item.id)?.id;
+  if (!folderId) {
+    const created = await fetch('https://www.googleapis.com/drive/v3/files?fields=id,mimeType', {
+      method: 'POST',
+      headers: { ...auth(token), 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name: 'ZIP Backups', mimeType: FOLDER_MIME, parents: [parentId] }),
+    });
+    if (!created.ok) throw new Error('Google Drive could not create the ZIP Backups folder.');
+    const result = await created.json() as { id?: string; mimeType?: string };
+    if (!result.id || result.mimeType !== FOLDER_MIME) throw new Error('Google Drive returned an invalid ZIP Backups folder.');
+    folderId = result.id;
+  }
+  await kv.put(key, folderId);
+  return folderId;
+}
+
+/** Resumable Google Drive upload into a caller-selected MAP132 folder. */
+export async function uploadMap132DriveFileToFolder(token: string, folderId: string, name: string, contentType: string, bytes: ArrayBuffer): Promise<DriveStorageMetadata> {
+  const mimeType = contentType || 'application/octet-stream';
+  const session = await fetch('https://www.googleapis.com/upload/drive/v3/files?uploadType=resumable&fields=id,name,mimeType,size,parents,md5Checksum', {
+    method: 'POST',
+    headers: {
+      ...auth(token),
+      'Content-Type': 'application/json; charset=UTF-8',
+      'X-Upload-Content-Type': mimeType,
+      'X-Upload-Content-Length': String(bytes.byteLength),
+    },
+    body: JSON.stringify({ name, mimeType, parents: [folderId] }),
+  });
+  if (!session.ok) throw new Error('Google Drive could not start the ZIP archive upload.');
+  const uploadUrl = session.headers.get('Location');
+  if (!uploadUrl) throw new Error('Google Drive did not return a resumable ZIP upload URL.');
+  const response = await fetch(uploadUrl, {
+    method: 'PUT',
+    headers: { 'Content-Type': mimeType, 'Content-Length': String(bytes.byteLength) },
+    body: bytes,
+  });
+  if (!response.ok) throw new Error('Google Drive ZIP archive upload failed. Check Drive quota and permissions.');
+  const result = await response.json() as DriveStorageMetadata;
+  if (!result.id) throw new Error('Google Drive did not return the saved ZIP archive ID.');
+  return result;
+}
