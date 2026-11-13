@@ -29,7 +29,7 @@ async function authorized(req:Request,env:AssetEnv){
 /** Durable private My Drive resource storage. Source Drive files remain read-only. */
 export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Response|null>{
  const url=new URL(req.url),path=url.pathname;
- if(!path.startsWith('/api/my-drive/assets'))return null;
+ if(!path.startsWith('/api/my-drive/assets')&&!path.startsWith('/api/my-drive/zip-backups'))return null;
  if(!env.MAP132_KV)return json({error:'My Drive metadata storage is not configured. Bind MAP132_KV.'},503);
  if(!await authorized(req,env))return json({error:'MAP132 Admin login required.'},401);
  const accessToken=await getMyDriveAccessToken(req,env);
