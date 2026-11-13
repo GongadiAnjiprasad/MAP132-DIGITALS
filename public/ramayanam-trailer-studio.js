@@ -39,7 +39,7 @@
  const tabs=[...panel.querySelectorAll('[data-rt-tab]')],views=[...panel.querySelectorAll('[data-rt-view]')];
  function showTab(name){tabs.forEach(b=>{const active=b.dataset.rtTab===name;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});views.forEach(v=>v.hidden=v.dataset.rtView!==name)}
  panel.querySelector('.rt-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-rt-tab]');if(b)showTab(b.dataset.rtTab)});
- panel.querySelector('[data-rt-open-my-drive]').addEventListener('click',()=>{const b=document.querySelector('[data-resource-view="my-drive"]');if(b)b.click();window.scrollTo({top:document.getElementById('myDrivePanel').offsetTop-20,behavior:'smooth'})});
+ panel.querySelectorAll('[data-rt-open-my-drive]').forEach(button=>button.addEventListener('click',()=>{const b=document.querySelector('[data-resource-view="my-drive"]');if(b)b.click();const target=document.getElementById('myDrivePanel');if(target)window.scrollTo({top:target.offsetTop-20,behavior:'smooth'})}));
  showTab('timeline');
 })();
 
