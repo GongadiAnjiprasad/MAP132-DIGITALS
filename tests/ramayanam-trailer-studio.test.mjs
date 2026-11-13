@@ -55,3 +55,23 @@ test('No text dialogue, copy, or manual SFX search controls remain in Ramayanam 
   const section = publicWorkspace.slice(publicWorkspace.indexOf('id="ramayanamStudio"'), publicWorkspace.indexOf('id="cinematic-sfx"'));
   assert.doesNotMatch(section, /data-rt-tab="dialogue"|data-copy-dialogue|rtSfxForm|Find sound effects|Copy dialogue/i);
 });
+
+test('Official Ramayana and Adipurush soundtrack references are curated scene-wise without fake download controls', () => {
+  for (const id of ['ry-ravana-tandavam','ry-sita-aspiration','ad-jai-shri-ram','ad-priya-mithunam','ad-ram-sita-ram']) assert.ok(studio.includes(id));
+  assert.match(studio,/Listen to official audio/);
+  assert.match(studio,/music\.apple\.com/);
+  assert.match(studio,/youtube\.com\/watch/);
+  assert.doesNotMatch(studio,/Download official soundtrack/);
+});
+
+test('Isolated preview includes element selection, circle, highlight, arrow, marker and exportable bug reports', () => {
+  const reporter = readFileSync(new URL('../public/ramayanam-bug-reporter.js', import.meta.url), 'utf8');
+  for (const feature of ['Select element','Circle area','Highlight area','Draw arrow','Drop marker','Copy report','Download JSON']) assert.ok(reporter.includes(feature));
+  assert.match(publicWorkspace,/ramayanam-bug-reporter\.js/);
+  assert.match(publicWorkspace,/#map132BugPanel/);
+});
+
+test('Trailer Studio layout hardening explicitly prevents grid item and header overlap', () => {
+  assert.match(publicWorkspace,/#ramayanamStudio \.rt-guide-grid article\{display:block;position:relative;min-width:0/);
+  assert.match(publicWorkspace,/#ramayanamStudio \.rt-audio-grid\{display:grid;grid-template-columns:repeat\(2,minmax\(0,1fr\)\)/);
+});
