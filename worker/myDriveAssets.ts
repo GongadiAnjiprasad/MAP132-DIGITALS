@@ -65,7 +65,7 @@ export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Resp
    return json({saved:true,backup},201);
   }catch(error){return json({error:error instanceof Error?error.message:'Could not save the original ZIP archive to Google Drive.'},502);}
  }
- const backupDownload=path.match(/^\\/api\\/my-drive\\/zip-backups\\/([a-z0-9-]+)\\/download$/i);
+ const backupDownload=path.match(/^\/api\/my-drive\/zip-backups\/([a-z0-9-]+)\/download$/i);
  if(backupDownload&&req.method==='GET'){
   const meta=await env.MAP132_KV.get('my-drive/zip-backups/'+backupDownload[1]);
   if(!meta)return json({error:'ZIP backup not found.'},404);
