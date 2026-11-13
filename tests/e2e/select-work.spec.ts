@@ -69,3 +69,30 @@ test('Category chooser displays six tabs in a stable three-column by two-row gri
   expect(boxes[1].x).toBeLessThan(boxes[2].x);
   expect(await tabs.evaluate(element => element.scrollWidth <= element.clientWidth + 1)).toBeTruthy();
 });
+
+
+test('Selected Work category controls remain sticky while scrolling project content', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
+  const sticky = page.locator('.ms-work-category-sticky');
+  await expect(sticky).toBeVisible();
+  await expect(sticky).toHaveCSS('position', 'sticky');
+  await expect(sticky.locator('.work-category-tabs button')).toHaveCount(6);
+});
+
+test('main page numbers render as compact circles with a filled active state', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+  const numbers = page.locator('.ms-controls .ms-pagination button');
+  await expect(numbers).toHaveCount(5);
+  await expect(numbers.nth(0)).toContainText('1');
+  const shape = await numbers.nth(0).evaluate(element => {
+    const style = getComputedStyle(element);
+    return { radius: style.borderRadius, width: style.width, height: style.height };
+  });
+  expect(shape.radius).toBe('50%');
+  expect(shape.width).toBe(shape.height);
+  const active = await numbers.nth(0).evaluate(element => getComputedStyle(element).backgroundImage);
+  expect(active).toContain('linear-gradient');
+});
