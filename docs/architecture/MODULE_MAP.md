@@ -27,7 +27,7 @@
 | M16 | Shared Design System & Assets | `src/index.css`, `src/HomeSlider.css`, `public/resources/*`, shared fonts/icons | Preserve MAP132 brand identity, typography, colours, spacing, responsive rules, logo and reusable UI patterns |
 | M17 | Routing / Application Bootstrap | `src/main.tsx`, `src/App.tsx`, `index.html`, hash routes `#admin` / `#workspace` | Load app; route between public site, protected admin and workspace; maintain route synchronisation |
 | M18 | QA / Build / Deployment | `tests/*`, `playwright.config.ts`, `package.json`, `.github/workflows/*`, `wrangler.toml` | Run unit/E2E tests; build; deploy Worker/assets; verify health and route behaviour; preserve release checkpoints |
-| M19 | Google Drive → Selected Work video sync | `src/modules/drive-portfolio/*`, existing My Drive OAuth/client, `worker/index.ts`, `src/HomeSlider.tsx` | Select one Drive folder; recursively sync supported videos; map categories; publish folder-owned records; run a five-minute background Worker sync on its own Cron; stream only published files with Range support |
+| M19 | Google Drive → Selected Work video sync | `src/modules/drive-portfolio/*`, existing My Drive OAuth/client, `worker/index.ts`, `src/HomeSlider.tsx` | Select one Drive folder; recursively sync supported videos; map categories; publish folder-owned records; sync on Admin Portfolio Manager open or on demand (no additional Cron); stream only published files with Range support |
 
 ## 2. Current route map
 
