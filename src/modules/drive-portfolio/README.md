@@ -8,7 +8,7 @@ Publish videos from one dedicated Google Drive folder into MAP132 DIGITALS Selec
 2. Connect Google Drive using the existing OAuth flow.
 3. In Portfolio Manager, choose one dedicated Selected Work folder with Google Picker.
 4. The module recursively scans that folder and nested folders, filters supported video files, maps folder/file names to the existing portfolio categories, and publishes the resulting records.
-5. The selected folder ID and name are stored in MAP132 KV through an Admin-authenticated API. The dashboard re-syncs when opened or refocused, and a dedicated Cloudflare Worker Cron trigger re-syncs the folder every five minutes even when the dashboard is closed. The existing festival automation remains on its original daily 18:35 UTC schedule; the two Cron handlers are kept separate.
+5. The selected folder ID and name are stored in the existing MAP132 KV namespace through an Admin-authenticated API. The dashboard scans once when Portfolio Manager opens or a folder is selected; use Sync now for an on-demand refresh. No additional background Cron is installed, avoiding 288 unnecessary scheduled Worker runs per day. The existing festival automation remains on its original daily 18:35 UTC schedule.
 6. Use Sync now to request an immediate refresh.
 
 ## Playback and access boundary
@@ -31,7 +31,7 @@ The current portfolio categories are retained for compatibility:
 - Other names → Other Projects
 
 ## Dependencies and rollout gates
-- Reuses the existing Drive client, Google OAuth, Google Picker configuration, Admin session, KV-backed portfolio content, and HomeSlider Selected Work media renderer. The scheduled Worker reads the persisted folder selection and refreshes portfolio metadata independently of an open browser session.
+- Reuses the existing Drive client, Google OAuth, Google Picker configuration, Admin session, KV-backed portfolio content, and HomeSlider Selected Work media renderer. The authenticated dashboard uses the existing Drive client to refresh portfolio metadata only when requested by opening Portfolio Manager, selecting a folder, or pressing Sync now.
 - Google OAuth must have a stored refresh token and read access to the chosen folder. If the stored refresh token is absent/revoked, reconnect Google Drive from the Admin Dashboard.
 - GOOGLE_PICKER_API_KEY, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, MY_DRIVE_SESSION_SECRET, and MAP132_KV must be configured as already required by My Drive.
 - Run focused unit tests, all existing unit tests, Playwright mobile tests, production build, and Worker dry-run before merging. PR runs must not deploy.
