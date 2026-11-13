@@ -299,11 +299,6 @@ export default {
     catch{return new Response('Website asset service unavailable.',{status:502});}
   },
   async scheduled(controller:ScheduledController,env:Env){
-    if(controller.cron==='*/5 * * * *'){
-      try{await syncDrivePortfolioFromFolder(env);}
-      catch(error){console.error('Drive portfolio scheduled sync failed:',error instanceof Error?error.message:'Unknown error');}
-      return;
-    }
     if(controller.cron!=='35 18 * * *')return;
     const today=getIndiaDateKey(new Date(controller.scheduledTime));
     const festival=FESTIVAL_CALENDAR.find(item=>item.date===today);
