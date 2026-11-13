@@ -2295,6 +2295,8 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 @keyframes feedback-studio-in{from{transform:translateY(12px) scale(.985);opacity:.5}to{transform:translateY(0) scale(1);opacity:1}}
 .feedback-studio-brand{display:flex;align-items:center;justify-content:space-between;gap:18px;padding-bottom:16px;border-bottom:1px solid #d5aa6633}
 .feedback-studio-brand>img{display:block;width:auto;height:auto;max-width:min(210px,65%);max-height:54px;object-fit:contain;object-position:left center}
+/* Feedback header optical alignment: lower logo and close control slightly together. */
+.feedback-studio-brand>img,.feedback-studio-brand-actions{transform:translateY(6px)}
 .feedback-studio .feedback-drawer-head{margin:22px 0 18px}
 .feedback-studio .feedback-drawer-head h2{font-size:clamp(27px,5vw,36px);letter-spacing:-1.4px}
 .feedback-studio .feedback-drawer-head h2 em{display:inline;color:#e8bd7a}
