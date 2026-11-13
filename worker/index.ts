@@ -1,6 +1,6 @@
 import { FESTIVAL_CALENDAR, getIndiaDateKey } from '../src/modules/seasonal/festivalCalendar';
 import { createFeedbackResponse } from './feedback';
-import { clearMyDriveSession, handleMyDriveOAuth } from '../src/modules/my-drive-resource-manager/driveOAuth';
+import { clearMyDriveSession, getPublishedDriveAccessToken, handleMyDriveOAuth } from '../src/modules/my-drive-resource-manager/driveOAuth';
 import { handleMyDriveAssets } from './myDriveAssets';
 interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; GOOGLE_PICKER_API_KEY?: string; MY_DRIVE_SESSION_SECRET?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
@@ -52,7 +52,39 @@ async function read(env:Env){
     return {...DEFAULTS,...stored,profile,skills,items,resources,logoPath:typeof stored.logoPath==='string'&&stored.logoPath.startsWith('portfolio/logos/')?stored.logoPath:''};
   }catch{return DEFAULTS;}
 }
-async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;if(path.startsWith('/api/my-drive/')){if(path==='/api/my-drive/logout'&&method==='POST'){const headers=await clearMyDriveSession(req,env);return json({signedOut:true},200,headers);}const oauthCallback=path==='/api/my-drive/oauth/callback'&&method==='GET';if(!oauthCallback&&!await validSession(req,env))return json({error:'MAP132 Admin login required. Sign in to the Admin Dashboard to access My Drive.'},401);}const driveAssetsResponse=await handleMyDriveAssets(req,env);if(driveAssetsResponse)return driveAssetsResponse;const driveOAuthResponse=await handleMyDriveOAuth(req,env);if(driveOAuthResponse)return driveOAuthResponse;
+async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;if(path.startsWith('/api/portfolio/video/')&&method==='GET'){
+ const fileId=path.slice('/api/portfolio/video/'.length);
+ if(!/^[a-zA-Z0-9_-]{1,256}$/.test(fileId))return json({error:'Invalid portfolio video ID.'},400);
+ const content=await read(env);
+ const published=(content.items||[]).some((item:any)=>item&&item.kind==='video'&&item.source==='drive'&&item.driveFileId===fileId&&typeof item.driveFolderId==='string');
+ if(!published)return json({error:'This video is not published in the MAP132 portfolio.'},404);
+ const accessToken=await getPublishedDriveAccessToken(env);
+ if(!accessToken)return json({error:'Google Drive playback is unavailable. Reconnect Google Drive from the Admin Dashboard.'},503);
+ const authHeaders={Authorization:'Bearer '+accessToken,Accept:'application/json'};
+ const metadataUrl=new URL('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(fileId));
+ metadataUrl.searchParams.set('fields','id,mimeType,trashed');
+ const metadataResponse=await fetch(metadataUrl,{headers:authHeaders});
+ if(!metadataResponse.ok)return json({error:'Google Drive could not verify this published video.'},metadataResponse.status===404?404:502);
+ const metadata=await metadataResponse.json() as {id?:string;mimeType?:string;trashed?:boolean};
+ if(metadata.trashed||!String(metadata.mimeType||'').startsWith('video/'))return json({error:'The published Drive item is not an available video file.'},415);
+ const upstreamUrl=new URL('https://www.googleapis.com/drive/v3/files/'+encodeURIComponent(fileId));
+ upstreamUrl.searchParams.set('alt','media');
+ const upstreamHeaders:Record<string,string>={Authorization:'Bearer '+accessToken,Accept:'*/*'};
+ const range=req.headers.get('Range');
+ if(range)upstreamHeaders.Range=range;
+ const upstream=await fetch(upstreamUrl,{headers:upstreamHeaders});
+ if(!upstream.ok||!upstream.body)return json({error:'Google Drive could not stream this published video.'},upstream.status===404?404:upstream.status===416?416:502);
+ const headers=new Headers({
+  'Content-Type':upstream.headers.get('Content-Type')||'video/mp4',
+  'Cache-Control':'public, max-age=60, stale-while-revalidate=300',
+  'Accept-Ranges':upstream.headers.get('Accept-Ranges')||'bytes',
+  'X-Content-Type-Options':'nosniff',
+  'Content-Disposition':'inline',
+  'X-Robots-Tag':'noindex',
+ });
+ for(const name of ['Content-Length','Content-Range','Last-Modified','ETag']){const value=upstream.headers.get(name);if(value)headers.set(name,value);}
+ return new Response(upstream.body,{status:upstream.status,headers});
+}if(path.startsWith('/api/my-drive/')){if(path==='/api/my-drive/logout'&&method==='POST'){const headers=await clearMyDriveSession(req,env);return json({signedOut:true},200,headers);}const oauthCallback=path==='/api/my-drive/oauth/callback'&&method==='GET';if(!oauthCallback&&!await validSession(req,env))return json({error:'MAP132 Admin login required. Sign in to the Admin Dashboard to access My Drive.'},401);}const driveAssetsResponse=await handleMyDriveAssets(req,env);if(driveAssetsResponse)return driveAssetsResponse;const driveOAuthResponse=await handleMyDriveOAuth(req,env);if(driveOAuthResponse)return driveOAuthResponse;
 if(path.startsWith('/api/resources/sounds/')&&path.endsWith('/preview')&&method==='GET'){
   if(!env.FREESOUND_API_KEY)return json({error:'Sound preview is not connected.'},503);
   const id=path.split('/')[4];
@@ -267,6 +299,7 @@ export default {
     catch{return new Response('Website asset service unavailable.',{status:502});}
   },
   async scheduled(controller:ScheduledController,env:Env){
+    if(controller.cron!=='35 18 * * *')return;
     const today=getIndiaDateKey(new Date(controller.scheduledTime));
     const festival=FESTIVAL_CALENDAR.find(item=>item.date===today);
     if(!festival||!env.AI||!env.MAP132_KV)return;

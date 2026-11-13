@@ -126,6 +126,43 @@ export async function getMyDriveAccessToken(request: Request, env: DriveEnv): Pr
   return session?.access_token || null;
 }
 
+/** Public portfolio playback token. The Worker calls this only after checking that the file ID is published in portfolio content. */
+export async function getPublishedDriveAccessToken(env: DriveEnv): Promise<string | null> {
+  if (!env.MAP132_KV || !env.MY_DRIVE_SESSION_SECRET || !env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) return null;
+  const cacheKey = 'my-drive/published-access-token';
+  try {
+    const cached = await env.MAP132_KV.get(cacheKey);
+    if (cached) {
+      const session = await decrypt<{ access_token: string; expires_at: number }>(cached, env.MY_DRIVE_SESSION_SECRET);
+      if (session.access_token && session.expires_at > Date.now() + 60_000) return session.access_token;
+    }
+    const encryptedRefresh = await env.MAP132_KV.get(REFRESH_TOKEN_KEY);
+    if (!encryptedRefresh) return null;
+    const refresh = await decrypt<{ refresh_token: string }>(encryptedRefresh, env.MY_DRIVE_SESSION_SECRET);
+    if (!refresh.refresh_token) return null;
+    const response = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+      body: new URLSearchParams({
+        client_id: env.GOOGLE_CLIENT_ID,
+        client_secret: env.GOOGLE_CLIENT_SECRET,
+        refresh_token: refresh.refresh_token,
+        grant_type: 'refresh_token',
+      }),
+    });
+    if (!response.ok) return null;
+    const token = await response.json() as { access_token?: string; expires_in?: number };
+    if (!token.access_token) return null;
+    const expiresAt = Date.now() + Math.max(60, Number(token.expires_in || SESSION_TTL)) * 1000;
+    await env.MAP132_KV.put(cacheKey, await encrypt({ access_token: token.access_token, expires_at: expiresAt }, env.MY_DRIVE_SESSION_SECRET), {
+      expirationTtl: Math.max(60, Math.ceil((expiresAt - Date.now()) / 1000)),
+    });
+    return token.access_token;
+  } catch {
+    return null;
+  }
+}
+
 
 
 const OAUTH_STATE_COOKIE = 'map132_drive_oauth_state';
@@ -345,6 +382,34 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
   if (path === '/api/my-drive/session' && request.method === 'GET') {
     const session = await readSession(request, env);
     return json({ connected: Boolean(session), expiresAt: session?.expires_at ?? null });
+  }
+
+
+  if (path === '/api/my-drive/portfolio-folder' && request.method === 'GET') {
+    const session = await readSession(request, env);
+    if (!session) return json({ error: 'Connect Google Drive again to continue.' }, 401);
+    const stored = await env.MAP132_KV!.get('my-drive/portfolio-folder');
+    if (!stored) return json({ folder: null });
+    try { return json({ folder: JSON.parse(stored) }); }
+    catch { return json({ error: 'Saved portfolio folder settings are invalid.' }, 500); }
+  }
+
+  if (path === '/api/my-drive/portfolio-folder' && request.method === 'PUT') {
+    const session = await readSession(request, env);
+    if (!session) return json({ error: 'Connect Google Drive again to continue.' }, 401);
+    const body = await request.json().catch(() => ({})) as { id?: string; name?: string };
+    const id = String(body.id || '');
+    const name = String(body.name || '').trim().slice(0, 180);
+    if (!/^[a-zA-Z0-9_-]{1,256}$/.test(id) || !name) return json({ error: 'Choose a valid Google Drive folder.' }, 400);
+    const metadataUrl = new URL('https://www.googleapis.com/drive/v3/files/' + encodeURIComponent(id));
+    metadataUrl.searchParams.set('fields', 'id,name,mimeType,trashed');
+    const metadataResponse = await fetch(metadataUrl, { headers: { Authorization: 'Bearer ' + session.access_token, Accept: 'application/json' } });
+    if (!metadataResponse.ok) return json({ error: 'Google Drive could not verify this folder.' }, metadataResponse.status === 404 ? 404 : 502);
+    const metadata = await metadataResponse.json() as { id?: string; name?: string; mimeType?: string; trashed?: boolean };
+    if (metadata.trashed || metadata.mimeType !== 'application/vnd.google-apps.folder') return json({ error: 'The selected Drive item is not an available folder.' }, 400);
+    const folder = { id, name: String(metadata.name || name) };
+    await env.MAP132_KV!.put('my-drive/portfolio-folder', JSON.stringify(folder));
+    return json({ saved: true, folder });
   }
 
 
