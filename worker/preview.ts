@@ -184,9 +184,16 @@ export default {
       rewriter.on("head", {
         element(element) {
           element.append(`<style>
+            /* Preview-only normal document flow: avoid layers covering text while scrolling. */
             html { scroll-behavior: auto !important; scroll-padding-top: 12px !important; }
-            body { overflow-x: hidden !important; }
+            html, body { overflow-x: hidden !important; overflow-y: auto !important; height: auto !important; }
+            #root, .site { height: auto !important; min-height: 0 !important; overflow: visible !important; }
             .nav { position: relative !important; top: auto !important; z-index: 2 !important; }
+            .website-intro, .royal-intro { display: none !important; pointer-events: none !important; }
+            .site main > section { display: block !important; }
+            .site main > section:target { animation: none !important; transform: none !important; }
+            .site main:not(:has(> section:target)) > section:not(#top):not(#work) { display: block !important; }
+            main:not(:has(> section:target)) > #work .work-card:nth-child(n+4) { display: block !important; }
             [id], section { scroll-margin-top: 12px !important; }
           </style>`, { html: true });
         },
