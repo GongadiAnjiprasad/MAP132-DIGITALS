@@ -40,6 +40,5 @@
  function showTab(name){tabs.forEach(b=>{const active=b.dataset.rtTab===name;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});views.forEach(v=>v.hidden=v.dataset.rtView!==name)}
  panel.querySelector('.rt-tabs').addEventListener('click',e=>{const b=e.target.closest('[data-rt-tab]');if(b)showTab(b.dataset.rtTab)});
  panel.querySelector('[data-rt-open-my-drive]').addEventListener('click',()=>{const b=document.querySelector('[data-resource-view="my-drive"]');if(b)b.click();window.scrollTo({top:document.getElementById('myDrivePanel').offsetTop-20,behavior:'smooth'})});
- panel.querySelector('[data-rt-open-sfx]').addEventListener('click',()=>{const b=document.querySelector('[data-resource-view="sounds"]');if(b)b.click();window.scrollTo({top:document.getElementById('cinematic-sfx').offsetTop-20,behavior:'smooth'})});
  showTab('timeline');
 })();
