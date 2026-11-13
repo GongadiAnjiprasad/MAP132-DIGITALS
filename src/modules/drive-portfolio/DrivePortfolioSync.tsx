@@ -93,14 +93,10 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
   useEffect(() => {
     if (!folder) return;
     void syncRef.current(folder);
-    const timer = window.setInterval(() => {
-      if (document.visibilityState === 'visible') void syncRef.current(folder);
-    }, 5 * 60 * 1000);
     const refresh = () => { if (document.visibilityState === 'visible') void syncRef.current(folder); };
     window.addEventListener('focus', refresh);
     document.addEventListener('visibilitychange', refresh);
     return () => {
-      window.clearInterval(timer);
       window.removeEventListener('focus', refresh);
       document.removeEventListener('visibilitychange', refresh);
     };
@@ -152,7 +148,7 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
 
   return <section className="admin-card drive-portfolio-sync" aria-labelledby="drive-portfolio-sync-title">
     <div className="card-heading"><div><p className="kicker">M02 / SELECTED WORK · GOOGLE DRIVE</p><h2 id="drive-portfolio-sync-title">Automatic Drive video sync</h2></div></div>
-    <p className="admin-hint">Choose one dedicated portfolio folder. Videos in its nested folders are added to Selected Work using their folder names to detect categories. The folder is checked when this dashboard opens, when it regains focus, and every five minutes while open.</p>
+    <p className="admin-hint">Choose one dedicated portfolio folder. Videos in its nested folders are added to Selected Work using their folder names to detect categories. The dashboard checks the folder when opened or refocused. A Cloudflare background schedule also checks it every five minutes, even while the dashboard is closed.</p>
     <p className="admin-hint"><b>Publishing notice:</b> Every supported video found in this selected folder becomes publicly playable on MAP132 DIGITALS. Keep private/client-confidential videos outside this folder. Source Drive files are not changed.</p>
     <div className="form-row">
       <div><b>{folder ? folder.name : 'No portfolio folder selected'}</b>{lastSynced && <p className="admin-hint">Last sync: {lastSynced}</p>}</div>
