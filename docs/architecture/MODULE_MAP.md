@@ -51,7 +51,7 @@ These are shared foundations, not safe-to-change-in-isolation modules:
 
 ## 4. Change-isolation rules
 
-1. Every task must name one primary Module ID (M01–M18) and the user story being changed.
+1. Every task must name one primary Module ID (M01–M19) and the user story being changed.
 2. Make the smallest possible change. Do not reformat or redesign unrelated modules.
 3. Before editing, create a checkpoint branch from the last verified production commit and a separate feature branch.
 4. Keep module-specific UI, styles, logic and tests together when extracting code. Use explicit props/interfaces rather than importing another module's internal state.
@@ -125,4 +125,4 @@ For each user story, record:
 - M12 Festival / Seasonal Atmosphere has now been extracted into `src/modules/seasonal/IndianFestivalAtmosphere.tsx`; the existing mount point and visual behaviour are preserved.
 - M19 Drive Portfolio Sync is implemented as an isolated module under `src/modules/drive-portfolio/`; it reuses the existing read-only Drive folder scanner, persists the chosen folder and portfolio metadata in the existing KV namespace, and syncs only when the Admin Portfolio Manager opens, when a folder is selected, or when the admin presses Sync now. No additional background Cron is used; the existing daily festival Cron is unchanged. The Worker streams only published Drive video IDs and forwards byte-range requests. Keep its publication allowlist, incomplete-scan protection and byte-range playback tests in place.
 - Existing tests include swipe navigation, responsive layout and swipe gesture unit coverage. Expand them with module-specific tests before extracting/refactoring.
-- The Worker uses Cloudflare KV for content/enquiries and optionally R2 for media; secrets/bindings are configured outside this document in Cloudflare.
+- The Worker uses the existing Cloudflare KV namespace for content/enquiries and Drive portfolio metadata; optionally configured R2 is used for media. Secrets/bindings are configured outside this document in Cloudflare.
