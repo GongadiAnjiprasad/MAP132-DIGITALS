@@ -27,7 +27,7 @@
 | M16 | Shared Design System & Assets | `src/index.css`, `src/HomeSlider.css`, `public/resources/*`, shared fonts/icons | Preserve MAP132 brand identity, typography, colours, spacing, responsive rules, logo and reusable UI patterns |
 | M17 | Routing / Application Bootstrap | `src/main.tsx`, `src/App.tsx`, `index.html`, hash routes `#admin` / `#workspace` | Load app; route between public site, protected admin and workspace; maintain route synchronisation |
 | M18 | QA / Build / Deployment | `tests/*`, `playwright.config.ts`, `package.json`, `.github/workflows/*`, `wrangler.toml` | Run unit/E2E tests; build; deploy Worker/assets; verify health and route behaviour; preserve release checkpoints |
-| M19 | Google Drive → Selected Work video sync | `src/modules/drive-portfolio/*`, existing My Drive OAuth/client, `worker/index.ts`, `src/HomeSlider.tsx` | Select one Drive folder; recursively sync supported videos; map categories; publish folder-owned records; stream only published files with Range support |
+| M19 | Google Drive → Selected Work video sync | `src/modules/drive-portfolio/*`, existing My Drive OAuth/client, `worker/index.ts`, `src/HomeSlider.tsx` | Select one Drive folder; recursively sync supported videos; map categories; publish folder-owned records; run a five-minute background Worker sync; stream only published files with Range support |
 
 ## 2. Current route map
 
@@ -123,6 +123,6 @@ For each user story, record:
 - The static workspace HTML is about 41 KB and includes the SFX and font catalogues in one document. They are logical modules but not separate source files yet.
 - `src/HomeSlider.tsx` and `src/HomeSlider.css` are already separate from `App.tsx`.
 - M12 Festival / Seasonal Atmosphere has now been extracted into `src/modules/seasonal/IndianFestivalAtmosphere.tsx`; the existing mount point and visual behaviour are preserved.
-- M19 Drive Portfolio Sync is implemented as an isolated module under `src/modules/drive-portfolio/`; it reuses the existing read-only Drive folder scanner and adds a separate published-video streaming path. Keep its publication allowlist and byte-range playback tests in place.
+- M19 Drive Portfolio Sync is implemented as an isolated module under `src/modules/drive-portfolio/`; it reuses the existing read-only Drive folder scanner, persists the chosen folder in KV, runs a five-minute Worker Cron sync, and adds a separate published-video streaming path. Keep its publication allowlist, incomplete-scan protection and byte-range playback tests in place.
 - Existing tests include swipe navigation, responsive layout and swipe gesture unit coverage. Expand them with module-specific tests before extracting/refactoring.
 - The Worker uses Cloudflare KV for content/enquiries and optionally R2 for media; secrets/bindings are configured outside this document in Cloudflare.
