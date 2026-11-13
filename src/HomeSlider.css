@@ -1815,3 +1815,27 @@
   color: #6f6d65;
   opacity: 1;
 }
+
+
+/* Compact circular pagination controls — shared dark/light geometry. */
+.map132-slider-site .ms-controls{gap:clamp(8px,1.4vw,16px)}
+.map132-slider-site .ms-pagination{gap:6px}
+.map132-slider-site .ms-pagination button{
+  width:28px;height:28px;min-width:28px;min-height:28px;padding:0;
+  display:grid;place-items:center;border:1px solid var(--ms-line);
+  border-radius:50%;background:transparent;color:var(--ms-muted);
+  line-height:1;font-size:9px;opacity:1;
+}
+.map132-slider-site .ms-pagination button.active{
+  border-color:var(--ms-gold);background:rgba(232,199,122,.16);
+  color:var(--ms-gold);box-shadow:inset 0 0 0 1px rgba(232,199,122,.16);
+}
+.map132-slider-site .ms-pagination button:focus-visible{outline:2px solid var(--ms-gold);outline-offset:2px}
+.map132-slider-site .ms-work-pagination{gap:10px}
+.map132-slider-site .ms-work-pagination button{border-radius:999px}
+@media(max-width:760px){
+  .map132-slider-site .ms-controls{gap:7px}
+  .map132-slider-site .ms-pagination{gap:4px}
+  .map132-slider-site .ms-pagination button{width:26px;height:26px;min-width:26px;min-height:26px}
+  .map132-slider-site .ms-current-label{min-width:0;font-size:8px}
+}
