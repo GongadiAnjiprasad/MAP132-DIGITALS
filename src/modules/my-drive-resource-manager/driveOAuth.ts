@@ -413,6 +413,66 @@ export async function handleMyDriveOAuth(request: Request, env: DriveEnv): Promi
   }
 
 
+  if (path === '/api/my-drive/create-portfolio-folders' && request.method === 'POST') {
+    const session = await readSession(request, env);
+    if (!session) return json({ error: 'Connect Google Drive again to continue.' }, 401);
+
+    const rootName = 'MAP132 Portfolio';
+    const categoryNames = [
+      '01 - Cinematic Trailers',
+      '02 - Wedding & Birthday',
+      '03 - Advertisements',
+      '04 - AI Services',
+      '05 - Insta Reels',
+      '06 - YouTube Related',
+    ];
+    const headers = {
+      Authorization: 'Bearer ' + session.access_token,
+      Accept: 'application/json',
+      'Content-Type': 'application/json',
+    };
+    const folderMime = 'application/vnd.google-apps.folder';
+
+    async function findOrCreateFolder(name: string, parentId: string): Promise<{ id: string; name: string }> {
+      const escapedName = name.replace(/\\/g, '\\\\').replace(/'/g, "\\'");
+      const listUrl = new URL('https://www.googleapis.com/drive/v3/files');
+      listUrl.searchParams.set('q', "'" + parentId + "' in parents and name = '" + escapedName + "' and mimeType = '" + folderMime + "' and trashed = false");
+      listUrl.searchParams.set('pageSize', '10');
+      listUrl.searchParams.set('orderBy', 'name');
+      listUrl.searchParams.set('fields', 'files(id,name,mimeType,trashed)');
+      const listResponse = await fetch(listUrl, { headers });
+      if (!listResponse.ok) throw new Error(listResponse.status === 403
+        ? 'Google Drive permission denied. Reconnect Drive and grant folder creation access.'
+        : 'Could not check existing Google Drive folders.');
+      const listing = await listResponse.json() as { files?: Array<{ id: string; name: string; mimeType: string; trashed?: boolean }> };
+      const existing = (listing.files || []).find(file => file.id && file.mimeType === folderMime && !file.trashed);
+      if (existing) return { id: existing.id, name: existing.name || name };
+
+      const createResponse = await fetch('https://www.googleapis.com/drive/v3/files?fields=id,name,mimeType', {
+        method: 'POST',
+        headers,
+        body: JSON.stringify({ name, mimeType: folderMime, parents: [parentId] }),
+      });
+      if (!createResponse.ok) throw new Error(createResponse.status === 403
+        ? 'Google Drive does not allow folder creation. Reconnect Drive and approve the requested access.'
+        : 'Google Drive could not create the folder "' + name + '".');
+      const created = await createResponse.json() as { id?: string; name?: string; mimeType?: string };
+      if (!created.id || created.mimeType !== folderMime) throw new Error('Google Drive returned an invalid folder response.');
+      return { id: created.id, name: created.name || name };
+    }
+
+    try {
+      const root = await findOrCreateFolder(rootName, 'root');
+      const folders: Array<{ id: string; name: string }> = [];
+      for (const name of categoryNames) folders.push(await findOrCreateFolder(name, root.id));
+      await env.MAP132_KV!.put('my-drive/portfolio-folder', JSON.stringify(root));
+      return json({ created: true, folder: root, folders, folderCount: folders.length });
+    } catch (error) {
+      return json({ error: error instanceof Error ? error.message : 'Could not create the MAP132 Drive folder structure.' }, 502);
+    }
+  }
+
+
 
 
   if (path.startsWith('/api/my-drive/download/') && request.method === 'GET') {
