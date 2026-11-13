@@ -2978,3 +2978,110 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
     border-radius: 15px;
   }
 }
+
+
+/* Drive portfolio sync: consistent alignment across wide and narrow admin layouts */
+.drive-portfolio-sync {
+  min-width: 0;
+}
+.drive-portfolio-sync .card-heading {
+  align-items: flex-start;
+}
+.drive-portfolio-sync .card-heading h2 {
+  line-height: 1.25;
+}
+.drive-portfolio-sync > .admin-hint {
+  max-width: 78ch;
+  margin: 16px 0;
+}
+.drive-portfolio-controls {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 18px 24px;
+  margin-top: 22px;
+  padding: 18px;
+  border: 1px solid rgba(151, 166, 210, .18);
+  border-radius: 6px;
+  background: rgba(11, 18, 33, .48);
+}
+.drive-portfolio-folder {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 7px;
+  min-width: 0;
+}
+.drive-portfolio-folder-label {
+  color: var(--brand-cyan, #7cebdc);
+  font-size: 8px;
+  font-weight: 800;
+  letter-spacing: 1.5px;
+}
+.drive-portfolio-folder > b {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  color: #f2f5ff;
+  font-size: 13px;
+  line-height: 1.5;
+}
+.drive-portfolio-folder .admin-hint {
+  margin: 0;
+}
+.drive-portfolio-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+}
+.drive-portfolio-actions .gold-button {
+  min-height: 42px;
+  padding: 11px 16px;
+  white-space: nowrap;
+}
+.drive-portfolio-actions .drive-sync-secondary {
+  border: 1px solid rgba(124, 235, 220, .48);
+  background: transparent;
+  color: var(--brand-cyan, #7cebdc);
+}
+.drive-portfolio-actions .gold-button:disabled {
+  cursor: wait;
+  opacity: .58;
+  transform: none;
+}
+.drive-portfolio-sync [role="status"] {
+  margin: 14px 0 0;
+  padding: 11px 13px;
+  border-left: 2px solid var(--brand-cyan, #7cebdc);
+  background: rgba(124, 235, 220, .06);
+  overflow-wrap: anywhere;
+}
+@media (max-width: 760px) {
+  .drive-portfolio-controls {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 15px;
+    padding: 15px;
+  }
+  .drive-portfolio-actions {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    justify-content: stretch;
+  }
+  .drive-portfolio-actions .gold-button {
+    width: 100%;
+    min-width: 0;
+    padding-inline: 10px;
+    white-space: normal;
+    text-align: center;
+  }
+}
+@media (max-width: 420px) {
+  .drive-portfolio-sync.admin-card {
+    padding: 16px;
+  }
+  .drive-portfolio-actions {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}
