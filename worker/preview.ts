@@ -190,10 +190,11 @@ export default {
             #root, .site { height: auto !important; min-height: 0 !important; overflow: visible !important; }
             .nav { position: relative !important; top: auto !important; z-index: 2 !important; }
             .website-intro, .royal-intro { display: none !important; pointer-events: none !important; }
-            .site main > section { display: block !important; }
+            /* Keep the site's own hash-based page routing intact. The previous
+               preview override forced every section visible, stacking page views
+               and making the selected Work content appear to overlap on scroll. */
+            .site { overflow: visible !important; }
             .site main > section:target { animation: none !important; transform: none !important; }
-            .site main:not(:has(> section:target)) > section:not(#top):not(#work) { display: block !important; }
-            main:not(:has(> section:target)) > #work .work-card:nth-child(n+4) { display: block !important; }
             [id], section { scroll-margin-top: 12px !important; }
           </style>`, { html: true });
         },
