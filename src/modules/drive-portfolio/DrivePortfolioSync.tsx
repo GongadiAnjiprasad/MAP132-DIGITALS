@@ -1,9 +1,9 @@
 import { useEffect, useRef, useState } from 'react';
 import { listDriveFolderRecursively } from '../my-drive-resource-manager/driveClient';
-import { buildDrivePortfolioItems, type DrivePortfolioItem } from './drivePortfolio';
+import { buildDrivePortfolioItems, type DrivePortfolioItem, type ExistingDrivePortfolioItem } from './drivePortfolio';
 
 type Props = {
-  existingItems: DrivePortfolioItem[];
+  existingItems: ExistingDrivePortfolioItem[];
   onPublish: (items: DrivePortfolioItem[], folderId: string) => Promise<void>;
 };
 
@@ -51,7 +51,7 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
   const [lastSynced, setLastSynced] = useState('');
-  const existingRef = useRef(existingItems);
+  const existingRef = useRef<ExistingDrivePortfolioItem[]>(existingItems);
   const publishRef = useRef(onPublish);
   const syncRef = useRef<(selected: SavedFolder) => Promise<void>>(async () => {});
 
@@ -64,7 +64,7 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
     try {
       const scan = await listDriveFolderRecursively(selected, count => setMessage('Scanning Drive… ' + count + ' file(s) checked.'));
       const videos = scan.candidates.filter(candidate => candidate.assetKind === 'video');
-      const mapped = buildDrivePortfolioItems(videos, selected.id, existingRef.current as DrivePortfolioItem[]);
+      const mapped = buildDrivePortfolioItems(videos, selected.id, existingRef.current);
       await publishRef.current(mapped, selected.id);
       existingRef.current = [...mapped, ...existingRef.current.filter(item => item.driveFolderId !== selected.id)];
       const skipped = scan.issues.filter(issue => issue.code === 'unsupported-file').length;
@@ -116,7 +116,6 @@ export default function DrivePortfolioSync({ existingItems, onPublish }: Props) 
           const next = { id: String(selected.id), name: String(selected.name || 'Selected Work') };
           localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
           setFolder(next);
-          void syncRef.current(next);
         }).build();
       picker.setVisible(true);
     } catch (error) {
