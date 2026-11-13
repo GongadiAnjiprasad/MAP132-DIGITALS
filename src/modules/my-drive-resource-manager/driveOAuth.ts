@@ -126,6 +126,43 @@ export async function getMyDriveAccessToken(request: Request, env: DriveEnv): Pr
   return session?.access_token || null;
 }
 
+/** Public portfolio playback token. The Worker calls this only after checking that the file ID is published in portfolio content. */
+export async function getPublishedDriveAccessToken(env: DriveEnv): Promise<string | null> {
+  if (!env.MAP132_KV || !env.MY_DRIVE_SESSION_SECRET || !env.GOOGLE_CLIENT_ID || !env.GOOGLE_CLIENT_SECRET) return null;
+  const cacheKey = 'my-drive/published-access-token';
+  try {
+    const cached = await env.MAP132_KV.get(cacheKey);
+    if (cached) {
+      const session = await decrypt<{ access_token: string; expires_at: number }>(cached, env.MY_DRIVE_SESSION_SECRET);
+      if (session.access_token && session.expires_at > Date.now() + 60_000) return session.access_token;
+    }
+    const encryptedRefresh = await env.MAP132_KV.get(REFRESH_TOKEN_KEY);
+    if (!encryptedRefresh) return null;
+    const refresh = await decrypt<{ refresh_token: string }>(encryptedRefresh, env.MY_DRIVE_SESSION_SECRET);
+    if (!refresh.refresh_token) return null;
+    const response = await fetch('https://oauth2.googleapis.com/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', Accept: 'application/json' },
+      body: new URLSearchParams({
+        client_id: env.GOOGLE_CLIENT_ID,
+        client_secret: env.GOOGLE_CLIENT_SECRET,
+        refresh_token: refresh.refresh_token,
+        grant_type: 'refresh_token',
+      }),
+    });
+    if (!response.ok) return null;
+    const token = await response.json() as { access_token?: string; expires_in?: number };
+    if (!token.access_token) return null;
+    const expiresAt = Date.now() + Math.max(60, Number(token.expires_in || SESSION_TTL)) * 1000;
+    await env.MAP132_KV.put(cacheKey, await encrypt({ access_token: token.access_token, expires_at: expiresAt }, env.MY_DRIVE_SESSION_SECRET), {
+      expirationTtl: Math.max(60, Math.ceil((expiresAt - Date.now()) / 1000)),
+    });
+    return token.access_token;
+  } catch {
+    return null;
+  }
+}
+
 
 
 const OAUTH_STATE_COOKIE = 'map132_drive_oauth_state';
