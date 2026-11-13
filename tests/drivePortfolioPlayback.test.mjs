@@ -7,6 +7,7 @@ const oauth = readFileSync(new URL('../src/modules/my-drive-resource-manager/dri
 const home = readFileSync(new URL('../src/HomeSlider.tsx', import.meta.url), 'utf8');
 const admin = readFileSync(new URL('../src/App.tsx', import.meta.url), 'utf8');
 const moduleUi = readFileSync(new URL('../src/modules/drive-portfolio/DrivePortfolioSync.tsx', import.meta.url), 'utf8');
+const wrangler = readFileSync(new URL('../wrangler.toml', import.meta.url), 'utf8');
 
 test('Drive video playback is restricted to items published in portfolio content', () => {
   assert.ok(worker.includes("item.kind==='video'&&item.source==='drive'&&item.driveFileId===fileId&&typeof item.driveFolderId==='string'"));
@@ -38,8 +39,11 @@ test('Selected Work uses the same-origin stream instead of exposing private Driv
 test('Admin Drive sync reuses the existing folder scanner and warns about public publishing', () => {
   assert.ok(moduleUi.includes('listDriveFolderRecursively'));
   assert.ok(moduleUi.includes('buildDrivePortfolioItems'));
-  assert.ok(moduleUi.includes('setInterval'));
-  assert.ok(moduleUi.includes('5 * 60 * 1000'));
+  assert.ok(moduleUi.includes("fetch('/api/my-drive/portfolio-folder'"));
+  assert.ok(worker.includes('async function syncDrivePortfolioFromFolder'));
+  assert.ok(worker.includes('await syncDrivePortfolioFromFolder(env)'));
+  assert.ok(wrangler.includes('crons = [\"*/5 * * * *\"]'));
+  assert.ok(oauth.includes("path === '/api/my-drive/portfolio-folder' && request.method === 'PUT'"));
   assert.ok(moduleUi.includes('Source Drive files are not changed.'));
   assert.ok(moduleUi.includes('Every supported video found in this selected folder becomes publicly playable'));
 });
