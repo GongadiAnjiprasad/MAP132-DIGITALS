@@ -152,10 +152,25 @@ export default {
       );
     }
     if (url.pathname === "/api/reviews" && request.method === "GET") {
-      return Response.json(
-        { reviews: [] },
-        { headers: { "Cache-Control": "no-store", "X-MAP132-Preview": "demo-data" } },
-      );
+      // Only read the production endpoint's already-public, consent-approved reviews.
+      // The preview has no KV binding and cannot read private feedback or mutate records.
+      try {
+        const upstream = await fetch("https://map132-digitals.anji-gongadi.workers.dev/api/reviews", {
+          method: "GET",
+          headers: { "Accept": "application/json" },
+        });
+        if (!upstream.ok) throw new Error("Public reviews endpoint unavailable");
+        const payload = await upstream.json() as { reviews?: unknown };
+        return Response.json(
+          { reviews: Array.isArray(payload.reviews) ? payload.reviews : [] },
+          { headers: { "Cache-Control": "no-store", "X-MAP132-Preview": "public-reviews-readonly" } },
+        );
+      } catch {
+        return Response.json(
+          { reviews: [], previewReviewsUnavailable: true },
+          { headers: { "Cache-Control": "no-store", "X-MAP132-Preview": "public-reviews-unavailable" } },
+        );
+      }
     }
     if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/media/")) {
       return blockedResponse();
