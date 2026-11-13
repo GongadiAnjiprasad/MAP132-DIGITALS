@@ -36,6 +36,21 @@ test('My Drive, Cinematic Sounds and Cinematic Fonts workspace panels are preser
   }
 });
 
+test('Scene guide stays visible even when no Drive audio has been connected', () => {
+  for (const marker of ['90-second scene guide','Hero introduction','Villain introduction','Heroine introduction','Hero vs Villain','Hero vs Heroine','Villain controls Heroine','Hanuman Sena','Emotional / Separation','Action / Climax']) {
+    assert.ok(publicWorkspace.includes(marker), 'Missing scene guide content: ' + marker);
+  }
+  assert.match(studio, /No audio files are connected to this library yet/);
+  assert.match(studio, /Open My Drive to add audio/);
+});
+
+test('Trailer Studio layout prevents grid and long-label overflow on mobile', () => {
+  assert.match(publicWorkspace, /\.rt-studio,\.rt-studio \*\{box-sizing:border-box;min-width:0\}/);
+  assert.match(publicWorkspace, /grid-template-columns:repeat\(auto-fit,minmax\(min\(100%,150px\),1fr\)\)/);
+  assert.match(publicWorkspace, /@media\(max-width:420px\)\{\.rt-guide-grid\{grid-template-columns:minmax\(0,1fr\)\}\}/);
+  assert.match(publicWorkspace, /\.rt-audio-card audio\{width:100%;max-width:100%/);
+});
+
 test('No text dialogue, copy, or manual SFX search controls remain in Ramayanam library', () => {
   const section = publicWorkspace.slice(publicWorkspace.indexOf('id="ramayanamStudio"'), publicWorkspace.indexOf('id="cinematic-sfx"'));
   assert.doesNotMatch(section, /data-rt-tab="dialogue"|data-copy-dialogue|rtSfxForm|Find sound effects|Copy dialogue/i);
