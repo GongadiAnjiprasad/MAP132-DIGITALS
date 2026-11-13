@@ -1,5 +1,7 @@
 import type { ImportCandidate } from '../my-drive-resource-manager/types';
 
+export type ExistingDrivePortfolioItem = { id: string; driveFileId?: string; driveFolderId?: string };
+
 export type DrivePortfolioItem = {
   id: string;
   title: string;
@@ -34,9 +36,9 @@ function titleFromFileName(name: string): string {
 export function buildDrivePortfolioItems(
   candidates: ImportCandidate[],
   folderId: string,
-  existingItems: DrivePortfolioItem[] = [],
+  existingItems: ExistingDrivePortfolioItem[] = [],
 ): DrivePortfolioItem[] {
-  const existingByFile = new Map(existingItems.filter(item => item.driveFolderId === folderId).map(item => [item.driveFileId, item]));
+  const existingByFile = new Map(existingItems.filter(item => item.driveFolderId === folderId && item.driveFileId).map(item => [item.driveFileId as string, item]));
   const seen = new Set<string>();
   const result: DrivePortfolioItem[] = [];
   for (const candidate of candidates) {
