@@ -219,7 +219,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 @media(max-width:700px){.rt-cue{grid-template-columns:1fr;gap:8px}.rt-cue button{justify-self:start}.rt-dialogues,.rt-audio-grid,.rt-provider-grid{grid-template-columns:1fr}.rt-dialogue{align-items:flex-start}.rt-tabs{display:grid;grid-template-columns:repeat(2,minmax(0,1fr))}.rt-tab{width:100%}}
 
 \n.rt-library-cats{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.rt-library-cat{border:1px solid var(--line);border-radius:999px;background:#0c0e12;color:var(--ink);padding:9px 13px;font-size:11px}.rt-library-cat.active{background:var(--gold);color:#151515;font-weight:800}.rt-library-empty{grid-column:1/-1;padding:18px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6}\n
-/* Ramayanam category selector: wrap cleanly on narrow mobile screens. */
+/* Scene audio category filters remain readable on mobile. */
 .rt-library-cats{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.rt-library-cat{border:1px solid var(--line);border-radius:999px;background:#0c0e12;color:var(--ink);padding:9px 13px;font-size:11px;line-height:1.3;white-space:normal}.rt-library-cat.active{background:var(--gold);color:#151515;font-weight:800}.rt-library-empty{grid-column:1/-1;padding:18px;border:1px dashed var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6}.rt-audio-card audio{width:100%;display:block;margin:10px 0}.rt-audio-card a{display:inline-block;margin-top:3px}.rt-audio-card .rt-audio-meta{color:var(--muted);font-size:10px;line-height:1.6;margin:7px 0}.rt-library-moods{padding-top:10px;border-top:1px solid var(--line)}@media(max-width:600px){.rt-library-cats{gap:6px}.rt-library-cat{padding:8px 10px;font-size:10px}.rt-audio-grid{grid-template-columns:1fr}}
 </style></head><body><main class="shell"><header class="top"><a class="brand" href="index.html">MAP<b>132</b> <span style="font-size:10px;color:#aaa;font-weight:400">DIGITALS</span></a><a class="dashboard-link" href="index.html#admin" aria-label="Open protected Admin Dashboard"><span aria-hidden="true">▦</span> Dashboard</a><a class="back" href="index.html">← Back to website</a></header>
 <section class="welcome"><div class="kicker">Private creator area · Workspace</div><h1>Your creative control room.</h1><p>Organise your brand resources, editing references, reusable assets and project links in one place.</p></section>
@@ -233,17 +233,73 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 
 <section class="rt-studio resource-panel" id="ramayanamStudio" data-resource-panel="trailer" hidden>
-<div class="rt-head"><div><div class="kicker">MAP132 / PRIVATE TRAILER WORKSPACE</div><h2>Ramayanam Audio Library</h2><p>Varsham × Ramayanam · Choose audio by character combination and scene emotion, then preview and download usable files.</p></div><span class="kicker">90 SEC · FAN EDIT</span></div>
-<div class="rt-note">Only actual audio files saved in your authorised MAP132 Drive library appear here. Movie/source and usage-right details are shown when available; an assignment does not automatically grant soundtrack reuse rights. No protected soundtrack extraction or fabricated preview.</div>
+<div class="rt-head"><div><div class="kicker">MAP132 / PRIVATE TRAILER WORKSPACE</div><h2>Ramayanam Audio Library</h2><p>Varsham × Ramayanam · Audio organised by character combinations and scene emotions.</p></div><span class="kicker">90 SEC · FAN EDIT</span></div>
+<div class="rt-note">Only real audio files already saved in your authorised MAP132 My Drive library appear here. Source and usage-right details are displayed when available. No protected soundtrack extraction or fabricated previews.</div>
 <div class="rt-library-cats" id="rtLibraryCategories" role="group" aria-label="Character and scene audio categories">
 <button type="button" class="rt-library-cat active" data-library-cat="all">All audio</button><button type="button" class="rt-library-cat" data-library-cat="hero-intro">Hero introduction</button><button type="button" class="rt-library-cat" data-library-cat="villain-intro">Villain introduction</button><button type="button" class="rt-library-cat" data-library-cat="heroine-intro">Heroine introduction</button><button type="button" class="rt-library-cat" data-library-cat="hero-villain">Hero vs Villain</button><button type="button" class="rt-library-cat" data-library-cat="hero-heroine">Hero vs Heroine</button><button type="button" class="rt-library-cat" data-library-cat="villain-heroine">Villain controls Heroine</button><button type="button" class="rt-library-cat" data-library-cat="hanuman-sena">Friends / Hanuman Sena</button><button type="button" class="rt-library-cat" data-library-cat="emotional">Emotional / Separation</button><button type="button" class="rt-library-cat" data-library-cat="action-climax">Action / Climax</button>
 </div>
-<div class="rt-library-cats rt-library-moods" id="rtLibraryMoods" role="group" aria-label="Audio mood filters">
-<button type="button" class="rt-library-cat active" data-library-mood="all">All moods</button><button type="button" class="rt-library-cat" data-library-mood="mass">Mass</button><button type="button" class="rt-library-cat" data-library-mood="royal">Royal</button><button type="button" class="rt-library-cat" data-library-mood="emotional">Emotional</button><button type="button" class="rt-library-cat" data-library-mood="devotional">Devotional</button><button type="button" class="rt-library-cat" data-library-mood="suspense">Suspense</button><button type="button" class="rt-library-cat" data-library-mood="action">Action</button>
-</div>
-<div class="rt-head"><div><h3>Scene-matched audio</h3><p>One audio file can appear in multiple relevant scenes without duplicating the stored file.</p></div><button type="button" class="rt-action" id="rtLibraryRefresh">Refresh library</button></div>
+<div class="rt-library-cats rt-library-moods" id="rtLibraryMoods" role="group" aria-label="Audio mood filters"><button type="button" class="rt-library-cat active" data-library-mood="all">All moods</button><button type="button" class="rt-library-cat" data-library-mood="mass">Mass</button><button type="button" class="rt-library-cat" data-library-mood="royal">Royal</button><button type="button" class="rt-library-cat" data-library-mood="emotional">Emotional</button><button type="button" class="rt-library-cat" data-library-mood="devotional">Devotional</button><button type="button" class="rt-library-cat" data-library-mood="suspense">Suspense</button><button type="button" class="rt-library-cat" data-library-mood="action">Action</button></div>
+<div class="rt-head"><div><h3>Scene-matched audio</h3><p>One saved file can appear in multiple relevant scenes without duplicating it.</p></div><button type="button" class="rt-action" id="rtLibraryRefresh">Refresh library</button></div>
 <div class="rt-status" id="rtLibraryStatus" role="status">Open this section to load audio saved in your MAP132 My Drive library.</div><div class="rt-audio-grid" id="rtLibraryAssets"></div><button type="button" class="rt-action" data-rt-open-my-drive>Open My Drive library</button>
 </section>
+
+<section class="sfx-panel resource-panel" id="cinematic-sfx" data-resource-panel="sounds">
+<div class="sfx-head"><h2>🎧 Cinematic Sound Effects</h2><span class="kicker">PLAY · PAUSE · DOWNLOAD</span></div>
+<p class="sfx-sub">Ready-to-preview cinematic sounds, organised by editing use. Tap any sound to play it here; starting another sound automatically stops the previous one.</p>
+<div class="sfx-cats" id="sfxCategories">
+<button class="sfx-cat active" data-cat="quick">QUICK FILTERS</button>
+<button class="sfx-cat" data-cat="trailer">TRAILER &amp; CINEMATIC IMPACT</button>
+<button class="sfx-cat" data-cat="action">ACTION &amp; FIGHT</button>
+<button class="sfx-cat" data-cat="transitions">TRANSITIONS &amp; LOGO REVEALS</button>
+<button class="sfx-cat" data-cat="horror">SUSPENSE &amp; HORROR</button>
+<button class="sfx-cat" data-cat="ambience">AMBIENCE &amp; FOLEY</button>
+</div>
+<div class="sfx-presets" id="sfxPresets"></div>
+<div class="sfx-tools"><input id="sfxSearchInput" type="search" placeholder="Search sounds: braam, explosion, sword, heartbeat..." aria-label="Search sounds"><button class="primary" id="sfxSearchBtn" type="button">Search sounds</button><button type="button" id="sfxRefreshBtn" title="Fetch the latest provider results">Refresh library</button></div>
+<div class="sfx-status" id="sfxStatus" role="status">Loading cinematic sound effects…</div>
+<div class="sfx-results" id="sfxResults"></div>
+<div class="sfx-pagination" id="sfxPagination" aria-label="Sound effects pages"></div>
+<div class="sfx-refresh-meta" aria-live="polite"><span id="sfxLastUpdated">Last updated: waiting for first refresh</span><span id="sfxNextRefresh">Next refresh: scheduled in 6 hours</span></div>
+<audio id="sfxAudioElement" preload="none" style="display:none"></audio>
+<div class="sfx-licence">Downloads are served through MAP132 DIGITALS for sounds returned with eligible CC0 / CC-BY licences. Check the displayed licence and attribution requirements before using each sound in a client project.</div>
+</section>
+
+
+<section class="font-panel resource-panel" id="cinematic-fonts" data-resource-panel="fonts" hidden>
+ <div class="font-head"><h2>🔤 Cinematic Fonts</h2><span class="kicker">LIVE LIBRARY · PREVIEW · SAVE · DOWNLOAD</span></div>
+ <p class="font-sub">An expanded library of 100+ free Google Fonts and Telugu typefaces, grouped by film-title style. These are free cinematic-style alternatives and genre matches—not claims that they are the exact proprietary fonts used in individual movie logos. Preview your title, save favourites, and download from the official source.</p>
+ <div class="font-cats" id="fontCategories" aria-label="Font categories" aria-live="polite"></div>
+ <div class="font-refresh-tools"><button type="button" id="fontRefreshBtn">↻ Refresh font library</button><div class="font-refresh-meta"><span id="fontLastUpdated">Last updated: loading…</span><span id="fontNextRefresh">Next refresh: every 6 hours</span></div><span class="font-refresh-status" id="fontRefreshStatus" role="status" aria-live="polite">Loading latest MAP132 font catalogue…</span></div>
+ <div class="font-controls"><input id="fontSearch" type="search" placeholder="Search font names…" aria-label="Search cinematic fonts"><button type="button" class="primary" id="fontSearchBtn">Search fonts</button></div>
+ <div class="font-sample-tools"><input id="fontSampleText" type="text" value="THE FINAL CHAPTER" maxlength="90" aria-label="Font preview text" placeholder="Type a title to preview"><button type="button" id="fontSampleReset">Reset sample</button></div>
+ <div class="font-grid" id="fontGrid" aria-live="polite"></div>
+ <div class="font-footnote">All fonts link to their official Google Fonts family pages and published licence details. Open-font licences generally allow video titling and commercial artwork, but the licence attached to the downloaded copy controls its use. Original movie logos may use separately licensed custom lettering. Saved favourites are stored only in this browser on this device.</div>
+</section>
+
+<section class="mydrive-panel resource-panel" id="myDrivePanel" data-resource-panel="my-drive" hidden>
+ <div class="mydrive-head"><h2>☁ My Drive Resource Library</h2><span class="kicker">PRIVATE · READ ONLY · IMPORT</span></div>
+ <p class="mydrive-sub">Choose one folder from your Google Drive. MAP132 scans only that folder and its nested folders, sorts supported files into categories, and saves copies in your private “MAP132 Workspace” folder. Original Drive files are never changed.</p>
+ <div class="mydrive-gate" id="myDriveGate">
+  <p>Login to MAP132 My Drive</p>
+  <form class="mydrive-form" id="myDriveLoginForm">
+   <div class="mydrive-password-field"><input type="password" id="myDriveAdminPassword" name="password" placeholder="Admin password" autocomplete="current-password" required aria-label="MAP132 Admin password"><button class="mydrive-password-toggle" id="myDrivePasswordToggle" type="button" aria-label="Show password" aria-pressed="false"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12Z"/><circle cx="12" cy="12" r="3"/></svg></button></div>
+   <button class="primary" id="myDriveLoginSubmit" type="submit">Login</button>
+  </form>
+ </div>
+ <div class="mydrive-status" id="myDriveStatus" role="status" aria-live="polite">Checking My Drive connection…</div>
+ <div id="myDriveContent" hidden>
+  <div class="mydrive-actions"><button type="button" id="myDriveRefresh">Refresh resources</button><button type="button" id="myDriveConnect">Connect Google Drive</button><button type="button" id="myDrivePicker" disabled>Choose a Drive folder</button><button type="button" class="mydrive-upload" id="myDriveChooseZip" disabled>Import ZIP from device</button><input type="file" id="myDriveLocalZip" accept=".zip,application/zip,application/x-zip-compressed" hidden><button type="button" id="myDriveLogout" hidden>Logout</button></div>
+  <section class="mydrive-zip-backups" aria-labelledby="myDriveZipBackupsTitle">
+   <div class="mydrive-zip-backups-head"><h3 id="myDriveZipBackupsTitle">Original ZIP Backups</h3><span>STORED IN YOUR GOOGLE DRIVE</span></div>
+   <p class="mydrive-sub">Each device ZIP is saved unchanged in My Drive → MAP132 Workspace → ZIP Backups before extraction. Re-download the original archive anytime from this list.</p>
+   <div class="mydrive-zip-backups-list" id="myDriveZipBackups" aria-live="polite"><p class="mydrive-empty">Connect Google Drive to view ZIP backups.</p></div>
+  </section>
+  <div class="mydrive-browse-list" id="myDriveBrowseList"></div>
+  <p class="mydrive-sub">Select one folder only. Nested folders are scanned automatically; supported resources are sorted into Sound Effects, Wedding, Birthday, Trailer BGMs, Plugins, Fonts, Images and Videos. Device ZIP import safely extracts supported files from nested archives and saves them into the matching categories.</p>
+  <div class="mydrive-library-nav" aria-label="Resource library sections"><a href="#myDriveCategoryFonts">Fonts Library</a><a href="#myDriveCategorySoundEffects">Sound Effects Library</a></div><h3>Saved resources</h3><div class="mydrive-items" id="myDriveItems"><p class="mydrive-empty">No assets imported yet.</p></div>
+ </div>
+</section>
+
 
 </main><script>
 // MAP132 single-instance SFX audio with Spotify-style controls inside each sound card.
