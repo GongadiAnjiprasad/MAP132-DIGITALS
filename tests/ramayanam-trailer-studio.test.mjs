@@ -68,3 +68,16 @@ test('Isolated preview bug reporter retains annotation and export tools', () => 
   assert.ok(publicWorkspace.includes('ramayanam-bug-reporter.js'));
   assert.ok(publicWorkspace.includes('#map132BugPanel'));
 });
+
+\ntest('Trailer Studio has five fundamentals and requires all three scene-specific audio types', () => {
+  for (const base of ['opening','characters','conflict','emotion','climax']) {
+    assert.match(publicWorkspace, new RegExp('data-rt-base="' + base + '"'));
+  }
+  assert.match(publicWorkspace, /data-rt-scene="opening-hook"/);
+  assert.match(studio, /const baseScenes/);
+  assert.match(studio, /const types=\['BGM','Dialogue','SFX'\]/);
+  assert.match(studio, /Not a complete scene match yet/);
+  assert.match(studio, /Complete match · BGM, Dialogue and SFX/);
+  assert.match(studio, /sceneAssets\(id,type\)/);
+  assert.match(studio, /loadDriveAudioAssets/);
+});
