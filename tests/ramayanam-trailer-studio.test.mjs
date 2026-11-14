@@ -112,5 +112,5 @@ test('Storyline discovery returns a different-hero film with multiple shared plo
 test('Isolated preview exposes read-only storyline discovery to all Editor Workspace visitors without login',()=>{
  assert.doesNotMatch(preview,/PREVIEW_ADMIN_PASSWORD|previewSession|Preview admin session required/);
  assert.match(preview,/Public, read-only Editor Workspace feature: no admin session or password required/);
- assert.match(preview,/handleTrailerDiscovery\\(request, env\\)/);
+ assert.match(preview,/handleTrailerDiscovery\(request, env\)/);
 });
