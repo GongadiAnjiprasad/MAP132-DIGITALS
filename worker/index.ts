@@ -2,7 +2,8 @@ import { FESTIVAL_CALENDAR, getIndiaDateKey } from '../src/modules/seasonal/fest
 import { createFeedbackResponse } from './feedback';
 import { clearMyDriveSession, getPublishedDriveAccessToken, handleMyDriveOAuth } from '../src/modules/my-drive-resource-manager/driveOAuth';
 import { handleMyDriveAssets } from './myDriveAssets';
-interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; GOOGLE_PICKER_API_KEY?: string; MY_DRIVE_SESSION_SECRET?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
+import { handleTrailerDiscovery } from './trailerDiscovery';
+interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; GOOGLE_PICKER_API_KEY?: string; YOUTUBE_API_KEY?: string; GOOGLE_CSE_API_KEY?: string; GOOGLE_CSE_CX?: string; X_BEARER_TOKEN?: string; MY_DRIVE_SESSION_SECRET?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
 const json=(body:unknown,status=200,headers:HeadersInit={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...Object.fromEntries(new Headers(headers))}});
 const COOKIE='map132_admin';
@@ -52,7 +53,7 @@ async function read(env:Env){
     return {...DEFAULTS,...stored,profile,skills,items,resources,logoPath:typeof stored.logoPath==='string'&&stored.logoPath.startsWith('portfolio/logos/')?stored.logoPath:''};
   }catch{return DEFAULTS;}
 }
-async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;if(path.startsWith('/api/portfolio/video/')&&method==='GET'){
+async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;if(path==='/api/trailer/discover'&&!await validSession(req,env))return json({error:'Admin session required.'},401);const trailerDiscovery=await handleTrailerDiscovery(req,env);if(trailerDiscovery)return trailerDiscovery;if(path.startsWith('/api/portfolio/video/')&&method==='GET'){
  const fileId=path.slice('/api/portfolio/video/'.length);
  if(!/^[a-zA-Z0-9_-]{1,256}$/.test(fileId))return json({error:'Invalid portfolio video ID.'},400);
  const content=await read(env);

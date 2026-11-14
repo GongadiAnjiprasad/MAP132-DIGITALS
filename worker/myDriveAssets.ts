@@ -1,5 +1,5 @@
 import { getMyDriveAccessToken } from '../src/modules/my-drive-resource-manager/driveOAuth.ts';
-import { uploadMap132DriveFile, downloadMap132DriveFile, deleteMap132DriveFile } from './googleDriveStorage.ts';
+import { uploadMap132DriveFile, downloadMap132DriveFile, deleteMap132DriveFile, ensureMap132ZipBackupFolder, uploadMap132DriveFileToFolder } from './googleDriveStorage.ts';
 interface AssetEnv { MAP132_KV?: KVNamespace; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; MY_DRIVE_SESSION_SECRET?: string; ADMIN_PASSWORD?: string; }
 const json=(body:unknown,status=200)=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
 const allowedExt=new Set(['ttf','otf','woff','woff2','mp3','wav','aac','ogg','m4a','flac','mp4','webm','mov','m4v','jpg','jpeg','png','webp','gif','avif','svg','zip','aep','mogrt','prproj','prfpset','ffx','cube','look','drx','setting','preset','prm']);
@@ -29,11 +29,52 @@ async function authorized(req:Request,env:AssetEnv){
 /** Durable private My Drive resource storage. Source Drive files remain read-only. */
 export async function handleMyDriveAssets(req:Request,env:AssetEnv):Promise<Response|null>{
  const url=new URL(req.url),path=url.pathname;
- if(!path.startsWith('/api/my-drive/assets'))return null;
+ if(!path.startsWith('/api/my-drive/assets')&&!path.startsWith('/api/my-drive/zip-backups'))return null;
  if(!env.MAP132_KV)return json({error:'My Drive metadata storage is not configured. Bind MAP132_KV.'},503);
  if(!await authorized(req,env))return json({error:'MAP132 Admin login required.'},401);
  const accessToken=await getMyDriveAccessToken(req,env);
  if(!accessToken)return json({error:'Google Drive session expired. Reconnect Google Drive and try again.'},401);
+ if(path==='/api/my-drive/zip-backups'&&req.method==='GET'){
+  const listed=await env.MAP132_KV.list({prefix:'my-drive/zip-backups/',limit:100});
+  const records=await Promise.all(listed.keys.map(async key=>{const value=await env.MAP132_KV!.get(key.name);if(!value)return null;try{return JSON.parse(value);}catch{return null;}}));
+  const backups=records.filter(Boolean).sort((a:any,b:any)=>String(b.storedAt||'').localeCompare(String(a.storedAt||'')));
+  return json({backups});
+ }
+ if(path==='/api/my-drive/zip-backups'&&req.method==='POST'){
+  const filename=safeName(decodeURIComponent(req.headers.get('X-Archive-Name')||'backup.zip'));
+  if(!filename.toLowerCase().endsWith('.zip'))return json({error:'Only ZIP archives can be saved as backups.'},415);
+  const declared=Number(req.headers.get('Content-Length')||0);
+  if(declared>100*1024*1024)return json({error:'ZIP archive exceeds the 100 MB backup limit.'},413);
+  if(!req.body)return json({error:'No ZIP archive bytes received.'},400);
+  const bytes=await req.arrayBuffer();
+  if(!bytes.byteLength||bytes.byteLength>100*1024*1024)return json({error:'ZIP archive is empty or exceeds the 100 MB backup limit.'},413);
+  const digest=new Uint8Array(await crypto.subtle.digest('SHA-256',bytes));
+  const sha=[...digest].map(b=>b.toString(16).padStart(2,'0')).join('');
+  const duplicateId=await env.MAP132_KV.get('my-drive/zip-backup-sha/'+sha);
+  if(duplicateId){
+   const existing=await env.MAP132_KV.get('my-drive/zip-backups/'+duplicateId);
+   if(existing)return json({saved:false,duplicate:true,backup:JSON.parse(existing)});
+  }
+  try{
+   const folderId=await ensureMap132ZipBackupFolder(accessToken,env.MAP132_KV);
+   const driveFile=await uploadMap132DriveFileToFolder(accessToken,folderId,filename,'application/zip',bytes);
+   const id=crypto.randomUUID();
+   const backup={id,name:filename,size:bytes.byteLength,sha256:sha,driveFileId:driveFile.id,storedAt:new Date().toISOString(),contentType:'application/zip',storage:'Google Drive · MAP132 Workspace / ZIP Backups'};
+   await env.MAP132_KV.put('my-drive/zip-backups/'+id,JSON.stringify(backup));
+   await env.MAP132_KV.put('my-drive/zip-backup-sha/'+sha,id);
+   return json({saved:true,backup},201);
+  }catch(error){return json({error:error instanceof Error?error.message:'Could not save the original ZIP archive to Google Drive.'},502);}
+ }
+ const backupDownload=path.match(/^\/api\/my-drive\/zip-backups\/([a-z0-9-]+)\/download$/i);
+ if(backupDownload&&req.method==='GET'){
+  const meta=await env.MAP132_KV.get('my-drive/zip-backups/'+backupDownload[1]);
+  if(!meta)return json({error:'ZIP backup not found.'},404);
+  let backup:any;try{backup=JSON.parse(meta);}catch{return json({error:'ZIP backup metadata is invalid.'},500);}
+  if(!backup.driveFileId)return json({error:'ZIP backup has no Google Drive file reference.'},404);
+  const object=await downloadMap132DriveFile(accessToken,backup.driveFileId);
+  if(!object.ok||!object.body)return json({error:'Google Drive could not retrieve this ZIP backup.'},object.status===404?404:502);
+  return new Response(object.body,{headers:{'Content-Type':'application/zip','Cache-Control':'private, no-store','X-Content-Type-Options':'nosniff','Content-Disposition':'attachment; filename="'+safeName(String(backup.name||'backup.zip'))+'"'}});
+ }
  if(path==='/api/my-drive/assets'&&req.method==='GET'){
   const page=Math.max(1,Math.min(100,Number(url.searchParams.get('limit')||50)));
   const cursor=url.searchParams.get('cursor')||undefined;
