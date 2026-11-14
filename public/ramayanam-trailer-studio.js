@@ -13,7 +13,7 @@ const cues=[
  {id:'faceoff',name:'Hero–villain face-off',terms:['fight','battle','confront','versus','defeat','attack'],audio:'cinematic fight impact'},
  {id:'climax',name:'Action climax / payoff',terms:['final','climax','battle','destroy','save','defeat','showdown'],audio:'epic action trailer'}
 ];
-let selectedScene=null,selectedFilm=null,audioType='BGM',currentMatches=[];
+let selectedScene=null,selectedFilm=null,audioType='BGM',sourceSceneCues=[];
 async function searchWiki(query,limit=7){
  const u=new URL(wiki);u.search=new URLSearchParams({action:'query',list:'search',srsearch:query,srlimit:String(limit),format:'json',origin:'*'}).toString();
  const r=await fetch(u);if(!r.ok)throw new Error('Film information search failed ('+r.status+').');const j=await r.json();return (j.query?.search||[]).map(x=>({title:x.title,pageid:x.pageid,snippet:x.snippet||''}));
@@ -24,13 +24,14 @@ async function getExtract(pageid){
 }
 function detectCues(text){const low=text.toLowerCase();return cues.map(c=>({...c,score:c.terms.reduce((n,t)=>n+(low.includes(t)?1:0),0)})).filter(c=>c.score>0).sort((a,b)=>b.score-a.score).slice(0,6);}
 function cardHtml(film,extract,kind){
- const cueList=detectCues(extract);const score=cueList.reduce((n,c)=>n+c.score,0);
- return '<article class="ts-result-card"><h4>'+esc(film.title)+'</h4><p>'+esc(extract.slice(0,390)||film.snippet.replace(/<[^>]*>/g,''))+'</p><div class="ts-match-note">'+(cueList.length?cueList.length+' potential story-beat cue(s) found · text match only':'No clear scene cues in the short article summary')+'</div><a href="https://en.wikipedia.org/?curid='+film.pageid+'" target="_blank" rel="noopener noreferrer">Open source article ↗</a><br><button type="button" data-ts-select="'+film.pageid+'" data-ts-title="'+esc(film.title)+'" data-ts-kind="'+kind+'">Compare scene beats</button></article>';
+ const cueList=detectCues(extract);const shared=kind==='cross'?cueList.filter(c=>sourceSceneCues.some(s=>s.id===c.id)):cueList;
+ const note=kind==='cross'?shared.length+' shared story-beat cue(s) with the source film · plot-text overlap only':(cueList.length?cueList.length+' potential story-beat cue(s) found · text match only':'No clear scene cues in the short article summary');
+ return '<article class="ts-result-card"><h4>'+esc(film.title)+'</h4><p>'+esc(extract.slice(0,390)||film.snippet.replace(/<[^>]*>/g,''))+'</p><div class="ts-match-note">'+note+'</div><a href="https://en.wikipedia.org/?curid='+film.pageid+'" target="_blank" rel="noopener noreferrer">Open source article ↗</a><br><button type="button" data-ts-select="'+film.pageid+'" data-ts-title="'+esc(film.title)+'" data-ts-kind="'+kind+'">Compare scene beats</button></article>';
 }
 async function enrichFilms(items){return Promise.all(items.map(async f=>({film:f,extract:await getExtract(f.pageid).catch(()=>f.snippet.replace(/<[^>]*>/g,''))})));}
 function sceneMarkup(list,kind){return list.map(c=>'<article class="ts-scene-card"><div><strong>'+esc(c.name)+'</strong><p>Matched by plot text cues: '+esc(c.terms.filter(t=>(selectedFilm?.extract||'').toLowerCase().includes(t)).slice(0,4).join(', ')||'general story structure')+'. Verify the actual scene in the source film.</p></div><button type="button" data-ts-scene="'+c.id+'" data-ts-kind="'+kind+'">Find related audio</button></article>').join('');}
 function chooseFilm(film,extract,kind){
- selectedFilm={...film,extract,kind};const found=detectCues(extract);const list=found.length?found:cues.slice(0,4);
+ selectedFilm={...film,extract,kind};const found=detectCues(extract);const shared=kind==='cross'?found.filter(c=>sourceSceneCues.some(s=>s.id===c.id)):found;const list=kind==='cross'?(shared.length?shared:found):found.length?found:cues.slice(0,4);
  if(kind==='story'){$('tsStorySelectedTitle').textContent=film.title;$('tsStorySceneList').innerHTML=sceneMarkup(list,kind);$('tsStoryScenes').hidden=false;}
  else{$('tsCrossSelectedTitle').textContent=film.title+' · scene cues';$('tsCrossSceneList').innerHTML=sceneMarkup(list,kind);$('tsCrossScenes').hidden=false;}
  bindSceneButtons();
@@ -40,10 +41,10 @@ async function runStorySearch(e){e.preventDefault();const q=$('tsStoryQuery').va
 function bindFilmButtons(full){root.querySelectorAll('[data-ts-select]').forEach(b=>b.onclick=()=>{const x=full.find(v=>String(v.film.pageid)===b.dataset.tsSelect);if(x)chooseFilm(x.film,x.extract,b.dataset.tsKind);});}
 async function runCrossSearch(e){e.preventDefault();const movie=$('tsCrossMovie').value.trim(),target=$('tsTargetIndustry').value,genre=$('tsCrossGenre').value,language=$('tsCrossLanguage').value.trim();if(!movie)return;
  $('tsCrossStatus').textContent='Reading reference film information…';$('tsCrossResults').innerHTML='';$('tsCrossScenes').hidden=true;
- try{const src=await searchWiki(movie+' film plot',1);if(src[0]){const ex=await getExtract(src[0].pageid);$('tsCrossSource').textContent='Reference: '+src[0].title+' · '+ex.slice(0,260);}
- const terms=[movie,target+' cinema',target+' films',genre,language].filter(Boolean).join(' ');
- const queries=[target+' '+(genre||'action')+' film',target+' '+(language||'cinema')+' movie',terms+' similar film'];
- const results=[];for(const q of queries){for(const f of await searchWiki(q,5)){if(!results.some(x=>x.pageid===f.pageid))results.push(f);if(results.length>=10)break;}if(results.length>=10)break;}
+ try{const src=await searchWiki(movie+' film plot',1);let sourceExtract='';if(src[0]){sourceExtract=await getExtract(src[0].pageid);sourceSceneCues=detectCues(sourceExtract);$('tsCrossSource').textContent='Reference: '+src[0].title+' · '+sourceExtract.slice(0,260)+' · '+sourceSceneCues.length+' plot cue(s) identified.';}else{sourceSceneCues=[];$('tsCrossSource').textContent='Could not locate a source-film plot summary. Results will be broad industry candidates, not scene matches.';}
+ const genreTerms=[genre,language].filter(Boolean).join(' ');
+ const queries=[...sourceSceneCues.slice(0,5).map(c=>target+' '+c.name+' '+(genreTerms||'film')),target+' '+(genre||'popular')+' film',target+' '+(language||'cinema')+' movie'];
+ const results=[];for(const q of queries){for(const f of await searchWiki(q,5)){if(!results.some(x=>x.pageid===f.pageid))results.push(f);if(results.length>=12)break;}if(results.length>=12)break;}
  const full=await enrichFilms(results);if(!full.length)throw new Error('No cross-industry reference articles found. Try another target industry or genre.');
  $('tsCrossResults').innerHTML=full.map(x=>cardHtml(x.film,x.extract,'cross')).join('');$('tsCrossStatus').textContent=full.length+' possible '+target+' reference article(s). These are discovery candidates, not verified scene equivalents.';bindFilmButtons(full);
  }catch(err){$('tsCrossStatus').textContent=err.message;}}
@@ -56,7 +57,7 @@ async function searchAudio(query){$('tsAudioStatus').textContent='Searching elig
 $('tsStoryForm').addEventListener('submit',runStorySearch);$('tsCrossForm').addEventListener('submit',runCrossSearch);
 $('tsStoryTab').addEventListener('click',()=>setModule('story'));$('tsCrossTab').addEventListener('click',()=>setModule('cross'));
 function setModule(which){const story=which==='story';$('tsStoryTab').classList.toggle('active',story);$('tsCrossTab').classList.toggle('active',!story);$('tsStoryTab').setAttribute('aria-selected',String(story));$('tsCrossTab').setAttribute('aria-selected',String(!story));$('tsStoryModule').hidden=!story;$('tsCrossModule').hidden=story;}
-root.querySelectorAll('[data-ts-audio]').forEach(b=>b.addEventListener('click',()=>{audioType=b.dataset.tsAudio;root.querySelectorAll('[data-ts-audio]').forEach(x=>x.classList.toggle('active',x===b));const q=selectedScene?.audio||'cinematic '+audioType.toLowerCase();$('tsAudioQuery').value=q;searchAudio(q);}));
+root.querySelectorAll('[data-ts-audio]').forEach(b=>b.addEventListener('click',()=>{audioType=b.dataset.tsAudio;root.querySelectorAll('[data-ts-audio]').forEach(x=>x.classList.toggle('active',x===b));const q=(selectedScene?.audio||'cinematic sound')+' '+audioType.toLowerCase();$('tsAudioQuery').value=q;searchAudio(q);}));
 $('tsAudioSearchBtn').addEventListener('click',()=>searchAudio($('tsAudioQuery').value));
 $('tsAudioQuery').addEventListener('keydown',e=>{if(e.key==='Enter')searchAudio($('tsAudioQuery').value);});
 $('tsStoryOpenAudio').addEventListener('click',()=>{$('tsAudioArea').scrollIntoView({behavior:'smooth'});$('tsAudioQuery').value=(selectedFilm?.title||'')+' cinematic music';searchAudio($('tsAudioQuery').value);});
