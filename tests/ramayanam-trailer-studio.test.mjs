@@ -6,6 +6,7 @@ const root=readFileSync(new URL('../workspace.html',import.meta.url),'utf8');
 const pub=readFileSync(new URL('../public/workspace.html',import.meta.url),'utf8');
 const js=readFileSync(new URL('../public/ramayanam-trailer-studio.js',import.meta.url),'utf8');
 const discovery=readFileSync(new URL('../worker/trailerDiscovery.ts',import.meta.url),'utf8');
+const preview=readFileSync(new URL('../worker/preview.ts',import.meta.url),'utf8');
 
 test('Trailer Studio has two generic modules, separate heroes and a mirrored workspace',()=>{
  assert.equal(root,pub);
@@ -91,4 +92,11 @@ test('Discovery returns only explicitly different-hero YouTube results',async()=
   assert.equal(body.results[0].videoId,'candidate1');
   assert.equal(body.results[0].category,'hero-intro');
  }finally{globalThis.fetch=originalFetch;}
+});
+
+test('Isolated preview protects provider-backed discovery with a separate preview login',()=>{
+ assert.match(preview,/PREVIEW_ADMIN_PASSWORD/);
+ assert.match(preview,/api\/admin\/login/);
+ assert.match(preview,/if \(!await previewSession\(request, env\)\)/);
+ assert.match(preview,/handleTrailerDiscovery\(request, env\)/);
 });
