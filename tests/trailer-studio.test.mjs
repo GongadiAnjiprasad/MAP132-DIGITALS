@@ -3,14 +3,16 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 import { findHeroes, detectStoryBeats, scoreStorylineSimilarity, handleTrailerDiscovery } from '../worker/trailerDiscovery.ts';
 const workspace=readFileSync(new URL('../workspace.html',import.meta.url),'utf8');
+const publishedWorkspace=readFileSync(new URL('../public/workspace.html',import.meta.url),'utf8');
 const ui=readFileSync(new URL('../public/trailer-studio.js',import.meta.url),'utf8');
 const backend=readFileSync(new URL('../worker/index.ts',import.meta.url),'utf8');
 test('Trailer Studio is added as a separate Editor Workspace resource without replacing existing libraries',()=>{
  assert.match(workspace,/data-resource-view="sounds"/);assert.match(workspace,/data-resource-view="fonts"/);assert.match(workspace,/data-resource-view="my-drive"/);assert.match(workspace,/data-resource-view="trailer"/);
  assert.match(workspace,/id="trailerStudio"/);assert.match(workspace,/id="cinematic-sfx"/);assert.match(workspace,/id="myDrivePanel"/);
- assert.match(workspace,/trailer-studio\.js/);
+ assert.match(workspace,/trailer-studio\.js/);assert.equal(workspace,publishedWorkspace);
 });
 test('Story matching UI shows different hero, shared beats and original evidence links',()=>{
+ assert.doesNotThrow(()=>new Function(ui));
  assert.match(ui,/mode=story/);assert.match(ui,/different-hero match/);assert.match(ui,/sharedBeats/);assert.match(ui,/Original source|source/);
  assert.match(ui,/api\/resources\/sounds/);assert.match(ui,/audio controls/);assert.match(ui,/\/download/);
 });
@@ -28,5 +30,5 @@ test('Discovery endpoint is public but returns an honest provider-configuration 
  assert.equal(response.status,503);const body=await response.json();assert.ok(body.error);assert.equal(body.results,undefined);
  const publicRoute=backend.indexOf("handleTrailerDiscovery(req,env)");const adminGate=backend.indexOf("if(!await validSession(req,env))");
  assert.ok(publicRoute>=0&&adminGate>publicRoute,'public discovery route must run before the admin-session gate');
- assert.match(backend,/public\\/trailer-rate/);
+ assert.ok(backend.includes('public/trailer-rate'));
 });
