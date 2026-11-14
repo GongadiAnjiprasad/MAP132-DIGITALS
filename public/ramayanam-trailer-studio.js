@@ -92,7 +92,8 @@
     }
     grid.innerHTML=types.map(type=>'<section class="rt-resource-group"><h4>'+type+'</h4><div class="rt-audio-grid">'+grouped[type].map(asset=>{
       const url='/api/my-drive/assets/'+encodeURIComponent(asset.id)+'/preview';
-      return '<article class="rt-audio-card"><strong>'+escapeHtml(asset.name||'Audio asset')+'</strong><div class="rt-audio-meta">My Drive · '+escapeHtml(asset.licenseStatus||'usage rights unverified')+'</div><audio controls preload="none" src="'+url+'" style="width:100%"></audio><a class="rt-download-link" href="'+url+'/download" download="'+escapeHtml(asset.name||'audio')+'">Download</a></article>';
+      const downloadUrl='/api/my-drive/assets/'+encodeURIComponent(asset.id)+'/download';
+      return '<article class="rt-audio-card"><strong>'+escapeHtml(asset.name||'Audio asset')+'</strong><div class="rt-audio-meta">My Drive · '+escapeHtml(asset.licenseStatus||'usage rights unverified')+'</div><audio controls preload="none" src="'+url+'" style="width:100%"></audio><a class="rt-download-link" href="'+downloadUrl+'" download="'+escapeHtml(asset.name||'audio')+'">Download</a></article>';
     }).join('')+'</div></section>').join('');
     grid.querySelectorAll('audio').forEach(audio=>audio.addEventListener('play',()=>grid.querySelectorAll('audio').forEach(other=>{if(other!==audio)other.pause();})));
     status.textContent='Complete match · BGM, Dialogue and SFX are all available for this scene.';
