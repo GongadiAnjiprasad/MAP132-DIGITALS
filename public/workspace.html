@@ -254,6 +254,28 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .map132-bug-selected{outline:3px solid #ff4d6d!important;outline-offset:3px!important}
 @media(max-width:480px){#map132BugLauncher{right:10px;bottom:12px;padding:10px 12px}#map132BugPanel{right:8px;bottom:58px;width:calc(100vw - 16px)}}
 
+
+/* Trailer Studio: compact genre folders and direct download collections */
+#ramayanamStudio .rt-project-box{border:1px solid var(--line);background:linear-gradient(145deg,#171a21,#101217);padding:18px;margin:18px 0;border-radius:12px}
+#ramayanamStudio .rt-project-heading h3{margin:9px 0 5px;font-size:20px;letter-spacing:.04em}
+#ramayanamStudio .rt-project-heading p,#ramayanamStudio .rt-genre-heading p,#ramayanamStudio .rt-download-head p{margin:4px 0;color:var(--muted);font-size:12px;line-height:1.5}
+#ramayanamStudio .rt-scene-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:16px}
+#ramayanamStudio .rt-scene-button,#ramayanamStudio .rt-genre-button{display:flex;flex-direction:column;align-items:flex-start;gap:5px;min-width:0;text-align:left;background:#0b0d11;border:1px solid var(--line);color:var(--ink);padding:12px;border-radius:8px}
+#ramayanamStudio .rt-scene-button span{font-size:10px;color:var(--muted);line-height:1.4}
+#ramayanamStudio .rt-scene-button.active,#ramayanamStudio .rt-genre-button.active{border-color:var(--gold);background:#d7b47718;box-shadow:inset 0 0 0 1px #d7b47733}
+#ramayanamStudio .rt-genre-heading{margin:22px 0 10px}
+#ramayanamStudio .rt-genre-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:9px}
+#ramayanamStudio .rt-genre-button{flex-direction:row;align-items:center;gap:9px;min-height:54px}
+#ramayanamStudio .rt-genre-button span{font-size:18px}
+#ramayanamStudio .rt-genre-button strong{font-size:12px}
+#ramayanamStudio .rt-download-head{margin:22px 0 10px}
+#ramayanamStudio .rt-audio-card{border-radius:9px;padding:14px}
+#ramayanamStudio .rt-audio-card .rt-audio-meta{font-size:11px;line-height:1.55;color:var(--muted)}
+#ramayanamStudio .rt-download-link{display:inline-flex;align-items:center;justify-content:center;align-self:flex-start;padding:9px 13px;border:1px solid var(--gold);border-radius:6px;color:var(--gold);font-size:11px;font-weight:700}
+#ramayanamStudio .rt-download-foot{font-size:10px;color:var(--muted);line-height:1.55;margin-top:12px}
+@media(max-width:700px){#ramayanamStudio .rt-scene-grid{grid-template-columns:repeat(2,minmax(0,1fr))}#ramayanamStudio .rt-genre-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:420px){#ramayanamStudio .rt-scene-grid,#ramayanamStudio .rt-genre-grid{grid-template-columns:minmax(0,1fr)}}
+
 </style></head><body><main class="shell"><header class="top"><a class="brand" href="index.html">MAP<b>132</b> <span style="font-size:10px;color:#aaa;font-weight:400">DIGITALS</span></a><a class="dashboard-link" href="index.html#admin" aria-label="Open protected Admin Dashboard"><span aria-hidden="true">▦</span> Dashboard</a><a class="back" href="index.html">← Back to website</a></header>
 <section class="welcome"><div class="kicker">Private creator area · Workspace</div><h1>Your creative control room.</h1><p>Organise your brand resources, editing references, reusable assets and project links in one place.</p></section>
 <nav class="resource-switcher" aria-label="Choose resource library">
@@ -266,27 +288,37 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 
 <section class="rt-studio resource-panel" id="ramayanamStudio" data-resource-panel="trailer" hidden>
-<div class="rt-head"><div><div class="kicker">MAP132 / PRIVATE TRAILER WORKSPACE</div><h2>Ramayanam Audio Library</h2><p>Varsham × Ramayanam · Audio organised by character combinations and scene emotions.</p></div><span class="kicker">90 SEC · FAN EDIT</span></div>
-<div class="rt-note">Only real audio files already saved in your authorised MAP132 My Drive library appear here. Source and usage-right details are displayed when available. No protected soundtrack extraction or fabricated previews.</div><div class="rt-scene-guide" aria-label="Varsham Ramayanam scene guide">
-<div class="rt-guide-heading"><h3>90-second scene guide</h3><span>SCENE PLAN · AUDIO NOT INCLUDED</span></div>
-<div class="rt-guide-grid">
-<article><strong>01 · Hero introduction</strong><p>Rama entry — Prabhas as Rama; build a heroic, devotional elevation.</p></article>
-<article><strong>02 · Villain introduction</strong><p>Ravana entry — Gopichand as Lanka's ruler; dark, royal power.</p></article>
-<article><strong>03 · Heroine introduction</strong><p>Sita entry — Trisha; graceful, divine and emotional tone.</p></article>
-<article><strong>04 · Hero vs Villain</strong><p>Rama and Ravana face each other; tension rises toward the clash.</p></article>
-<article><strong>05 · Hero vs Heroine</strong><p>Rama and Sita face each other; love, misunderstanding and longing.</p></article>
-<article><strong>06 · Villain controls Heroine</strong><p>Ravana takes Sita to Ashokavanam; show captivity without physical contact.</p></article>
-<article><strong>07 · Hanuman Sena</strong><p>Rama's friends become Hanuman and the Vanara sena; search and rescue support.</p></article>
-<article><strong>08 · Emotional / Separation</strong><p>Sita's sorrow, the couple's separation and the silent emotional beat.</p></article>
-<article><strong>09 · Action / Climax</strong><p>Rama's rescue, Rama–Ravana battle and a powerful final resolve.</p></article>
-</div></div>
-
-<div class="rt-library-cats" id="rtLibraryCategories" role="group" aria-label="Character and scene audio categories">
-<button type="button" class="rt-library-cat active" data-library-cat="all">All audio</button><button type="button" class="rt-library-cat" data-library-cat="hero-intro">Hero introduction</button><button type="button" class="rt-library-cat" data-library-cat="villain-intro">Villain introduction</button><button type="button" class="rt-library-cat" data-library-cat="heroine-intro">Heroine introduction</button><button type="button" class="rt-library-cat" data-library-cat="hero-villain">Hero vs Villain</button><button type="button" class="rt-library-cat" data-library-cat="hero-heroine">Hero vs Heroine</button><button type="button" class="rt-library-cat" data-library-cat="villain-heroine">Villain controls Heroine</button><button type="button" class="rt-library-cat" data-library-cat="hanuman-sena">Friends / Hanuman Sena</button><button type="button" class="rt-library-cat" data-library-cat="emotional">Emotional / Separation</button><button type="button" class="rt-library-cat" data-library-cat="action-climax">Action / Climax</button>
+<div class="rt-head"><div><div class="kicker">MAP132 / EDITOR WORKSPACE</div><h2>Trailer Studio</h2><p>Genre-wise audio download folders and scene-matched picks for each trailer project.</p></div><a class="rt-action" href="https://www.youtube.com/audiolibrary" target="_blank" rel="noopener noreferrer">YouTube Audio Library ↗</a></div>
+<div class="rt-project-box">
+<div class="rt-project-heading"><div><span class="rt-source-label">TRAILER PROJECT</span><h3>RAMA: THE VARSHAM SAGA</h3><p>Varsham reimagined with a Ramayanam theme · 90-second fan edit</p></div></div>
+<div class="rt-scene-grid" id="rtProjectScenes" aria-label="Scene-wise audio downloads">
+<button type="button" class="rt-scene-button active" data-rt-scene="hero-intro"><strong>01 · Hero Intro</strong><span>Rama entry / elevation</span></button>
+<button type="button" class="rt-scene-button" data-rt-scene="villain-intro"><strong>02 · Villain Intro</strong><span>Ravana / dark royal entry</span></button>
+<button type="button" class="rt-scene-button" data-rt-scene="heroine-intro"><strong>03 · Heroine Intro</strong><span>Sita / graceful entry</span></button>
+<button type="button" class="rt-scene-button" data-rt-scene="hero-villain"><strong>04 · Hero vs Villain</strong><span>Face-off / confrontation</span></button>
+<button type="button" class="rt-scene-button" data-rt-scene="hero-heroine"><strong>05 · Hero vs Heroine</strong><span>Love / longing</span></button>
+<button type="button" class="rt-scene-button" data-rt-scene="villain-heroine"><strong>06 · Ashokavanam</strong><span>Captivity / tension</span></button>
+<button type="button" class="rt-scene-button" data-rt-scene="hanuman-sena"><strong>07 · Hanuman Sena</strong><span>Search / rescue support</span></button>
+<button type="button" class="rt-scene-button" data-rt-scene="emotional"><strong>08 · Separation</strong><span>Emotional / sorrow</span></button>
+<button type="button" class="rt-scene-button" data-rt-scene="action-climax"><strong>09 · Action / Climax</strong><span>Battle / final elevation</span></button>
 </div>
-<div class="rt-library-cats rt-library-moods" id="rtLibraryMoods" role="group" aria-label="Audio mood filters"><button type="button" class="rt-library-cat active" data-library-mood="all">All moods</button><button type="button" class="rt-library-cat" data-library-mood="mass">Mass</button><button type="button" class="rt-library-cat" data-library-mood="royal">Royal</button><button type="button" class="rt-library-cat" data-library-mood="emotional">Emotional</button><button type="button" class="rt-library-cat" data-library-mood="devotional">Devotional</button><button type="button" class="rt-library-cat" data-library-mood="suspense">Suspense</button><button type="button" class="rt-library-cat" data-library-mood="action">Action</button></div>
-<div class="rt-head"><div><h3>Scene-matched audio</h3><p>One saved file can appear in multiple relevant scenes without duplicating it.</p></div><button type="button" class="rt-action" id="rtLibraryRefresh">Refresh library</button></div>
-<div class="rt-status" id="rtLibraryStatus" role="status">Open this section to load audio saved in your MAP132 My Drive library.</div><div class="rt-audio-grid" id="rtLibraryAssets"></div><button type="button" class="rt-action" data-rt-open-my-drive>Open My Drive library</button>
+</div>
+<div class="rt-genre-heading"><div><h3>Genre Folders</h3><p>Open a genre to get ready-made, downloadable music collections.</p></div></div>
+<div class="rt-genre-grid" id="rtGenreFolders" role="group" aria-label="Audio genres">
+<button type="button" class="rt-genre-button active" data-rt-genre="action"><span>⚔️</span><strong>Action</strong></button>
+<button type="button" class="rt-genre-button" data-rt-genre="romance"><span>❤️</span><strong>Romance</strong></button>
+<button type="button" class="rt-genre-button" data-rt-genre="thriller"><span>🕶️</span><strong>Thriller / Suspense</strong></button>
+<button type="button" class="rt-genre-button" data-rt-genre="emotional"><span>💔</span><strong>Emotional</strong></button>
+<button type="button" class="rt-genre-button" data-rt-genre="horror"><span>🌑</span><strong>Horror</strong></button>
+<button type="button" class="rt-genre-button" data-rt-genre="comedy"><span>😄</span><strong>Comedy</strong></button>
+<button type="button" class="rt-genre-button" data-rt-genre="devotional"><span>🪔</span><strong>Devotional / Mythological</strong></button>
+<button type="button" class="rt-genre-button" data-rt-genre="epic"><span>🏹</span><strong>Epic / Heroic</strong></button>
+<button type="button" class="rt-genre-button" data-rt-genre="adventure"><span>🧭</span><strong>Adventure / Fantasy</strong></button>
+</div>
+<div class="rt-download-head"><div><h3 id="rtDownloadTitle">Action Audio Downloads</h3><p id="rtDownloadDescription">Curated free collections. Open a source and use its official Download control.</p></div></div>
+<div class="rt-status" id="rtLibraryStatus" role="status">Choose a genre or a scene above. Only downloadable source collections are listed here.</div>
+<div class="rt-audio-grid" id="rtLibraryAssets" aria-live="polite"></div>
+<div class="rt-download-foot">Downloads open on the original provider. Check the item licence and any attribution requirements before using it in a published video.</div>
 </section>
 
 <section class="sfx-panel resource-panel" id="cinematic-sfx" data-resource-panel="sounds">
