@@ -3,7 +3,8 @@ main = "worker/preview.ts"
 compatibility_date = "2026-10-31"
 workers_dev = true
 
-# Intentionally no production KV, R2, secrets, variables, or cron bindings.
+# Intentionally no production KV, R2, variables, or cron bindings.
+# Optional preview-only search secrets: YOUTUBE_API_KEY, GOOGLE_CSE_API_KEY, GOOGLE_CSE_CX, X_BEARER_TOKEN.
 # The preview serves the built frontend and blocks backend/media requests.
 [assets]
 directory = "./dist"
