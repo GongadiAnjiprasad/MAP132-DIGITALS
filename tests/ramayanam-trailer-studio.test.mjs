@@ -1,7 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
-import { findHeroes, findCategory, handleTrailerDiscovery } from '../worker/trailerDiscovery.ts';
+import { findHeroes, findCategory, handleTrailerDiscovery, matchRamayanaStoryPatterns } from '../worker/trailerDiscovery.ts';
 const root=readFileSync(new URL('../workspace.html',import.meta.url),'utf8');
 const pub=readFileSync(new URL('../public/workspace.html',import.meta.url),'utf8');
 const js=readFileSync(new URL('../public/ramayanam-trailer-studio.js',import.meta.url),'utf8');
@@ -99,4 +99,40 @@ test('Isolated preview protects provider-backed discovery with a separate previe
  assert.match(preview,/api\/admin\/login/);
  assert.match(preview,/if \(!await previewSession\(request, env\)\)/);
  assert.match(preview,/handleTrailerDiscovery\(request, env\)/);
+});
+
+\ntest('Story matching maps Varsham kidnapping, forced marriage and rescue to the Sita abduction arc',()=>{
+ const matches=matchRamayanaStoryPatterns('Bhadranna kidnaps Sailaja and attempts to force her into marriage. Venkat brings Sailaja back and rescues her.');
+ assert.ok(matches.some(x=>x.storyBeatId==='sita-abduction-rescue'&&x.forcedMarriage===true&&x.abduction===true&&x.rescue===true));
+});
+\ntest('Story matching does not claim a complete Ramayana event from kidnapping alone',()=>{
+ const matches=matchRamayanaStoryPatterns('Bhadranna kidnaps Sailaja and takes her away.');
+ assert.equal(matches.some(x=>x.storyBeatId==='sita-abduction-rescue'),false);
+});
+\ntest('Story endpoint returns evidence-backed event matches without requiring hero separation',async()=>{
+ const originalFetch=globalThis.fetch;
+ try{
+  globalThis.fetch=async input=>{
+   const u=new URL(String(input));
+   if(u.hostname==='www.googleapis.com'&&u.pathname==='/customsearch/v1')return new Response(JSON.stringify({items:[{title:'Varsham Telugu movie story',snippet:'Bhadranna kidnaps Sailaja and attempts to force her into marriage. Venkat rescues Sailaja and brings her back.',link:'https://example.test/varsham-story'}]}),{status:200,headers:{'Content-Type':'application/json'}});
+   return new Response(JSON.stringify({items:[]}),{status:200,headers:{'Content-Type':'application/json'}});
+  };
+  const response=await handleTrailerDiscovery(new Request('https://preview.test/api/trailer/discover?mode=story&movie=Varsham'),{GOOGLE_CSE_API_KEY:'test-key',GOOGLE_CSE_CX:'test-cx'});
+  assert.equal(response.status,200);
+  const body=await response.json();
+  assert.equal(body.matches.length,1);
+  assert.equal(body.matches[0].storyBeatId,'sita-abduction-rescue');
+  assert.equal(body.matches[0].forcedMarriage,true);
+  assert.equal(body.matches[0].sources[0].url,'https://example.test/varsham-story');
+ }finally{globalThis.fetch=originalFetch;}
+});
+\ntest('Story endpoint returns no complete match when plot evidence is incomplete',async()=>{
+ const originalFetch=globalThis.fetch;
+ try{
+  globalThis.fetch=async()=>new Response(JSON.stringify({items:[{title:'Varsham movie story',snippet:'Bhadranna kidnaps Sailaja.',link:'https://example.test/varsham'}]}),{status:200,headers:{'Content-Type':'application/json'}});
+  const response=await handleTrailerDiscovery(new Request('https://preview.test/api/trailer/discover?mode=story&movie=Varsham'),{GOOGLE_CSE_API_KEY:'test-key',GOOGLE_CSE_CX:'test-cx'});
+  const body=await response.json();
+  assert.equal(body.matches.length,0);
+  assert.equal(body.partialEvidence.length,1);
+ }finally{globalThis.fetch=originalFetch;}
 });
