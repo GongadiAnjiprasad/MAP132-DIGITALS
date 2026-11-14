@@ -1,6 +1,20 @@
+import { handleTrailerDiscovery } from './trailerDiscovery';
+
 interface Env {
   ASSETS: Fetcher;
+  PREVIEW_ADMIN_PASSWORD?: string;
+  YOUTUBE_API_KEY?: string;
+  GOOGLE_CSE_API_KEY?: string;
+  GOOGLE_CSE_CX?: string;
+  X_BEARER_TOKEN?: string;
 }
+
+const PREVIEW_COOKIE = 'map132_admin';
+const previewEncoder = new TextEncoder();
+function previewBase64Url(bytes: Uint8Array) { let value=''; for (const byte of bytes) value+=String.fromCharCode(byte); return btoa(value).replaceAll('+','-').replaceAll('/','_').replaceAll('=',''); }
+async function previewSignature(payload: string, password: string) { const key=await crypto.subtle.importKey('raw',previewEncoder.encode(password),{name:'HMAC',hash:'SHA-256'},false,['sign']); return previewBase64Url(new Uint8Array(await crypto.subtle.sign('HMAC',key,previewEncoder.encode(payload)))); }
+async function previewSession(request: Request, env: Env) { if(!env.PREVIEW_ADMIN_PASSWORD)return false; const match=(request.headers.get('Cookie')||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(PREVIEW_COOKIE+'=')); if(!match)return false; const parts=match.slice(PREVIEW_COOKIE.length+1).split('.'); if(parts.length!==2)return false; try { const data=JSON.parse(atob(parts[0].replace(/-/g,'+').replace(/_/g,'/'))); if(!Number.isFinite(data.exp)||data.exp<Date.now())return false; return parts[1]===await previewSignature(parts[0],env.PREVIEW_ADMIN_PASSWORD); } catch { return false; } }
+function previewCookie(value: string, maxAge: number) { return PREVIEW_COOKIE+'='+value+'; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age='+maxAge; }
 
 const demoContent = {
   profile: {
