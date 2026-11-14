@@ -34,7 +34,7 @@ async function handleStorylineMatch(movie,env,configured){
  const sourceTasks=[google(sourceQuery,env),youtube('"'+movie+'" Telugu movie full story plot hero cast',env),xsearch('"'+movie+'" Telugu movie story OR plot',env)];
  const sourceSettled=await Promise.allSettled(sourceTasks),sourceItems=sourceSettled.flatMap(x=>x.status==='fulfilled'?x.value:[]);
  const sourceText=sourceItems.map(x=>(x.title||'')+' '+(x.description||'')).join('\n');
- const sourceBeats=detectStoryBeats(sourceText),sourceHeroes=[...new Set(sourceItems.flatMap(x=>findHeroes((x.title||'')+' '+(x.description||''))))];
+ const sourceBeats=detectStoryBeats(sourceText),heroCounts=new Map();for(const item of sourceItems)for(const hero of findHeroes((item.title||'')+' '+(item.description||'')))heroCounts.set(hero,(heroCounts.get(hero)||0)+1);const rankedSourceHeroes=[...heroCounts].sort((a,b)=>b[1]-a[1]),sourceHero=rankedSourceHeroes.length&&(!rankedSourceHeroes[1]||rankedSourceHeroes[0][1]>rankedSourceHeroes[1][1])?rankedSourceHeroes[0][0]:null;
  if(!sourceItems.length||sourceBeats.length<2)return json({movie,matches:[],error:'ఈ సినిమా కథకు సరిపడా public plot evidence దొరకలేదు. కనీసం రెండు కథా సంఘటనలు నిర్ధారించకుండా reference చూపించము.',configured,providersUsed:[...new Set(sourceItems.map(x=>x.source))],providerErrors:sourceSettled.filter(x=>x.status==='rejected').map(x=>String(x.reason?.message||'Provider failed'))},422);
  const beatTerms=sourceBeats.map(x=>x.label).join(' ');
  const candidateQueries=[
@@ -45,7 +45,7 @@ async function handleStorylineMatch(movie,env,configured){
  ];
  const candidateSettled=await Promise.allSettled(candidateQueries.flatMap(q=>[google(q,env),youtube(q+' Telugu movie plot cast',env)]).concat([xsearch('"'+movie+'" "similar story" OR "same storyline" Telugu movie',env)]));
  const candidateItems=candidateSettled.flatMap(x=>x.status==='fulfilled'?x.value:[]);
- const sourceHero=sourceHeroes.length===1?sourceHeroes[0]:null,grouped=new Map(),partial=[];
+ const grouped=new Map(),partial=[];
  for(const item of candidateItems){
   const title=String(item.title||'').trim(),description=String(item.description||''),text=title+' '+description;
   if(!title||!item.url||clean(title).includes(clean(movie)))continue;
