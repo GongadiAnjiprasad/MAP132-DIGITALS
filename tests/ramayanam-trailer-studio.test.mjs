@@ -101,15 +101,18 @@ test('Isolated preview protects provider-backed discovery with a separate previe
  assert.match(preview,/handleTrailerDiscovery\(request, env\)/);
 });
 
-\ntest('Story matching maps Varsham kidnapping, forced marriage and rescue to the Sita abduction arc',()=>{
+
+test('Story matching maps Varsham kidnapping, forced marriage and rescue to the Sita abduction arc',()=>{
  const matches=matchRamayanaStoryPatterns('Bhadranna kidnaps Sailaja and attempts to force her into marriage. Venkat brings Sailaja back and rescues her.');
  assert.ok(matches.some(x=>x.storyBeatId==='sita-abduction-rescue'&&x.forcedMarriage===true&&x.abduction===true&&x.rescue===true));
 });
-\ntest('Story matching does not claim a complete Ramayana event from kidnapping alone',()=>{
+
+test('Story matching does not claim a complete Ramayana event from kidnapping alone',()=>{
  const matches=matchRamayanaStoryPatterns('Bhadranna kidnaps Sailaja and takes her away.');
  assert.equal(matches.some(x=>x.storyBeatId==='sita-abduction-rescue'),false);
 });
-\ntest('Story endpoint returns evidence-backed event matches without requiring hero separation',async()=>{
+
+test('Story endpoint returns evidence-backed event matches without requiring hero separation',async()=>{
  const originalFetch=globalThis.fetch;
  try{
   globalThis.fetch=async input=>{
@@ -126,7 +129,8 @@ test('Isolated preview protects provider-backed discovery with a separate previe
   assert.equal(body.matches[0].sources[0].url,'https://example.test/varsham-story');
  }finally{globalThis.fetch=originalFetch;}
 });
-\ntest('Story endpoint returns no complete match when plot evidence is incomplete',async()=>{
+
+test('Story endpoint returns no complete match when plot evidence is incomplete',async()=>{
  const originalFetch=globalThis.fetch;
  try{
   globalThis.fetch=async()=>new Response(JSON.stringify({items:[{title:'Varsham movie story',snippet:'Bhadranna kidnaps Sailaja.',link:'https://example.test/varsham'}]}),{status:200,headers:{'Content-Type':'application/json'}});
