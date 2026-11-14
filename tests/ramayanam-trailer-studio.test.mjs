@@ -48,7 +48,7 @@ test('Cross-industry recreation supports original concept notes and rights-safe 
 });
 
 test('Discovery backend integrates YouTube, Google Search and X APIs with strict hero filtering',()=>{
- assert.match(discovery,/googleapis\.com\\/youtube\\/v3\\/search/);
+ assert.match(discovery,/googleapis\.com\/youtube\/v3\/search/);
  assert.match(discovery,/customsearch\/v1/);
  assert.match(discovery,/api\.x\.com\/2\/tweets\/search\/recent/);
  assert.match(discovery,/different.length!==1/);
