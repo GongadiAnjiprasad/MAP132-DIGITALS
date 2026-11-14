@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { findHeroes, findCategory, handleTrailerDiscovery } from '../worker/trailerDiscovery.ts';
 const root=readFileSync(new URL('../workspace.html',import.meta.url),'utf8');
 const pub=readFileSync(new URL('../public/workspace.html',import.meta.url),'utf8');
 const js=readFileSync(new URL('../public/ramayanam-trailer-studio.js',import.meta.url),'utf8');
@@ -47,11 +48,47 @@ test('Cross-industry recreation supports original concept notes and rights-safe 
 });
 
 test('Discovery backend integrates YouTube, Google Search and X APIs with strict hero filtering',()=>{
- assert.match(discovery,/youtube\.googleapis\.com/);
+ assert.match(discovery,/googleapis\.com\\/youtube\\/v3\\/search/);
  assert.match(discovery,/customsearch\/v1/);
  assert.match(discovery,/api\.x\.com\/2\/tweets\/search\/recent/);
  assert.match(discovery,/different.length!==1/);
  assert.match(discovery,/YOUTUBE_API_KEY/);
  assert.match(discovery,/GOOGLE_CSE_API_KEY/);
  assert.match(discovery,/X_BEARER_TOKEN/);
+});
+
+test('Hero and scene categorization rejects same-hero references',()=>{
+ assert.deepEqual(findHeroes('Pushpa Allu Arjun hero intro'),['Allu Arjun']);
+ assert.deepEqual(findHeroes('Prabhas and Allu Arjun face off'),['Prabhas','Allu Arjun']);
+ assert.equal(findCategory('mass hero entry scene').id,'hero-intro');
+ assert.equal(findCategory('villain intro and hostage heroine').id,'villain-intro');
+});
+
+test('Discovery reports missing provider credentials without fabricating matches',async()=>{
+ const response=await handleTrailerDiscovery(new Request('https://preview.test/api/trailer/discover?movie=Salaar'),{});
+ assert.equal(response.status,503);
+ const body=await response.json();
+ assert.deepEqual(body.requiredSecrets,['YOUTUBE_API_KEY','GOOGLE_CSE_API_KEY','GOOGLE_CSE_CX','X_BEARER_TOKEN']);
+ assert.equal(body.results,undefined);
+});
+
+test('Discovery returns only explicitly different-hero YouTube results',async()=>{
+ const originalFetch=globalThis.fetch;
+ try{
+  globalThis.fetch=async input=>{
+   const u=new URL(String(input));const q=u.searchParams.get('q')||'';
+   const items=q.includes('cast hero actor')?
+    [{id:{videoId:'cast1'},snippet:{title:'Salaar Telugu movie cast Prabhas'}}]:
+    [{id:{videoId:'candidate1'},snippet:{title:'Pushpa Allu Arjun hero intro fan edit',description:'Tollywood mass entry'}},{id:{videoId:'mixed'},snippet:{title:'Prabhas and Allu Arjun mashup',description:'face off scene'}}];
+   return new Response(JSON.stringify({items}),{status:200,headers:{'Content-Type':'application/json'}});
+  };
+  const response=await handleTrailerDiscovery(new Request('https://preview.test/api/trailer/discover?movie=Salaar'),{YOUTUBE_API_KEY:'test-key'});
+  assert.equal(response.status,200);
+  const body=await response.json();
+  assert.equal(body.visualHero,'Prabhas');
+  assert.equal(body.results.length,1);
+  assert.equal(body.results[0].hero,'Allu Arjun');
+  assert.equal(body.results[0].videoId,'candidate1');
+  assert.equal(body.results[0].category,'hero-intro');
+ }finally{globalThis.fetch=originalFetch;}
 });
