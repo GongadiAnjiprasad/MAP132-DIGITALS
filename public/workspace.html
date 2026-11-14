@@ -210,13 +210,65 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 }
 @media(prefers-reduced-motion:reduce){button{transition:none}}
 
+
+/* MAP132 Trailer Studio — isolated feature module */
+.ts-studio{margin:20px 0;padding:clamp(16px,2.5vw,30px);border:1px solid #675438;background:linear-gradient(145deg,#171a21,#101217);color:var(--ink);min-width:0}
+.ts-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+.ts-head h2{margin:4px 0 8px;font-size:clamp(22px,3vw,32px)}
+.ts-copy,.ts-note{color:var(--muted);font-size:12px;line-height:1.7}
+.ts-search{display:flex;gap:9px;flex-wrap:wrap;margin:18px 0}
+.ts-search input{flex:1 1 240px;min-width:0;min-height:46px;padding:12px 14px;border:1px solid #65563d;border-radius:10px;background:#0c0e13;color:var(--ink);font:inherit}
+.ts-search button,.ts-chip,.ts-beat button{min-height:42px;padding:10px 15px;border:1px solid #d7b47788;border-radius:999px;background:#d7b477;color:#17191e;font-weight:700;cursor:pointer}
+.ts-status{padding:12px 14px;border:1px solid #393b42;border-radius:10px;color:#d7c9ad;font-size:12px;line-height:1.6;overflow-wrap:anywhere}
+.ts-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px;margin-top:14px}
+.ts-card{min-width:0;padding:15px;border:1px solid #484039;border-radius:12px;background:#11151c}
+.ts-card h3{margin:5px 0 8px;font-size:17px;overflow-wrap:anywhere}
+.ts-card p,.ts-card li{font-size:12px;line-height:1.65;color:#c5c3bd}
+.ts-card a,.ts-audio-card a{color:#e8c77a;text-decoration:underline;text-underline-offset:3px}
+.ts-meta{color:#e8c77a;font-size:11px;font-weight:700;letter-spacing:.04em}
+.ts-beats{display:flex;gap:7px;flex-wrap:wrap;margin:10px 0}
+.ts-beat{padding:6px 9px;border:1px solid #65563d;border-radius:999px;color:#e5d1a9;font-size:11px}
+.ts-beat button{min-height:0;padding:4px 8px;margin-left:5px;font-size:10px}
+.ts-sources{display:flex;gap:10px;flex-wrap:wrap;margin-top:10px;font-size:11px}
+.ts-audio{margin-top:20px;padding-top:18px;border-top:1px solid #4b4030}
+.ts-audio h3{margin:0 0 8px}
+.ts-audio-controls{display:flex;gap:8px;flex-wrap:wrap;margin:12px 0}
+.ts-chip{background:#171a21;color:#e8c77a}
+.ts-chip[aria-pressed="true"]{background:#d7b477;color:#17191e}
+.ts-audio-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:12px}
+.ts-audio-card{padding:12px;border:1px solid #484039;border-radius:10px;background:#0e1117;min-width:0}
+.ts-audio-card strong{display:block;overflow-wrap:anywhere}
+.ts-audio-card p,.ts-audio-card small{color:var(--muted);font-size:11px;line-height:1.6}
+.ts-audio-card audio{display:block;width:100%;margin:9px 0}
+.ts-audio-card a{display:inline-block;margin:5px 12px 0 0;font-size:11px}
+@media(max-width:700px){.ts-results,.ts-audio-results{grid-template-columns:1fr}.ts-search button{width:100%}}
+
 </style></head><body><main class="shell"><header class="top"><a class="brand" href="index.html">MAP<b>132</b> <span style="font-size:10px;color:#aaa;font-weight:400">DIGITALS</span></a><a class="dashboard-link" href="index.html#admin" aria-label="Open protected Admin Dashboard"><span aria-hidden="true">▦</span> Dashboard</a><a class="back" href="index.html">← Back to website</a></header>
 <section class="welcome"><div class="kicker">Private creator area · Workspace</div><h1>Your creative control room.</h1><p>Organise your brand resources, editing references, reusable assets and project links in one place.</p></section>
 <nav class="resource-switcher" aria-label="Choose resource library">
  <button type="button" class="resource-pill active" data-resource-view="sounds" aria-pressed="true"><span class="resource-pill-icon">♫</span><strong>Cinematic Sounds</strong></button>
  <button type="button" class="resource-pill" data-resource-view="fonts" aria-pressed="false"><span class="resource-pill-icon">Aa</span><strong>Cinematic Fonts</strong></button>
  <button type="button" class="resource-pill" data-resource-view="my-drive" aria-pressed="false"><span class="resource-pill-icon">☁</span><strong>My Drive</strong></button>
+ <button type="button" class="resource-pill" data-resource-view="trailer" aria-pressed="false"><span class="resource-pill-icon">🎬</span><strong>Trailer Studio</strong></button>
 </nav>
+
+
+<section class="ts-studio resource-panel" id="trailerStudio" data-resource-panel="trailer" hidden>
+ <div class="ts-head"><div><div class="kicker">MAP132 / EDITOR WORKSPACE</div><h2>Trailer Studio · Story Match</h2><p class="ts-copy">ఒక తెలుగు సినిమాను Visual Reference‌గా ఇవ్వండి. వేరే హీరో నటించిన, కథా సంఘటనలు నిజంగా పోలిన తెలుగు సినిమాలను వెతుకుతాం.</p></div></div>
+ <form class="ts-search" id="tsStoryForm"><input id="tsStoryMovie" type="search" maxlength="100" minlength="2" placeholder="Visual Reference movie name (ఉదా: Varsham)" aria-label="Visual reference Telugu movie" required><button type="submit">Different Hero Match వెతుకు</button></form>
+ <p class="ts-note">Genre లేదా action ఒక్కటే match కాదు. కథలోని shared events ఆధారంగా candidates చూపిస్తాం. Public search snippets పూర్తి screenplay కావు; source links తెరిచి కథను verify చేయండి.</p>
+ <div class="ts-status" id="tsStoryStatus" role="status" aria-live="polite">సినిమా పేరు ఇచ్చి Search నొక్కండి. నిర్ధారణకు సరిపడా evidence లేకపోతే match చూపించము.</div>
+ <div class="ts-results" id="tsStoryResults"></div>
+ <section class="ts-audio" id="tsAudioPanel" hidden><h3 id="tsAudioTitle">Selected story beat · Audio references</h3><p class="ts-copy">ఇక్కడ preview/download అయ్యేవి licence-filtered CC0 / CC-BY sound assets మాత్రమే. అసలు సినిమా copyrighted dialogue లేదా BGM‌ను extract చేయము.</p>
+  <div class="ts-audio-controls" role="group" aria-label="Audio reference type">
+   <button class="ts-chip" type="button" data-ts-audio="BGM music" aria-pressed="true">BGM / Music</button>
+   <button class="ts-chip" type="button" data-ts-audio="voice dialogue" aria-pressed="false">Dialogue / Voice</button>
+   <button class="ts-chip" type="button" data-ts-audio="sound effect" aria-pressed="false">Sound Effects</button>
+  </div>
+  <div class="ts-status" id="tsAudioStatus" role="status" aria-live="polite">Story beat select చేసిన తర్వాత eligible audio search చేయండి.</div>
+  <div class="ts-audio-results" id="tsAudioResults"></div>
+ </section>
+</section>
 <div class="notice"><strong>Storage & privacy note:</strong> Free Sources remain online catalogues. My Drive reads selected Drive folders without changing the originals. Imported fonts and assets are copied into your Google Drive folder “MAP132 DIGITALS Resources” and listed from encrypted MAP132 metadata. Licences remain unverified until checked. Do not use this workspace as a client-confidential file vault.</div>
 
 <section class="sfx-panel resource-panel" id="cinematic-sfx" data-resource-panel="sounds">
@@ -283,6 +335,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 // Switch the two resource libraries in-place without scrolling the workspace.
 (()=>{const buttons=[...document.querySelectorAll('[data-resource-view]')],panels=[...document.querySelectorAll('[data-resource-panel]')];if(!buttons.length||!panels.length)return;function show(view){buttons.forEach(b=>{const active=b.dataset.resourceView===view;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});panels.forEach(p=>{p.hidden=p.dataset.resourcePanel!==view})}document.querySelector('.resource-switcher').addEventListener('click',e=>{const b=e.target.closest('[data-resource-view]');if(b)show(b.dataset.resourceView)});show('sounds')})();
-</script><script src="my-drive-resource-manager.js" defer></script><!-- MAP132 production deploy trigger: 2026-11-05 --><!-- MAP132 resource capsule deploy trigger 2026-11-05 --><!-- MAP132 minimal segmented switcher deploy trigger 2026-11-05 -->
+</script><script src="my-drive-resource-manager.js" defer></script><script src="trailer-studio.js" defer></script><!-- MAP132 production deploy trigger: 2026-11-05 --><!-- MAP132 resource capsule deploy trigger 2026-11-05 --><!-- MAP132 minimal segmented switcher deploy trigger 2026-11-05 -->
 <!-- MAP132 Telugu preview fix deploy trigger 2026-11-05 -->
 </body></html>
