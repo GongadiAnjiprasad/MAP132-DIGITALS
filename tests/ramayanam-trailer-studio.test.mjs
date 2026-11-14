@@ -6,14 +6,14 @@ const rootWorkspace = readFileSync(new URL('../workspace.html', import.meta.url)
 const publicWorkspace = readFileSync(new URL('../public/workspace.html', import.meta.url), 'utf8');
 const studio = readFileSync(new URL('../public/ramayanam-trailer-studio.js', import.meta.url), 'utf8');
 
-test('Trailer Studio workspace mirrors remain identical and are a separate Editor Workspace tab', () => {
+test('Trailer Studio workspace mirrors remain identical and separate from My Drive', () => {
   assert.equal(rootWorkspace, publicWorkspace);
   assert.match(publicWorkspace, /data-resource-view="trailer"/);
   assert.match(publicWorkspace, /data-resource-panel="trailer"/);
   assert.match(publicWorkspace, /ramayanam-trailer-studio\.js/);
 });
 
-test('Ramayanam × Varsham project contains all nine scene-wise audio download choices', () => {
+test('Ramayanam × Varsham project contains all nine scene-wise audio choices', () => {
   for (const scene of ['hero-intro','villain-intro','heroine-intro','hero-villain','hero-heroine','villain-heroine','hanuman-sena','emotional','action-climax']) {
     assert.match(publicWorkspace, new RegExp('data-rt-scene="' + scene + '"'));
     assert.ok(studio.includes("'" + scene + "'"), 'Missing scene genre mapping: ' + scene);
@@ -21,40 +21,44 @@ test('Ramayanam × Varsham project contains all nine scene-wise audio download c
   assert.match(publicWorkspace, /RAMA: THE VARSHAM SAGA/);
 });
 
-test('All requested genre folders are present and have curated downloadable collections', () => {
+test('All genre folders are present and empty genres do not show fake tracks', () => {
   for (const genre of ['action','romance','thriller','emotional','horror','comedy','devotional','epic','adventure']) {
     assert.match(publicWorkspace, new RegExp('data-rt-genre="' + genre + '"'));
-    assert.ok(studio.includes(genre + ':{title:'), 'Missing curated genre: ' + genre);
+    assert.ok(studio.includes(genre+':{title:'), 'Missing genre: ' + genre);
   }
-  assert.match(studio, /Download audio/);
-  assert.match(studio, /mixkit\.co\/free-stock-music/);
-  assert.ok(publicWorkspace.includes('https://www.youtube.com/audiolibrary'));
+  assert.match(studio, /rt-empty-state/);
 });
 
-test('Trailer Studio is independent from My Drive and has no audio preview/player dependency', () => {
-  assert.doesNotMatch(studio, /\/api\/my-drive|data-rt-open-my-drive|querySelectorAll\('audio'\)|<audio/);
+test('Each listed track uses the same official Mixkit asset for preview and download', () => {
+  for (const id of ['676','871','493','614']) assert.ok(studio.includes("id:'"+id+"'"), 'Missing verified asset id '+id);
+  assert.match(studio, /assets\.mixkit\.co\/music\/preview\/mixkit-/);
+  assert.match(studio, /assets\.mixkit\.co\/music\/download\/mixkit-/);
+  assert.match(studio, /data-rt-preview/);
+  assert.match(studio, /audio\.play\(\)/);
+  assert.match(studio, /audio\.pause\(\)/);
+  assert.match(studio, /stopCurrent\(\)/);
+  assert.match(studio, /data-rt-preview/);
+});
+
+test('Only one track can play at a time and preview failure is surfaced', () => {
+  assert.match(studio, /stopCurrent\(\); currentAudio=audio/);
+  assert.match(studio, /Preview could not load/);
+  assert.match(studio, /Preview playback was blocked/);
+});
+
+test('Trailer Studio is independent from My Drive and retains the separate workspace panels', () => {
+  assert.doesNotMatch(studio, /\/api\/my-drive/);
   const section = publicWorkspace.slice(publicWorkspace.indexOf('id="ramayanamStudio"'), publicWorkspace.indexOf('id="cinematic-sfx"'));
-  assert.doesNotMatch(section, /my-drive|My Drive|<audio|audio controls/i);
-  assert.match(studio, /Download audio/);
-});
-
-test('My Drive, Cinematic Sounds and Cinematic Fonts workspace panels remain present', () => {
+  assert.doesNotMatch(section, /my-drive|My Drive/i);
   for (const marker of ['id="myDrivePanel"','id="cinematic-sfx"','id="cinematic-fonts"','id="myDriveLoginForm"']) {
     assert.ok(publicWorkspace.includes(marker), 'Missing existing workspace element: ' + marker);
   }
 });
 
-test('Genre and scene selection render downloadable source links without inventing hosted audio files', () => {
-  assert.match(studio, /function renderGenre/);
-  assert.match(studio, /function renderScene/);
-  assert.match(studio, /target="_blank" rel="noopener noreferrer"/);
-  assert.match(studio, /Downloadable picks|downloadable picks/i);
-  assert.doesNotMatch(studio, /blob:|data:audio|\/assets\/.*\.mp3/);
-});
-
-test('Trailer Studio layout remains responsive on mobile', () => {
+test('Trailer Studio responsive preview controls are styled and keyboard accessible', () => {
+  assert.match(publicWorkspace, /rt-preview-button/);
+  assert.match(publicWorkspace, /focus-visible/);
   assert.ok(publicWorkspace.includes('#ramayanamStudio .rt-scene-grid{display:grid'));
-  assert.ok(publicWorkspace.includes('#ramayanamStudio .rt-genre-grid{display:grid'));
   assert.ok(publicWorkspace.includes('@media(max-width:420px){#ramayanamStudio .rt-scene-grid'));
 });
 
