@@ -336,10 +336,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   <section class="ts-module" id="tsStoryModule" role="tabpanel" aria-labelledby="tsStoryTab">
     <div class="ts-intro"><span class="ts-eyebrow">MODULE 01</span><h3>Story → Reference Movies</h3><p>కథకు సరిపోయే Visual‌ను ఒక Tollywood హీరో సినిమా నుంచి, Dialogue / BGM source‌ను మరో Tollywood హీరో సినిమా నుంచి వేర్వేరుగా ఎంచుకోండి.</p></div>
     <form class="ts-search" id="tsStoryForm">
-      <label for="tsStoryQuery">కథ / ఇతివృత్తం</label><div class="ts-search-row"><input id="tsStoryQuery" type="search" placeholder="ఉదా: రామాయణం, మహాభారతం" required><button class="primary" type="submit">సినిమా references వెతుకు</button></div>
-      <p class="ts-telugu-help">Visual కోసం ఒక Tollywood హీరో సినిమా, Audio కోసం వేరే Tollywood హీరో సినిమా ఎంచుకోండి. ఇద్దరు హీరోలు ఒకరే కాకూడదు.</p>
-      <div class="ts-two-fields"><div><label for="tsVisualHero">Visual Hero (హీరో పేరు)</label><input id="tsVisualHero" type="text" placeholder="ఉదా: ప్రభాస్" required></div><div><label for="tsVisualMovie">Visual Movie (సినిమా పేరు)</label><input id="tsVisualMovie" type="text" placeholder="ఉదా: వర్షం" required></div></div>
-      <div class="ts-two-fields"><div><label for="tsAudioHero">Audio Hero (వేరే హీరో)</label><input id="tsAudioHero" type="text" placeholder="ఉదా: జూనియర్ ఎన్టీఆర్" required></div><div><label for="tsAudioMovie">Audio Movie (సినిమా పేరు)</label><input id="tsAudioMovie" type="text" placeholder="ఆ హీరో సినిమా పేరు" required></div></div>
+      <label for="tsStoryQuery">కథ / సినిమా పేరు</label><div class="ts-search-row"><input id="tsStoryQuery" type="search" placeholder="ఒక సినిమా పేరు ఇవ్వండి (ఉదా: బాహుబలి)" required><button class="primary" type="submit">References వెతుకు</button></div>
+      <p class="ts-telugu-help">ఒక పేరు చాలు. Visual కోసం ఒక Tollywood హీరో సినిమా, Audio కోసం వేరే హీరో సినిమా ఆటోమేటిక్‌గా వెతుకుతాం. ఇద్దరు హీరోలు ఒకరే కాకుండా చూసుకుంటాం.</p>
     </form>
     <div class="ts-status" id="tsStoryStatus" role="status" aria-live="polite">Search results are discovered live from Wikipedia article metadata. Scene suggestions are plot-text matches, not verified shot-by-shot analysis.</div>
     <div class="ts-results" id="tsStoryResults"></div>
