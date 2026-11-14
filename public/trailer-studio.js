@@ -1,0 +1,27 @@
+(()=>{'use strict';
+const root=document.getElementById('trailerStudio');if(!root||root.dataset.ready)return;root.dataset.ready='1';
+const $=id=>document.getElementById(id),esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let selected={movie:'',film:'',beat:''},audioQuery='cinematic background music',audioType='BGM music';
+async function searchStory(event){event.preventDefault();const movie=$('tsStoryMovie').value.trim();if(movie.length<2)return;
+ $('tsStoryStatus').textContent='Public sourcesలో కథ, హీరో, shared story beats వెతుకుతున్నాం…';$('tsStoryResults').innerHTML='';$('tsAudioPanel').hidden=true;selected={movie,film:'',beat:''};
+ try{const response=await fetch('/api/trailer/discover?mode=story&movie='+encodeURIComponent(movie),{headers:{Accept:'application/json'},cache:'no-store'});const data=await response.json();
+ if(!response.ok){$('tsStoryStatus').textContent=data.error||'Story search failed ('+response.status+').';return;}
+ const matches=Array.isArray(data.matches)?data.matches:[];const evidence=Array.isArray(data.sourceEvidence)?data.sourceEvidence:[];
+ $('tsStoryStatus').textContent='Visual Reference: '+movie+' · detected hero: '+(data.visualHero||'not confirmed')+' · '+matches.length+' different-hero match(es). '+(data.notice||'');
+ const sourceLinks=evidence.map(s=>'<a href="'+esc(s.url)+'" target="_blank" rel="noopener noreferrer">'+esc(s.source+': '+s.title)+'</a>').join('');
+ const cards=matches.map((m,i)=>'<article class="ts-card"><div class="ts-meta">DIFFERENT HERO · '+esc(m.matchStrength||'candidate')+' · '+esc(String(m.score||0))+'% text-beat overlap</div><h3>'+esc(m.title)+'</h3><p><strong>Hero:</strong> '+esc(m.hero)+'</p><p>'+esc(m.reason||'Shared story events identified in public source snippets.')+'</p><div class="ts-beats">'+(m.sharedBeats||[]).map(b=>'<span class="ts-beat">'+esc(b.label)+'</span>').join('')+'</div><div class="ts-sources">'+(m.sources||[]).map(s=>'<a href="'+esc(s.url)+'" target="_blank" rel="noopener noreferrer">'+esc((s.source||'Source')+': '+(s.title||'Open source'))+'</a>').join('')+'</div><button type="button" class="ts-chip" data-ts-select="'+i+'">ఈ story beatకి Audio references</button></article>').join('');
+ $('tsStoryResults').innerHTML=(evidence.length?'<article class="ts-card"><div class="ts-meta">VISUAL REFERENCE SOURCES</div><p>ఈ source snippets ఆధారంగా source movie hero/story cues గుర్తించబడ్డాయి.</p><div class="ts-sources">'+sourceLinks+'</div></article>':'')+cards;
+ if(!matches.length)$('tsStoryStatus').textContent+=' సరిపడా different-hero story match దొరకలేదు. తక్కువ evidence ఉన్న candidates‌ను confirmed match‌గా చూపించలేదు.';
+ root.querySelectorAll('[data-ts-select]').forEach(button=>button.addEventListener('click',()=>{const m=matches[Number(button.dataset.tsSelect)];if(!m)return;selected={movie,film:m.title,beat:(m.sharedBeats||[]).map(b=>b.label).join(', ')};$('tsAudioPanel').hidden=false;$('tsAudioTitle').textContent=m.title+' ('+m.hero+') · '+(selected.beat||'story match')+' · Audio references';$('tsAudioStatus').textContent='Audio type ఎంచుకుని search చేయండి.';$('tsAudioResults').innerHTML='';$('tsAudioPanel').scrollIntoView({behavior:'smooth',block:'nearest'});}));
+ }catch(error){$('tsStoryStatus').textContent='Search connection error: '+(error?.message||'unknown error');}
+}
+async function searchAudio(){const query=[selected.beat||'cinematic story scene',audioType,'cinematic'].join(' ');audioQuery=query;$('tsAudioStatus').textContent='Eligible CC0 / CC-BY audio వెతుకుతున్నాం…';$('tsAudioResults').innerHTML='';
+ try{const response=await fetch('/api/resources/sounds?query='+encodeURIComponent(query)+'&page=1',{cache:'no-store'});const data=await response.json();if(!response.ok)throw new Error(data.error||'Audio provider unavailable');const items=Array.isArray(data.results)?data.results:[];
+ if(!items.length){$('tsAudioStatus').textContent='ఈ cueకి eligible CC0 / CC-BY audio దొరకలేదు. వేరే audio type ప్రయత్నించండి.';return;}
+ $('tsAudioStatus').textContent=items.length+' eligible audio result(s). Licence source cardలో చూపబడుతుంది.';
+ $('tsAudioResults').innerHTML=items.slice(0,12).map(a=>'<article class="ts-audio-card"><strong>'+esc(a.title||'Untitled sound')+'</strong><p>'+esc(a.creator||'Unknown creator')+' · '+esc(a.duration||'Duration unavailable')+'<br>Licence: '+esc(a.license||'Not supplied')+'</p>'+(a.id?'<audio controls preload="none" src="/api/resources/sounds/'+encodeURIComponent(a.id)+'/preview"></audio><a href="/api/resources/sounds/'+encodeURIComponent(a.id)+'/download">Download eligible audio</a>':'<small>Preview/download unavailable</small>')+(a.url?'<a href="'+esc(a.url)+'" target="_blank" rel="noopener noreferrer">Original source ↗</a>':'')+'</article>').join('');
+ }catch(error){$('tsAudioStatus').textContent=error?.message||'Audio search failed.';}
+}
+$('tsStoryForm').addEventListener('submit',searchStory);
+root.querySelectorAll('[data-ts-audio]').forEach(button=>button.addEventListener('click',()=>{audioType=button.dataset.tsAudio;root.querySelectorAll('[data-ts-audio]').forEach(x=>x.setAttribute('aria-pressed',String(x===button)));if(selected.film)searchAudio();}));
+})();
