@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 const root=readFileSync(new URL('../workspace.html',import.meta.url),'utf8');
 const pub=readFileSync(new URL('../public/workspace.html',import.meta.url),'utf8');
-const js=readFileSync(new URL('../public/ramayanam-trailer-studio.js',import.meta.url),'utf8');
+const js=readFileSync(new URL('../public/ramayanam-trailer-studio.js',import.meta.url),'utf8');\nconst discovery=readFileSync(new URL('../worker/trailerDiscovery.ts',import.meta.url),'utf8');
 
 test('Trailer Studio has two generic modules, separate heroes and a mirrored workspace',()=>{
  assert.equal(root,pub);
@@ -21,24 +21,11 @@ test('Trailer Studio has two generic modules, separate heroes and a mirrored wor
  assert.doesNotMatch(pub,/RAMA: THE VARSHAM SAGA|Varsham reimagined/);
 });
 
-test('Story Adaptation enforces different Tollywood heroes and explains scene cues in Telugu',()=>{
- assert.match(js,/identifyHero/);
- assert.match(js,/వేరే హీరో సినిమా నుంచి సరిపోయే scene-beat overlap/);
- assert.match(js,/matchedBeats/);
- assert.match(js,/YOUR VISUAL REFERENCE/);
- assert.match(js,/telugu\|tollywood/i);
- assert.match(js,/VISUAL REFERENCE/);
- assert.match(js,/AUDIO REFERENCE/);
- assert.match(js,/హీరో \/ పాత్ర పరిచయం/);
- assert.match(js,/article plot text ఆధారితం/);
-});
-
-test('Discovery uses live public article search and discloses text-based matching',()=>{
- assert.match(js,/en\.wikipedia\.org\/w\/api\.php/);
- assert.match(js,/searchWiki/);
- assert.match(js,/tsTargetIndustry/);
- assert.match(js,/detectCues/);
- assert.match(js,/text match only|plot-text|plot cues/i);
+test('Story Adaptation uses public video/social discovery and cross-hero evidence',()=>{
+ assert.match(js,/api\\/trailer\\/discover/);
+ assert.match(js,/YouTube, Google Search, X/);
+ assert.match(js,/cross-hero public reference/);
+ assert.doesNotMatch(js.slice(js.indexOf('async function runStorySearch'),js.indexOf('function bindFilmButtons')),/searchWiki|wikipedia/i);
 });
 
 test('Scene audio uses the existing eligible sound API and inline preview controls',()=>{
@@ -57,3 +44,4 @@ test('Cross-industry recreation supports original concept notes and rights-safe 
  assert.match(pub,/My Drive/);
  assert.match(pub,/copyrighted scores are not scraped/);
 });
+\ntest('Discovery backend integrates YouTube, Google Search and X APIs with strict hero filtering',()=>{assert.match(discovery,/youtube\\.googleapis\\.com/);assert.match(discovery,/customsearch\\/v1/);assert.match(discovery,/api\\.x\\.com\\/2\\/tweets\\/search\\/recent/);assert.match(discovery,/different.length!==1/);assert.match(discovery,/YOUTUBE_API_KEY/);assert.match(discovery,/GOOGLE_CSE_API_KEY/);assert.match(discovery,/X_BEARER_TOKEN/);});\n
