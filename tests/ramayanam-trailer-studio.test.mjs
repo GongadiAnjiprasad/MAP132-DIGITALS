@@ -35,7 +35,7 @@ test('Each listed track uses the same official Mixkit asset for preview and down
   assert.match(studio, /assets\.mixkit\.co\/music\/download\/mixkit-/);
   assert.match(studio, /data-rt-preview/);
   assert.match(studio, /audio\.play\(\)/);
-  assert.match(studio, /audio\.pause\(\)/);
+  assert.match(studio, /currentAudio\.pause\(\)/);
   assert.match(studio, /stopCurrent\(\)/);
   assert.match(studio, /data-rt-preview/);
 });
