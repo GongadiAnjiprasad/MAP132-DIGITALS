@@ -69,7 +69,8 @@ test('Isolated preview bug reporter retains annotation and export tools', () => 
   assert.ok(publicWorkspace.includes('#map132BugPanel'));
 });
 
-\ntest('Trailer Studio has five fundamentals and requires all three scene-specific audio types', () => {
+
+test('Trailer Studio has five fundamentals and requires all three scene-specific audio types', () => {
   for (const base of ['opening','characters','conflict','emotion','climax']) {
     assert.match(publicWorkspace, new RegExp('data-rt-base="' + base + '"'));
   }
