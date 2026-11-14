@@ -1,5 +1,11 @@
+import { handleTrailerDiscovery } from './trailerDiscovery';
+
 interface Env {
   ASSETS: Fetcher;
+  YOUTUBE_API_KEY?: string;
+  GOOGLE_CSE_API_KEY?: string;
+  GOOGLE_CSE_CX?: string;
+  X_BEARER_TOKEN?: string;
 }
 
 const demoContent = {
@@ -144,6 +150,8 @@ function blockedResponse(): Response {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+    const trailerDiscovery = await handleTrailerDiscovery(request, env);
+    if (trailerDiscovery) return trailerDiscovery;
 
     if (url.pathname === "/api/portfolio" && request.method === "GET") {
       return Response.json(
