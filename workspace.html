@@ -317,7 +317,7 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .ts-licence-note{font-size:10px;color:var(--muted);line-height:1.6;margin-top:14px}
 @media(max-width:600px){.ts-module{padding:13px}.ts-results,.ts-audio-results,.ts-two-fields{grid-template-columns:1fr}.ts-search-row,.ts-audio-search{flex-direction:column}.ts-search-row button,.ts-audio-search button{width:100%}.ts-scene-card{grid-template-columns:1fr}.ts-scene-card button{justify-self:start}}
 
-</style></head><body><main class="shell"><header class="top"><a class="brand" href="index.html">MAP<b>132</b> <span style="font-size:10px;color:#aaa;font-weight:400">DIGITALS</span></a><a class="dashboard-link" href="index.html#admin" aria-label="Open protected Admin Dashboard"><span aria-hidden="true">▦</span> Dashboard</a><a class="back" href="index.html">← Back to website</a></header>
+.ts-telugu-help{color:var(--muted);font-size:12px;line-height:1.7;margin:6px 0 12px}.ts-search .ts-two-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}.ts-search .ts-two-fields>div{min-width:0}.ts-search .ts-two-fields input{width:100%;min-width:0}@media(max-width:600px){.ts-search .ts-two-fields{grid-template-columns:1fr}}</style></head><body><main class="shell"><header class="top"><a class="brand" href="index.html">MAP<b>132</b> <span style="font-size:10px;color:#aaa;font-weight:400">DIGITALS</span></a><a class="dashboard-link" href="index.html#admin" aria-label="Open protected Admin Dashboard"><span aria-hidden="true">▦</span> Dashboard</a><a class="back" href="index.html">← Back to website</a></header>
 <section class="welcome"><div class="kicker">Private creator area · Workspace</div><h1>Your creative control room.</h1><p>Organise your brand resources, editing references, reusable assets and project links in one place.</p></section>
 <nav class="resource-switcher" aria-label="Choose resource library">
  <button type="button" class="resource-pill" data-resource-view="fonts" aria-pressed="false"><span class="resource-pill-icon">Aa</span><strong>Cinematic Fonts</strong></button>
@@ -338,14 +338,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <form class="ts-search" id="tsStoryForm">
       <label for="tsStoryQuery">కథ / ఇతివృత్తం</label><div class="ts-search-row"><input id="tsStoryQuery" type="search" placeholder="ఉదా: రామాయణం, మహాభారతం" required><button class="primary" type="submit">సినిమా references వెతుకు</button></div>
       <p class="ts-telugu-help">Visual కోసం ఒక Tollywood హీరో సినిమా, Audio కోసం వేరే Tollywood హీరో సినిమా ఎంచుకోండి. ఇద్దరు హీరోలు ఒకరే కాకూడదు.</p>
-      <div class="ts-two-fields">
-        <div><label for="tsVisualHero">Visual Hero (హీరో పేరు)</label><input id="tsVisualHero" type="text" placeholder="ఉదా: ప్రభాస్" required></div>
-        <div><label for="tsVisualMovie">Visual Movie (సినిమా పేరు)</label><input id="tsVisualMovie" type="text" placeholder="ఉదా: వర్షం" required></div>
-      </div>
-      <div class="ts-two-fields">
-        <div><label for="tsAudioHero">Audio Hero (వేరే హీరో)</label><input id="tsAudioHero" type="text" placeholder="ఉదా: జూనియర్ ఎన్టీఆర్" required></div>
-        <div><label for="tsAudioMovie">Audio Movie (సినిమా పేరు)</label><input id="tsAudioMovie" type="text" placeholder="ఆ హీరో సినిమా పేరు" required></div>
-      </div>
+      <div class="ts-two-fields"><div><label for="tsVisualHero">Visual Hero (హీరో పేరు)</label><input id="tsVisualHero" type="text" placeholder="ఉదా: ప్రభాస్" required></div><div><label for="tsVisualMovie">Visual Movie (సినిమా పేరు)</label><input id="tsVisualMovie" type="text" placeholder="ఉదా: వర్షం" required></div></div>
+      <div class="ts-two-fields"><div><label for="tsAudioHero">Audio Hero (వేరే హీరో)</label><input id="tsAudioHero" type="text" placeholder="ఉదా: జూనియర్ ఎన్టీఆర్" required></div><div><label for="tsAudioMovie">Audio Movie (సినిమా పేరు)</label><input id="tsAudioMovie" type="text" placeholder="ఆ హీరో సినిమా పేరు" required></div></div>
     </form>
     <div class="ts-status" id="tsStoryStatus" role="status" aria-live="polite">Search results are discovered live from Wikipedia article metadata. Scene suggestions are plot-text matches, not verified shot-by-shot analysis.</div>
     <div class="ts-results" id="tsStoryResults"></div>
@@ -374,8 +368,8 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   </section>
 </section>
 
-<section class="sfx-panel resource-panel" id="cinematic-sfx" data-resource-panel="sounds">
-<div class="sfx-head"><h2>🎧 Cinematic Sound Effects</h2><span class="kicker">PLAY · PAUSE · ARY · PREVIEW · SAVE · DOWNLOAD</span></div>
+<section class="font-panel resource-panel" id="cinematic-fonts" data-resource-panel="fonts" hidden>
+ <div class="font-head"><h2>🔤 Cinematic Fonts</h2><span class="kicker">LIVE LIBRARY · PREVIEW · SAVE · DOWNLOAD</span></div>
  <p class="font-sub">An expanded library of 100+ free Google Fonts and Telugu typefaces, grouped by film-title style. These are free cinematic-style alternatives and genre matches—not claims that they are the exact proprietary fonts used in individual movie logos. Preview your title, save favourites, and download from the official source.</p>
  <div class="font-cats" id="fontCategories" aria-label="Font categories" aria-live="polite"></div>
  <div class="font-refresh-tools"><button type="button" id="fontRefreshBtn">↻ Refresh font library</button><div class="font-refresh-meta"><span id="fontLastUpdated">Last updated: loading…</span><span id="fontNextRefresh">Next refresh: every 6 hours</span></div><span class="font-refresh-status" id="fontRefreshStatus" role="status" aria-live="polite">Loading latest MAP132 font catalogue…</span></div>
