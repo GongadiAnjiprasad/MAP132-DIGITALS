@@ -15,6 +15,9 @@ test('Story matching UI shows different hero, shared beats and original evidence
  assert.doesNotThrow(()=>new Function(ui));
  assert.match(ui,/mode=story/);assert.match(ui,/different-hero match/);assert.match(ui,/sharedBeats/);assert.match(ui,/Original source|source/);
  assert.match(ui,/api\/resources\/sounds/);assert.match(ui,/audio controls/);assert.match(ui,/\/download/);
+ assert.match(ui,/sourceUrl/,'Freesound source links must use the API sourceUrl field');
+ assert.match(ui,/family-revenge/,'story beat audio search must map Telugu beat IDs to English provider search terms');
+ assert.match(ui,/audioTerms/,'selected story beats must pass mapped audio search terms');
 });
 test('Only a different identified Telugu hero and multiple story events can qualify',()=>{
  assert.deepEqual(findHeroes('Indra Telugu movie Chiranjeevi'),['Chiranjeevi']);
