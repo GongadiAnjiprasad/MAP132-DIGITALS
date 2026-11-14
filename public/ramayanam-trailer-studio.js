@@ -80,12 +80,101 @@
     };
     genreButtons.forEach(button=>button.classList.toggle('active',button.dataset.rtGenre===related[0]));
     sceneButtons.forEach(button=>button.classList.toggle('active',button.dataset.rtScene===id));
-    const keys=related.flatMap(key=>library[key].items);
-    render(keys,names[id]+' · Scene Audio','Scene-matched tracks. Preview first, then download the same track.');
+    const types=['BGM','Dialogue','SFX'];
+    const grouped=Object.fromEntries(types.map(type=>[type,sceneAssets(id,type)]));
+    const missing=types.filter(type=>!grouped[type].length);
+    stopCurrent(); title.textContent=names[id]+' · Audio Match';
+    description.textContent='Scene relevance is checked from the saved asset name/path. Only actual audio files are listed.';
+    if(missing.length){
+      grid.innerHTML='<p class="rt-empty-state">Not a complete scene match yet. Missing: '+missing.join(', ')+'. Add scene-tagged audio to My Drive (Trailer BGMs, Dialogues, Sound Effects), then refresh this panel.</p>';
+      status.textContent='Not ready · '+missing.join(' + ')+' missing. This scene is not counted as matched.';
+      return;
+    }
+    grid.innerHTML=types.map(type=>'<section class="rt-resource-group"><h4>'+type+'</h4><div class="rt-audio-grid">'+grouped[type].map(asset=>{
+      const url='/api/my-drive/assets/'+encodeURIComponent(asset.id);
+      return '<article class="rt-audio-card"><strong>'+escapeHtml(asset.name||'Audio asset')+'</strong><div class="rt-audio-meta">My Drive · '+escapeHtml(asset.licenseStatus||'usage rights unverified')+'</div><audio controls preload="none" src="'+url+'" style="width:100%"></audio><a class="rt-download-link" href="'+url+'/download" download="'+escapeHtml(asset.name||'audio')+'">Download</a></article>';
+    }).join('')+'</div></section>').join('');
+    grid.querySelectorAll('audio').forEach(audio=>audio.addEventListener('play',()=>grid.querySelectorAll('audio').forEach(other=>{if(other!==audio)other.pause();})));
+    status.textContent='Complete match · BGM, Dialogue and SFX are all available for this scene.';
+
   }
   genreButtons.forEach(button=>button.addEventListener('click',()=>selectGenre(button.dataset.rtGenre)));
   sceneButtons.forEach(button=>button.addEventListener('click',()=>selectScene(button.dataset.rtScene)));
   const tab=document.querySelector('[data-resource-view="trailer"]');
   if(tab)tab.addEventListener('click',()=>{if(!panel.hidden)selectGenre(activeGenre);});
+
+  const baseButtons = [...panel.querySelectorAll('[data-rt-base]')];
+  const baseScenes = {
+    opening: [],
+    characters: ['hero-intro','villain-intro','heroine-intro','hanuman-sena'],
+    conflict: ['hero-villain','villain-heroine'],
+    emotion: ['hero-heroine','villain-heroine','emotional'],
+    climax: ['hanuman-sena','action-climax','hero-villain']
+  };
+  const sceneTerms = {
+    'hero-intro':['hero','rama','entry','intro'], 'villain-intro':['villain','ravana','entry','intro'],
+    'heroine-intro':['heroine','sita','entry','intro'], 'hero-villain':['faceoff','confrontation','battle','rival'],
+    'hero-heroine':['romance','love','couple','relationship'], 'villain-heroine':['ashok','captivity','abduction','sita'],
+    'hanuman-sena':['hanuman','sena','search','rescue','friends'], emotional:['emotional','separation','sorrow','sad'],
+    'action-climax':['climax','war','fight','battle','action','rescue']
+  };
+  let driveAudioAssets = [];
+  let activeBase = 'opening';
+  function classifyAsset(asset) {
+    const category = String(asset.category || '').toLowerCase();
+    const text = [asset.name,asset.sourcePath,asset.subcategory,asset.tags].filter(Boolean).join(' ').toLowerCase();
+    if (category.includes('trailer bgm') || /\b(bgm|score|soundtrack|music)\b/.test(text)) return 'BGM';
+    if (category.includes('sound effect') || /\b(sfx|whoosh|riser|impact|boom|foley|explosion|heartbeat|sword|ambience)\b/.test(text)) return 'SFX';
+    if (category.includes('dialogue') || /\b(dialogue|dialog|voiceover|voice-over|narration|speech)\b/.test(text)) return 'Dialogue';
+    return '';
+  }
+  function sceneAssets(scene, type) {
+    const terms = sceneTerms[scene] || [];
+    return driveAudioAssets.filter(asset => asset.kind === 'audio' && classifyAsset(asset) === type &&
+      terms.some(term => [asset.name,asset.sourcePath,asset.subcategory,asset.tags].filter(Boolean).join(' ').toLowerCase().includes(term)));
+  }
+  async function loadDriveAudioAssets() {
+    try {
+      const session = await fetch('/api/admin/session',{credentials:'same-origin',cache:'no-store'});
+      if (!session.ok || !(await session.json()).authenticated) return;
+      const response = await fetch('/api/my-drive/assets?limit=100',{credentials:'same-origin',cache:'no-store'});
+      if (!response.ok) return;
+      const data = await response.json();
+      driveAudioAssets = Array.isArray(data.assets) ? data.assets : [];
+      updateSceneAvailability();
+    } catch (_) { /* My Drive may be signed out or unavailable; never invent resources. */ }
+  }
+  function updateSceneAvailability() {
+    sceneButtons.forEach(button => {
+      const id = button.dataset.rtScene;
+      const complete = ['BGM','Dialogue','SFX'].every(type => sceneAssets(id,type).length > 0);
+      button.dataset.rtAvailability = complete ? 'complete' : 'incomplete';
+      const note = button.querySelector('small[data-rt-availability]');
+      if (note) note.remove();
+      const statusNote = document.createElement('small');
+      statusNote.dataset.rtAvailability = 'true';
+      statusNote.textContent = complete ? '✓ BGM + Dialogue + SFX ready' : 'Audio match incomplete';
+      button.appendChild(statusNote);
+    });
+  }
+  function selectBase(id) {
+    if (!Object.prototype.hasOwnProperty.call(baseScenes,id)) return;
+    activeBase=id;
+    baseButtons.forEach(button=>button.classList.toggle('active',button.dataset.rtBase===id));
+    const allowed = baseScenes[id];
+    sceneButtons.forEach(button=>{
+      const show = allowed.length===0 || allowed.includes(button.dataset.rtScene);
+      button.hidden = !show;
+    });
+    const baseNames={opening:'Opening / Hook',characters:'Character Introductions',conflict:'Conflict / Confrontation',emotion:'Emotion / Relationship',climax:'Action / Climax / Payoff'};
+    title.textContent=baseNames[id]+' · Scene Matches';
+    description.textContent='A complete match requires scene-relevant BGM, Dialogue and SFX. Incomplete scenes are not presented as ready.';
+    status.textContent='Choose a scene. Availability is checked against audio actually saved in your authenticated My Drive.';
+    stopCurrent();
+  }
+  baseButtons.forEach(button=>button.addEventListener('click',()=>selectBase(button.dataset.rtBase)));
+
   selectGenre(activeGenre);
+  selectBase(activeBase);
+  loadDriveAudioAssets();
 })();
