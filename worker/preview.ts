@@ -158,6 +158,28 @@ function blockedResponse(): Response {
 export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
+
+    if (url.pathname === '/api/admin/session' && request.method === 'GET') {
+      const authenticated = await previewSession(request, env);
+      return Response.json({ authenticated }, { status: authenticated ? 200 : 401, headers: { 'Cache-Control': 'no-store', 'X-MAP132-Preview': 'isolated-auth' } });
+    }
+    if (url.pathname === '/api/admin/login' && request.method === 'POST') {
+      if (!env.PREVIEW_ADMIN_PASSWORD) return Response.json({ error: 'Preview admin password secret is not configured.' }, { status: 503 });
+      let body: { password?: unknown };
+      try { body = await request.json() as { password?: unknown }; } catch { return Response.json({ error: 'Invalid login request.' }, { status: 400 }); }
+      if (typeof body.password !== 'string' || body.password !== env.PREVIEW_ADMIN_PASSWORD) return Response.json({ error: 'Incorrect preview admin password.' }, { status: 401 });
+      const payload = previewBase64Url(previewEncoder.encode(JSON.stringify({ exp: Date.now() + 8 * 60 * 60 * 1000 })));
+      const token = payload + '.' + await previewSignature(payload, env.PREVIEW_ADMIN_PASSWORD);
+      return Response.json({ authenticated: true }, { headers: { 'Set-Cookie': previewCookie(token, 8 * 60 * 60), 'Cache-Control': 'no-store', 'X-MAP132-Preview': 'isolated-auth' } });
+    }
+    if (url.pathname === '/api/admin/logout' && request.method === 'POST') {
+      return Response.json({ signedOut: true }, { headers: { 'Set-Cookie': previewCookie('', 0), 'Cache-Control': 'no-store', 'X-MAP132-Preview': 'isolated-auth' } });
+    }
+    if (url.pathname === '/api/trailer/discover') {
+      if (!await previewSession(request, env)) return Response.json({ error: 'Preview admin session required.' }, { status: 401, headers: { 'Cache-Control': 'no-store', 'X-MAP132-Preview': 'isolated-auth' } });
+      const discovery = await handleTrailerDiscovery(request, env);
+      if (discovery) return discovery;
+    }
     if (url.pathname === "/api/portfolio" && request.method === "GET") {
       return Response.json(
         { content: demoContent },
