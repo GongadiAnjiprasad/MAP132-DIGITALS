@@ -74,7 +74,7 @@
   }
   function selectScene(id) {
     const related=sceneMap[id]||['action']; const names={
-      'hero-intro':'Hero Intro','villain-intro':'Villain Intro','heroine-intro':'Heroine Intro',
+      'opening-hook':'Opening / Hook','hero-intro':'Hero Intro','villain-intro':'Villain Intro','heroine-intro':'Heroine Intro',
       'hero-villain':'Hero vs Villain','hero-heroine':'Hero vs Heroine','villain-heroine':'Ashokavanam',
       'hanuman-sena':'Hanuman Sena',emotional:'Separation','action-climax':'Action / Climax'
     };
@@ -91,7 +91,7 @@
       return;
     }
     grid.innerHTML=types.map(type=>'<section class="rt-resource-group"><h4>'+type+'</h4><div class="rt-audio-grid">'+grouped[type].map(asset=>{
-      const url='/api/my-drive/assets/'+encodeURIComponent(asset.id);
+      const url='/api/my-drive/assets/'+encodeURIComponent(asset.id)+'/preview';
       return '<article class="rt-audio-card"><strong>'+escapeHtml(asset.name||'Audio asset')+'</strong><div class="rt-audio-meta">My Drive · '+escapeHtml(asset.licenseStatus||'usage rights unverified')+'</div><audio controls preload="none" src="'+url+'" style="width:100%"></audio><a class="rt-download-link" href="'+url+'/download" download="'+escapeHtml(asset.name||'audio')+'">Download</a></article>';
     }).join('')+'</div></section>').join('');
     grid.querySelectorAll('audio').forEach(audio=>audio.addEventListener('play',()=>grid.querySelectorAll('audio').forEach(other=>{if(other!==audio)other.pause();})));
@@ -101,17 +101,17 @@
   genreButtons.forEach(button=>button.addEventListener('click',()=>selectGenre(button.dataset.rtGenre)));
   sceneButtons.forEach(button=>button.addEventListener('click',()=>selectScene(button.dataset.rtScene)));
   const tab=document.querySelector('[data-resource-view="trailer"]');
-  if(tab)tab.addEventListener('click',()=>{if(!panel.hidden)selectGenre(activeGenre);});
+  if(tab)tab.addEventListener('click',()=>{if(!panel.hidden){selectGenre(activeGenre);loadDriveAudioAssets();}});
 
   const baseButtons = [...panel.querySelectorAll('[data-rt-base]')];
   const baseScenes = {
-    opening: [],
+    opening: ['opening-hook'],
     characters: ['hero-intro','villain-intro','heroine-intro','hanuman-sena'],
     conflict: ['hero-villain','villain-heroine'],
     emotion: ['hero-heroine','villain-heroine','emotional'],
     climax: ['hanuman-sena','action-climax','hero-villain']
   };
-  const sceneTerms = {
+  const sceneTerms = {\n    'opening-hook':['opening','hook','mystery','intro','atmosphere'],
     'hero-intro':['hero','rama','entry','intro'], 'villain-intro':['villain','ravana','entry','intro'],
     'heroine-intro':['heroine','sita','entry','intro'], 'hero-villain':['faceoff','confrontation','battle','rival'],
     'hero-heroine':['romance','love','couple','relationship'], 'villain-heroine':['ashok','captivity','abduction','sita'],
@@ -170,6 +170,7 @@
     title.textContent=baseNames[id]+' · Scene Matches';
     description.textContent='A complete match requires scene-relevant BGM, Dialogue and SFX. Incomplete scenes are not presented as ready.';
     status.textContent='Choose a scene. Availability is checked against audio actually saved in your authenticated My Drive.';
+    loadDriveAudioAssets();
     stopCurrent();
   }
   baseButtons.forEach(button=>button.addEventListener('click',()=>selectBase(button.dataset.rtBase)));
