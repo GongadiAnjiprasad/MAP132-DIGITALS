@@ -46,8 +46,10 @@ test('Only one track can play at a time and preview failure is surfaced', () => 
   assert.match(studio, /Preview playback was blocked/);
 });
 
-test('Trailer Studio is independent from My Drive and retains the separate workspace panels', () => {
-  assert.doesNotMatch(studio, /\/api\/my-drive/);
+test('Trailer Studio reads available audio assets without merging the My Drive workspace panels', () => {
+  assert.match(studio, /api\\/my-drive\\/assets\\?limit=100/);
+  assert.match(studio, /loadDriveAudioAssets/);
+  assert.doesNotMatch(studio, /method:\\s*['"](?:POST|PUT|PATCH|DELETE)['"]/i);
   const section = publicWorkspace.slice(publicWorkspace.indexOf('id="ramayanamStudio"'), publicWorkspace.indexOf('id="cinematic-sfx"'));
   assert.doesNotMatch(section, /my-drive|My Drive/i);
   for (const marker of ['id="myDrivePanel"','id="cinematic-sfx"','id="cinematic-fonts"','id="myDriveLoginForm"']) {
