@@ -2,19 +2,11 @@ import { handleTrailerDiscovery } from './trailerDiscovery';
 
 interface Env {
   ASSETS: Fetcher;
-  PREVIEW_ADMIN_PASSWORD?: string;
   YOUTUBE_API_KEY?: string;
   GOOGLE_CSE_API_KEY?: string;
   GOOGLE_CSE_CX?: string;
   X_BEARER_TOKEN?: string;
 }
-
-const PREVIEW_COOKIE = 'map132_admin';
-const previewEncoder = new TextEncoder();
-function previewBase64Url(bytes: Uint8Array) { let value=''; for (const byte of bytes) value+=String.fromCharCode(byte); return btoa(value).replaceAll('+','-').replaceAll('/','_').replaceAll('=',''); }
-async function previewSignature(payload: string, password: string) { const key=await crypto.subtle.importKey('raw',previewEncoder.encode(password),{name:'HMAC',hash:'SHA-256'},false,['sign']); return previewBase64Url(new Uint8Array(await crypto.subtle.sign('HMAC',key,previewEncoder.encode(payload)))); }
-async function previewSession(request: Request, env: Env) { if(!env.PREVIEW_ADMIN_PASSWORD)return false; const match=(request.headers.get('Cookie')||'').split(';').map(x=>x.trim()).find(x=>x.startsWith(PREVIEW_COOKIE+'=')); if(!match)return false; const parts=match.slice(PREVIEW_COOKIE.length+1).split('.'); if(parts.length!==2)return false; try { const data=JSON.parse(atob(parts[0].replace(/-/g,'+').replace(/_/g,'/'))); if(!Number.isFinite(data.exp)||data.exp<Date.now())return false; return parts[1]===await previewSignature(parts[0],env.PREVIEW_ADMIN_PASSWORD); } catch { return false; } }
-function previewCookie(value: string, maxAge: number) { return PREVIEW_COOKIE+'='+value+'; HttpOnly; Secure; SameSite=Lax; Path=/; Max-Age='+maxAge; }
 
 const demoContent = {
   profile: {
@@ -159,24 +151,8 @@ export default {
   async fetch(request: Request, env: Env): Promise<Response> {
     const url = new URL(request.url);
 
-    if (url.pathname === '/api/admin/session' && request.method === 'GET') {
-      const authenticated = await previewSession(request, env);
-      return Response.json({ authenticated }, { status: authenticated ? 200 : 401, headers: { 'Cache-Control': 'no-store', 'X-MAP132-Preview': 'isolated-auth' } });
-    }
-    if (url.pathname === '/api/admin/login' && request.method === 'POST') {
-      if (!env.PREVIEW_ADMIN_PASSWORD) return Response.json({ error: 'Preview admin password secret is not configured.' }, { status: 503 });
-      let body: { password?: unknown };
-      try { body = await request.json() as { password?: unknown }; } catch { return Response.json({ error: 'Invalid login request.' }, { status: 400 }); }
-      if (typeof body.password !== 'string' || body.password !== env.PREVIEW_ADMIN_PASSWORD) return Response.json({ error: 'Incorrect preview admin password.' }, { status: 401 });
-      const payload = previewBase64Url(previewEncoder.encode(JSON.stringify({ exp: Date.now() + 8 * 60 * 60 * 1000 })));
-      const token = payload + '.' + await previewSignature(payload, env.PREVIEW_ADMIN_PASSWORD);
-      return Response.json({ authenticated: true }, { headers: { 'Set-Cookie': previewCookie(token, 8 * 60 * 60), 'Cache-Control': 'no-store', 'X-MAP132-Preview': 'isolated-auth' } });
-    }
-    if (url.pathname === '/api/admin/logout' && request.method === 'POST') {
-      return Response.json({ signedOut: true }, { headers: { 'Set-Cookie': previewCookie('', 0), 'Cache-Control': 'no-store', 'X-MAP132-Preview': 'isolated-auth' } });
-    }
+    // Public, read-only Editor Workspace feature: no admin session or password required.
     if (url.pathname === '/api/trailer/discover') {
-      if (!await previewSession(request, env)) return Response.json({ error: 'Preview admin session required.' }, { status: 401, headers: { 'Cache-Control': 'no-store', 'X-MAP132-Preview': 'isolated-auth' } });
       const discovery = await handleTrailerDiscovery(request, env);
       if (discovery) return discovery;
     }
