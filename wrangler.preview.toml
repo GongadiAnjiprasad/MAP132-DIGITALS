@@ -4,7 +4,7 @@ compatibility_date = "2026-10-31"
 workers_dev = true
 
 # No production KV/R2/variables/cron bindings. Optional preview-only secrets: PREVIEW_ADMIN_PASSWORD, YOUTUBE_API_KEY, GOOGLE_CSE_API_KEY, GOOGLE_CSE_CX, X_BEARER_TOKEN.
-# The preview serves the built frontend and blocks backend/media requests.
+# The preview serves demo portfolio data, public approved reviews, and authenticated read-only trailer discovery; other backend/media actions stay blocked.
 [assets]
 directory = "./dist"
 binding = "ASSETS"
