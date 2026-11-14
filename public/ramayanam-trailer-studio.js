@@ -39,25 +39,40 @@ function chooseFilm(film,extract,kind){
 function bindSceneButtons(){root.querySelectorAll('[data-ts-scene]').forEach(b=>b.onclick=()=>{const c=cues.find(x=>x.id===b.dataset.tsScene);selectedScene=c;const source=selectedFilm?.kind==='story'?storyAudioReference:null;const query=[c?.audio||'cinematic sound',audioType.toLowerCase(),source?.hero,source?.movie].filter(Boolean).join(' ');$('tsAudioHeading').textContent=(c?.name||'Scene')+' · '+audioType;$('tsAudioQuery').value=query;$('tsAudioSubheading').textContent=source?'Audio reference: '+source.hero+' — '+source.movie+'. ఖచ్చితమైన సినిమా dialogue/BGM హక్కులతో అందుబాటులో లేకపోతే ఇక్కడ చూపించబడదు. Public search‌లో లభించే CC0 / CC-BY audio మాత్రమే preview/download అవుతుంది; మీకు అనుమతి ఉన్న అసలు audio కోసం My Drive ఉపయోగించండి.':'Search only eligible CC0 / CC-BY public audio. Verify the licence before use.';$('tsAudioArea').scrollIntoView({behavior:'smooth',block:'start'});searchAudio(query);});}
 async function runStorySearch(e){
  e.preventDefault();const query=$('tsStoryQuery').value.trim();if(!query)return;
- $('tsStoryStatus').textContent='మీరు ఇచ్చిన సినిమా పేరు ఆధారంగా రెండు వేర్వేరు Tollywood హీరోల references వెతుకుతున్నాం…';
+ $('tsStoryStatus').textContent='మీ Visual Reference సినిమా కథా వివరాలు చదివి, దానికి సరిపోయే వేరే Tollywood హీరో Audio Reference వెతుకుతున్నాం…';
  $('tsStoryResults').innerHTML='';$('tsStoryScenes').hidden=true;storyAudioReference=null;sourceSceneCues=[];
  try{
   const heroes=['Prabhas','N. T. Rama Rao Jr.','Jr NTR','Ram Charan','Allu Arjun','Mahesh Babu','Pawan Kalyan','Chiranjeevi','Venkatesh','Nagarjuna','Nani','Ravi Teja','Vijay Deverakonda','Balakrishna','Sharwanand','Gopichand','Varun Tej','Sai Dharam Tej','Adivi Sesh'];
   const identifyHero=extract=>heroes.find(h=>extract.toLowerCase().includes(h.toLowerCase()))||null;
   const norm=s=>String(s||'').toLowerCase().replace(/[^\p{L}\p{N}]/gu,'');
-  const hits=await searchWiki(query+' Telugu film Tollywood cast',20),full=await enrichFilms(hits);
-  const telugu=full.filter(x=>/telugu|tollywood/i.test(x.film.title+' '+x.extract.slice(0,1800)));
-  if(!telugu.length)throw new Error('ఈ పేరుతో సరిపోలే Telugu/Tollywood సినిమా సమాచారం దొరకలేదు. సినిమా పేరు spelling సరిచూడండి.');
-  const visual=telugu.find(x=>norm(x.film.title)===norm(query))||telugu.find(x=>norm(x.film.title).includes(norm(query))||norm(query).includes(norm(x.film.title)))||telugu[0];
-  const visualHero=identifyHero(visual.extract),cuesFound=detectCues(visual.extract);
-  const audioHits=await searchWiki('Telugu film '+(cuesFound.slice(0,3).map(c=>c.name).join(' ')||query)+' cast hero',25),audioFull=await enrichFilms(audioHits);
-  const audio=audioFull.find(x=>x.film.pageid!==visual.film.pageid&&/telugu|tollywood/i.test(x.film.title+' '+x.extract.slice(0,1800))&&identifyHero(x.extract)&&(!visualHero||norm(identifyHero(x.extract))!==norm(visualHero)));
-  if(!audio)throw new Error('Visual reference దొరికింది ('+visual.film.title+'), కానీ వేరే హీరోతో ఉన్న రెండో Tollywood సినిమాను article ఆధారంగా నిర్ధారించలేకపోయాం. తప్పు match చూపించకుండా ఆపేశాం.');
-  const audioHero=identifyHero(audio.extract);selectedFilm={...visual.film,extract:visual.extract,kind:'story'};
-  storyAudioReference={hero:audioHero,movie:audio.film.title,film:audio.film,extract:audio.extract,url:'https://en.wikipedia.org/?curid='+audio.film.pageid};sourceSceneCues=cuesFound;
-  $('tsStoryResults').innerHTML='<article class="ts-result-card"><h4>VISUAL REFERENCE · '+esc(visualHero||'హీరో వివరాలు నిర్ధారణ కాలేదు')+'</h4><strong>'+esc(visual.film.title)+'</strong><p>'+esc(visual.extract.slice(0,340))+'</p><a href="https://en.wikipedia.org/?curid='+visual.film.pageid+'" target="_blank" rel="noopener noreferrer">Visual movie source ↗</a></article><article class="ts-result-card"><h4>AUDIO REFERENCE · '+esc(audioHero)+'</h4><strong>'+esc(audio.film.title)+'</strong><p>'+esc(audio.extract.slice(0,340))+'</p><a href="'+storyAudioReference.url+'" target="_blank" rel="noopener noreferrer">Audio movie source ↗</a></article>';
-  $('tsStorySelectedTitle').textContent='Visual: '+(visualHero||'Hero not verified')+' — '+visual.film.title;$('tsStorySceneList').innerHTML=sceneMarkup(sourceSceneCues,'story');$('tsStoryScenes').hidden=false;
-  $('tsStoryStatus').textContent='మీరు ఇచ్చిన '+query+' ఆధారంగా Visual కోసం '+visual.film.title+', Audio కోసం వేరే హీరో '+audioHero+' సినిమా '+audio.film.title+' ఎంపిక చేశాం. Scene suggestions కథా text ఆధారితమే; అసలు shots‌ను verify చేయాలి.';bindSceneButtons();
+  const visualHits=await searchWiki(query+' Telugu film',20),visualFull=await enrichFilms(visualHits);
+  const visual=visualFull.find(x=>norm(x.film.title)===norm(query))||visualFull.find(x=>norm(x.film.title).includes(norm(query))||norm(query).includes(norm(x.film.title)));
+  if(!visual)throw new Error('మీరు ఇచ్చిన Visual Reference సినిమా పేరు Wikipedia Telugu-film searchలో నిర్ధారించలేకపోయాం. సరైన సినిమా పేరు ఇవ్వండి.');
+  if(!/telugu|tollywood/i.test(visual.film.title+' '+visual.extract.slice(0,1800)))throw new Error('ఈ result Telugu/Tollywood సినిమా అని article ఆధారంగా నిర్ధారణ కాలేదు. తప్పు Visual Reference చూపించలేదు.');
+  const visualHero=identifyHero(visual.extract);
+  if(!visualHero)throw new Error('Visual Reference సినిమా దొరికింది ('+visual.film.title+'), కానీ అందులోని హీరోను article ఆధారంగా నిర్ధారించలేకపోయాం. వేరే హీరో Audio match‌ను ఊహించి చూపించలేదు.');
+  const visualCues=detectCues(visual.extract);
+  if(!visualCues.length)throw new Error('Visual Reference కథా సారాంశంలో సరిపోల్చడానికి scene-beat సమాచారం లేదు. ఈ సినిమా కోసం Audio match‌ను verify చేయలేకపోయాం.');
+  sourceSceneCues=visualCues;
+  const candidateMap=new Map();
+  for(const cue of visualCues.slice(0,5)){
+   const hits=await searchWiki('Telugu film '+cue.name+' '+cue.audio+' cast',10);
+   for(const film of hits){if(film.pageid!==visual.film.pageid&&!candidateMap.has(film.pageid))candidateMap.set(film.pageid,film);}
+  }
+  const audioFull=await enrichFilms([...candidateMap.values()]);
+  const candidates=audioFull.map(x=>{const hero=identifyHero(x.extract);const beats=detectCues(x.extract);const shared=beats.filter(c=>visualCues.some(v=>v.id===c.id));return {...x,hero,shared,score:shared.reduce((n,c)=>n+c.score,0)};})
+   .filter(x=>x.hero&&norm(x.hero)!==norm(visualHero)&&/telugu|tollywood/i.test(x.film.title+' '+x.extract.slice(0,1800))&&x.shared.length)
+   .sort((a,b)=>b.shared.length-a.shared.length||b.score-a.score);
+  const audio=candidates[0];
+  if(!audio)throw new Error('Visual Reference ('+visual.film.title+') దొరికింది. కానీ వేరే హీరో సినిమా నుంచి సరిపోయే scene-beat overlap ఉన్న Audio Reference‌ను verify చేయలేకపోయాం. తప్పు match చూపించకుండా ఆపేశాం.');
+  const audioHero=audio.hero,matchedBeats=audio.shared.map(c=>c.name);
+  selectedFilm={...visual.film,extract:visual.extract,kind:'story'};
+  storyAudioReference={hero:audioHero,movie:audio.film.title,film:audio.film,extract:audio.extract,url:'https://en.wikipedia.org/?curid='+audio.film.pageid,matchedBeats};
+  $('tsStoryResults').innerHTML='<article class="ts-result-card"><h4>YOUR VISUAL REFERENCE · '+esc(visualHero)+'</h4><strong>'+esc(visual.film.title)+'</strong><p>'+esc(visual.extract.slice(0,340))+'</p><a href="https://en.wikipedia.org/?curid='+visual.film.pageid+'" target="_blank" rel="noopener noreferrer">Visual movie source ↗</a></article><article class="ts-result-card"><h4>SUGGESTED AUDIO REFERENCE · '+esc(audioHero)+'</h4><strong>'+esc(audio.film.title)+'</strong><p>'+esc(audio.extract.slice(0,340))+'</p><div class="ts-match-note">సారాంశంలో కనిపించిన common story beats: '+esc(matchedBeats.join(', '))+'. ఇది plot-summary ఆధారిత candidate మాత్రమే; actual scene/audio match ఇంకా verify చేయాలి.</div><a href="'+storyAudioReference.url+'" target="_blank" rel="noopener noreferrer">Audio movie source ↗</a></article>';
+  $('tsStorySelectedTitle').textContent='Visual: '+visualHero+' — '+visual.film.title;
+  $('tsStorySceneList').innerHTML=sceneMarkup(visualCues,'story');$('tsStoryScenes').hidden=false;
+  $('tsStoryStatus').textContent='మీరు ఇచ్చిన Visual movie '+visual.film.title+'. దానికి scene-beat overlap ఉన్న వేరే హీరో '+audioHero+' సినిమా '+audio.film.title+'ని Audio Reference candidate‌గా సూచించాం. ఇది article plot text ఆధారితం; actual scene, dialogue, BGM సరిపోతాయో తప్పనిసరిగా verify చేయాలి.';
+  bindSceneButtons();
  }catch(err){$('tsStoryStatus').textContent=err.message;}
 }
 function bindFilmButtons(full){root.querySelectorAll('[data-ts-select]').forEach(b=>b.onclick=()=>{const x=full.find(v=>String(v.film.pageid)===b.dataset.tsSelect);if(x)chooseFilm(x.film,x.extract,b.dataset.tsKind);});}
