@@ -282,6 +282,41 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 #ramayanamStudio .rt-preview-button:focus-visible,#ramayanamStudio .rt-download-link:focus-visible{outline:2px solid currentColor;outline-offset:3px}
 #ramayanamStudio .rt-source-link{display:inline-block;margin-top:8px;color:var(--muted);font-size:10px;text-decoration:underline}
 #ramayanamStudio .rt-empty-state{grid-column:1/-1;padding:14px;border:1px dashed var(--border);border-radius:8px;color:var(--muted);font-size:12px;line-height:1.6}
+
+/* MAP132 Trailer Studio: two searchable research modules */
+.ts-module-tabs,.ts-audio-tabs{display:flex;gap:8px;flex-wrap:wrap;margin:18px 0}
+.ts-module-tab,.ts-audio-tabs button{border:1px solid var(--line);background:#0b0d11;color:var(--ink);border-radius:999px;padding:10px 15px;font-size:12px}
+.ts-module-tab.active,.ts-audio-tabs button.active{background:var(--gold);color:#111;border-color:var(--gold);font-weight:800}
+.ts-module{border:1px solid var(--line);background:#0b0d11;padding:18px;margin:14px 0;border-radius:12px}
+.ts-module[hidden],.ts-scene-area[hidden]{display:none}
+.ts-intro h3,.ts-section-head h3{margin:6px 0;font-size:21px}.ts-intro p,.ts-section-head p{color:var(--muted);font-size:12px;line-height:1.65;margin:6px 0 14px}
+.ts-eyebrow{font-size:9px;letter-spacing:.18em;color:var(--gold);font-weight:800}
+.ts-search{display:grid;gap:8px;margin:18px 0}.ts-search label,.ts-concept label{font-size:11px;color:var(--muted);font-weight:700}
+.ts-search-row{display:flex;gap:8px}.ts-search input,.ts-search select,.ts-audio-search input,.ts-concept textarea{min-width:0;width:100%;padding:12px;background:#151922;color:var(--ink);border:1px solid var(--line);border-radius:7px}
+.ts-search-row button,.ts-search>button{white-space:nowrap}
+.ts-two-fields{display:grid;grid-template-columns:1fr 1fr;gap:10px}.ts-two-fields>div{display:grid;gap:7px;min-width:0}
+.ts-status{font-size:11px;color:var(--muted);padding:10px 0;line-height:1.6}
+.ts-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.ts-result-card,.ts-scene-card,.ts-audio-card{border:1px solid var(--line);background:#151922;padding:14px;border-radius:9px;min-width:0}
+.ts-result-card h4{font-size:14px;margin:0 0 6px}.ts-result-card p,.ts-scene-card p,.ts-audio-card p{font-size:11px;line-height:1.6;color:var(--muted);margin:6px 0}
+.ts-result-card a,.ts-audio-card a{color:var(--gold);font-size:11px;text-decoration:underline}
+.ts-result-card button,.ts-scene-card button,.ts-audio-card button,.ts-concept button{margin-top:9px;padding:8px 11px;border-radius:6px;font-size:11px}
+.ts-match-note{font-size:10px;color:#c8b68f;margin-top:8px}
+.ts-scene-area{border-top:1px solid var(--line);margin-top:18px;padding-top:16px}
+.ts-scene-list{display:grid;gap:8px;margin:12px 0}
+.ts-scene-card{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:center;gap:8px}
+.ts-scene-card strong{font-size:12px}.ts-scene-card button{margin:0;white-space:nowrap}
+.ts-cross-form{gap:10px}.ts-cross-source{margin:12px 0;color:var(--muted);font-size:11px}
+.ts-concept{border:1px solid var(--line);padding:13px;border-radius:8px;margin-top:14px;display:grid;gap:9px}
+.ts-concept-output{font-size:12px;line-height:1.7;color:var(--ink);white-space:pre-wrap}
+.ts-audio-area{border:1px solid var(--line);padding:18px;margin-top:18px;border-radius:12px;background:#11151d}
+.ts-audio-search{display:flex;gap:8px}.ts-audio-search button{white-space:nowrap}
+.ts-audio-results{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+.ts-audio-card strong{font-size:12px;display:block;overflow-wrap:anywhere}.ts-audio-card .ts-meta{font-size:10px;color:var(--muted);line-height:1.5;margin:6px 0}
+.ts-audio-card audio{width:100%;height:34px;margin:7px 0}.ts-audio-card .ts-audio-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.ts-licence-note{font-size:10px;color:var(--muted);line-height:1.6;margin-top:14px}
+@media(max-width:600px){.ts-module{padding:13px}.ts-results,.ts-audio-results,.ts-two-fields{grid-template-columns:1fr}.ts-search-row,.ts-audio-search{flex-direction:column}.ts-search-row button,.ts-audio-search button{width:100%}.ts-scene-card{grid-template-columns:1fr}.ts-scene-card button{justify-self:start}}
+
 </style></head><body><main class="shell"><header class="top"><a class="brand" href="index.html">MAP<b>132</b> <span style="font-size:10px;color:#aaa;font-weight:400">DIGITALS</span></a><a class="dashboard-link" href="index.html#admin" aria-label="Open protected Admin Dashboard"><span aria-hidden="true">▦</span> Dashboard</a><a class="back" href="index.html">← Back to website</a></header>
 <section class="welcome"><div class="kicker">Private creator area · Workspace</div><h1>Your creative control room.</h1><p>Organise your brand resources, editing references, reusable assets and project links in one place.</p></section>
 <nav class="resource-switcher" aria-label="Choose resource library">
@@ -294,47 +329,39 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 
 <section class="rt-studio resource-panel" id="ramayanamStudio" data-resource-panel="trailer" hidden>
-<div class="rt-head"><div><div class="kicker">MAP132 / EDITOR WORKSPACE</div><h2>Trailer Studio</h2><p>Genre-wise audio download folders and scene-matched picks for each trailer project.</p></div><a class="rt-action" href="https://www.youtube.com/audiolibrary" target="_blank" rel="noopener noreferrer">YouTube Audio Library ↗</a></div>
-<div class="rt-project-box">
-<div class="rt-project-heading"><div><span class="rt-source-label">TRAILER PROJECT</span><h3>RAMA: THE VARSHAM SAGA</h3><p>Varsham reimagined with a Ramayanam theme · 90-second fan edit</p></div></div>
-<div class="rt-genre-heading"><div><h3>Trailer Fundamentals · 5 Bases</h3><p>Choose a storytelling base first; its scene options appear below.</p></div></div>
-<div class="rt-scene-grid" id="rtFundamentalBases" aria-label="Five trailer fundamentals">
-<button type="button" class="rt-scene-button active" data-rt-base="opening"><strong>01 · Opening / Hook</strong><span>Establish the world and grab attention</span></button>
-<button type="button" class="rt-scene-button" data-rt-base="characters"><strong>02 · Character Introductions</strong><span>Hero, villain, heroine and allies</span></button>
-<button type="button" class="rt-scene-button" data-rt-base="conflict"><strong>03 · Conflict / Confrontation</strong><span>Threats, face-offs and pursuit</span></button>
-<button type="button" class="rt-scene-button" data-rt-base="emotion"><strong>04 · Emotion / Relationship</strong><span>Love, separation and captivity</span></button>
-<button type="button" class="rt-scene-button" data-rt-base="climax"><strong>05 · Action / Climax / Payoff</strong><span>Rescue, battle and final reveal</span></button>
-</div>
-<div class="rt-genre-heading"><div><h3>Scene Matches</h3><p>Only mark a scene as matched when BGM, Dialogue and SFX are all available and scene-relevant.</p></div></div>
-<div class="rt-scene-grid" id="rtProjectScenes" aria-label="Scene-wise audio downloads">
-<button type="button" class="rt-scene-button" data-rt-scene="opening-hook"><strong>00 · Opening / Hook</strong><span>Mystery / world introduction</span></button>
-<button type="button" class="rt-scene-button active" data-rt-scene="hero-intro"><strong>01 · Hero Intro</strong><span>Rama entry / elevation</span></button>
-<button type="button" class="rt-scene-button" data-rt-scene="villain-intro"><strong>02 · Villain Intro</strong><span>Ravana / dark royal entry</span></button>
-<button type="button" class="rt-scene-button" data-rt-scene="heroine-intro"><strong>03 · Heroine Intro</strong><span>Sita / graceful entry</span></button>
-<button type="button" class="rt-scene-button" data-rt-scene="hero-villain"><strong>04 · Hero vs Villain</strong><span>Face-off / confrontation</span></button>
-<button type="button" class="rt-scene-button" data-rt-scene="hero-heroine"><strong>05 · Hero vs Heroine</strong><span>Love / longing</span></button>
-<button type="button" class="rt-scene-button" data-rt-scene="villain-heroine"><strong>06 · Ashokavanam</strong><span>Captivity / tension</span></button>
-<button type="button" class="rt-scene-button" data-rt-scene="hanuman-sena"><strong>07 · Hanuman Sena</strong><span>Search / rescue support</span></button>
-<button type="button" class="rt-scene-button" data-rt-scene="emotional"><strong>08 · Separation</strong><span>Emotional / sorrow</span></button>
-<button type="button" class="rt-scene-button" data-rt-scene="action-climax"><strong>09 · Action / Climax</strong><span>Battle / final elevation</span></button>
-</div>
-</div>
-<div class="rt-genre-heading"><div><h3>Genre Folders</h3><p>Open a genre to get ready-made, downloadable music collections.</p></div></div>
-<div class="rt-genre-grid" id="rtGenreFolders" role="group" aria-label="Audio genres">
-<button type="button" class="rt-genre-button active" data-rt-genre="action"><span>⚔️</span><strong>Action</strong></button>
-<button type="button" class="rt-genre-button" data-rt-genre="romance"><span>❤️</span><strong>Romance</strong></button>
-<button type="button" class="rt-genre-button" data-rt-genre="thriller"><span>🕶️</span><strong>Thriller / Suspense</strong></button>
-<button type="button" class="rt-genre-button" data-rt-genre="emotional"><span>💔</span><strong>Emotional</strong></button>
-<button type="button" class="rt-genre-button" data-rt-genre="horror"><span>🌑</span><strong>Horror</strong></button>
-<button type="button" class="rt-genre-button" data-rt-genre="comedy"><span>😄</span><strong>Comedy</strong></button>
-<button type="button" class="rt-genre-button" data-rt-genre="devotional"><span>🪔</span><strong>Devotional / Mythological</strong></button>
-<button type="button" class="rt-genre-button" data-rt-genre="epic"><span>🏹</span><strong>Epic / Heroic</strong></button>
-<button type="button" class="rt-genre-button" data-rt-genre="adventure"><span>🧭</span><strong>Adventure / Fantasy</strong></button>
-</div>
-<div class="rt-download-head"><div><h3 id="rtDownloadTitle">Action Audio Downloads</h3><p id="rtDownloadDescription">Curated free collections. Open a source and use its official Download control.</p></div></div>
-<div class="rt-status" id="rtLibraryStatus" role="status">Choose a genre or a scene above. Only downloadable source collections are listed here.</div>
-<div class="rt-audio-grid" id="rtLibraryAssets" aria-live="polite"></div>
-<div class="rt-download-foot">Downloads open on the original provider. Check the item licence and any attribution requirements before using it in a published video.</div>
+  <div class="rt-head"><div><div class="kicker">MAP132 / EDITOR WORKSPACE</div><h2>Trailer Studio</h2><p>Research reference films, compare story moments across industries, then find usable scene-wise audio.</p></div><a class="rt-action" href="https://www.youtube.com/audiolibrary" target="_blank" rel="noopener noreferrer">YouTube Audio Library ↗</a></div>
+  <div class="ts-module-tabs" role="tablist" aria-label="Trailer Studio modules">
+    <button type="button" class="ts-module-tab active" id="tsStoryTab" role="tab" aria-selected="true" aria-controls="tsStoryModule">01 · Story Adaptation</button>
+    <button type="button" class="ts-module-tab" id="tsCrossTab" role="tab" aria-selected="false" aria-controls="tsCrossModule">02 · Cross-Industry Recreation</button>
+  </div>
+  <section class="ts-module" id="tsStoryModule" role="tabpanel" aria-labelledby="tsStoryTab">
+    <div class="ts-intro"><span class="ts-eyebrow">MODULE 01</span><h3>Story → Reference Movies</h3><p>Search a story, mythology or film concept. Discover film references and inspect plot-based scene matches before choosing a reference.</p></div>
+    <form class="ts-search" id="tsStoryForm"><label for="tsStoryQuery">Story / theme name</label><div class="ts-search-row"><input id="tsStoryQuery" type="search" placeholder="e.g. Ramayanam, Mahabharatam, a story title" required><button class="primary" type="submit">Find references</button></div></form>
+    <div class="ts-status" id="tsStoryStatus" role="status" aria-live="polite">Search results are discovered live from Wikipedia article metadata. Scene suggestions are plot-text matches, not verified shot-by-shot analysis.</div>
+    <div class="ts-results" id="tsStoryResults"></div>
+    <div class="ts-scene-area" id="tsStoryScenes" hidden><div class="ts-section-head"><div><h4 id="tsStorySelectedTitle">Selected reference</h4><p>Potential story beats found in the reference article. Open the source to verify the actual scene.</p></div></div><div class="ts-scene-list" id="tsStorySceneList"></div><button type="button" class="primary" id="tsStoryOpenAudio">Open scene-wise audio library</button></div>
+  </section>
+  <section class="ts-module" id="tsCrossModule" role="tabpanel" aria-labelledby="tsCrossTab" hidden>
+    <div class="ts-intro"><span class="ts-eyebrow">MODULE 02</span><h3>Cross-Industry Movie Recreation</h3><p>Take a Hollywood, Tollywood, Bollywood or other-industry film as a creative reference. Find comparable story moments in another industry and combine the ideas into a new story concept.</p></div>
+    <form class="ts-search ts-cross-form" id="tsCrossForm">
+      <label for="tsCrossMovie">Reference movie</label><input id="tsCrossMovie" type="search" placeholder="e.g. Spider-Man" required>
+      <div class="ts-two-fields"><div><label for="tsSourceIndustry">Reference industry</label><select id="tsSourceIndustry"><option>Hollywood</option><option>Tollywood</option><option>Bollywood</option><option>Korean cinema</option><option>Japanese cinema</option><option>Other / not sure</option></select></div><div><label for="tsTargetIndustry">Find matches in</label><select id="tsTargetIndustry"><option>Tollywood</option><option>Hollywood</option><option>Bollywood</option><option>Korean cinema</option><option>Japanese cinema</option><option>Other / not sure</option></select></div></div>
+      <div class="ts-two-fields"><div><label for="tsCrossGenre">Genre (optional)</label><select id="tsCrossGenre"><option value="">Auto-detect / any</option><option>Action</option><option>Thriller</option><option>Sci-fi</option><option>Fantasy</option><option>Comedy</option><option>Horror</option><option>Drama</option><option>Adventure</option></select></div><div><label for="tsCrossLanguage">Preferred language (optional)</label><input id="tsCrossLanguage" type="text" placeholder="e.g. Telugu"></div></div>
+      <button class="primary" type="submit">Find cross-industry matches</button>
+    </form>
+    <div class="ts-status" id="tsCrossStatus" role="status" aria-live="polite">Searches public film/article information. Similarity is based on text cues and must be reviewed; it does not claim two films contain identical scenes.</div>
+    <div class="ts-cross-source" id="tsCrossSource"></div>
+    <div class="ts-results" id="tsCrossResults"></div>
+    <div class="ts-scene-area" id="tsCrossScenes" hidden><div class="ts-section-head"><div><h4 id="tsCrossSelectedTitle">Scene comparison</h4><p>Select a story beat to find audio and build a fresh scene concept.</p></div></div><div class="ts-scene-list" id="tsCrossSceneList"></div><div class="ts-concept"><label for="tsNewStoryNotes">Your new-story notes</label><textarea id="tsNewStoryNotes" rows="3" placeholder="Write your new hero, setting, conflict or comedy angle…"></textarea><button type="button" id="tsBuildConcept">Build scene concept</button><div id="tsConceptOutput" class="ts-concept-output" aria-live="polite"></div></div></div>
+  </section>
+  <section class="ts-audio-area" id="tsAudioArea">
+    <div class="ts-section-head"><div><span class="ts-eyebrow">SCENE-WISE AUDIO LIBRARY</span><h3 id="tsAudioHeading">Choose a scene to find audio</h3><p id="tsAudioSubheading">Search results from FreeSound are limited to eligible CC0 / CC-BY assets exposed by the existing MAP132 sound API. Film dialogues and copyrighted scores are not scraped or redistributed.</p></div></div>
+    <div class="ts-audio-tabs" role="group" aria-label="Audio category"><button type="button" class="active" data-ts-audio="BGM">BGM / Music</button><button type="button" data-ts-audio="Dialogue">Dialogue / Voice</button><button type="button" data-ts-audio="SFX">Sound Effects</button></div>
+    <div class="ts-audio-search"><input id="tsAudioQuery" type="search" placeholder="Search this scene's audio…"><button type="button" class="primary" id="tsAudioSearchBtn">Search audio</button></div>
+    <div class="ts-status" id="tsAudioStatus" role="status" aria-live="polite">No audio search yet. Choose a scene first.</div>
+    <div class="ts-audio-results" id="tsAudioResults"></div>
+    <p class="ts-licence-note">Movie dialogue/BGM from commercial films may be copyrighted. This library does not extract movie audio. For those, use your own authorised files in My Drive. Public-source results show their licence and creator where supplied.</p>
+  </section>
 </section>
 
 <section class="sfx-panel resource-panel" id="cinematic-sfx" data-resource-panel="sounds">
