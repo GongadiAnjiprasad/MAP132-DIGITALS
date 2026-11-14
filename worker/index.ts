@@ -52,7 +52,7 @@ async function read(env:Env){
     return {...DEFAULTS,...stored,profile,skills,items,resources,logoPath:typeof stored.logoPath==='string'&&stored.logoPath.startsWith('portfolio/logos/')?stored.logoPath:''};
   }catch{return DEFAULTS;}
 }
-async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;const trailerDiscovery=await handleTrailerDiscovery(req,env);if(trailerDiscovery)return trailerDiscovery;if(path.startsWith('/api/portfolio/video/')&&method==='GET'){
+async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;if(path==='/api/trailer/discover'&&!await validSession(req,env))return json({error:'Admin session required.'},401);const trailerDiscovery=await handleTrailerDiscovery(req,env);if(trailerDiscovery)return trailerDiscovery;if(path.startsWith('/api/portfolio/video/')&&method==='GET'){
  const fileId=path.slice('/api/portfolio/video/'.length);
  if(!/^[a-zA-Z0-9_-]{1,256}$/.test(fileId))return json({error:'Invalid portfolio video ID.'},400);
  const content=await read(env);
