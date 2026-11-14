@@ -7,13 +7,13 @@ const js=readFileSync(new URL('../public/ramayanam-trailer-studio.js',import.met
 test('Trailer Studio has two distinct generic modules and preserves workspace mirror',()=>{
  assert.equal(root,pub);
  assert.match(pub,/Story Adaptation/); assert.match(pub,/Cross-Industry Recreation/);
- assert.match(pub,/tsStoryForm/); assert.match(pub,/tsCrossForm/);
+ assert.match(pub,/tsStoryForm/); assert.match(pub,/tsCrossForm/);\n assert.match(pub,/tsVisualHero/); assert.match(pub,/tsAudioHero/);\n assert.doesNotMatch(pub,/data-resource-view=\"sounds\"|id=\"cinematic-sfx\"/);
  assert.doesNotMatch(pub,/RAMA: THE VARSHAM SAGA|Varsham reimagined/);
 });
 test('Discovery uses live public article search and does not hardcode a single film',()=>{
  assert.match(js,/en\.wikipedia\.org\/w\/api\.php/);assert.match(js,/searchWiki/);
  assert.match(js,/tsTargetIndustry/);assert.match(js,/detectCues/);
- assert.match(js,/text match only|plot-text|plot cues/i);
+ assert.match(js,/text match only|plot-text|plot cues/i);\n assert.match(js,/Visual Hero, Audio Hero/);\n assert.match(js,/telugu\\|tollywood/i);\n assert.match(js,/VISUAL REFERENCE/); assert.match(js,/AUDIO REFERENCE/);\n assert.match(js,/హీరో \/ పాత్ర పరిచయం/);
 });
 test('Scene audio uses the existing eligible sound API and inline preview controls',()=>{
  assert.match(js,/api\/resources\/sounds/);assert.match(js,/audio controls/);
