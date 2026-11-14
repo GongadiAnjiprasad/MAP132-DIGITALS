@@ -47,7 +47,7 @@ test('Only one track can play at a time and preview failure is surfaced', () => 
 });
 
 test('Trailer Studio reads available audio assets without merging the My Drive workspace panels', () => {
-  assert.match(studio, /api\\/my-drive\\/assets\\?limit=100/);
+  assert.ok(studio.includes('/api/my-drive/assets?limit=100'), 'Expected read-only My Drive asset endpoint');
   assert.match(studio, /loadDriveAudioAssets/);
   assert.doesNotMatch(studio, /method:\\s*['"](?:POST|PUT|PATCH|DELETE)['"]/i);
   const section = publicWorkspace.slice(publicWorkspace.indexOf('id="ramayanamStudio"'), publicWorkspace.indexOf('id="cinematic-sfx"'));
