@@ -1,41 +1,99 @@
-(()=>{const panel=document.getElementById('ramayanamStudio'),grid=document.getElementById('rtLibraryAssets');if(!panel||!grid)return;
-const status=document.getElementById('rtLibraryStatus'),refresh=document.getElementById('rtLibraryRefresh'),categoryButtons=[...panel.querySelectorAll('[data-library-cat]')],moodButtons=[...panel.querySelectorAll('[data-library-mood]')];
-let assets=[],activeCategory='all',activeMood='all',loaded=false;
-const safe=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const catalog=[
-{id:'ry-jai-jai-ram',title:'Jai Jai Rama (Telugu)',film:'Ramayana (2026)',duration:'5:20',language:'Telugu',source:'Apple Music · official Telugu EP',url:'https://music.apple.com/us/album/ramayana-original-motion-picture-soundtrack-telugu-ep/6825356567',scenes:['hero-intro','hanuman-sena','action-climax'],moods:['devotional','royal','mass'],note:'Official Telugu soundtrack listing; stream/preview on licensed music service.'},
-{id:'ry-ravana-tandavam',title:'Ravana Tandavam (Telugu)',film:'Ramayana (2026)',duration:'3:14',language:'Telugu',source:'World Of Ramayana · official YouTube',url:'https://www.youtube.com/watch?v=HP-FAYqCfR8',scenes:['villain-intro','hero-villain','villain-heroine','action-climax'],moods:['mass','royal','action'],note:'Official Telugu song video; no download provided.'},
-{id:'ry-sita-aspiration',title:"Sita’s Aspiration (Telugu EP)",film:'Ramayana (2026)',duration:'2:42',language:'Telugu EP listing',source:'Apple Music · official Telugu EP',url:'https://music.apple.com/us/album/ramayana-original-motion-picture-soundtrack-telugu-ep/6825356567',scenes:['heroine-intro','hero-heroine','villain-heroine','emotional'],moods:['emotional','suspense'],note:'Track listed on the official Telugu EP; use licensed streaming preview.'},
-{id:'ry-jai-jai-orchestral',title:'Jai Jai Ram (Orchestral)',film:'Ramayana (2026)',duration:'3:02',language:'Instrumental',source:'T-Series · official YouTube',url:'https://www.youtube.com/watch?v=PoG5Pnk5t2c',scenes:['hero-intro','hanuman-sena','action-climax'],moods:['royal','devotional','action'],note:'Official instrumental audio; Hindi release, instrumental.'},
-{id:'ry-rama-theme',title:'Rama Theme',film:'Ramayana (2026)',duration:'2:27',language:'Instrumental',source:'T-Series · official YouTube',url:'https://www.youtube.com/watch?v=l27kqvm64QY',scenes:['hero-intro','hero-heroine','emotional','hero-villain'],moods:['royal','emotional','devotional'],note:'Official instrumental audio; Hindi release, instrumental.'},
-{id:'ad-jai-shri-ram',title:'Jai Shri Ram',film:'Adipurush (Telugu)',duration:'3:32',language:'Telugu',source:'T-Series Telugu · official jukebox',url:'https://www.youtube.com/watch?v=vWKzIP51Qv8&t=0s',scenes:['hero-intro','hanuman-sena','action-climax'],moods:['mass','devotional','action'],note:'Official Telugu jukebox · starts 00:00.'},
-{id:'ad-shivoham',title:'Shivoham',film:'Adipurush (Telugu)',duration:'3:56',language:'Telugu',source:'T-Series Telugu · official jukebox',url:'https://www.youtube.com/watch?v=vWKzIP51Qv8&t=212s',scenes:['villain-intro','hero-villain','action-climax'],moods:['royal','devotional','action'],note:'Official Telugu jukebox · starts 03:32.'},
-{id:'ad-priya-mithunam',title:'Priya Mithunam',film:'Adipurush (Telugu)',duration:'3:22',language:'Telugu',source:'T-Series Telugu · official jukebox',url:'https://www.youtube.com/watch?v=vWKzIP51Qv8&t=448s',scenes:['heroine-intro','hero-heroine','emotional'],moods:['emotional','royal'],note:'Official Telugu jukebox · starts 07:28.'},
-{id:'ad-huppa-huiya',title:'Huppa Huiya',film:'Adipurush (Telugu)',duration:'3:43',language:'Telugu',source:'T-Series Telugu · official jukebox',url:'https://www.youtube.com/watch?v=vWKzIP51Qv8&t=650s',scenes:['hanuman-sena','hero-villain','action-climax'],moods:['mass','action'],note:'Official Telugu jukebox · starts 10:50.'},
-{id:'ad-ram-sita-ram',title:'Ram Sita Ram',film:'Adipurush (Telugu)',duration:'Not independently verified',language:'Telugu',source:'T-Series Telugu · official jukebox',url:'https://www.youtube.com/watch?v=vWKzIP51Qv8&t=873s',scenes:['hero-heroine','emotional','heroine-intro'],moods:['emotional','devotional'],note:'Official Telugu jukebox · starts 14:33; exact track end not independently verified.'}
-,
-{id:'srj-jagadhanandhakaraka',title:'Jagadhanandhakaraka',film:'Sri Rama Rajyam (2011)',duration:'Album jukebox',language:'Telugu',source:'Aditya Music · official verified YouTube jukebox',url:'https://www.youtube.com/watch?v=dVoqDJMAM6c',scenes:['hero-intro','hanuman-sena','action-climax'],moods:['devotional','royal'],note:'Official Aditya Music full-songs jukebox; browse track list in video description.'},
-{id:'srj-sita-rama-charitham',title:'Sita Rama Charitham',film:'Sri Rama Rajyam (2011)',duration:'Album jukebox',language:'Telugu',source:'Aditya Music · official verified YouTube jukebox',url:'https://www.youtube.com/watch?v=dVoqDJMAM6c',scenes:['heroine-intro','hero-heroine','emotional'],moods:['emotional','devotional'],note:'Official Aditya Music full-songs jukebox; track listed in video description.'},
-{id:'srj-dandakam',title:'Dandakam',film:'Sri Rama Rajyam (2011)',duration:'Album jukebox',language:'Telugu',source:'Aditya Music · official verified YouTube jukebox',url:'https://www.youtube.com/watch?v=dVoqDJMAM6c',scenes:['villain-intro','hero-villain','action-climax'],moods:['devotional','suspense'],note:'Official Aditya Music full-songs jukebox; track listed in video description.'},
-{id:'srj-ramayanamu',title:'Ramayanamu',film:'Sri Rama Rajyam (2011)',duration:'Album jukebox',language:'Telugu',source:'Aditya Music · official verified YouTube jukebox',url:'https://www.youtube.com/watch?v=dVoqDJMAM6c',scenes:['hanuman-sena','emotional','action-climax'],moods:['devotional','royal'],note:'Official Aditya Music full-songs jukebox; track listed in video description.'},
-{id:'sr-lava-jaya-jaya-rama',title:'Jaya Jaya Rama',film:'Lava Kusa (1963)',duration:'3:36',language:'Telugu',source:'Apple Music · Saregama soundtrack listing',url:'https://music.apple.com/us/album/jaya-jaya-rama/1328784416?i=1328784424',scenes:['hero-intro','hanuman-sena','action-climax'],moods:['devotional','royal'],note:'Official licensed track page with preview; Ghantasala-era soundtrack.'},
-{id:'sr-lava-vinudu',title:'Vinudu Vinudu Ramayana Gaatha',film:'Lava Kusa (1963)',duration:'4:29',language:'Telugu',source:'Apple Music · Saregama soundtrack listing',url:'https://music.apple.com/us/album/lava-kusa-original-motion-picture-soundtrack/1328784416',scenes:['hanuman-sena','emotional','action-climax'],moods:['devotional','emotional'],note:'Track and duration listed on the licensed soundtrack album page.'},
-{id:'sr-sampoorna-vedalenu',title:'Vedalenu Kodandapani',film:'Sampoorna Ramayanam (1972)',duration:'8:04',language:'Telugu',source:'Apple Music · Saregama soundtrack listing',url:'https://music.apple.com/us/album/sampoorna-ramayanam-original-motion-picture-soundtrack/1434932805',scenes:['hero-intro','hero-villain','action-climax'],moods:['devotional','royal','action'],note:'Track and duration listed on the licensed soundtrack album page.'},
-{id:'sr-sampoorna-jatakataha',title:'Jatakataha',film:'Sampoorna Ramayanam (1972)',duration:'3:01',language:'Telugu',source:'Apple Music · Saregama soundtrack listing',url:'https://music.apple.com/us/album/sampoorna-ramayanam-original-motion-picture-soundtrack/1434932805',scenes:['villain-intro','hero-villain','action-climax'],moods:['devotional','action'],note:'Track and duration listed on the licensed soundtrack album page.'},
-{id:'sr-sampoorna-rama-laali',title:'Rama Laali',film:'Sampoorna Ramayanam (1972)',duration:'3:06',language:'Telugu',source:'Apple Music · Saregama soundtrack listing',url:'https://music.apple.com/us/album/sampoorna-ramayanam-original-motion-picture-soundtrack/1434932805',scenes:['hero-heroine','emotional','heroine-intro'],moods:['emotional','devotional'],note:'Track and duration listed on the licensed soundtrack album page.'}
-];
-const categoryMap={'hero-intro':/hero intro|rama intro|rama entry|hero entry|hero elevation|hero reveal/,'villain-intro':/villain intro|ravana intro|villain entry|dark reveal|lanka entry/,'heroine-intro':/heroine intro|sita intro|seetha intro|heroine entry|divine beauty/,'hero-villain':/hero.?villain|rama.?ravana|face.?off|confrontation|war declaration/,'hero-heroine':/hero.?heroine|rama.?sita|seetha.?rama|romance|love meeting|reunion/,'villain-heroine':/villain.?heroine|ravana.?sita|abduction|ashokavanam|captivity|pressure|resistance/,'hanuman-sena':/hanuman|vanara|sena|friends entry|search mission|rescue support/,'emotional':/emotional|separation|sad|sorrow|crying|misunderstanding|reunion/,'action-climax':/action|climax|battle|war drums|fight|impact|victory|defeat/};
-const moodMap={mass:/mass|elevation|powerful|heroic/,royal:/royal|grand|orchestral|regal/,emotional:/emotional|sad|love|separation|sorrow/,devotional:/shloka|chant|mantra|stotra|devotional|conch/,suspense:/suspense|tension|dark|ominous|heartbeat/,action:/action|battle|war|impact|fight|percussion/};
-const fields=x=>[x.category,x.subcategory,x.name,x.filename,x.sourcePath,x.scene,x.tags,x.mood,x.movieTitle,x.sourceMovie].flat().filter(Boolean).join(' ').toLowerCase();
-const byCategory=(x,k)=>k==='all'||(x.scenes&&x.scenes.includes(k))||(Array.isArray(x.sceneCategories)&&x.sceneCategories.includes(k))||(categoryMap[k]&&categoryMap[k].test(fields(x)));
-const byMood=(x,k)=>k==='all'||(x.moods&&x.moods.includes(k))||(Array.isArray(x.moods)&&x.moods.includes(k))||(moodMap[k]&&moodMap[k].test(fields(x)));
-function card(x,isDrive=false){const name=x.title||x.name||x.filename||'Audio asset',film=x.film||x.movieTitle||x.sourceMovie||x.source||x.sourcePath||'Source not recorded',scenes=(x.scenes||Object.keys(categoryMap).filter(k=>byCategory(x,k))),moods=x.moods||[];if(isDrive){const format=(name.match(/\.([a-z0-9]{2,5})$/i)||[])[1]||x.mimeType?.split('/').pop()||'format not reported';return '<article class="rt-audio-card"><span class="rt-source-label">MY DRIVE · USER ASSET</span><strong>'+safe(name)+'</strong><div class="rt-audio-meta">'+safe(film)+' · '+safe(String(format).toUpperCase())+'<br>Usage: '+safe(x.licenseStatus||x.licenceStatus||'Usage rights not verified')+(scenes.length?' · Scenes: '+safe(scenes.join(', ')):'')+'</div><audio controls preload="none" src="/api/my-drive/assets/'+encodeURIComponent(x.id)+'/preview"></audio><a href="/api/my-drive/assets/'+encodeURIComponent(x.id)+'/download" download="'+safe(name)+'">Download from My Drive</a></article>';}
-return '<article class="rt-audio-card"><span class="rt-source-label rt-recommended">OFFICIAL SOURCE · SCENE PICK</span><strong>'+safe(name)+'</strong><div class="rt-audio-meta">'+safe(film)+' · '+safe(x.language)+' · '+safe(x.duration)+'<br>'+safe(x.source)+'<br>Suggested scenes: '+safe(scenes.join(', '))+'<br>Mood: '+safe(moods.join(', '))+'<br>'+safe(x.note)+'</div><a href="'+safe(x.url)+'" target="_blank" rel="noopener noreferrer">Listen to official audio ↗</a></article>';}
-function render(){const official=catalog.filter(x=>byCategory(x,activeCategory)&&byMood(x,activeMood));const drive=assets.filter(x=>byCategory(x,activeCategory)&&byMood(x,activeMood));const cards=official.map(x=>card(x)).concat(drive.map(x=>card(x,true)));if(!cards.length){grid.innerHTML='<div class="rt-library-empty">No official track or saved Drive audio matches this filter. Try All audio / All moods.</div>';return;}grid.innerHTML=cards.join('');grid.querySelectorAll('audio').forEach(a=>a.addEventListener('play',()=>document.querySelectorAll('audio').forEach(other=>{if(other!==a)other.pause()})));}
-async function load(){if(refresh)refresh.disabled=true;status.textContent='Official soundtrack catalogue ready · checking your private Drive audio…';try{let cursor=null,all=[],pages=0;do{const response=await fetch('/api/my-drive/assets?limit=100'+(cursor?'&cursor='+encodeURIComponent(cursor):''),{credentials:'same-origin',cache:'no-store'}),data=await response.json().catch(()=>({}));if(!response.ok)throw new Error(data.error||'My Drive not connected; official listening catalogue is still available.');all=all.concat(Array.isArray(data.assets)?data.assets:[]);cursor=typeof data.cursor==='string'&&data.cursor?data.cursor:null;pages++;}while(cursor&&pages<100);const seen=new Set();assets=all.filter(x=>x.kind==='audio'&&x.id&&!seen.has(x.id)&&seen.add(x.id));status.textContent=catalog.length+' verified official-source track entries · '+assets.length+' actual Drive audio file(s) loaded · '+(cursor?'Drive pagination limit reached.':'Drive pages checked.');}catch(e){status.textContent=catalog.length+' official-source track entries ready · My Drive audio not connected ('+(e.message||'connection unavailable')+').';}finally{loaded=true;render();if(refresh)refresh.disabled=false;}}
-categoryButtons.forEach(b=>b.addEventListener('click',()=>{activeCategory=b.dataset.libraryCat;categoryButtons.forEach(x=>x.classList.toggle('active',x===b));if(loaded)render();}));
-moodButtons.forEach(b=>b.addEventListener('click',()=>{activeMood=b.dataset.libraryMood;moodButtons.forEach(x=>x.classList.toggle('active',x===b));if(loaded)render();}));
-if(refresh)refresh.addEventListener('click',load);
-const tab=document.querySelector('[data-resource-view="trailer"]');if(tab)tab.addEventListener('click',()=>{if(!loaded)load();});
-panel.addEventListener('click',e=>{const trigger=e.target.closest('[data-rt-open-my-drive]');if(!trigger)return;const drive=document.querySelector('[data-resource-view="my-drive"]');if(drive)drive.click();});
+(()=> {
+const panel=document.getElementById('ramayanamStudio');
+const grid=document.getElementById('rtLibraryAssets');
+if(!panel||!grid)return;
+const status=document.getElementById('rtLibraryStatus');
+const title=document.getElementById('rtDownloadTitle');
+const description=document.getElementById('rtDownloadDescription');
+const genreButtons=[...panel.querySelectorAll('[data-rt-genre]')];
+const sceneButtons=[...panel.querySelectorAll('[data-rt-scene]')];
+const mixkit='Mixkit · Free Stock Music';
+const genres={
+ action:{title:'Action Audio Downloads',description:'Hero entries, fights, impact builds and battle energy.',items:[
+  ['Epical Drums 01','Grigoriy Nuzhny','1:46','Percussion trailer · cinematic action','https://mixkit.co/free-stock-music/sound-elements/'],
+  ['Epical Drums 06','Grigoriy Nuzhny','1:43','Percussion trailer · action / thriller','https://mixkit.co/free-stock-music/mood/suspenseful/'],
+  ['Action Cinematic Music','PaulYudin','1:43','Epic action score · MP3','https://pixabay.com/music/main-title-action-cinematic-music-450665/']
+ ]},
+ romance:{title:'Romance Audio Downloads',description:'Love themes, soft meetings, longing and reunion moments.',items:[
+  ['Beautiful Dream','Diego Nava','1:37','Romantic · acoustic guitar · love','https://mixkit.co/free-stock-music/mood/romantic/'],
+  ['Romantic','Francisco Alvear','2:39','Film score · piano · wedding','https://mixkit.co/free-stock-music/mood/romantic/'],
+  ['Love is Eternal','Ahjay Stelino','1:44','Atmospheric · instrumental · love','https://mixkit.co/free-stock-music/mood/romantic/']
+ ]},
+ thriller:{title:'Thriller / Suspense Audio Downloads',description:'Tension builds, villain reveals, mystery and confrontation.',items:[
+  ['Fright Night','Michael Ramir C.','1:41','Dramatic · mysterious · cinematic thriller','https://mixkit.co/free-stock-music/mood/suspenseful/'],
+  ['Echoes','Andrew Ev','3:46','Eerie atmosphere · synth · thriller','https://mixkit.co/free-stock-music/mood/suspenseful/'],
+  ['Epical Drums 06','Grigoriy Nuzhny','1:43','Percussion trailer · action / thriller','https://mixkit.co/free-stock-music/mood/suspenseful/']
+ ]},
+ emotional:{title:'Emotional Audio Downloads',description:'Separation, sorrow, heartfelt moments and reunion.',items:[
+  ['Silent Descent','Eugenio Mininni','2:40','Melancholic piano and strings','https://mixkit.co/free-stock-music/mood/sad/'],
+  ['Drawing the Sky','Eugenio Mininni','3:27','Orchestral pop · cinematic drama','https://mixkit.co/free-stock-music/mood/sad/'],
+  ['Ode to Loneliness','Diego Nava','1:59','Piano · mysterious · human drama','https://mixkit.co/free-stock-music/mood/sad/']
+ ]},
+ horror:{title:'Horror Audio Downloads',description:'Dark atmosphere, eerie reveals and fear builds.',items:[
+  ['Piano Horror','Francisco Alvear','1:53','Eerie · nightmarish · cinematic thriller','https://mixkit.co/free-stock-music/tag/horror/'],
+  ['Echoes','Andrew Ev','3:46','Eerie atmosphere · synth','https://mixkit.co/free-stock-music/tag/horror/'],
+  ['Dark Shadows','Ahjay Stelino','1:46','Traditional · mysterious · horror','https://mixkit.co/free-stock-music/tag/horror/']
+ ]},
+ comedy:{title:'Comedy Audio Downloads',description:'Light, playful, quirky and fun scene backgrounds.',items:[
+  ['Secret Garden','Eugenio Mininni','2:33','Playful strings · dramedy','https://mixkit.co/free-stock-music/tag/comedy/'],
+  ['Comical','Ahjay Stelino','1:54','Playful drums and mallets','https://mixkit.co/free-stock-music/tag/comedy/'],
+  ['Games Worldbeat','Bernardo R.','1:47','World · medieval · playful flute','https://mixkit.co/free-stock-music/tag/comedy/']
+ ]},
+ devotional:{title:'Devotional / Mythological Audio Downloads',description:'Spiritual, mystical, traditional and mythological atmosphere.',items:[
+  ['Song of Kindness','Diego Nava','1:45','Religious · atmospheric · meditative','https://mixkit.co/free-stock-music/religious/'],
+  ['I Believe','Michael Ramir C.','1:53','Religious · ethereal · atmospheric','https://mixkit.co/free-stock-music/religious/'],
+  ['Indian Meditations','Ahjay Stelino','2:48','Traditional · mystical flute and percussion','https://mixkit.co/free-stock-music/world/'],
+  ['How','Eugenio Mininni','2:43','Gregorian chant · mystical piano','https://mixkit.co/free-stock-music/tag/religion/']
+ ]},
+ epic:{title:'Epic / Heroic Audio Downloads',description:'Grand reveals, heroic elevation, orchestral builds and victory.',items:[
+  ['Life’s a Movie','Arulo','2:01','Film score · brass · epic drama','https://mixkit.co/free-stock-music/mood/epic/'],
+  ['Epical Drums 05','Grigoriy Nuzhny','1:42','Orchestral hybrid · dramatic brass and drums','https://mixkit.co/free-stock-music/mood/suspenseful/'],
+  ['Cinematic Collection','Mixkit collection','108 tracks','Cinematic film-score and trailer music','https://mixkit.co/free-stock-music/tag/cinematic/']
+ ]},
+ adventure:{title:'Adventure / Fantasy Audio Downloads',description:'Journey, exploration, magical worlds and rescue missions.',items:[
+  ['Games Worldbeat','Bernardo R.','1:47','World · medieval · cinematic flute','https://mixkit.co/free-stock-music/medieval/'],
+  ['Condor','Eugenio Mininni','3:38','Medieval · hypnotic percussion','https://mixkit.co/free-stock-music/medieval/'],
+  ['World Music Collection','Mixkit collection','74 tracks','World instruments and atmospheric themes','https://mixkit.co/free-stock-music/world/']
+ ]}
+};
+const sceneGenres={
+ 'hero-intro':['action','epic','adventure'],
+ 'villain-intro':['thriller','horror','epic'],
+ 'heroine-intro':['romance','emotional','devotional'],
+ 'hero-villain':['action','thriller','epic'],
+ 'hero-heroine':['romance','emotional'],
+ 'villain-heroine':['thriller','emotional','horror'],
+ 'hanuman-sena':['adventure','epic','devotional','action'],
+ emotional:['emotional','romance'],
+ 'action-climax':['action','epic','thriller']
+};
+let activeGenre='action';
+const safe=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function renderGenre(id){
+ const genre=genres[id];if(!genre)return;
+ activeGenre=id;
+ genreButtons.forEach(button=>button.classList.toggle('active',button.dataset.rtGenre===id));
+ sceneButtons.forEach(button=>button.classList.remove('active'));
+ title.textContent=genre.title;description.textContent=genre.description;
+ status.textContent=genre.items.length+' curated downloadable picks · '+mixkit+' and other listed source providers.';
+ grid.innerHTML=genre.items.map(item=>'<article class="rt-audio-card"><span class="rt-source-label rt-recommended">DOWNLOADABLE SOURCE</span><strong>'+safe(item[0])+'</strong><div class="rt-audio-meta">Artist: '+safe(item[1])+'<br>Duration: '+safe(item[2])+'<br>'+safe(item[3])+'<br>Source: '+(item[4].includes('mixkit.co')?'Mixkit · Free Stock Music':'Pixabay · Content License')+'</div><a class="rt-download-link" href="'+safe(item[4])+'" target="_blank" rel="noopener noreferrer">Download audio ↗</a></article>').join('');
+}
+function renderScene(id){
+ const related=sceneGenres[id]||['action'];
+ genreButtons.forEach(button=>button.classList.toggle('active',button.dataset.rtGenre===related[0]));
+ sceneButtons.forEach(button=>button.classList.toggle('active',button.dataset.rtScene===id));
+ const names={ 'hero-intro':'Hero Intro','villain-intro':'Villain Intro','heroine-intro':'Heroine Intro','hero-villain':'Hero vs Villain','hero-heroine':'Hero vs Heroine','villain-heroine':'Ashokavanam','hanuman-sena':'Hanuman Sena','emotional':'Emotional / Separation','action-climax':'Action / Climax'};
+ title.textContent=names[id]+' · Scene Audio Downloads';
+ description.textContent='Scene ki match ayye genre-wise download collections.';
+ const items=related.flatMap(key=>genres[key].items.map(item=>({genre:genres[key].title,item})));
+ const seen=new Set();
+ const unique=items.filter(x=>{const k=x.item[0]+'|'+x.item[4];if(seen.has(k))return false;seen.add(k);return true;});
+ status.textContent=unique.length+' scene-matched downloadable picks.';
+ grid.innerHTML=unique.map(x=>'<article class="rt-audio-card"><span class="rt-source-label">'+safe(x.genre)+'</span><strong>'+safe(x.item[0])+'</strong><div class="rt-audio-meta">Artist: '+safe(x.item[1])+'<br>Duration: '+safe(x.item[2])+'<br>'+safe(x.item[3])+'<br>Source: '+(x.item[4].includes('mixkit.co')?'Mixkit · Free Stock Music':'Pixabay · Content License')+'</div><a class="rt-download-link" href="'+safe(x.item[4])+'" target="_blank" rel="noopener noreferrer">Download audio ↗</a></article>').join('');
+}
+genreButtons.forEach(button=>button.addEventListener('click',()=>renderGenre(button.dataset.rtGenre)));
+sceneButtons.forEach(button=>button.addEventListener('click',()=>renderScene(button.dataset.rtScene)));
+const trailerTab=document.querySelector('[data-resource-view="trailer"]');
+if(trailerTab)trailerTab.addEventListener('click',()=>{if(!grid.dataset.initialized){grid.dataset.initialized='true';renderGenre(activeGenre);}});
+renderGenre(activeGenre);
 })();
