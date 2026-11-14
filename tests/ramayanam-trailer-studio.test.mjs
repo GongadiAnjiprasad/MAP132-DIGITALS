@@ -11,10 +11,8 @@ test('Trailer Studio has two generic modules, separate heroes and a mirrored wor
  assert.match(pub,/Cross-Industry Recreation/);
  assert.match(pub,/tsStoryForm/);
  assert.match(pub,/tsCrossForm/);
- assert.match(pub,/tsVisualHero/);
- assert.match(pub,/tsVisualMovie/);
- assert.match(pub,/tsAudioHero/);
- assert.match(pub,/tsAudioMovie/);
+ assert.match(pub,/ఒక సినిమా పేరు ఇవ్వండి/);
+ assert.doesNotMatch(pub,/tsVisualHero|tsVisualMovie|tsAudioHero|tsAudioMovie/);
  assert.doesNotMatch(pub,/data-resource-view="sounds"|id="cinematic-sfx"/);
  assert.match(pub,/id="cinematic-fonts"/);
  assert.match(pub,/id="myDrivePanel"/);
@@ -22,7 +20,8 @@ test('Trailer Studio has two generic modules, separate heroes and a mirrored wor
 });
 
 test('Story Adaptation enforces different Tollywood heroes and explains scene cues in Telugu',()=>{
- assert.match(js,/Visual Hero, Audio Hero/);
+ assert.match(js,/identifyHero/);
+ assert.match(js,/వేరే హీరోతో ఉన్న రెండో Tollywood సినిమా/);
  assert.match(js,/telugu\|tollywood/i);
  assert.match(js,/VISUAL REFERENCE/);
  assert.match(js,/AUDIO REFERENCE/);
