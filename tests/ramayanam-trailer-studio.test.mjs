@@ -3,7 +3,8 @@ import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 const root=readFileSync(new URL('../workspace.html',import.meta.url),'utf8');
 const pub=readFileSync(new URL('../public/workspace.html',import.meta.url),'utf8');
-const js=readFileSync(new URL('../public/ramayanam-trailer-studio.js',import.meta.url),'utf8');\nconst discovery=readFileSync(new URL('../worker/trailerDiscovery.ts',import.meta.url),'utf8');
+const js=readFileSync(new URL('../public/ramayanam-trailer-studio.js',import.meta.url),'utf8');
+const discovery=readFileSync(new URL('../worker/trailerDiscovery.ts',import.meta.url),'utf8');
 
 test('Trailer Studio has two generic modules, separate heroes and a mirrored workspace',()=>{
  assert.equal(root,pub);
@@ -22,7 +23,7 @@ test('Trailer Studio has two generic modules, separate heroes and a mirrored wor
 });
 
 test('Story Adaptation uses public video/social discovery and cross-hero evidence',()=>{
- assert.match(js,/api\\/trailer\\/discover/);
+ assert.match(js,/api\/trailer\/discover/);
  assert.match(js,/YouTube, Google Search, X/);
  assert.match(js,/cross-hero public reference/);
  assert.doesNotMatch(js.slice(js.indexOf('async function runStorySearch'),js.indexOf('function bindFilmButtons')),/searchWiki|wikipedia/i);
@@ -44,4 +45,13 @@ test('Cross-industry recreation supports original concept notes and rights-safe 
  assert.match(pub,/My Drive/);
  assert.match(pub,/copyrighted scores are not scraped/);
 });
-\ntest('Discovery backend integrates YouTube, Google Search and X APIs with strict hero filtering',()=>{assert.match(discovery,/youtube\\.googleapis\\.com/);assert.match(discovery,/customsearch\\/v1/);assert.match(discovery,/api\\.x\\.com\\/2\\/tweets\\/search\\/recent/);assert.match(discovery,/different.length!==1/);assert.match(discovery,/YOUTUBE_API_KEY/);assert.match(discovery,/GOOGLE_CSE_API_KEY/);assert.match(discovery,/X_BEARER_TOKEN/);});\n
+
+test('Discovery backend integrates YouTube, Google Search and X APIs with strict hero filtering',()=>{
+ assert.match(discovery,/youtube\.googleapis\.com/);
+ assert.match(discovery,/customsearch\/v1/);
+ assert.match(discovery,/api\.x\.com\/2\/tweets\/search\/recent/);
+ assert.match(discovery,/different.length!==1/);
+ assert.match(discovery,/YOUTUBE_API_KEY/);
+ assert.match(discovery,/GOOGLE_CSE_API_KEY/);
+ assert.match(discovery,/X_BEARER_TOKEN/);
+});
