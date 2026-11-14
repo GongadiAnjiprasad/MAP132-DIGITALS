@@ -334,14 +334,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <button type="button" class="ts-module-tab" id="tsCrossTab" role="tab" aria-selected="false" aria-controls="tsCrossModule">02 · Cross-Industry Recreation</button>
   </div>
   <section class="ts-module" id="tsStoryModule" role="tabpanel" aria-labelledby="tsStoryTab">
-    <div class="ts-intro"><span class="ts-eyebrow">MODULE 01</span><h3>Visual Movie → Matching Audio Movie</h3><p>నువ్వు Visual Reference సినిమా ఎంచుకో. దానికి సరిపోయే Dialogue / BGM కోసం మరో Tollywood హీరో సినిమాను వెతుకుతాం.</p></div>
+    <div class="ts-intro"><span class="ts-eyebrow">MODULE 01</span><h3>Visual Movie → Ramayanam Story Match</h3><p>నువ్వు ఒక తెలుగు సినిమా పేరు ఇవ్వు. ఆ సినిమా కథలోని సంఘటనలను Ramayanam కథా సంఘటనలతో పోల్చి, సరిపోయే visual story beats చూపిస్తాం.</p></div>
     <form class="ts-search" id="tsStoryForm">
-      <label for="tsStoryQuery">మీ Visual Reference సినిమా పేరు</label><div class="ts-search-row"><input id="tsStoryQuery" type="search" placeholder="Visual movie name (ఉదా: బాహుబలి)" required><button class="primary" type="submit">Matching Audio వెతుకు</button></div>
-      <p class="ts-telugu-help">Visual movie నువ్వు ఎంచుకో. దానికి సరిపోయే scene-beat ఆధారంగా వేరే Tollywood హీరో Audio Reference సినిమాను వెతుకుతాం. Audio movie name ఇవ్వాల్సిన అవసరం లేదు.</p>
+      <label for="tsStoryQuery">మీ Visual Reference తెలుగు సినిమా పేరు</label><div class="ts-search-row"><input id="tsStoryQuery" type="search" placeholder="ఉదా: Varsham" required><button class="primary" type="submit">Ramayanam Story Match వెతుకు</button></div>
+      <p class="ts-telugu-help">హీరో పేరు ఆధారంగా కాదు. అపహరణ, రక్షణ, మోసం, అరణ్యవాసం, తుది యుద్ధం వంటి కథా సంఘటనల పోలిక ఆధారంగా results వస్తాయి. పోలిక ఎందుకు వచ్చిందో source evidence చూపిస్తాం.</p>
     </form>
-    <div class="ts-status" id="tsStoryStatus" role="status" aria-live="polite">Search results are discovered live from Wikipedia article metadata. Scene suggestions are plot-text matches, not verified shot-by-shot analysis.</div>
+    <div class="ts-status" id="tsStoryStatus" role="status" aria-live="polite">Public film-plot summaries, YouTube and social search snippets ఆధారంగా Ramayanam story-event matches వెతుకుతాం. ప్రతి match source evidenceతో చూపబడుతుంది; ఇది frame-by-frame analysis కాదు.</div>
     <div class="ts-results" id="tsStoryResults"></div>
-    <div class="ts-scene-area" id="tsStoryScenes" hidden><div class="ts-section-head"><div><h4 id="tsStorySelectedTitle">Selected reference</h4><p>Potential story beats found in the reference article. Open the source to verify the actual scene.</p></div></div><div class="ts-scene-list" id="tsStorySceneList"></div><button type="button" class="primary" id="tsStoryOpenAudio">Open scene-wise audio library</button></div>
+    <div class="ts-scene-area" id="tsStoryScenes" hidden><div class="ts-section-head"><div><h4 id="tsStorySelectedTitle">Selected reference</h4><p>కథా సంఘటనల పోలిక. Source తెరిచి actual sceneని verify చేయండి.</p></div></div><div class="ts-scene-list" id="tsStorySceneList"></div><button type="button" class="primary" id="tsStoryOpenAudio">Open scene-wise audio library</button></div>
   </section>
   <section class="ts-module" id="tsCrossModule" role="tabpanel" aria-labelledby="tsCrossTab" hidden>
     <div class="ts-intro"><span class="ts-eyebrow">MODULE 02</span><h3>Cross-Industry Movie Recreation</h3><p>Take a Hollywood, Tollywood, Bollywood or other-industry film as a creative reference. Find comparable story moments in another industry and combine the ideas into a new story concept.</p></div>
