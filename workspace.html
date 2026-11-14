@@ -334,10 +334,10 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
     <button type="button" class="ts-module-tab" id="tsCrossTab" role="tab" aria-selected="false" aria-controls="tsCrossModule">02 · Cross-Industry Recreation</button>
   </div>
   <section class="ts-module" id="tsStoryModule" role="tabpanel" aria-labelledby="tsStoryTab">
-    <div class="ts-intro"><span class="ts-eyebrow">MODULE 01</span><h3>Story → Reference Movies</h3><p>కథకు సరిపోయే Visual‌ను ఒక Tollywood హీరో సినిమా నుంచి, Dialogue / BGM source‌ను మరో Tollywood హీరో సినిమా నుంచి వేర్వేరుగా ఎంచుకోండి.</p></div>
+    <div class="ts-intro"><span class="ts-eyebrow">MODULE 01</span><h3>Visual Movie → Matching Audio Movie</h3><p>నువ్వు Visual Reference సినిమా ఎంచుకో. దానికి సరిపోయే Dialogue / BGM కోసం మరో Tollywood హీరో సినిమాను వెతుకుతాం.</p></div>
     <form class="ts-search" id="tsStoryForm">
-      <label for="tsStoryQuery">కథ / సినిమా పేరు</label><div class="ts-search-row"><input id="tsStoryQuery" type="search" placeholder="ఒక సినిమా పేరు ఇవ్వండి (ఉదా: బాహుబలి)" required><button class="primary" type="submit">References వెతుకు</button></div>
-      <p class="ts-telugu-help">ఒక పేరు చాలు. Visual కోసం ఒక Tollywood హీరో సినిమా, Audio కోసం వేరే హీరో సినిమా ఆటోమేటిక్‌గా వెతుకుతాం. ఇద్దరు హీరోలు ఒకరే కాకుండా చూసుకుంటాం.</p>
+      <label for="tsStoryQuery">మీ Visual Reference సినిమా పేరు</label><div class="ts-search-row"><input id="tsStoryQuery" type="search" placeholder="Visual movie name (ఉదా: బాహుబలి)" required><button class="primary" type="submit">Matching Audio వెతుకు</button></div>
+      <p class="ts-telugu-help">Visual movie నువ్వు ఎంచుకో. దానికి సరిపోయే scene-beat ఆధారంగా వేరే Tollywood హీరో Audio Reference సినిమాను వెతుకుతాం. Audio movie name ఇవ్వాల్సిన అవసరం లేదు.</p>
     </form>
     <div class="ts-status" id="tsStoryStatus" role="status" aria-live="polite">Search results are discovered live from Wikipedia article metadata. Scene suggestions are plot-text matches, not verified shot-by-shot analysis.</div>
     <div class="ts-results" id="tsStoryResults"></div>
