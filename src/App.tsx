@@ -593,6 +593,23 @@ function WorkspaceLibrary({resources=[],onAdd,onDelete,saving=false}:{resources?
           ['Logo Reveal','logo reveal']
         ].map(([label,term])=><button key={label} type="button" className={(soundQuery.toLowerCase()===term.toLowerCase()||(label==='All'&&!soundQuery))?'selected':''} onClick={()=>{setSoundGenre('All genres');setSoundQuery(term);searchSounds(1,false,term,'All genres');}}>{label}</button>)}
       </div>}
+      {section==='Music & BGM'&&<div className="workspace-cinematic-filters" aria-label="Trailer BGM categories" style={{display:'flex',flexWrap:'wrap',gap:8,margin:'12px 0 16px'}}>
+        {[
+          ['Epic Trailer','epic cinematic trailer'],
+          ['Action / Heroic','action heroic orchestral'],
+          ['Mass Elevation','heroic powerful cinematic'],
+          ['Dark / Suspense','dark suspense tension'],
+          ['Emotional','emotional piano strings'],
+          ['Orchestral','orchestral cinematic'],
+          ['Riser / Build-up','cinematic riser build up'],
+          ['All Music','']
+        ].map(([label,term])=><button key={label} type="button" className={(soundQuery.toLowerCase()===term.toLowerCase()||(label==='All Music'&&!soundQuery))?'selected':''} onClick={()=>{setSoundGenre('All genres');setSoundQuery(term);searchSounds(1,false,term,'All genres');}}>{label}</button>)}
+      </div>}
+      {section==='Music & BGM'&&<div className="workspace-card-actions" style={{display:'flex',flexWrap:'wrap',gap:8,margin:'0 0 14px'}}>
+        <a className="gold-button" href="https://www.youtube.com/audiolibrary" target="_blank" rel="noreferrer">YouTube Audio Library ↗</a>
+        <a href="https://mixkit.co/free-stock-music/" target="_blank" rel="noreferrer">Mixkit Free Music ↗</a>
+        <a href="https://pixabay.com/music/" target="_blank" rel="noreferrer">Pixabay Music ↗</a>
+      </div>}
       <p className="workspace-form-note">Film-style sound searches across Freesound. Results are filtered to CC0 and Creative Commons Attribution licences; CC BY requires creator credit. Availability depends on the source catalogue, so try related terms if a filter returns no eligible preview.</p>
       {soundError&&<p className="error-text">{soundError}</p>}
       {soundResults.length>0&&<><div className="workspace-resource-grid" style={{gridTemplateColumns:'1fr',gap:8}}>{soundResults.map(sound=><SoundResultCard key={sound.id} sound={sound}/>)}</div><div style={{display:'flex',alignItems:'center',justifyContent:'space-between',gap:12,flexWrap:'wrap',padding:'12px 0'}}><span>{soundResults.length.toLocaleString()} loaded · {soundCount.toLocaleString()} provider matches</span>{soundNextPage&&<button type="button" className="gold-button" onClick={()=>searchSounds(soundNextPage!,true)} disabled={soundBusy}>{soundBusy?'Loading…':'Load more sounds'}</button>}</div></>}
