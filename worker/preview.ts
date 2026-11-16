@@ -178,7 +178,8 @@ export default {
     // its secret; no credentials or write-capable endpoints are exposed.
     const soundCatalogueRequest =
       request.method === "GET" &&
-      (url.pathname === "/api/resources/sounds" ||
+      (url.pathname === "/api/resources/movie-ost" ||
+        url.pathname === "/api/resources/sounds" ||
         /^\/api\/resources\/sounds\/\d+\/(preview|download)$/.test(url.pathname));
     if (soundCatalogueRequest) {
       const upstreamUrl = new URL(url.pathname + url.search, "https://map132-digitals.anji-gongadi.workers.dev");
