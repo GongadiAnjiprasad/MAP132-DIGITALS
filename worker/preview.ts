@@ -172,6 +172,25 @@ export default {
         );
       }
     }
+    // Allow only read-only, licensed Freesound catalogue operations in the
+    // isolated preview. The production Worker performs provider requests using
+    // its secret; no credentials or write-capable endpoints are exposed.
+    const soundCatalogueRequest =
+      request.method === "GET" &&
+      (url.pathname === "/api/resources/sounds" ||
+        /^\/api\/resources\/sounds\/\d+\/(preview|download)$/.test(url.pathname));
+    if (soundCatalogueRequest) {
+      const upstreamUrl = new URL(url.pathname + url.search, "https://map132-digitals.anji-gongadi.workers.dev");
+      const upstream = await fetch(upstreamUrl.toString(), {
+        method: "GET",
+        headers: { "Accept": request.headers.get("Accept") || "application/json" },
+      });
+      const headers = new Headers(upstream.headers);
+      headers.set("Cache-Control", "no-store");
+      headers.set("X-MAP132-Preview", "licensed-audio-readonly-proxy");
+      return new Response(upstream.body, { status: upstream.status, statusText: upstream.statusText, headers });
+    }
+
     if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/media/")) {
       return blockedResponse();
     }
