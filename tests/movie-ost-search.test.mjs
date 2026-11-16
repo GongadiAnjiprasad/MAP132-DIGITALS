@@ -10,7 +10,8 @@ test("movie OST route ignores unrelated paths and methods", async () => {
 test("movie OST route requires a configured YouTube API key", async () => {
   const response = await handleMovieOst(new Request("https://map132.test/api/resources/movie-ost?query=Baahubali"), {});
   assert.equal(response?.status, 503);
-  assert.match((await response!.json()).error, /YOUTUBE_API_KEY/);
+  const payload = await response.json();
+  assert.match(payload.error, /YOUTUBE_API_KEY/);
 });
 
 test("movie OST route validates page tokens before calling YouTube", async () => {
