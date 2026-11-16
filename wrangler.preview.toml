@@ -3,8 +3,9 @@ main = "worker/preview.ts"
 compatibility_date = "2026-10-31"
 workers_dev = true
 
-# Intentionally no production KV, R2, secrets, variables, or cron bindings.
-# The preview serves the built frontend and blocks backend/media requests.
+# Intentionally no production KV, R2, or cron bindings.
+# Movie OST search runs locally in this preview and needs a preview-only
+# YOUTUBE_API_KEY secret; never copy production storage bindings into preview.
 [assets]
 directory = "./dist"
 binding = "ASSETS"
