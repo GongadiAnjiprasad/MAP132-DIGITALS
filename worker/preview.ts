@@ -1,6 +1,9 @@
+import { handleMovieOst } from './movieOst';
+
 interface Env {
   ASSETS: Fetcher;
   PRODUCTION_API: Fetcher;
+  YOUTUBE_API_KEY?: string;
 }
 
 const demoContent = {
@@ -173,13 +176,20 @@ export default {
         );
       }
     }
+    // Run Movie OST search inside the isolated preview Worker. The production
+    // Worker does not yet contain this PR route, so proxying it would fall into
+    // the production admin-only API fallback and return "Admin session required".
+    // The preview uses its own YOUTUBE_API_KEY secret and never forwards this
+    // request to production.
+    const movieOstResponse = await handleMovieOst(request, env);
+    if (movieOstResponse) return movieOstResponse;
+
     // Allow only read-only, licensed Freesound catalogue operations in the
     // isolated preview. The production Worker performs provider requests using
     // its secret; no credentials or write-capable endpoints are exposed.
     const soundCatalogueRequest =
       request.method === "GET" &&
-      (url.pathname === "/api/resources/movie-ost" ||
-        url.pathname === "/api/resources/sounds" ||
+      (url.pathname === "/api/resources/sounds" ||
         /^\/api\/resources\/sounds\/\d+\/(preview|download)$/.test(url.pathname));
     if (soundCatalogueRequest) {
       const upstreamUrl = new URL(url.pathname + url.search, "https://map132-digitals.anji-gongadi.workers.dev");
