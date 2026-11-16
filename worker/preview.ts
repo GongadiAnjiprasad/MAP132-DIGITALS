@@ -1,5 +1,6 @@
 interface Env {
   ASSETS: Fetcher;
+  PRODUCTION_API: Fetcher;
 }
 
 const demoContent = {
@@ -155,10 +156,10 @@ export default {
       // Only read the production endpoint's already-public, consent-approved reviews.
       // The preview has no KV binding and cannot read private feedback or mutate records.
       try {
-        const upstream = await fetch("https://map132-digitals.anji-gongadi.workers.dev/api/reviews", {
+        const upstream = await env.PRODUCTION_API.fetch(new Request("https://map132-digitals/api/reviews", {
           method: "GET",
           headers: { "Accept": "application/json" },
-        });
+        }));
         if (!upstream.ok) throw new Error("Public reviews endpoint unavailable");
         const payload = await upstream.json() as { reviews?: unknown };
         return Response.json(
@@ -181,10 +182,10 @@ export default {
         /^\/api\/resources\/sounds\/\d+\/(preview|download)$/.test(url.pathname));
     if (soundCatalogueRequest) {
       const upstreamUrl = new URL(url.pathname + url.search, "https://map132-digitals.anji-gongadi.workers.dev");
-      const upstream = await fetch(upstreamUrl.toString(), {
+      const upstream = await env.PRODUCTION_API.fetch(new Request(upstreamUrl.toString(), {
         method: "GET",
         headers: { "Accept": request.headers.get("Accept") || "application/json" },
-      });
+      }));
       const headers = new Headers(upstream.headers);
       headers.set("Cache-Control", "no-store");
       headers.set("X-MAP132-Preview", "licensed-audio-readonly-proxy");
