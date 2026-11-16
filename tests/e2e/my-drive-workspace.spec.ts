@@ -1,19 +1,19 @@
 import { test, expect } from '@playwright/test';
 
-test('My Drive remains an independent tab and does not replace Free Sources', async ({ page }) => {
+test('Cinematic Sounds is removed while Cinematic Fonts and My Drive remain independent tabs', async ({ page }) => {
   await page.goto('/workspace.html');
   const sounds = page.locator('[data-resource-panel="sounds"]');
   const fonts = page.locator('[data-resource-panel="fonts"]');
   const myDrive = page.locator('[data-resource-panel="my-drive"]');
-  await expect(sounds).toBeVisible();
+  await expect(sounds).toHaveCount(0);
+  await expect(page.locator('[data-resource-view="sounds"]')).toHaveCount(0);
+  await expect(fonts).toBeVisible();
   await page.locator('[data-resource-view="my-drive"]').click();
   await expect(myDrive).toBeVisible();
-  await expect(sounds).toBeHidden();
   await expect(fonts).toBeHidden();
   await page.locator('[data-resource-view="fonts"]').click();
   await expect(fonts).toBeVisible();
-  await page.locator('[data-resource-view="sounds"]').click();
-  await expect(sounds).toBeVisible();
+  await expect(myDrive).toBeHidden();
 });
 
 test('Signed-out users see inline Admin login and cannot access My Drive content', async ({ page }) => {

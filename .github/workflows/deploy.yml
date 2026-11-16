@@ -3,6 +3,7 @@ name: Build and deploy MAP132 DIGITALS
 on:
   push:
     branches: [main]
+  # Feature PRs target main so checks and isolated preview run without production deployment.
   pull_request:
     branches: [main]
   workflow_dispatch:
