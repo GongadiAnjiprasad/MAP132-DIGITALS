@@ -2,7 +2,8 @@ import { FESTIVAL_CALENDAR, getIndiaDateKey } from '../src/modules/seasonal/fest
 import { createFeedbackResponse } from './feedback';
 import { clearMyDriveSession, getPublishedDriveAccessToken, handleMyDriveOAuth } from '../src/modules/my-drive-resource-manager/driveOAuth';
 import { handleMyDriveAssets } from './myDriveAssets';
-interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; GOOGLE_PICKER_API_KEY?: string; MY_DRIVE_SESSION_SECRET?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
+import { handleTrailerDiscovery } from './trailerDiscovery';
+interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; YOUTUBE_API_KEY?: string; GOOGLE_CSE_API_KEY?: string; GOOGLE_CSE_CX?: string; X_BEARER_TOKEN?: string; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; GOOGLE_PICKER_API_KEY?: string; MY_DRIVE_SESSION_SECRET?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
 const json=(body:unknown,status=200,headers:HeadersInit={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...Object.fromEntries(new Headers(headers))}});
 const COOKIE='map132_admin';
@@ -84,7 +85,20 @@ async function api(req:Request,env:Env){const url=new URL(req.url),path=url.path
  });
  for(const name of ['Content-Length','Content-Range','Last-Modified','ETag']){const value=upstream.headers.get(name);if(value)headers.set(name,value);}
  return new Response(upstream.body,{status:upstream.status,headers});
-}if(path.startsWith('/api/my-drive/')){if(path==='/api/my-drive/logout'&&method==='POST'){const headers=await clearMyDriveSession(req,env);return json({signedOut:true},200,headers);}const oauthCallback=path==='/api/my-drive/oauth/callback'&&method==='GET';if(!oauthCallback&&!await validSession(req,env))return json({error:'MAP132 Admin login required. Sign in to the Admin Dashboard to access My Drive.'},401);}const driveAssetsResponse=await handleMyDriveAssets(req,env);if(driveAssetsResponse)return driveAssetsResponse;const driveOAuthResponse=await handleMyDriveOAuth(req,env);if(driveOAuthResponse)return driveOAuthResponse;
+}if(path==='/api/trailer/discover'){
+  if(env.MAP132_KV){
+    const ip=(req.headers.get('CF-Connecting-IP')||'unknown').slice(0,80);
+    if(ip!=='unknown'){
+      const bucket=Math.floor(Date.now()/600000),key='public/trailer-rate/'+bucket+'/'+ip;
+      const used=Number(await env.MAP132_KV.get(key)||0);
+      if(used>=20)return json({error:'ఈ public search limit తాత్కాలికంగా చేరింది. 10 నిమిషాల తర్వాత మళ్లీ ప్రయత్నించండి.'},429,{'Retry-After':'600'});
+      await env.MAP132_KV.put(key,String(used+1),{expirationTtl:700});
+    }
+  }
+  const response=await handleTrailerDiscovery(req,env);
+  if(response)return response;
+}
+if(path.startsWith('/api/my-drive/')){if(path==='/api/my-drive/logout'&&method==='POST'){const headers=await clearMyDriveSession(req,env);return json({signedOut:true},200,headers);}const oauthCallback=path==='/api/my-drive/oauth/callback'&&method==='GET';if(!oauthCallback&&!await validSession(req,env))return json({error:'MAP132 Admin login required. Sign in to the Admin Dashboard to access My Drive.'},401);}const driveAssetsResponse=await handleMyDriveAssets(req,env);if(driveAssetsResponse)return driveAssetsResponse;const driveOAuthResponse=await handleMyDriveOAuth(req,env);if(driveOAuthResponse)return driveOAuthResponse;
 if(path.startsWith('/api/resources/sounds/')&&path.endsWith('/preview')&&method==='GET'){
   if(!env.FREESOUND_API_KEY)return json({error:'Sound preview is not connected.'},503);
   const id=path.split('/')[4];
