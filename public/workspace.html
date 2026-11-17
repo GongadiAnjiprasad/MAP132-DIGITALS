@@ -210,11 +210,32 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 }
 @media(prefers-reduced-motion:reduce){button{transition:none}}
 
+
+/* Official YouTube Audio Library shortcut — MAP132 workspace */
+.youtube-audio-panel{margin:28px 0;padding:clamp(16px,2.4vw,28px);background:linear-gradient(145deg,#171a21,#101217);border:1px solid #4b4030;color:var(--ink);min-width:0}
+.youtube-audio-head{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.youtube-audio-head h2{margin:0;font-family:var(--map132-font-display);font-size:clamp(20px,2.4vw,28px)}
+.youtube-audio-stamp{display:inline-flex;padding:8px 11px;border:1px solid #d7b47766;border-radius:999px;color:var(--gold);font-size:10px;font-weight:700;letter-spacing:.08em}
+.youtube-audio-intro{max-width:850px;color:var(--muted);font-size:12px;line-height:1.7;margin:12px 0 18px}
+.youtube-audio-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px}
+.youtube-audio-card{min-width:0;padding:16px;border:1px solid var(--line);border-radius:14px;background:#0b0d11}
+.youtube-audio-card h3{font-size:15px;line-height:1.4;margin:10px 0 8px}
+.youtube-audio-card p,.youtube-audio-card ol{color:var(--muted);font-size:11px;line-height:1.65}
+.youtube-audio-card ol{padding-left:18px;margin:9px 0 0}
+.youtube-audio-card li+li{margin-top:5px}
+.youtube-audio-card b{color:#e9d7b5}
+.youtube-audio-open{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;margin-top:8px;padding:10px 14px;border:1px solid #d7b47788;border-radius:999px;background:#d7b477;color:#17191e;font-size:11px;font-weight:800;text-align:center}
+.youtube-audio-open:hover{background:#f0d69f}
+.youtube-audio-note{margin:14px 0 0;padding:12px 14px;border-left:3px solid var(--gold);background:#d7b4770d;color:var(--muted);font-size:10px;line-height:1.7}
+.youtube-audio-note b{color:var(--gold)}
+@media(max-width:850px){.youtube-audio-grid{grid-template-columns:1fr 1fr}.youtube-audio-source{grid-column:1/-1}}
+@media(max-width:600px){.youtube-audio-panel{padding:16px}.youtube-audio-grid{grid-template-columns:1fr}.youtube-audio-source{grid-column:auto}.youtube-audio-card{padding:14px}.youtube-audio-open{width:100%}}
 </style></head><body><main class="shell"><header class="top"><a class="brand" href="index.html">MAP<b>132</b> <span style="font-size:10px;color:#aaa;font-weight:400">DIGITALS</span></a><a class="dashboard-link" href="index.html#admin" aria-label="Open protected Admin Dashboard"><span aria-hidden="true">▦</span> Dashboard</a><a class="back" href="index.html">← Back to website</a></header>
 <section class="welcome"><div class="kicker">Private creator area · Workspace</div><h1>Your creative control room.</h1><p>Organise your brand resources, editing references, reusable assets and project links in one place.</p></section>
 <nav class="resource-switcher" aria-label="Choose resource library">
  <button type="button" class="resource-pill active" data-resource-view="sounds" aria-pressed="true"><span class="resource-pill-icon">♫</span><strong>Cinematic Sounds</strong></button>
  <button type="button" class="resource-pill" data-resource-view="fonts" aria-pressed="false"><span class="resource-pill-icon">Aa</span><strong>Cinematic Fonts</strong></button>
+ <button type="button" class="resource-pill" data-resource-view="youtube-audio" aria-pressed="false"><span class="resource-pill-icon">♫</span><strong>YouTube Audio</strong></button>
  <button type="button" class="resource-pill" data-resource-view="my-drive" aria-pressed="false"><span class="resource-pill-icon">☁</span><strong>My Drive</strong></button>
 </nav>
 <div class="notice"><strong>Storage & privacy note:</strong> Free Sources remain online catalogues. My Drive reads selected Drive folders without changing the originals. Imported fonts and assets are copied into your Google Drive folder “MAP132 DIGITALS Resources” and listed from encrypted MAP132 metadata. Licences remain unverified until checked. Do not use this workspace as a client-confidential file vault.</div>
@@ -239,6 +260,28 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 <div class="sfx-refresh-meta" aria-live="polite"><span id="sfxLastUpdated">Last updated: waiting for first refresh</span><span id="sfxNextRefresh">Next refresh: scheduled in 6 hours</span></div>
 <audio id="sfxAudioElement" preload="none" style="display:none"></audio>
 <div class="sfx-licence">Downloads are served through MAP132 DIGITALS for sounds returned with eligible CC0 / CC-BY licences. Check the displayed licence and attribution requirements before using each sound in a client project.</div>
+</section>
+
+
+<section class="youtube-audio-panel resource-panel" id="youtubeAudioLibrary" data-resource-panel="youtube-audio" hidden>
+ <div class="youtube-audio-head"><div><p class="kicker">OFFICIAL YOUTUBE SOURCE</p><h2>🎼 YouTube Audio Library</h2></div><span class="youtube-audio-stamp">FREE · MP3 · STUDIO</span></div>
+ <p class="youtube-audio-intro">Find royalty-free production music and sound effects in YouTube Studio. Preview a track there and download its MP3 from the official library. MAP132 keeps this as an official-source shortcut rather than copying or mirroring YouTube’s catalogue.</p>
+ <div class="youtube-audio-grid">
+  <article class="youtube-audio-card youtube-audio-source">
+   <span class="kicker">01 / OFFICIAL LIBRARY</span><h3>Browse music &amp; sound effects</h3>
+   <p>Sign in with your Google account. The official library opens in a separate tab, so MAP132 stays open.</p>
+   <a class="youtube-audio-open" href="https://www.youtube.com/audiolibrary" target="_blank" rel="noopener noreferrer">Open YouTube Audio Library <span aria-hidden="true">↗</span></a>
+  </article>
+  <article class="youtube-audio-card">
+   <span class="kicker">02 / DOWNLOAD SAFELY</span><h3>Choose the right licence</h3>
+   <ol><li>Open the <b>Music</b> or <b>Sound effects</b> tab.</li><li>For tracks that do not need credit, filter <b>Attribution not required</b>.</li><li>If you choose a Creative Commons track, copy its attribution text and credit the artist in your video description.</li><li>Preview the track, then select <b>Download</b> to save the MP3.</li></ol>
+  </article>
+  <article class="youtube-audio-card">
+   <span class="kicker">03 / USE INSIDE MAP132</span><h3>Bring your MP3s into My Drive</h3>
+   <ol><li>Move downloaded MP3 files into one Google Drive folder.</li><li>Switch to the <b>My Drive</b> tab above and connect Google Drive.</li><li>Choose that folder. MAP132 imports supported audio files into your private resource library for in-site preview.</li></ol>
+  </article>
+ </div>
+ <p class="youtube-audio-note"><b>Licence reminder:</b> YouTube identifies tracks downloaded from its Audio Library as copyright-safe for use in YouTube videos and says they are not claimed through Content ID. This is not permission to redistribute the MP3 files publicly or a blanket guarantee for off-platform use. Check each track’s licence and attribution requirements.</p>
 </section>
 
 
