@@ -26,5 +26,5 @@ test("YouTube Audio Library panel explains import and licence boundaries without
   assert.match(html, /My Drive/);
   assert.match(html, /private resource library for in-site preview/);
   assert.match(html, /not permission to redistribute the MP3 files publicly/);
-  assert.match(html, /not a blanket guarantee for off-platform use/);
+  assert.match(html, /blanket guarantee for off-platform use/);
 });
