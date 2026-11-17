@@ -8,6 +8,8 @@ test("YouTube Audio Library shortcut is present in both mirrored workspace pages
   assert.equal(root, publicCopy);
   assert.match(root, /data-resource-view="youtube-audio"/);
   assert.match(root, /data-resource-panel="youtube-audio"/);
+  assert.match(root, /aria-label="YouTube Audio Library"/);
+  assert.match(root, /<strong>YT Audio<\/strong>/);
 });
 
 test("YouTube Audio Library opens the official Studio library in a separate tab", async () => {
