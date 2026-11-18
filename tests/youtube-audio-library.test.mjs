@@ -25,6 +25,6 @@ test("YouTube Audio Library panel explains import and licence boundaries without
   const html = await readFile(new URL("../workspace.html", import.meta.url), "utf8");
   assert.match(html, /My Drive/);
   assert.match(html, /private resource library for in-site preview/);
-  assert.match(html, /not permission to redistribute the MP3 files publicly/);
+  assert.match(html, /nor permission to redistribute MP3 files publicly/);
   assert.match(html, /(?:This is )?not a blanket guarantee for off-platform use/);
 });
