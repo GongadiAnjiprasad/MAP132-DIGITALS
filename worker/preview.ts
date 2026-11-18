@@ -1,5 +1,9 @@
+import { handleMovieOst } from './movieOst';
+
 interface Env {
   ASSETS: Fetcher;
+  PRODUCTION_API: Fetcher;
+  YOUTUBE_API_KEY?: string;
 }
 
 const demoContent = {
@@ -155,10 +159,10 @@ export default {
       // Only read the production endpoint's already-public, consent-approved reviews.
       // The preview has no KV binding and cannot read private feedback or mutate records.
       try {
-        const upstream = await fetch("https://map132-digitals.anji-gongadi.workers.dev/api/reviews", {
+        const upstream = await env.PRODUCTION_API.fetch(new Request("https://map132-digitals/api/reviews", {
           method: "GET",
           headers: { "Accept": "application/json" },
-        });
+        }));
         if (!upstream.ok) throw new Error("Public reviews endpoint unavailable");
         const payload = await upstream.json() as { reviews?: unknown };
         return Response.json(
@@ -172,6 +176,33 @@ export default {
         );
       }
     }
+    // Run Movie OST search inside the isolated preview Worker. The production
+    // Worker does not yet contain this PR route, so proxying it would fall into
+    // the production admin-only API fallback and return "Admin session required".
+    // The preview uses its own YOUTUBE_API_KEY secret and never forwards this
+    // request to production.
+    const movieOstResponse = await handleMovieOst(request, env);
+    if (movieOstResponse) return movieOstResponse;
+
+    // Allow only read-only, licensed Freesound catalogue operations in the
+    // isolated preview. The production Worker performs provider requests using
+    // its secret; no credentials or write-capable endpoints are exposed.
+    const soundCatalogueRequest =
+      request.method === "GET" &&
+      (url.pathname === "/api/resources/sounds" ||
+        /^\/api\/resources\/sounds\/\d+\/(preview|download)$/.test(url.pathname));
+    if (soundCatalogueRequest) {
+      const upstreamUrl = new URL(url.pathname + url.search, "https://map132-digitals.anji-gongadi.workers.dev");
+      const upstream = await env.PRODUCTION_API.fetch(new Request(upstreamUrl.toString(), {
+        method: "GET",
+        headers: { "Accept": request.headers.get("Accept") || "application/json" },
+      }));
+      const headers = new Headers(upstream.headers);
+      headers.set("Cache-Control", "no-store");
+      headers.set("X-MAP132-Preview", "licensed-audio-readonly-proxy");
+      return new Response(upstream.body, { status: upstream.status, statusText: upstream.statusText, headers });
+    }
+
     if (url.pathname.startsWith("/api/") || url.pathname.startsWith("/media/")) {
       return blockedResponse();
     }
