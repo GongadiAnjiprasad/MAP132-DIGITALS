@@ -210,11 +210,29 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 }
 @media(prefers-reduced-motion:reduce){button{transition:none}}
 
+
+/* MAP132 AI Music Studio */
+.music-panel{margin:28px 0;background:linear-gradient(145deg,#171a21,#101217);border:1px solid #8d7447;padding:24px;border-radius:14px}
+.music-head,.music-mix-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.music-head h2{margin:8px 0 0;font-size:24px}.music-tag,.music-mix-head span{font-size:9px;letter-spacing:.12em;color:var(--gold);border:1px solid var(--line);padding:7px 10px;border-radius:999px}
+.music-sub,.music-note{font-size:12px;color:var(--muted);line-height:1.65}.music-generate{display:grid;gap:10px;margin-top:18px}
+.music-panel label{font-size:11px;color:#e9dfca;font-weight:650;display:block}
+.music-panel textarea,.music-panel select,.music-panel input[type=number],.music-panel input[type=file]{width:100%;min-width:0;padding:12px;background:#0b0d11;color:#f4f0e8;border:1px solid var(--line);border-radius:8px;margin-top:7px}
+.music-panel textarea{min-height:100px;resize:vertical;line-height:1.55}
+.music-presets{display:flex;gap:7px;flex-wrap:wrap}.music-presets button{font-size:10px;padding:8px 11px;border-radius:999px}
+.music-fields{display:grid;grid-template-columns:1fr 1fr;gap:12px}.music-check{display:flex!important;align-items:center;gap:8px}.music-check input{accent-color:var(--gold)}
+.music-generate-button,.music-export{justify-self:start;border-radius:999px;padding:12px 18px}.music-status{margin:14px 0;padding:12px;border:1px solid var(--line);background:#0b0d11;border-radius:8px;color:var(--muted);font-size:11px;line-height:1.5}.music-status[data-state=error],.music-status[data-state=warning]{border-color:#a77945;color:#e5c18c}.music-status[data-state=success]{border-color:#648b70;color:#b8d9bf}
+.music-mix{margin-top:18px;padding:18px;background:#0b0d11;border:1px solid var(--line);border-radius:10px}.music-mix h3{margin:0;font-size:17px}.music-mix audio{width:100%;margin:16px 0 8px}.music-download-source{display:inline-block;color:var(--gold);font-size:11px;margin-bottom:16px}.music-download-source[aria-disabled=true]{opacity:.4;pointer-events:none}
+.music-mix-grid{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:12px 0 18px}.music-mix-grid label output{float:right;color:var(--gold);font-variant-numeric:tabular-nums}.music-mix-grid input[type=range]{width:100%;accent-color:var(--gold);display:block;margin-top:9px}
+.music-export{margin-top:14px}.music-note{margin-bottom:0;font-size:10px}
+@media(max-width:600px){.music-panel{padding:16px}.music-fields,.music-mix-grid{grid-template-columns:1fr}.music-generate-button,.music-export{width:100%}}
+
 </style></head><body><main class="shell"><header class="top"><a class="brand" href="index.html">MAP<b>132</b> <span style="font-size:10px;color:#aaa;font-weight:400">DIGITALS</span></a><a class="dashboard-link" href="index.html#admin" aria-label="Open protected Admin Dashboard"><span aria-hidden="true">▦</span> Dashboard</a><a class="back" href="index.html">← Back to website</a></header>
 <section class="welcome"><div class="kicker">Private creator area · Workspace</div><h1>Your creative control room.</h1><p>Organise your brand resources, editing references, reusable assets and project links in one place.</p></section>
 <nav class="resource-switcher" aria-label="Choose resource library">
  <button type="button" class="resource-pill active" data-resource-view="sounds" aria-pressed="true"><span class="resource-pill-icon">♫</span><strong>Cinematic Sounds</strong></button>
  <button type="button" class="resource-pill" data-resource-view="fonts" aria-pressed="false"><span class="resource-pill-icon">Aa</span><strong>Cinematic Fonts</strong></button>
+ <button type="button" class="resource-pill" data-resource-view="music" aria-pressed="false"><span class="resource-pill-icon">♫</span><strong>AI Music Studio</strong></button>
  <button type="button" class="resource-pill" data-resource-view="my-drive" aria-pressed="false"><span class="resource-pill-icon">☁</span><strong>My Drive</strong></button>
 </nav>
 <div class="notice"><strong>Storage & privacy note:</strong> Free Sources remain online catalogues. My Drive reads selected Drive folders without changing the originals. Imported fonts and assets are copied into your Google Drive folder “MAP132 DIGITALS Resources” and listed from encrypted MAP132 metadata. Licences remain unverified until checked. Do not use this workspace as a client-confidential file vault.</div>
@@ -252,6 +270,40 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
  <div class="font-footnote">All fonts link to their official Google Fonts family pages and published licence details. Open-font licences generally allow video titling and commercial artwork, but the licence attached to the downloaded copy controls its use. Original movie logos may use separately licensed custom lettering. Saved favourites are stored only in this browser on this device.</div>
 </section>
 
+
+<section class="music-panel resource-panel" id="aiMusicPanel" data-resource-panel="music" hidden>
+ <div class="music-head"><div><span class="kicker">ORIGINAL SCORE · SIMPLE MIXING</span><h2>🎼 AI Music Studio</h2></div><span class="music-tag">ACE-STEP · GPU PROVIDER</span></div>
+ <p class="music-sub">Describe the score you need, choose the duration, generate an original instrumental, then mix a sound effect and export a Premiere Pro-ready WAV.</p>
+ <form id="musicGenerateForm" class="music-generate">
+  <label for="musicPrompt">Music description</label>
+  <textarea id="musicPrompt" maxlength="2000" required placeholder="Example: Epic Indian cinematic destiny theme, emotional strings, bamboo flute, deep brass and powerful orchestral percussion…"></textarea>
+  <div class="music-presets" aria-label="Prompt presets">
+   <button type="button" data-music-preset="epic">Epic / Hero</button><button type="button" data-music-preset="romance">Romance</button><button type="button" data-music-preset="villain">Villain</button><button type="button" data-music-preset="war">War Climax</button><button type="button" data-music-preset="suspense">Suspense</button>
+  </div>
+  <div class="music-fields">
+   <div><label for="musicDuration">Music duration</label><select id="musicDuration"><option value="30">30 seconds</option><option value="60">1 minute</option><option value="105" selected>1 minute 45 seconds</option><option value="120">2 minutes</option><option value="180">3 minutes</option><option value="300">5 minutes</option><option value="custom">Custom (10–600 seconds)</option></select><input id="musicCustomDuration" type="number" min="10" max="600" value="105" hidden aria-label="Custom duration in seconds"></div>
+   <div><label for="musicFormat">Generated file format</label><select id="musicFormat"><option value="wav" selected>WAV</option><option value="mp3">MP3</option><option value="aac">AAC</option></select></div>
+  </div>
+  <label class="music-check"><input id="musicInstrumental" type="checkbox" checked> Instrumental only — no vocals or lyrics</label>
+  <button class="primary music-generate-button" id="musicGenerateButton" type="submit">Generate music</button>
+ </form>
+ <div class="music-status" id="musicStatus" role="status" aria-live="polite">Checking music generation provider…</div>
+ <div class="music-mix">
+  <div class="music-mix-head"><h3>Preview &amp; easy mixing</h3><span>ONE TRACK + OPTIONAL SFX</span></div>
+  <audio id="musicPreview" controls preload="metadata"></audio>
+  <a id="musicDownloadSource" class="music-download-source" href="#" download="MAP132-AI-Music.wav" aria-disabled="true">Download generated track</a>
+  <div class="music-mix-grid">
+   <label>Main BGM volume <output id="musicMainVolumeValue">80%</output><input id="musicMainVolume" type="range" min="0" max="100" value="80"></label>
+   <label>Sound effect volume <output id="musicSfxVolumeValue">65%</output><input id="musicSfxVolume" type="range" min="0" max="100" value="65"></label>
+   <label>Fade in <select id="musicFadeIn"><option value="0">Off</option><option value="1">1 second</option><option value="2" selected>2 seconds</option><option value="4">4 seconds</option><option value="6">6 seconds</option></select></label>
+   <label>Fade out <select id="musicFadeOut"><option value="0">Off</option><option value="2">2 seconds</option><option value="4" selected>4 seconds</option><option value="6">6 seconds</option><option value="10">10 seconds</option></select></label>
+  </div>
+  <label for="musicSfxFile">Add one sound-effect layer (optional)</label><input id="musicSfxFile" type="file" accept="audio/*">
+  <button type="button" class="primary music-export" id="musicExportMix">Export final mix · WAV 48 kHz / 24-bit</button>
+  <p class="music-note">The final mix is rendered in this browser as stereo PCM WAV at 48 kHz / 24-bit. Generated source format depends on the connected ACE-Step server. Current Studio version mixes one BGM track and one optional SFX layer; multi-track scene automation can be added in a later phase.</p>
+ </div>
+</section>
+
 <section class="mydrive-panel resource-panel" id="myDrivePanel" data-resource-panel="my-drive" hidden>
  <div class="mydrive-head"><h2>☁ My Drive Resource Library</h2><span class="kicker">PRIVATE · READ ONLY · IMPORT</span></div>
  <p class="mydrive-sub">Choose one folder from your Google Drive. MAP132 scans only that folder and its nested folders, sorts supported files into categories, and saves copies in your private “MAP132 Workspace” folder. Original Drive files are never changed.</p>
@@ -283,6 +335,6 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 
 // Switch the two resource libraries in-place without scrolling the workspace.
 (()=>{const buttons=[...document.querySelectorAll('[data-resource-view]')],panels=[...document.querySelectorAll('[data-resource-panel]')];if(!buttons.length||!panels.length)return;function show(view){buttons.forEach(b=>{const active=b.dataset.resourceView===view;b.classList.toggle('active',active);b.setAttribute('aria-pressed',String(active))});panels.forEach(p=>{p.hidden=p.dataset.resourcePanel!==view})}document.querySelector('.resource-switcher').addEventListener('click',e=>{const b=e.target.closest('[data-resource-view]');if(b)show(b.dataset.resourceView)});show('sounds')})();
-</script><script src="my-drive-resource-manager.js" defer></script><!-- MAP132 production deploy trigger: 2026-11-05 --><!-- MAP132 resource capsule deploy trigger 2026-11-05 --><!-- MAP132 minimal segmented switcher deploy trigger 2026-11-05 -->
+</script><script src="/ai-music-studio.js" defer></script><script src="my-drive-resource-manager.js" defer></script><!-- MAP132 production deploy trigger: 2026-11-05 --><!-- MAP132 resource capsule deploy trigger 2026-11-05 --><!-- MAP132 minimal segmented switcher deploy trigger 2026-11-05 -->
 <!-- MAP132 Telugu preview fix deploy trigger 2026-11-05 -->
 </body></html>
