@@ -94,6 +94,7 @@
       player.load();
       downloadButton.disabled = false;
       downloadButton.href = audioUrl;
+      downloadButton.removeAttribute('aria-disabled');
       downloadButton.download = 'MAP132-AI-Music.'+formatSelect.value;
       setStatus('Music generated. Preview it, add your sound effects, then export a Premiere-ready mix.', 'success');
     } catch (error) {
@@ -175,8 +176,9 @@
   }
   $('musicExportMix').addEventListener('click',exportMix);
   $('musicDownloadSource').addEventListener('click',event=>{if(!audioBlob)event.preventDefault()});
+  for (const [input, output] of [['musicMainVolume','musicMainVolumeValue'],['musicSfxVolume','musicSfxVolumeValue']]) $(input).addEventListener('input',()=>$(output).textContent=$(input).value+'%');
   api('/api/music/config').then(config=>{
-    if(config.configured) setStatus('Music generation service is connected. Create an original instrumental track.');
+    if(config.configured) { generateButton.disabled=false; generateButton.textContent='Generate music'; setStatus('Music generation service is connected. Create an original instrumental track.'); }
     else {setStatus('Music Studio is ready, but its external GPU provider is not configured yet. No generation quota or free hosting is assumed.','warning');generateButton.disabled=true;generateButton.textContent='Provider setup required';}
   }).catch(()=>setStatus('Could not check the music generation service.','error'));
 })();
