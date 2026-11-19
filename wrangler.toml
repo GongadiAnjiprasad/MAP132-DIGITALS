@@ -23,3 +23,5 @@ run_worker_first = ["/api/*", "/media/*"]
 # R2 bucket binding: MAP132_MEDIA
 # Worker secrets: ADMIN_PASSWORD and FREESOUND_API_KEY
 # Workers AI is a native binding; no API key is placed in frontend code.
+# Optional AI Music Studio provider: set ACE_STEP_API_URL as a Worker variable and ACE_STEP_API_KEY as a Worker secret.
+# Configure these only after provisioning a trusted ACE-Step HTTPS inference endpoint.
