@@ -1,6 +1,7 @@
 import test from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
+import { execFileSync } from 'node:child_process';
 
 const read = path => readFileSync(new URL(path, import.meta.url), 'utf8');
 const rootWorkspace = read('../workspace.html');
@@ -54,4 +55,14 @@ test('browser mixer supports optional SFX, volume controls, fades and PCM WAV ex
   assert.match(studio, /offline\.createGain\(\)/);
   assert.match(studio, /musicGain\.gain\.linearRampToValueAtTime/);
   assert.match(studio, /encodeWav24/);
+});
+
+test('expensive music endpoints require the existing protected admin session', () => {
+  assert.match(worker, /validSession\(req,env\).*Sign in to the MAP132 Admin Dashboard/s);
+  assert.match(worker, /validSession\(req,env\).*session has expired/s);
+  assert.match(studio, /config\.authenticated/);
+});
+
+test('AI Music Studio client module has valid JavaScript syntax', () => {
+  execFileSync(process.execPath, ['--check', new URL('../public/ai-music-studio.js', import.meta.url).pathname]);
 });
