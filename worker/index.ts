@@ -2,7 +2,7 @@ import { FESTIVAL_CALENDAR, getIndiaDateKey } from '../src/modules/seasonal/fest
 import { createFeedbackResponse } from './feedback';
 import { clearMyDriveSession, getPublishedDriveAccessToken, handleMyDriveOAuth } from '../src/modules/my-drive-resource-manager/driveOAuth';
 import { handleMyDriveAssets } from './myDriveAssets';
-interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; GOOGLE_PICKER_API_KEY?: string; MY_DRIVE_SESSION_SECRET?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
+interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; GOOGLE_PICKER_API_KEY?: string; MY_DRIVE_SESSION_SECRET?: string; ACE_STEP_API_URL?: string; ACE_STEP_API_KEY?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
 const json=(body:unknown,status=200,headers:HeadersInit={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...Object.fromEntries(new Headers(headers))}});
 const COOKIE='map132_admin';
@@ -52,7 +52,49 @@ async function read(env:Env){
     return {...DEFAULTS,...stored,profile,skills,items,resources,logoPath:typeof stored.logoPath==='string'&&stored.logoPath.startsWith('portfolio/logos/')?stored.logoPath:''};
   }catch{return DEFAULTS;}
 }
-async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;if(path.startsWith('/api/portfolio/video/')&&method==='GET'){
+async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;
+if(path==='/api/music/config'&&method==='GET')return json({configured:!!env.ACE_STEP_API_URL});
+if(path==='/api/music/generate'&&method==='POST'){
+ if(!env.ACE_STEP_API_URL)return json({error:'Music generation provider is not configured. Add ACE_STEP_API_URL and, if required, ACE_STEP_API_KEY in Cloudflare Worker settings.'},503);
+ let base:URL;try{base=new URL(env.ACE_STEP_API_URL);}catch{return json({error:'Music provider URL is invalid.'},503);}
+ if(base.protocol!=='https:')return json({error:'Music provider must use HTTPS.'},503);
+ let body:any;try{body=await req.json();}catch{return json({error:'Invalid music request.'},400);}
+ const prompt=typeof body.prompt==='string'?body.prompt.trim():'',duration=Number(body.duration),format=String(body.format||'wav').toLowerCase();
+ if(!prompt||prompt.length>2000)return json({error:'Music prompt must contain 1–2000 characters.'},400);
+ if(!Number.isFinite(duration)||duration<10||duration>600)return json({error:'Music duration must be between 10 and 600 seconds.'},400);
+ if(!['wav','mp3','aac'].includes(format))return json({error:'Choose WAV, MP3 or AAC output.'},400);
+ const headers=new Headers({'Content-Type':'application/json','Accept':'application/json'});if(env.ACE_STEP_API_KEY)headers.set('Authorization','Bearer '+env.ACE_STEP_API_KEY);
+ const upstream=await fetch(new URL('/release_task',base),{method:'POST',headers,body:JSON.stringify({prompt,lyrics:body.instrumental===false?'':'[Instrumental]',thinking:false,audio_format:format,audio_duration:duration,model:'acestep-v15-turbo',batch_size:1})});
+ const payload:any=await upstream.json().catch(()=>({}));
+ if(!upstream.ok||payload.code&&payload.code!==200)return json({error:payload.error||'Music provider rejected the generation request.'},502);
+ const taskId=payload.data?.task_id||payload.task_id;if(typeof taskId!=='string'||!taskId)return json({error:'Music provider did not return a task ID.'},502);
+ return json({taskId,status:payload.data?.status||'queued'});
+}
+if(path==='/api/music/status'&&method==='GET'){
+ if(!env.ACE_STEP_API_URL)return json({error:'Music generation provider is not configured.'},503);
+ const taskId=url.searchParams.get('task_id')||'';if(!/^[a-zA-Z0-9_-]{8,128}$/.test(taskId))return json({error:'Invalid music task ID.'},400);
+ let base:URL;try{base=new URL(env.ACE_STEP_API_URL);}catch{return json({error:'Music provider URL is invalid.'},503);}
+ if(base.protocol!=='https:')return json({error:'Music provider must use HTTPS.'},503);
+ const headers=new Headers({'Content-Type':'application/json','Accept':'application/json'});if(env.ACE_STEP_API_KEY)headers.set('Authorization','Bearer '+env.ACE_STEP_API_KEY);
+ const upstream=await fetch(new URL('/query_result',base),{method:'POST',headers,body:JSON.stringify({task_id_list:[taskId]})});
+ const payload:any=await upstream.json().catch(()=>({}));if(!upstream.ok||payload.code&&payload.code!==200)return json({error:payload.error||'Could not check music generation status.'},502);
+ const record=Array.isArray(payload.data)?payload.data[0]:payload.data;if(!record)return json({error:'Music task was not found.'},404);
+ let result:any=null;try{result=typeof record.result==='string'?JSON.parse(record.result):record.result;}catch{}
+ if(Array.isArray(result))result=result[0];
+ const file=typeof result?.file==='string'?result.file:'';
+ return json({taskId,status:record.status,queuePosition:record.queue_position||null,error:record.error||result?.error||null,audioPath:file,metadata:result?.metas||null});
+}
+if(path==='/api/music/audio'&&method==='GET'){
+ if(!env.ACE_STEP_API_URL)return json({error:'Music generation provider is not configured.'},503);
+ const audioPath=url.searchParams.get('path')||'';if(!audioPath.startsWith('/v1/audio?path='))return json({error:'Invalid generated audio path.'},400);
+ let base:URL,audioUrl:URL;try{base=new URL(env.ACE_STEP_API_URL);audioUrl=new URL(audioPath,base);}catch{return json({error:'Music provider URL is invalid.'},503);}
+ if(base.protocol!=='https:'||audioUrl.origin!==base.origin||audioUrl.pathname!=='/v1/audio')return json({error:'Generated audio source is not trusted.'},400);
+ const headers=new Headers();if(env.ACE_STEP_API_KEY)headers.set('Authorization','Bearer '+env.ACE_STEP_API_KEY);
+ const upstream=await fetch(audioUrl,{headers});if(!upstream.ok)return json({error:'Generated audio could not be downloaded from the provider.'},502);
+ const type=upstream.headers.get('Content-Type')||'audio/wav';
+ return new Response(upstream.body,{status:200,headers:{'Content-Type':type,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff'}});
+}
+if(path.startsWith('/api/portfolio/video/')&&method==='GET'){
  const fileId=path.slice('/api/portfolio/video/'.length);
  if(!/^[a-zA-Z0-9_-]{1,256}$/.test(fileId))return json({error:'Invalid portfolio video ID.'},400);
  const content=await read(env);
