@@ -53,8 +53,9 @@ async function read(env:Env){
   }catch{return DEFAULTS;}
 }
 async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;
-if(path==='/api/music/config'&&method==='GET')return json({configured:!!env.ACE_STEP_API_URL});
+if(path==='/api/music/config'&&method==='GET')return json({configured:!!env.ACE_STEP_API_URL,authenticated:await validSession(req,env)});
 if(path==='/api/music/generate'&&method==='POST'){
+ if(!await validSession(req,env))return json({error:'Sign in to the MAP132 Admin Dashboard before generating music.'},401);
  if(!env.ACE_STEP_API_URL)return json({error:'Music generation provider is not configured. Add ACE_STEP_API_URL and, if required, ACE_STEP_API_KEY in Cloudflare Worker settings.'},503);
  let base:URL;try{base=new URL(env.ACE_STEP_API_URL);}catch{return json({error:'Music provider URL is invalid.'},503);}
  if(base.protocol!=='https:')return json({error:'Music provider must use HTTPS.'},503);
@@ -71,6 +72,7 @@ if(path==='/api/music/generate'&&method==='POST'){
  return json({taskId,status:payload.data?.status||'queued'});
 }
 if(path==='/api/music/status'&&method==='GET'){
+ if(!await validSession(req,env))return json({error:'Your MAP132 Admin session has expired. Sign in again.'},401);
  if(!env.ACE_STEP_API_URL)return json({error:'Music generation provider is not configured.'},503);
  const taskId=url.searchParams.get('task_id')||'';if(!/^[a-zA-Z0-9_-]{8,128}$/.test(taskId))return json({error:'Invalid music task ID.'},400);
  let base:URL;try{base=new URL(env.ACE_STEP_API_URL);}catch{return json({error:'Music provider URL is invalid.'},503);}
@@ -85,6 +87,7 @@ if(path==='/api/music/status'&&method==='GET'){
  return json({taskId,status:record.status,queuePosition:record.queue_position||null,error:record.error||result?.error||null,audioPath:file,metadata:result?.metas||null});
 }
 if(path==='/api/music/audio'&&method==='GET'){
+ if(!await validSession(req,env))return json({error:'Your MAP132 Admin session has expired. Sign in again.'},401);
  if(!env.ACE_STEP_API_URL)return json({error:'Music generation provider is not configured.'},503);
  const audioPath=url.searchParams.get('path')||'';if(!audioPath.startsWith('/v1/audio?path='))return json({error:'Invalid generated audio path.'},400);
  let base:URL,audioUrl:URL;try{base=new URL(env.ACE_STEP_API_URL);audioUrl=new URL(audioPath,base);}catch{return json({error:'Music provider URL is invalid.'},503);}
