@@ -178,7 +178,8 @@
   $('musicDownloadSource').addEventListener('click',event=>{if(!audioBlob)event.preventDefault()});
   for (const [input, output] of [['musicMainVolume','musicMainVolumeValue'],['musicSfxVolume','musicSfxVolumeValue']]) $(input).addEventListener('input',()=>$(output).textContent=$(input).value+'%');
   api('/api/music/config').then(config=>{
-    if(config.configured) { generateButton.disabled=false; generateButton.textContent='Generate music'; setStatus('Music generation service is connected. Create an original instrumental track.'); }
+    if(config.configured && config.authenticated) { generateButton.disabled=false; generateButton.textContent='Generate music'; setStatus('Music generation service is connected. Create an original instrumental track.'); }
+    else if(config.configured) {setStatus('Sign in to the MAP132 Admin Dashboard first, then return here to generate music.','warning');generateButton.disabled=true;generateButton.textContent='Admin sign-in required';}
     else {setStatus('Music Studio is ready, but its external GPU provider is not configured yet. No generation quota or free hosting is assumed.','warning');generateButton.disabled=true;generateButton.textContent='Provider setup required';}
   }).catch(()=>setStatus('Could not check the music generation service.','error'));
 })();
