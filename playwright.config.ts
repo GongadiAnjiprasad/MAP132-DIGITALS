@@ -16,7 +16,7 @@ export default defineConfig({
     },
     {
       name: 'desktop-chromium',
-      testMatch: ['responsive-layout.spec.ts', 'theme-toggle.spec.ts', 'ambient-service-theme.spec.ts', 'work-feedback.spec.ts', 'select-work.spec.ts', 'my-drive-workspace.spec.ts', 'premium-uiux.spec.ts', 'elite-light-theme.spec.ts'],
+      testMatch: ['responsive-layout.spec.ts', 'theme-toggle.spec.ts', 'ambient-service-theme.spec.ts', 'work-feedback.spec.ts', 'select-work.spec.ts', 'my-drive-workspace.spec.ts', 'ai-music-studio.spec.ts', 'premium-uiux.spec.ts', 'elite-light-theme.spec.ts'],
       use: { ...devices['Desktop Chrome'], viewport: { width: 1440, height: 900 } },
     },
   ],
