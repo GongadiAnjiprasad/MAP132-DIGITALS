@@ -11,7 +11,7 @@ export default defineConfig({
   projects: [
     {
       name: 'mobile-chromium',
-      testMatch: ['mobile-swipe.spec.ts', 'ambient-service-theme.mobile.spec.ts', 'work-feedback.mobile.spec.ts', 'select-work.spec.ts', 'my-drive-workspace.spec.ts', 'premium-uiux.spec.ts', 'elite-light-theme.spec.ts'],
+      testMatch: ['mobile-swipe.spec.ts', 'ambient-service-theme.mobile.spec.ts', 'work-feedback.mobile.spec.ts', 'select-work.spec.ts', 'my-drive-workspace.spec.ts', 'ai-music-studio.spec.ts', 'premium-uiux.spec.ts', 'elite-light-theme.spec.ts'],
       use: { ...devices['iPhone 13'], browserName: 'chromium' },
     },
     {
