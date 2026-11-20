@@ -53,7 +53,8 @@ async function read(env:Env){
   }catch{return DEFAULTS;}
 }
 async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;
-const musicProviderUrl=env.ACE_STEP_API_URL||'https://ace-step-v1-5.hf.space';\nif(path==='/api/music/config'&&method==='GET')return json({configured:!!musicProviderUrl,provider:'Hugging Face ZeroGPU · ACE-Step v1.5',authenticated:await validSession(req,env)});
+const musicProviderUrl=env.ACE_STEP_API_URL||'';
+if(path==='/api/music/config'&&method==='GET')return json({configured:!!env.ACE_STEP_API_URL,provider:env.ACE_STEP_API_URL?'ACE-Step v1.5':'Not configured',authenticated:await validSession(req,env)});
 if(path==='/api/music/generate'&&method==='POST'){
  if(!await validSession(req,env))return json({error:'Sign in to the MAP132 Admin Dashboard before generating music.'},401);
  if(!musicProviderUrl)return json({error:'Music generation provider is not configured.'},503);
