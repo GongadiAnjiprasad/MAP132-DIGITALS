@@ -1474,6 +1474,9 @@ main:not(:has(> section:target))>#work .work-card:nth-child(n+4){display:none}
 .feedback-launch.royal-feedback-launch.is-expanded .feedback-mark{transform:translateX(-94px)}
 .feedback-launch.royal-feedback-launch.is-expanded .feedback-launch-text{opacity:1;transform:translateX(0)}
 .feedback-launch.royal-feedback-launch:hover{transform:translateY(-3px);color:#fff1c9}
+/* Suppress the browser's pointer/tap focus halo; keep a visible keyboard focus indicator. */
+.feedback-launch.royal-feedback-launch{-webkit-tap-highlight-color:transparent}
+.feedback-launch.royal-feedback-launch:focus:not(:focus-visible){outline:none;box-shadow:none}
 .feedback-launch.royal-feedback-launch:hover::before{border-color:#ffe3a0}
 @media(max-width:600px){
   .feedback-launch.royal-feedback-launch{right:12px;bottom:calc(92px + env(safe-area-inset-bottom));z-index:999;width:146px;height:52px;min-width:146px}
