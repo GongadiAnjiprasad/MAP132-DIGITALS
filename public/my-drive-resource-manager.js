@@ -197,6 +197,7 @@
       if (state.connected) {
         try {
           await loadAssets(false);
+          await loadZipBackups();
           showMessage('Google Drive connected. Your saved resources are ready.');
         } catch (assetError) {
           state.assets = []; state.cursor = null; renderAssets();
@@ -536,12 +537,50 @@
     return {assets,issues};
   }
 
+  async function loadZipBackups() {
+    const host = $('myDriveZipBackups');
+    if (!host) return;
+    try {
+      const data = await request('/api/my-drive/zip-backups');
+      host.replaceChildren();
+      const backups = data.backups || [];
+      if (!backups.length) {
+        host.appendChild(make('p', 'mydrive-empty', 'No original ZIP archives backed up yet.'));
+        return;
+      }
+      backups.forEach(backup => {
+        const card = make('article', 'mydrive-zip-backup');
+        const details = make('div', 'mydrive-zip-backup-details');
+        details.appendChild(make('strong', '', backup.name || 'ZIP archive'));
+        details.appendChild(make('small', '', sizeText(backup.size) + ' · Saved ' + new Date(backup.storedAt).toLocaleString()));
+        const download = make('a', 'mydrive-upload', 'Download original ZIP');
+        download.href = '/api/my-drive/zip-backups/' + encodeURIComponent(backup.id) + '/download';
+        download.setAttribute('download', backup.name || 'backup.zip');
+        details.appendChild(download);
+        card.appendChild(details);
+        host.appendChild(card);
+      });
+    } catch (error) {
+      host.replaceChildren(make('p', 'mydrive-empty', error.message || 'Could not load ZIP backups.'));
+    }
+  }
+
   async function importZip(file) {
     if (!file || state.busy) return;
     if (!state.connected) { showMessage('Connect Google Drive first so extracted files can be saved into MAP132 Workspace.', true); return; }
+    if (file.size > 100 * 1024 * 1024) { showMessage('ZIP archive exceeds the 100 MB backup limit.', true); return; }
     setBusy(true);
     try {
-      showMessage('Scanning ZIP and nested ZIP archives for supported resources…');
+      showMessage('Saving the original ZIP archive to your Google Drive backup folder…');
+      const archiveResponse = await fetch('/api/my-drive/zip-backups', {
+        method: 'POST', credentials: 'same-origin',
+        headers: { 'Content-Type': 'application/zip', 'X-Archive-Name': encodeURIComponent(file.name) },
+        body: file
+      });
+      const archiveResult = await archiveResponse.json().catch(() => ({}));
+      if (!archiveResponse.ok) throw new Error(archiveResult.error || 'Could not save the original ZIP backup.');
+      await loadZipBackups();
+      showMessage((archiveResult.duplicate ? 'Original ZIP already backed up. ' : 'Original ZIP safely backed up. ') + 'Now scanning nested ZIP archives…');
       const extracted = await extractZipResources(file,0,{entries:0,bytes:0});
       if (!extracted.assets.length) throw new Error('No supported resources were found in this ZIP. Unsupported or unsafe entries were skipped.');
       let saved=0,duplicates=0;
@@ -552,6 +591,7 @@
         if(result.duplicate)duplicates++;else saved++;
       }
       await loadAssets(false);
+      await loadZipBackups();
       showMessage('ZIP import complete: '+saved+' saved, '+duplicates+' duplicate(s), '+extracted.issues.length+' skipped item(s). Nested ZIPs were scanned automatically.');
     } catch (error) { showMessage(error.message || 'ZIP import failed.', true); }
     finally {
