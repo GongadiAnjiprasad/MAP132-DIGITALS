@@ -8,8 +8,8 @@ Publish videos from one dedicated Google Drive folder into MAP132 DIGITALS Selec
 2. Connect Google Drive using the existing OAuth flow.
 3. In Portfolio Manager, use **Create MAP132 Drive folders** to create or reuse `MAP132 Portfolio` and its six category folders in My Drive, or choose an existing folder with Google Picker.
 4. The module recursively scans that folder and nested folders, filters supported video files, maps folder/file names to the existing portfolio categories, and publishes the resulting records.
-5. The selected folder ID and name are stored in the existing MAP132 KV namespace through an Admin-authenticated API. The dashboard scans once when Portfolio Manager opens or a folder is selected; use Sync now for an on-demand refresh. No additional background Cron is installed, avoiding 288 unnecessary scheduled Worker runs per day. The existing festival automation remains on its original daily 18:35 UTC schedule.
-6. Use Sync now to request an immediate refresh.
+5. The selected folder ID and name are stored in the existing MAP132 KV namespace through an Admin-authenticated API. A Cloudflare Worker Cron polls the saved folder every 15 minutes using the encrypted OAuth refresh token, publishing newly uploaded videos without needing the Admin Dashboard open. Opening Portfolio Manager, selecting a folder, or pressing Sync now still requests an on-demand refresh. The existing festival automation remains on its original daily 18:35 UTC schedule.
+6. The scheduled poll runs every 15 minutes; use Sync now to request an immediate refresh.
 
 ## Playback and access boundary
 - The public Worker playback endpoint serves only Drive file IDs present in the published portfolio content and tagged as Drive video items with a selected folder ID.
@@ -36,3 +36,10 @@ The current portfolio categories are retained for compatibility:
 - GOOGLE_PICKER_API_KEY, GOOGLE_CLIENT_ID, GOOGLE_CLIENT_SECRET, MY_DRIVE_SESSION_SECRET, and MAP132_KV must be configured as already required by My Drive.
 - Run focused unit tests, all existing unit tests, Playwright mobile tests, production build, and Worker dry-run before merging. PR runs must not deploy.
 - No production deployment is included in this feature branch.
+
+
+## Scheduled sync reliability
+- The scheduled sync fully scans the selected folder and nested folders with Drive pagination before writing portfolio content.
+- If token refresh, folder access, paging, or portfolio metadata parsing fails, the existing published list is preserved; partial scans do not unpublish videos.
+- The polling schedule is every 15 minutes. This is polling-based (not instant Google Drive push notification), so newly uploaded videos may take up to about 15 minutes to appear after a successful run.
+- Videos found in the selected folder are public on the portfolio. Only use a folder intended for public showcase work.

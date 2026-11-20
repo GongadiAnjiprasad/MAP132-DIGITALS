@@ -2,6 +2,7 @@ import { FESTIVAL_CALENDAR, getIndiaDateKey } from '../src/modules/seasonal/fest
 import { createFeedbackResponse } from './feedback';
 import { clearMyDriveSession, getPublishedDriveAccessToken, handleMyDriveOAuth } from '../src/modules/my-drive-resource-manager/driveOAuth';
 import { handleMyDriveAssets } from './myDriveAssets';
+import { syncDrivePortfolioFromFolder } from './drivePortfolioCron';
 interface Env { ASSETS: Fetcher; MAP132_KV?: KVNamespace; MAP132_MEDIA?: R2Bucket; ADMIN_PASSWORD?: string; FREESOUND_API_KEY?: string; GOOGLE_CLIENT_ID?: string; GOOGLE_CLIENT_SECRET?: string; GOOGLE_PICKER_API_KEY?: string; MY_DRIVE_SESSION_SECRET?: string; AI?: { run(model: string, inputs: Record<string, unknown>): Promise<{ image?: string; translated_text?: string; translations?: string[] }> }; }
 const DEFAULTS={profile:{name:'MAP132 DIGITALS',headline:'Every frame has a story.',intro:'Cinematic edits. Powerful stories. Visuals that stay with you.',about:'I turn raw footage into purposeful visual stories through thoughtful editing, rhythm, colour, motion and sound.',location:'India',seasonalEffect:'none',whatsapp:'',instagram:'',youtube:'',email:'',facebook:'',telegram:'',linkedin:''},skills:['Adobe Premiere Pro','After Effects','DaVinci Resolve','Cinematic Editing','Colour Grading','Motion Graphics','Sound Design','Storytelling'],items:[]};
 const json=(body:unknown,status=200,headers:HeadersInit={})=>new Response(JSON.stringify(body),{status,headers:{'Content-Type':'application/json; charset=utf-8','Cache-Control':'no-store',...Object.fromEntries(new Headers(headers))}});
@@ -299,6 +300,11 @@ export default {
     catch{return new Response('Website asset service unavailable.',{status:502});}
   },
   async scheduled(controller:ScheduledController,env:Env){
+    if(controller.cron==='*/15 * * * *'){
+      try{await syncDrivePortfolioFromFolder(env,()=>getPublishedDriveAccessToken(env));}
+      catch(error){console.error('MAP132 scheduled Drive portfolio sync failed; existing portfolio records were preserved.',error);}
+      return;
+    }
     if(controller.cron!=='35 18 * * *')return;
     const today=getIndiaDateKey(new Date(controller.scheduledTime));
     const festival=FESTIVAL_CALENDAR.find(item=>item.date===today);

@@ -36,15 +36,15 @@ test('Selected Work uses the same-origin stream instead of exposing private Driv
   assert.ok(admin.includes("'/api/portfolio/video/' + encodeURIComponent(item.driveFileId)"));
 });
 
-test('Admin Drive sync reuses the existing folder scanner, is on-demand, and warns about public publishing', () => {
+test('Admin Drive sync has on-demand and scheduled 15-minute refresh and warns about public publishing', () => {
   assert.ok(moduleUi.includes('listDriveFolderRecursively'));
   assert.ok(moduleUi.includes('buildDrivePortfolioItems'));
   assert.ok(moduleUi.includes("fetch('/api/my-drive/portfolio-folder'"));
   assert.ok(moduleUi.includes('Sync now'));
   assert.ok(!moduleUi.includes("addEventListener('focus'"));
-  assert.ok(!worker.includes('async function syncDrivePortfolioFromFolder'));
-  assert.ok(!worker.includes("*/5 * * * *"));
-  assert.ok(wrangler.includes('crons = ["35 18 * * *"]'));
+  assert.ok(worker.includes("import { syncDrivePortfolioFromFolder } from './drivePortfolioCron'"));
+  assert.ok(worker.includes("if(controller.cron==='*/15 * * * *')"));
+  assert.ok(wrangler.includes('crons = ["35 18 * * *", "*/15 * * * *"]'));
   assert.ok(worker.includes("if(controller.cron!=='35 18 * * *')return"));
   assert.ok(oauth.includes("path === '/api/my-drive/portfolio-folder' && request.method === 'PUT'"));
   assert.ok(moduleUi.includes('Source Drive files are not changed.'));
