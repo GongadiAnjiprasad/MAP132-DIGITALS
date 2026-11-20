@@ -43,7 +43,7 @@ test('music provider credentials remain server-side and provider URLs must use H
 
 test('generation validates prompt, duration and provider-supported output formats', () => {
   assert.match(worker, /duration<10\|\|duration>600/);
-  assert.match(worker, /\['wav','mp3','aac'\]/);
+  assert.match(worker, /\['wav','mp3'\]/);
   assert.match(worker, /audio_duration:duration/);
   assert.match(worker, /audio_format:format/);
 });
