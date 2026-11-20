@@ -32,6 +32,7 @@ test('music generation is never represented as available until a provider is con
   assert.match(rootWorkspace, /id="musicGenerateButton" type="submit" disabled/);
   assert.match(worker, /path==='\/api\/music\/config'/);
   assert.match(worker, /configured:!!env\.ACE_STEP_API_URL/);
+  assert.match(worker, /const musicProviderUrl=env\.ACE_STEP_API_URL\|\|'';/);
   assert.match(studio, /Provider setup required/);
 });
 
