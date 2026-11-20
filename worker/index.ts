@@ -63,9 +63,9 @@ if(path==='/api/music/generate'&&method==='POST'){
  const prompt=typeof body.prompt==='string'?body.prompt.trim():'',duration=Number(body.duration),format=String(body.format||'wav').toLowerCase();
  if(!prompt||prompt.length>2000)return json({error:'Music prompt must contain 1–2000 characters.'},400);
  if(!Number.isFinite(duration)||duration<10||duration>600)return json({error:'Music duration must be between 10 and 600 seconds.'},400);
- if(!['wav','mp3','aac'].includes(format))return json({error:'Choose WAV, MP3 or AAC output.'},400);
+ if(!['wav','mp3'].includes(format))return json({error:'Choose WAV or MP3 output.'},400);
  const headers=new Headers({'Content-Type':'application/json','Accept':'application/json'});if(env.ACE_STEP_API_KEY)headers.set('Authorization','Bearer '+env.ACE_STEP_API_KEY);
- const upstream=await fetch(new URL('/release_task',base),{method:'POST',headers,body:JSON.stringify({prompt,lyrics:body.instrumental===false?'':'[Instrumental]',thinking:false,audio_format:format,audio_duration:duration,model:'acestep-v15-turbo',batch_size:1})});
+ const upstream=await fetch(new URL('/release_task',base),{method:'POST',headers,body:JSON.stringify({prompt:body.instrumental===false?prompt:prompt+' Instrumental only, no vocals or lyrics.',lyrics:'',thinking:false,audio_format:format,audio_duration:duration,model:'acestep-v15-turbo',batch_size:1})});
  const payload:any=await upstream.json().catch(()=>({}));
  if(!upstream.ok||payload.code&&payload.code!==200)return json({error:payload.error||'Music provider rejected the generation request.'},502);
  const taskId=payload.data?.task_id||payload.task_id;if(typeof taskId!=='string'||!taskId)return json({error:'Music provider did not return a task ID.'},502);
@@ -75,7 +75,7 @@ if(path==='/api/music/status'&&method==='GET'){
  if(!await validSession(req,env))return json({error:'Your MAP132 Admin session has expired. Sign in again.'},401);
  if(!musicProviderUrl)return json({error:'Music generation provider is not configured.'},503);
  const taskId=url.searchParams.get('task_id')||'';if(!/^[a-zA-Z0-9_-]{8,128}$/.test(taskId))return json({error:'Invalid music task ID.'},400);
- let base:URL;try{base=new URL(env.ACE_STEP_API_URL);}catch{return json({error:'Music provider URL is invalid.'},503);}
+ let base:URL;try{base=new URL(musicProviderUrl);}catch{return json({error:'Music provider URL is invalid.'},503);}
  if(base.protocol!=='https:')return json({error:'Music provider must use HTTPS.'},503);
  const headers=new Headers({'Content-Type':'application/json','Accept':'application/json'});if(env.ACE_STEP_API_KEY)headers.set('Authorization','Bearer '+env.ACE_STEP_API_KEY);
  const upstream=await fetch(new URL('/query_result',base),{method:'POST',headers,body:JSON.stringify({task_id_list:[taskId]})});
@@ -88,9 +88,9 @@ if(path==='/api/music/status'&&method==='GET'){
 }
 if(path==='/api/music/audio'&&method==='GET'){
  if(!await validSession(req,env))return json({error:'Your MAP132 Admin session has expired. Sign in again.'},401);
- if(!env.ACE_STEP_API_URL)return json({error:'Music generation provider is not configured.'},503);
+ if(!musicProviderUrl)return json({error:'Music generation provider is not configured.'},503);
  const audioPath=url.searchParams.get('path')||'';if(!audioPath.startsWith('/v1/audio?path='))return json({error:'Invalid generated audio path.'},400);
- let base:URL,audioUrl:URL;try{base=new URL(env.ACE_STEP_API_URL);audioUrl=new URL(audioPath,base);}catch{return json({error:'Music provider URL is invalid.'},503);}
+ let base:URL,audioUrl:URL;try{base=new URL(musicProviderUrl);audioUrl=new URL(audioPath,base);}catch{return json({error:'Music provider URL is invalid.'},503);}
  if(base.protocol!=='https:'||audioUrl.origin!==base.origin||audioUrl.pathname!=='/v1/audio')return json({error:'Generated audio source is not trusted.'},400);
  const headers=new Headers();if(env.ACE_STEP_API_KEY)headers.set('Authorization','Bearer '+env.ACE_STEP_API_KEY);
  const upstream=await fetch(audioUrl,{headers});if(!upstream.ok)return json({error:'Generated audio could not be downloaded from the provider.'},502);
