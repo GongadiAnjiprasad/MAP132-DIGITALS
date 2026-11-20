@@ -53,11 +53,11 @@ async function read(env:Env){
   }catch{return DEFAULTS;}
 }
 async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;
-if(path==='/api/music/config'&&method==='GET')return json({configured:!!env.ACE_STEP_API_URL,authenticated:await validSession(req,env)});
+const musicProviderUrl=env.ACE_STEP_API_URL||'https://ace-step-v1-5.hf.space';\nif(path==='/api/music/config'&&method==='GET')return json({configured:!!musicProviderUrl,provider:'Hugging Face ZeroGPU · ACE-Step v1.5',authenticated:await validSession(req,env)});
 if(path==='/api/music/generate'&&method==='POST'){
  if(!await validSession(req,env))return json({error:'Sign in to the MAP132 Admin Dashboard before generating music.'},401);
- if(!env.ACE_STEP_API_URL)return json({error:'Music generation provider is not configured. Add ACE_STEP_API_URL and, if required, ACE_STEP_API_KEY in Cloudflare Worker settings.'},503);
- let base:URL;try{base=new URL(env.ACE_STEP_API_URL);}catch{return json({error:'Music provider URL is invalid.'},503);}
+ if(!musicProviderUrl)return json({error:'Music generation provider is not configured.'},503);
+ let base:URL;try{base=new URL(musicProviderUrl);}catch{return json({error:'Music provider URL is invalid.'},503);}
  if(base.protocol!=='https:')return json({error:'Music provider must use HTTPS.'},503);
  let body:any;try{body=await req.json();}catch{return json({error:'Invalid music request.'},400);}
  const prompt=typeof body.prompt==='string'?body.prompt.trim():'',duration=Number(body.duration),format=String(body.format||'wav').toLowerCase();
@@ -73,7 +73,7 @@ if(path==='/api/music/generate'&&method==='POST'){
 }
 if(path==='/api/music/status'&&method==='GET'){
  if(!await validSession(req,env))return json({error:'Your MAP132 Admin session has expired. Sign in again.'},401);
- if(!env.ACE_STEP_API_URL)return json({error:'Music generation provider is not configured.'},503);
+ if(!musicProviderUrl)return json({error:'Music generation provider is not configured.'},503);
  const taskId=url.searchParams.get('task_id')||'';if(!/^[a-zA-Z0-9_-]{8,128}$/.test(taskId))return json({error:'Invalid music task ID.'},400);
  let base:URL;try{base=new URL(env.ACE_STEP_API_URL);}catch{return json({error:'Music provider URL is invalid.'},503);}
  if(base.protocol!=='https:')return json({error:'Music provider must use HTTPS.'},503);
