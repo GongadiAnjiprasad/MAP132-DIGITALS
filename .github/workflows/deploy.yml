@@ -52,7 +52,7 @@ jobs:
           wranglerVersion: "4.160.1"
           command: deploy --config wrangler.preview.toml
       - name: Deploy Worker and static website
-        if: github.event_name != 'pull_request'
+        if: github.ref == 'refs/heads/main' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
         uses: cloudflare/wrangler-action@v3
         with:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
