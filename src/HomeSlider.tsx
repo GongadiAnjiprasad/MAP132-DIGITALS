@@ -210,16 +210,18 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   const heroTileGesture = useRef<{ index: number; x: number; y: number; pointerId: number } | null>(null);
   const suppressHeroTileClick = useRef(false);
   const onHeroTilePointerDown = (index: number, event: PointerEvent<HTMLButtonElement>) => {
+    // Single-video tiles keep the existing page-swipe gesture; only multi-video
+    // tiles claim a horizontal swipe for their own thumbnail carousel.
+    if (heroDriveVideos[index].length < 2 || (event.pointerType !== 'touch' && event.pointerType !== 'pen')) return;
     event.stopPropagation();
-    if (event.pointerType !== 'touch' && event.pointerType !== 'pen') return;
     try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* capture may be unavailable */ }
     heroTileGesture.current = { index, x: event.clientX, y: event.clientY, pointerId: event.pointerId };
   };
   const onHeroTilePointerUp = (event: PointerEvent<HTMLButtonElement>) => {
-    event.stopPropagation();
     const start = heroTileGesture.current;
-    heroTileGesture.current = null;
     if (!start || start.pointerId !== event.pointerId) return;
+    event.stopPropagation();
+    heroTileGesture.current = null;
     try {
       if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
     } catch { /* capture may already be released */ }
@@ -228,11 +230,9 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     suppressHeroTileClick.current = true;
     window.setTimeout(() => { suppressHeroTileClick.current = false; }, 350);
     const videoCount = heroDriveVideos[start.index].length;
-    if (videoCount > 1) {
-      setHeroTileVideoIndices(current => current.map((value, index) =>
-        index === start.index ? (value + direction + videoCount) % videoCount : value
-      ));
-    }
+    setHeroTileVideoIndices(current => current.map((value, index) =>
+      index === start.index ? (value + direction + videoCount) % videoCount : value
+    ));
   };
   const onHeroTileClick = (index: number, cardTheme: string) => {
     if (suppressHeroTileClick.current) return;
@@ -416,7 +416,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
               {serviceCards.map((card, index) => {
                 const driveVideos = heroDriveVideos[index];
                 const driveVideo = driveVideos[heroTileVideoIndices[index] % Math.max(1, driveVideos.length)];
-                return <button type="button" key={card.title} data-service-theme={card.theme} aria-label={`Play ${card.title} ${driveVideos.length ? 'published portfolio' : 'sample'} video`} title={`Play ${card.title} ${driveVideos.length ? 'published portfolio' : 'sample'} video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onPointerDown={event => onHeroTilePointerDown(index, event)} onPointerUp={onHeroTilePointerUp} onPointerCancel={event => { event.stopPropagation(); heroTileGesture.current = null; }} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={() => onHeroTileClick(index, card.theme)} >
+                return <button type="button" key={card.title} data-service-theme={card.theme} aria-label={`Play ${card.title} ${driveVideos.length ? 'published portfolio' : 'sample'} video`} title={`Play ${card.title} ${driveVideos.length ? 'published portfolio' : 'sample'} video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onPointerDown={event => onHeroTilePointerDown(index, event)} onPointerUp={onHeroTilePointerUp} onPointerCancel={event => { if (heroTileGesture.current?.index === index) { event.stopPropagation(); heroTileGesture.current = null; } }} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={() => onHeroTileClick(index, card.theme)} >
                   {driveVideo?.driveFileId ? <video key={driveVideo.id || driveVideo.driveFileId} className="ms-service-tile-media" src={'/api/portfolio/video/' + encodeURIComponent(driveVideo.driveFileId)} poster={card.image} muted autoPlay loop playsInline preload="metadata" aria-hidden="true" tabIndex={-1} /> : <img src={card.image} alt="" aria-hidden="true" loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'auto'} decoding="async" />}
                   <span>{card.number}</span>{driveVideos.length > 1 && <em className="ms-service-tile-count">{String((heroTileVideoIndices[index] % driveVideos.length) + 1).padStart(2, '0')} / {String(driveVideos.length).padStart(2, '0')}</em>}<b>{card.title}</b><small>{card.note}</small>
                 </button>;
