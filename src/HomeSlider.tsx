@@ -230,7 +230,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     const videoCount = heroDriveVideos[start.index].length;
     if (videoCount > 1) {
       setHeroTileVideoIndices(current => current.map((value, index) =>
-        index === start.index ? (value + (direction > 0 ? -1 : 1) + videoCount) % videoCount : value
+        index === start.index ? (value + direction + videoCount) % videoCount : value
       ));
     }
   };
