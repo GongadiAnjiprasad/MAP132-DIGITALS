@@ -79,6 +79,14 @@ function socialLink(value: string, platform: 'instagram' | 'youtube' | 'facebook
   };
   return bases[platform] + handle;
 }
+const servicePortfolioPatterns: RegExp[] = [
+  /cinematic|film|trailer|teaser/i,
+  /wedding|birthday|bday|celebration|event/i,
+  /reel|short|instagram|insta/i,
+  /youtube|podcast|interview|creator|news/i,
+  /brand|advert|commercial|product|promotion|promo/i,
+  /\bai\b|artificial|futur|generative/i
+];
 function mediaEmbed(item: PortfolioItem) {
   const url = item.url || item.mediaUrl || '';
   if (item.source === 'youtube') {
@@ -188,6 +196,10 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     nav.scrollTo({ left: Math.max(0, Math.min(targetLeft, maxScroll)), behavior: 'smooth' });
   }, [active]);
   const [activePreview, setActivePreview] = useState<number | null>(null);
+  const heroDrivePreview = activePreview === null ? undefined : content.items.find(item =>
+    item.kind === 'video' && item.source === 'drive' && Boolean(item.driveFileId) &&
+    servicePortfolioPatterns[activePreview].test(item.category + ' ' + item.title + ' ' + item.description)
+  );
   const [enquirySubmitted, setEnquirySubmitted] = useState(false);
   const [enquiryBusy, setEnquiryBusy] = useState(false);
   const [enquiryError, setEnquiryError] = useState('');
@@ -467,12 +479,12 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
       <div className="ms-preview-dialog" onClick={event => event.stopPropagation()} onPointerDown={event => { if (event.pointerType !== 'touch' && event.pointerType !== 'pen' && event.pointerType !== 'mouse') return; if ((event.target as HTMLElement).closest('button, input')) return; event.currentTarget.setPointerCapture(event.pointerId); previewGesture.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId }; }} onPointerUp={event => { const start = previewGesture.current; previewGesture.current = null; if (!start || start.pointerId !== event.pointerId) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; const direction = getHorizontalSwipeDirection(dx, dy, event.pointerType === 'mouse' ? 55 : 42, 1.15); if (direction !== 0) changePreview(direction); }} onPointerCancel={() => { previewGesture.current = null; }} onWheel={event => { if (Math.abs(event.deltaX) < Math.abs(event.deltaY) * 1.15 || Math.abs(event.deltaX) < 2) return; event.preventDefault(); if (wheelLocked.current) return; wheelTotal.current += event.deltaX; if (Math.abs(wheelTotal.current) >= 58) { changePreview(wheelTotal.current > 0 ? 1 : -1); wheelTotal.current = 0; wheelLocked.current = true; window.setTimeout(() => { wheelLocked.current = false; }, 520); } }}>
         <div className="ms-preview-dialog-head"><div><span>MAP132 DIGITALS / SHOWCASE PREVIEW</span><h2>{serviceCards[activePreview].title}</h2></div><button type="button" className="ms-preview-close" aria-label="Close video" onClick={closePreview}><X size={22}/></button></div>
         <div className="ms-preview-stage">
-          <video key={activePreview} className="ms-preview-player" src={previewVideos[activePreview].src} controls autoPlay playsInline preload="metadata" onPlay={() => ambientTheme.setPlayback(serviceCards[activePreview].theme as ServiceThemeKey, 'preview-modal')} onPause={() => ambientTheme.clearPlayback('preview-modal')} onEnded={() => ambientTheme.clearPlayback('preview-modal')}>Your browser does not support video playback.</video>
+          <video key={heroDrivePreview?.id || activePreview} className="ms-preview-player" src={heroDrivePreview?.driveFileId ? '/api/portfolio/video/' + encodeURIComponent(heroDrivePreview.driveFileId) : previewVideos[activePreview].src} controls autoPlay playsInline preload="metadata" onPlay={() => ambientTheme.setPlayback(serviceCards[activePreview].theme as ServiceThemeKey, 'preview-modal')} onPause={() => ambientTheme.clearPlayback('preview-modal')} onEnded={() => ambientTheme.clearPlayback('preview-modal')}>Your browser does not support video playback.</video>
           <span className="ms-preview-swipe-hint ms-preview-swipe-left" aria-hidden="true"><ArrowLeft size={25}/></span>
           <span className="ms-preview-swipe-hint ms-preview-swipe-right" aria-hidden="true"><ArrowRight size={25}/></span>
         </div>
         <div className="ms-preview-count">{String(activePreview + 1).padStart(2, '0')} / {String(previewVideos.length).padStart(2, '0')}</div>
-        <p className="ms-preview-disclaimer">{previewVideos[activePreview].note}. Swipe left/right for more videos · Reference footage only — not a commissioned MAP132 client project.</p>
+        <p className="ms-preview-disclaimer">{heroDrivePreview ? heroDrivePreview.title + ' · Published MAP132 portfolio video' : previewVideos[activePreview].note + ' · Reference footage only — not a commissioned MAP132 client project'}. Swipe left/right for more videos.</p>
       </div>
     </div>}
     <div className="ms-controls">
