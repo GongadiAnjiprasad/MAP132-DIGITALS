@@ -98,13 +98,13 @@ async function syncDrivePortfolioScheduled(env:Env){
     let category='Other Projects';
     if(/birthday|bday|birth day/.test(text))category='Birthday Films';
     else if(/wedding|marriage|pelli/.test(text))category='Wedding & Events';
-    else if(/advert|\\bads?\\b|promotion|promo|brand/.test(text))category='Brand Promotions';
-    else if(/\\bai\\b|artificial intelligence|generative/.test(text))category='AI Video Creation';
-    else if(/reel|instagram|\\binsta\\b|shorts?/.test(text))category='Reels & Shorts';
+    else if(/advert|\bads?\b|promotion|promo|brand/.test(text))category='Brand Promotions';
+    else if(/\bai\b|artificial intelligence|generative/.test(text))category='AI Video Creation';
+    else if(/reel|instagram|\binsta\b|shorts?/.test(text))category='Reels & Shorts';
     else if(/youtube|podcast|interview/.test(text))category='YouTube Videos';
     else if(/cinematic|trailer|teaser/.test(text))category='Cinematic Films';
     const previous=oldByFile.get(file.id) as any;
-    return {id:previous?.id||'drive-'+file.id,title:name.replace(/\\.[^.]+$/,'').replace(/[_-]+/g,' ').replace(/\\s+/g,' ').trim()||'Untitled video',category,description:file.relativePath,kind:'video',url:'https://drive.google.com/file/d/'+encodeURIComponent(file.id)+'/view',source:'drive',driveFileId:file.id,driveFolderId:folder.id};
+    return {id:previous?.id||'drive-'+file.id,title:name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').replace(/\\s+/g,' ').trim()||'Untitled video',category,description:file.relativePath,kind:'video',url:'https://drive.google.com/file/d/'+encodeURIComponent(file.id)+'/view',source:'drive',driveFileId:file.id,driveFolderId:folder.id};
   });
   const unrelated=(existing.items||[]).filter((item:any)=>item?.driveFolderId!==folder.id);
   await env.MAP132_KV.put('portfolio/content',JSON.stringify({...existing,items:[...synced,...unrelated]}));
