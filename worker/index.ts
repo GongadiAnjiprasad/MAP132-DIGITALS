@@ -96,8 +96,12 @@ async function syncDrivePortfolioScheduled(env:Env){
   const synced=files.filter(file=>!seen.has(file.id)&&seen.add(file.id)).map(file=>{
     const name=String(file.name||'Video'),text=(file.relativePath+' '+name).toLowerCase().replace(/[_-]+/g,' ');
     let category='Other Projects';
-    if(/birthday|bday|birth day/.test(text))category='Birthday Films';
-    else if(/wedding|marriage|pelli/.test(text))category='Wedding & Events';
+    const fileText=name.toLowerCase().replace(/[_-]+/g,' ');
+    const folderText=String(file.relativePath||'').toLowerCase().replace(/[_-]+/g,' ');
+    if(/birthday|bday|birth day/.test(fileText))category='Birthday Films';
+    else if(/wedding|marriage|pelli/.test(fileText))category='Wedding & Events';
+    else if(/birthday|bday|birth day/.test(folderText)&&!/wedding|marriage|pelli/.test(folderText))category='Birthday Films';
+    else if(/wedding|marriage|pelli/.test(folderText))category='Wedding & Events';
     else if(/advert|\bads?\b|promotion|promo|brand/.test(text))category='Brand Promotions';
     else if(/\bai\b|artificial intelligence|generative/.test(text))category='AI Video Creation';
     else if(/reel|instagram|\binsta\b|shorts?/.test(text))category='Reels & Shorts';
