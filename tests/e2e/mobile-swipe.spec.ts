@@ -231,6 +231,10 @@ test('Explore category tabs allow horizontal page swipe while category taps stil
 
   // Returning and tapping the same chip must continue to select the category normally.
   await page.locator('.ms-nav').getByRole('button', { name: 'Portfolio', exact: true }).click();
+  // Wait until the slider has returned to Portfolio before tapping a control
+  // inside the transitioning page; otherwise the click can land mid-transition.
+  await expect(track).toHaveAttribute('style', /translateX\\(-100%\\)/);
+  await page.waitForTimeout(750);
   await firstCategory.click();
   await expect(firstCategory).toHaveAttribute('aria-pressed', 'true');
 });
