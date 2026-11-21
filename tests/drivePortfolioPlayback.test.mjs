@@ -47,6 +47,7 @@ test('Admin sync and scheduled Drive auto-sync both refresh Selected Work safely
   assert.ok(wrangler.includes('crons = ["35 18 * * *", "*/30 * * * *"]'));
   assert.ok(worker.includes("my-drive/portfolio-last-auto-sync"));
   assert.ok(worker.includes('previous portfolio data was preserved'));
+  assert.ok(moduleUi.includes('background sync checks it every 30 minutes'));
   assert.ok(oauth.includes("path === '/api/my-drive/portfolio-folder' && request.method === 'PUT'"));
   assert.ok(moduleUi.includes('Source Drive files are not changed.'));
   assert.ok(moduleUi.includes('Every supported video found in this selected folder becomes publicly playable'));
