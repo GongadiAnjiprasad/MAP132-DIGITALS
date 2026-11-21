@@ -52,6 +52,65 @@ async function read(env:Env){
     return {...DEFAULTS,...stored,profile,skills,items,resources,logoPath:typeof stored.logoPath==='string'&&stored.logoPath.startsWith('portfolio/logos/')?stored.logoPath:''};
   }catch{return DEFAULTS;}
 }
+async function syncDrivePortfolioScheduled(env:Env){
+  if(!env.MAP132_KV)return {status:'skipped',reason:'KV unavailable'};
+  const saved=await env.MAP132_KV.get('my-drive/portfolio-folder');
+  if(!saved)return {status:'skipped',reason:'No portfolio folder selected'};
+  let folder:{id:string;name:string};
+  try{folder=JSON.parse(saved);}catch{return {status:'skipped',reason:'Saved folder record invalid'};}
+  if(!folder?.id||!folder?.name)return {status:'skipped',reason:'Saved folder record incomplete'};
+  const token=await getPublishedDriveAccessToken(env);
+  if(!token)return {status:'skipped',reason:'Google Drive refresh token unavailable'};
+  const headers={Authorization:'Bearer '+token,Accept:'application/json'};
+  const queue=[{id:folder.id,name:folder.name,path:folder.name}];
+  const visited=new Set<string>(),files:any[]=[];
+  const maxFolders=500,maxFiles=5000;
+  while(queue.length){
+    const current=queue.shift()!;
+    if(visited.has(current.id))continue;
+    visited.add(current.id);
+    if(visited.size>maxFolders)throw new Error('Automatic Drive sync exceeded the folder safety limit; existing portfolio items were kept.');
+    let pageToken='';
+    do{
+      const listUrl=new URL('https://www.googleapis.com/drive/v3/files');
+      listUrl.searchParams.set('q',"'"+current.id.replace(/'/g,"\\'")+"' in parents and trashed = false");
+      listUrl.searchParams.set('pageSize','100');
+      listUrl.searchParams.set('fields','nextPageToken,files(id,name,mimeType,modifiedTime,size,trashed)');
+      if(pageToken)listUrl.searchParams.set('pageToken',pageToken);
+      const response=await fetch(listUrl,{headers});
+      if(!response.ok)throw new Error('Google Drive listing failed ('+response.status+'); previous portfolio data was preserved.');
+      const page=await response.json() as {files?:any[];nextPageToken?:string};
+      for(const file of page.files||[]){
+        if(!file?.id||file.trashed)continue;
+        if(file.mimeType==='application/vnd.google-apps.folder')queue.push({id:file.id,name:file.name||'Folder',path:current.path+'/'+(file.name||'Folder')});
+        else if(String(file.mimeType||'').startsWith('video/'))files.push({...file,relativePath:current.path+'/'+(file.name||'Video')});
+        if(files.length>=maxFiles)throw new Error('Automatic Drive sync exceeded the 5,000-video safety limit; existing portfolio items were kept.');
+      }
+      pageToken=page.nextPageToken||'';
+    }while(pageToken);
+  }
+  const existing=await read(env);
+  const oldFolderItems=(existing.items||[]).filter((item:any)=>item?.driveFolderId===folder.id&&item?.driveFileId);
+  const oldByFile=new Map(oldFolderItems.map((item:any)=>[item.driveFileId,item]));
+  const seen=new Set<string>();
+  const synced=files.filter(file=>!seen.has(file.id)&&seen.add(file.id)).map(file=>{
+    const name=String(file.name||'Video'),text=(file.relativePath+' '+name).toLowerCase().replace(/[_-]+/g,' ');
+    let category='Other Projects';
+    if(/birthday|bday|birth day/.test(text))category='Birthday Films';
+    else if(/wedding|marriage|pelli/.test(text))category='Wedding & Events';
+    else if(/advert|\\bads?\\b|promotion|promo|brand/.test(text))category='Brand Promotions';
+    else if(/\\bai\\b|artificial intelligence|generative/.test(text))category='AI Video Creation';
+    else if(/reel|instagram|\\binsta\\b|shorts?/.test(text))category='Reels & Shorts';
+    else if(/youtube|podcast|interview/.test(text))category='YouTube Videos';
+    else if(/cinematic|trailer|teaser/.test(text))category='Cinematic Films';
+    const previous=oldByFile.get(file.id) as any;
+    return {id:previous?.id||'drive-'+file.id,title:name.replace(/\\.[^.]+$/,'').replace(/[_-]+/g,' ').replace(/\\s+/g,' ').trim()||'Untitled video',category,description:file.relativePath,kind:'video',url:'https://drive.google.com/file/d/'+encodeURIComponent(file.id)+'/view',source:'drive',driveFileId:file.id,driveFolderId:folder.id};
+  });
+  const unrelated=(existing.items||[]).filter((item:any)=>item?.driveFolderId!==folder.id);
+  await env.MAP132_KV.put('portfolio/content',JSON.stringify({...existing,items:[...synced,...unrelated]}));
+  await env.MAP132_KV.put('my-drive/portfolio-last-auto-sync',JSON.stringify({at:new Date().toISOString(),folderId:folder.id,folderName:folder.name,count:synced.length}));
+  return {status:'success',count:synced.length};
+}
 async function api(req:Request,env:Env){const url=new URL(req.url),path=url.pathname,method=req.method;if(path.startsWith('/api/portfolio/video/')&&method==='GET'){
  const fileId=path.slice('/api/portfolio/video/'.length);
  if(!/^[a-zA-Z0-9_-]{1,256}$/.test(fileId))return json({error:'Invalid portfolio video ID.'},400);
@@ -299,6 +358,13 @@ export default {
     catch{return new Response('Website asset service unavailable.',{status:502});}
   },
   async scheduled(controller:ScheduledController,env:Env){
+    if(controller.cron==='*/30 * * * *'){
+      try{await syncDrivePortfolioScheduled(env);}catch(error){
+        const message=error instanceof Error?error.message:'Automatic Drive sync failed';
+        if(env.MAP132_KV)await env.MAP132_KV.put('my-drive/portfolio-last-auto-sync-error',JSON.stringify({at:new Date(controller.scheduledTime).toISOString(),message}));
+      }
+      return;
+    }
     if(controller.cron!=='35 18 * * *')return;
     const today=getIndiaDateKey(new Date(controller.scheduledTime));
     const festival=FESTIVAL_CALENDAR.find(item=>item.date===today);
