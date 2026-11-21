@@ -283,3 +283,33 @@ test('feedback review categories do not rotate automatically', async ({ page }) 
   await expect(feed.getByRole('button', { name: 'Video Editing Service' })).toHaveAttribute('aria-pressed', 'true');
   await expect(feed.getByRole('button', { name: 'Website Experience' })).toHaveAttribute('aria-pressed', 'false');
 });
+
+
+test('hero tile swipe cycles published videos within the same service without changing the page', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.route('**/api/portfolio', route => route.fulfill({
+    status: 200,
+    contentType: 'application/json',
+    body: JSON.stringify({ content: { items: [
+      { id: 'trailer-one', title: 'Magadheera ReCreate', category: 'Cinematic Films', description: 'Cinematic trailer recreate', kind: 'video', source: 'drive', driveFileId: 'drive-trailer-one' },
+      { id: 'trailer-two', title: 'Magadheera Trailer Recreate', category: 'Cinematic Films', description: 'Cinematic trailer', kind: 'video', source: 'drive', driveFileId: 'drive-trailer-two' },
+    ] } }),
+  }));
+  await page.goto('/');
+  const track = page.locator('.ms-track');
+  const tile = page.locator('.ms-service-tile[data-service-theme="cinematic"]');
+  await expect(tile.locator('video')).toHaveAttribute('src', '/api/portfolio/video/drive-trailer-one');
+  await expect(tile.locator('.ms-service-tile-count')).toHaveText('01 / 02');
+
+  await dispatchTouchSwipe(page, '.ms-service-tile[data-service-theme="cinematic"]', 'left');
+
+  await expect(tile.locator('video')).toHaveAttribute('src', '/api/portfolio/video/drive-trailer-two');
+  await expect(tile.locator('.ms-service-tile-count')).toHaveText('02 / 02');
+  await expect(track).toHaveAttribute('style', /translateX\(0%\)/);
+  await expect(page.locator('.ms-preview-dialog')).toHaveCount(0);
+
+  await dispatchTouchSwipe(page, '.ms-service-tile[data-service-theme="cinematic"]', 'right');
+  await expect(tile.locator('video')).toHaveAttribute('src', '/api/portfolio/video/drive-trailer-one');
+  await expect(tile.locator('.ms-service-tile-count')).toHaveText('01 / 02');
+  await expect(track).toHaveAttribute('style', /translateX\(0%\)/);
+});
