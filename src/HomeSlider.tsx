@@ -28,7 +28,7 @@ type HomeContent = {
   logoUrl?: string;
 };
 
-const pages = ['Home', 'Selected Work', 'Services', 'Studio', 'Contact'];
+const pages = ['Home', 'Portfolio', 'Services', 'Studio', 'Contact'];
 const previewVideos = [
  {src:'https://videos.pexels.com/video-files/27099636/12071805_1920_1080_60fps.mp4',note:'Stock-footage visual study · cinematic atmosphere'},
  {src:'https://videos.pexels.com/video-files/31245302/13345103_1920_1080_50fps.mp4',note:'Stock-footage visual study · wedding and celebration'},
@@ -103,7 +103,7 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 export default function HomeSlider({ content, feedbackWidget }: { content: HomeContent; feedbackWidget?: ReactNode }) {
   const logoUrl = content.logoUrl === '/resources/Logo.png' ? '/resources/Logo.webp' : content.logoUrl || '/resources/Logo.webp';
   const [active, setActive] = useState(0);
-  const [activeProjectCategory, setActiveProjectCategory] = useState<string | null>(null);
+  const [activeProjectCategory, setActiveProjectCategory] = useState<string | null>('All Projects');
   const [activeProjectPage, setActiveProjectPage] = useState(1);
   const [publicReviews,setPublicReviews] = useState<PublicReview[]>([]);
   const [reviewCategory,setReviewCategory] = useState<'Website Experience'|'Video Editing Service'>('Video Editing Service');
@@ -382,12 +382,12 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
             </section>
         </section>
 
-        <section ref={workPageRef} className="ms-page ms-work-page" aria-label="Selected work">
-          <div className="ms-page-heading"><div><p className="ms-kicker">PORTFOLIO / VISUAL STUDIES</p><h2>Choose your <em>work.</em></h2></div><p>Select the type of video you want to explore. Each category opens its matching projects and creative samples.</p></div>
+        <section ref={workPageRef} className="ms-page ms-work-page" aria-label="Portfolio">
+          <div className="ms-page-heading"><div><p className="ms-kicker">MAP132 DIGITALS / PORTFOLIO</p><h2>Explore our <em>work.</em></h2></div><p>Explore our published videos, creative samples and featured projects. Browse everything or filter by service.</p></div>
           <div className="ms-work-category-sticky">
             <div className="work-category-toolbar">
-              <span>EXPLORE BY CATEGORY</span>
-              <button type="button" className={activeProjectCategory === 'All Projects' ? 'all-work-filter active' : 'all-work-filter'} aria-pressed={activeProjectCategory === 'All Projects'} onClick={() => selectWorkCategory('All Projects')}>View all projects <ArrowRight size={14}/></button>
+              <span>EXPLORE THE PORTFOLIO</span>
+              <button type="button" className={activeProjectCategory === 'All Projects' ? 'all-work-filter active' : 'all-work-filter'} aria-pressed={activeProjectCategory === 'All Projects'} onClick={() => selectWorkCategory('All Projects')}>All projects <ArrowRight size={14}/></button>
             </div>
             <div className="work-category-tabs" role="group" aria-label="Choose a project category">
               {workCategoryCards.map(category => {
@@ -398,7 +398,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
               })}
             </div>
           </div>
-          {activeProjectCategory === null && <div className="ms-work-prompt"><Sparkles size={17}/><span>Select a category to display all matching videos here. Switch categories anytime using the tabs above.</span></div>}
+          {activeProjectCategory === null && <div className="ms-work-prompt"><Sparkles size={17}/><span>Browse all published projects below, or choose a category to narrow the portfolio.</span></div>}
           {activeProjectCategory !== null && <div className="ms-work-results-heading">
             <div><p className="ms-category-showcase-kicker">{activeProjectCategory === 'All Projects' ? 'COMPLETE PORTFOLIO' : 'CATEGORY GALLERY'}</p><h3>{activeProjectCategory}</h3></div>
             <span>{selectedWorkItems.length} {selectedWorkItems.length === 1 ? 'PROJECT' : 'PROJECTS'}</span>
