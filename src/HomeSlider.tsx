@@ -202,10 +202,44 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     servicePortfolioPatterns[activePreview].test(item.category + ' ' + item.title + ' ' + item.description)
   );
   const heroDrivePreview = heroDrivePreviewItems[activePreviewVideoIndex];
-  const heroDriveVideos = serviceCards.map((_, index) => content.items.find(item =>
+  const heroDriveVideos = serviceCards.map((_, index) => content.items.filter(item =>
     item.kind === 'video' && item.source === 'drive' && Boolean(item.driveFileId) &&
     servicePortfolioPatterns[index].test(item.category + ' ' + item.title + ' ' + item.description)
   ));
+  const [heroTileVideoIndices, setHeroTileVideoIndices] = useState<number[]>(() => serviceCards.map(() => 0));
+  const heroTileGesture = useRef<{ index: number; x: number; y: number; pointerId: number } | null>(null);
+  const suppressHeroTileClick = useRef(false);
+  const onHeroTilePointerDown = (index: number, event: PointerEvent<HTMLButtonElement>) => {
+    // Single-video tiles keep the existing page-swipe gesture; only multi-video
+    // tiles claim a horizontal swipe for their own thumbnail carousel.
+    if (heroDriveVideos[index].length < 2 || (event.pointerType !== 'touch' && event.pointerType !== 'pen')) return;
+    event.stopPropagation();
+    try { event.currentTarget.setPointerCapture(event.pointerId); } catch { /* capture may be unavailable */ }
+    heroTileGesture.current = { index, x: event.clientX, y: event.clientY, pointerId: event.pointerId };
+  };
+  const onHeroTilePointerUp = (event: PointerEvent<HTMLButtonElement>) => {
+    const start = heroTileGesture.current;
+    if (!start || start.pointerId !== event.pointerId) return;
+    event.stopPropagation();
+    heroTileGesture.current = null;
+    try {
+      if (event.currentTarget.hasPointerCapture(event.pointerId)) event.currentTarget.releasePointerCapture(event.pointerId);
+    } catch { /* capture may already be released */ }
+    const direction = getHorizontalSwipeDirection(event.clientX - start.x, event.clientY - start.y, 42, 1.15);
+    if (direction === 0) return;
+    suppressHeroTileClick.current = true;
+    window.setTimeout(() => { suppressHeroTileClick.current = false; }, 350);
+    const videoCount = heroDriveVideos[start.index].length;
+    setHeroTileVideoIndices(current => current.map((value, index) =>
+      index === start.index ? (value + direction + videoCount) % videoCount : value
+    ));
+  };
+  const onHeroTileClick = (index: number, cardTheme: string) => {
+    if (suppressHeroTileClick.current) return;
+    ambientTheme.pin(cardTheme);
+    setActivePreviewVideoIndex(heroTileVideoIndices[index] || 0);
+    setActivePreview(index);
+  };
   const [enquirySubmitted, setEnquirySubmitted] = useState(false);
   const [enquiryBusy, setEnquiryBusy] = useState(false);
   const [enquiryError, setEnquiryError] = useState('');
@@ -380,10 +414,11 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
             <div className="ms-showcase-top"><span>WHAT WE CAN CREATE</span><span>MAP132 / 01—06</span></div>
             <div className="ms-service-bento">
               {serviceCards.map((card, index) => {
-                const driveVideo = heroDriveVideos[index];
-                return <button type="button" key={card.title} data-service-theme={card.theme} aria-label={`Play ${card.title} ${driveVideo ? 'published portfolio' : 'sample'} video`} title={`Play ${card.title} ${driveVideo ? 'published portfolio' : 'sample'} video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={() => { ambientTheme.pin(card.theme); setActivePreviewVideoIndex(0); setActivePreview(index); }} >
-                  {driveVideo?.driveFileId ? <video className="ms-service-tile-media" src={'/api/portfolio/video/' + encodeURIComponent(driveVideo.driveFileId)} poster={card.image} muted autoPlay loop playsInline preload="none" aria-hidden="true" tabIndex={-1} /> : <img src={card.image} alt="" aria-hidden="true" loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'auto'} decoding="async" />}
-                  <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small>
+                const driveVideos = heroDriveVideos[index];
+                const driveVideo = driveVideos[heroTileVideoIndices[index] % Math.max(1, driveVideos.length)];
+                return <button type="button" key={card.title} data-service-theme={card.theme} aria-label={`Play ${card.title} ${driveVideos.length ? 'published portfolio' : 'sample'} video`} title={`Play ${card.title} ${driveVideos.length ? 'published portfolio' : 'sample'} video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onPointerDown={event => onHeroTilePointerDown(index, event)} onPointerUp={onHeroTilePointerUp} onPointerCancel={event => { if (heroTileGesture.current?.index === index) { event.stopPropagation(); heroTileGesture.current = null; } }} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={() => onHeroTileClick(index, card.theme)} >
+                  {driveVideo?.driveFileId ? <video key={driveVideo.id || driveVideo.driveFileId} className="ms-service-tile-media" src={'/api/portfolio/video/' + encodeURIComponent(driveVideo.driveFileId)} poster={card.image} muted autoPlay loop playsInline preload="metadata" aria-hidden="true" tabIndex={-1} /> : <img src={card.image} alt="" aria-hidden="true" loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'auto'} decoding="async" />}
+                  <span>{card.number}</span>{driveVideos.length > 1 && <em className="ms-service-tile-count">{String((heroTileVideoIndices[index] % driveVideos.length) + 1).padStart(2, '0')} / {String(driveVideos.length).padStart(2, '0')}</em>}<b>{card.title}</b><small>{card.note}</small>
                 </button>;
               })}
             </div>

@@ -40,6 +40,7 @@
 .ms-service-tile>i{z-index:2}
 .ms-service-tile:hover{transform:translateY(-3px);border-color:var(--ms-gold)}
 .ms-service-tile>span{position:absolute;top:9px;left:10px;color:#f1dba8;font-size:8px;letter-spacing:1px}
+.ms-service-tile>.ms-service-tile-count{position:absolute;top:8px;right:10px;left:auto;z-index:2;padding:4px 6px;border:1px solid rgba(245,220,167,.42);border-radius:999px;background:rgba(7,10,15,.68);color:#f1dba8;font-size:8px;font-style:normal;letter-spacing:.7px;line-height:1}
 .ms-service-tile b{font:700 11px/1.2 'Manrope',sans-serif}
 .ms-service-tile small{font-size:8px;color:#d5d3ce;line-height:1.35}
 .ms-service-tile i{position:absolute;right:9px;top:8px;font-style:normal;color:var(--ms-gold);opacity:0}
