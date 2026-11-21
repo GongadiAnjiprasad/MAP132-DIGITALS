@@ -9,13 +9,13 @@ const categories = [
   'YouTube Related',
 ];
 
-test('Selected Work keeps category tabs visible and starts without an arbitrary all-project gallery', async ({ page }) => {
+test('Portfolio starts with all published projects and keeps category tabs visible', async ({ page }) => {
   await page.goto('/');
-  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
+  await page.locator('.ms-nav').getByRole('button', { name: 'Portfolio', exact: true }).click();
   const tabs = page.getByRole('group', { name: 'Choose a project category' });
   await expect(tabs).toBeVisible();
-  await expect(page.locator('.ms-project-grid')).toHaveCount(0);
-  await expect(page.locator('.ms-work-prompt')).toContainText('Select a category');
+  await expect(page.locator('.ms-work-results-heading h3')).toHaveText('All Projects');
+  await expect(page.locator('.ms-work-prompt')).toHaveCount(0);
   for (const category of categories) {
     await expect(tabs.getByRole('button', { name: new RegExp(category) })).toBeVisible();
   }
@@ -23,7 +23,7 @@ test('Selected Work keeps category tabs visible and starts without an arbitrary 
 
 test('Selecting a category updates the same page and keeps all category tabs available', async ({ page }) => {
   await page.goto('/');
-  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
+  await page.locator('.ms-nav').getByRole('button', { name: 'Portfolio', exact: true }).click();
   const tabs = page.getByRole('group', { name: 'Choose a project category' });
   const wedding = tabs.getByRole('button', { name: /Wedding \/ B’Day/ });
   await wedding.click();
@@ -40,7 +40,7 @@ test('Selecting a category updates the same page and keeps all category tabs ava
 
 test('All Projects is an explicit tab choice and empty results are labelled honestly', async ({ page }) => {
   await page.goto('/');
-  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
+  await page.locator('.ms-nav').getByRole('button', { name: 'Portfolio', exact: true }).click();
   const allProjects = page.getByRole('button', { name: /View all projects/ });
   await allProjects.click();
   await expect(allProjects).toHaveAttribute('aria-pressed', 'true');
@@ -52,7 +52,7 @@ test('All Projects is an explicit tab choice and empty results are labelled hone
 test('Category chooser displays six tabs in a stable three-column by two-row grid without horizontal tab scrolling', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
+  await page.locator('.ms-nav').getByRole('button', { name: 'Portfolio', exact: true }).click();
   const tabs = page.getByRole('group', { name: 'Choose a project category' });
   const buttons = tabs.getByRole('button');
   await expect(buttons).toHaveCount(6);
@@ -71,10 +71,10 @@ test('Category chooser displays six tabs in a stable three-column by two-row gri
 });
 
 
-test('Selected Work category controls remain sticky while scrolling project content', async ({ page }) => {
+test('Portfolio category controls remain sticky while scrolling project content', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await page.goto('/');
-  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
+  await page.locator('.ms-nav').getByRole('button', { name: 'Portfolio', exact: true }).click();
   const sticky = page.locator('.ms-work-category-sticky');
   await expect(sticky).toBeVisible();
   await expect(sticky).toHaveCSS('position', 'sticky');
