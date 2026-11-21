@@ -170,7 +170,7 @@ test('swiping updates a clearly selected page in both navigation indicators', as
 
   await dispatchTouchSwipe(page, '.ms-home-copy', 'left');
 
-  await expect(page.locator('.ms-nav button.active')).toHaveText('Selected Work');
+  await expect(page.locator('.ms-nav button.active')).toHaveText('Portfolio');
   await expect(page.locator('.ms-nav button.active')).toHaveAttribute('aria-current', 'page');
   await expect(page.locator('.ms-pagination button.active')).toContainText('2');
   await page.waitForTimeout(750);
@@ -219,7 +219,7 @@ test('swiping updates a clearly selected page in both navigation indicators', as
 test('Explore category tabs allow horizontal page swipe while category taps still work', async ({ page }) => {
   await page.goto('/');
   const track = page.locator('.ms-track');
-  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
+  await page.locator('.ms-nav').getByRole('button', { name: 'Portfolio', exact: true }).click();
   // Wait for the page-track transition to settle before measuring and dispatching touch coordinates.
   await page.waitForTimeout(750);
   const firstCategory = page.locator('.work-category-tab').first();
@@ -230,7 +230,7 @@ test('Explore category tabs allow horizontal page swipe while category taps stil
   await expect(track).toHaveAttribute('style', /translateX\(-200%\)/);
 
   // Returning and tapping the same chip must continue to select the category normally.
-  await page.locator('.ms-nav').getByRole('button', { name: 'Selected Work', exact: true }).click();
+  await page.locator('.ms-nav').getByRole('button', { name: 'Portfolio', exact: true }).click();
   await firstCategory.click();
   await expect(firstCategory).toHaveAttribute('aria-pressed', 'true');
 });
