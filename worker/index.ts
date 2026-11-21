@@ -104,7 +104,7 @@ async function syncDrivePortfolioScheduled(env:Env){
     else if(/youtube|podcast|interview/.test(text))category='YouTube Videos';
     else if(/cinematic|trailer|teaser/.test(text))category='Cinematic Films';
     const previous=oldByFile.get(file.id) as any;
-    return {id:previous?.id||'drive-'+file.id,title:name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').replace(/\\s+/g,' ').trim()||'Untitled video',category,description:file.relativePath,kind:'video',url:'https://drive.google.com/file/d/'+encodeURIComponent(file.id)+'/view',source:'drive',driveFileId:file.id,driveFolderId:folder.id};
+    return {id:previous?.id||'drive-'+file.id,title:name.replace(/\.[^.]+$/,'').replace(/[_-]+/g,' ').replace(/\s+/g,' ').trim()||'Untitled video',category,description:file.relativePath,kind:'video',url:'https://drive.google.com/file/d/'+encodeURIComponent(file.id)+'/view',source:'drive',driveFileId:file.id,driveFolderId:folder.id};
   });
   const unrelated=(existing.items||[]).filter((item:any)=>item?.driveFolderId!==folder.id);
   await env.MAP132_KV.put('portfolio/content',JSON.stringify({...existing,items:[...synced,...unrelated]}));
