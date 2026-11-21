@@ -200,6 +200,10 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     item.kind === 'video' && item.source === 'drive' && Boolean(item.driveFileId) &&
     servicePortfolioPatterns[activePreview].test(item.category + ' ' + item.title + ' ' + item.description)
   );
+  const heroDriveVideos = serviceCards.map((_, index) => content.items.find(item =>
+    item.kind === 'video' && item.source === 'drive' && Boolean(item.driveFileId) &&
+    servicePortfolioPatterns[index].test(item.category + ' ' + item.title + ' ' + item.description)
+  ));
   const [enquirySubmitted, setEnquirySubmitted] = useState(false);
   const [enquiryBusy, setEnquiryBusy] = useState(false);
   const [enquiryError, setEnquiryError] = useState('');
@@ -369,11 +373,15 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
           <div className="ms-home-showcase">
             <div className="ms-showcase-top"><span>WHAT WE CAN CREATE</span><span>MAP132 / 01—06</span></div>
             <div className="ms-service-bento">
-              {serviceCards.map((card, index) => <button type="button" key={card.title} data-service-theme={card.theme} aria-label={`Play ${card.title} sample video`} title={`Play ${card.title} sample video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={() => { ambientTheme.pin(card.theme); setActivePreview(index); }} ><img src={card.image} alt="" aria-hidden="true" loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'auto'} decoding="async" />
-                <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small>
-              </button>)}
+              {serviceCards.map((card, index) => {
+                const driveVideo = heroDriveVideos[index];
+                return <button type="button" key={card.title} data-service-theme={card.theme} aria-label={`Play ${card.title} ${driveVideo ? 'published portfolio' : 'sample'} video`} title={`Play ${card.title} ${driveVideo ? 'published portfolio' : 'sample'} video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={() => { ambientTheme.pin(card.theme); setActivePreview(index); }} >
+                  {driveVideo?.driveFileId ? <video className="ms-service-tile-media" src={'/api/portfolio/video/' + encodeURIComponent(driveVideo.driveFileId)} poster={card.image} muted autoPlay loop playsInline preload="none" aria-hidden="true" tabIndex={-1} /> : <img src={card.image} alt="" aria-hidden="true" loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'auto'} decoding="async" />}
+                  <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small>
+                </button>;
+              })}
             </div>
-            <p className="ms-showcase-foot">Tap any showcase tile to play its sample video here — no page navigation.</p>
+            <p className="ms-showcase-foot">Published Drive videos appear on matching service tiles. Tap any tile to open its video preview.</p>
           </div>
             <section className="ms-home-review-feed ms-live-feedback-feed" aria-label="Client feedback feed" onPointerDown={onReviewPointerDown} onPointerUp={onReviewPointerUp} onPointerCancel={()=>{reviewSwipeStart.current=null;}}>
               <div className="ms-review-feed-heading"><div><span>CLIENT LOVE / FEEDBACK FEED</span><b>Kind words. Creative stories.</b></div><span className="ms-live-label"><i/> LIVE REVIEWS</span></div>
