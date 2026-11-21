@@ -28,7 +28,7 @@ type HomeContent = {
   logoUrl?: string;
 };
 
-const pages = ['Home', 'Selected Work', 'Services', 'Studio', 'Contact'];
+const pages = ['Home', 'Portfolio', 'Services', 'Studio', 'Contact'];
 const previewVideos = [
  {src:'https://videos.pexels.com/video-files/27099636/12071805_1920_1080_60fps.mp4',note:'Stock-footage visual study · cinematic atmosphere'},
  {src:'https://videos.pexels.com/video-files/31245302/13345103_1920_1080_50fps.mp4',note:'Stock-footage visual study · wedding and celebration'},
@@ -79,6 +79,14 @@ function socialLink(value: string, platform: 'instagram' | 'youtube' | 'facebook
   };
   return bases[platform] + handle;
 }
+const servicePortfolioPatterns: RegExp[] = [
+  /cinematic|film|trailer|teaser/i,
+  /wedding|birthday|bday|celebration|event/i,
+  /reel|short|instagram|insta/i,
+  /youtube|podcast|interview|creator|news/i,
+  /brand|advert|commercial|product|promotion|promo/i,
+  /\bai\b|artificial|futur|generative/i
+];
 function mediaEmbed(item: PortfolioItem) {
   const url = item.url || item.mediaUrl || '';
   if (item.source === 'youtube') {
@@ -103,7 +111,7 @@ function ProjectPreview({ item }: { item: PortfolioItem }) {
 export default function HomeSlider({ content, feedbackWidget }: { content: HomeContent; feedbackWidget?: ReactNode }) {
   const logoUrl = content.logoUrl === '/resources/Logo.png' ? '/resources/Logo.webp' : content.logoUrl || '/resources/Logo.webp';
   const [active, setActive] = useState(0);
-  const [activeProjectCategory, setActiveProjectCategory] = useState<string | null>(null);
+  const [activeProjectCategory, setActiveProjectCategory] = useState<string | null>('All Projects');
   const [activeProjectPage, setActiveProjectPage] = useState(1);
   const [publicReviews,setPublicReviews] = useState<PublicReview[]>([]);
   const [reviewCategory,setReviewCategory] = useState<'Website Experience'|'Video Editing Service'>('Video Editing Service');
@@ -188,6 +196,10 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     nav.scrollTo({ left: Math.max(0, Math.min(targetLeft, maxScroll)), behavior: 'smooth' });
   }, [active]);
   const [activePreview, setActivePreview] = useState<number | null>(null);
+  const heroDrivePreview = activePreview === null ? undefined : content.items.find(item =>
+    item.kind === 'video' && item.source === 'drive' && Boolean(item.driveFileId) &&
+    servicePortfolioPatterns[activePreview].test(item.category + ' ' + item.title + ' ' + item.description)
+  );
   const [enquirySubmitted, setEnquirySubmitted] = useState(false);
   const [enquiryBusy, setEnquiryBusy] = useState(false);
   const [enquiryError, setEnquiryError] = useState('');
@@ -382,12 +394,12 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
             </section>
         </section>
 
-        <section ref={workPageRef} className="ms-page ms-work-page" aria-label="Selected work">
-          <div className="ms-page-heading"><div><p className="ms-kicker">PORTFOLIO / VISUAL STUDIES</p><h2>Choose your <em>work.</em></h2></div><p>Select the type of video you want to explore. Each category opens its matching projects and creative samples.</p></div>
+        <section ref={workPageRef} className="ms-page ms-work-page" aria-label="Portfolio">
+          <div className="ms-page-heading"><div><p className="ms-kicker">MAP132 DIGITALS / PORTFOLIO</p><h2>Explore our <em>work.</em></h2></div><p>Explore our published videos, creative samples and featured projects. Browse everything or filter by service.</p></div>
           <div className="ms-work-category-sticky">
             <div className="work-category-toolbar">
-              <span>EXPLORE BY CATEGORY</span>
-              <button type="button" className={activeProjectCategory === 'All Projects' ? 'all-work-filter active' : 'all-work-filter'} aria-pressed={activeProjectCategory === 'All Projects'} onClick={() => selectWorkCategory('All Projects')}>View all projects <ArrowRight size={14}/></button>
+              <span>EXPLORE THE PORTFOLIO</span>
+              <button type="button" className={activeProjectCategory === 'All Projects' ? 'all-work-filter active' : 'all-work-filter'} aria-pressed={activeProjectCategory === 'All Projects'} onClick={() => selectWorkCategory('All Projects')}>All projects <ArrowRight size={14}/></button>
             </div>
             <div className="work-category-tabs" role="group" aria-label="Choose a project category">
               {workCategoryCards.map(category => {
@@ -398,7 +410,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
               })}
             </div>
           </div>
-          {activeProjectCategory === null && <div className="ms-work-prompt"><Sparkles size={17}/><span>Select a category to display all matching videos here. Switch categories anytime using the tabs above.</span></div>}
+          {activeProjectCategory === null && <div className="ms-work-prompt"><Sparkles size={17}/><span>Browse all published projects below, or choose a category to narrow the portfolio.</span></div>}
           {activeProjectCategory !== null && <div className="ms-work-results-heading">
             <div><p className="ms-category-showcase-kicker">{activeProjectCategory === 'All Projects' ? 'COMPLETE PORTFOLIO' : 'CATEGORY GALLERY'}</p><h3>{activeProjectCategory}</h3></div>
             <span>{selectedWorkItems.length} {selectedWorkItems.length === 1 ? 'PROJECT' : 'PROJECTS'}</span>
@@ -467,12 +479,12 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
       <div className="ms-preview-dialog" onClick={event => event.stopPropagation()} onPointerDown={event => { if (event.pointerType !== 'touch' && event.pointerType !== 'pen' && event.pointerType !== 'mouse') return; if ((event.target as HTMLElement).closest('button, input')) return; event.currentTarget.setPointerCapture(event.pointerId); previewGesture.current = { x: event.clientX, y: event.clientY, pointerId: event.pointerId }; }} onPointerUp={event => { const start = previewGesture.current; previewGesture.current = null; if (!start || start.pointerId !== event.pointerId) return; const dx = event.clientX - start.x; const dy = event.clientY - start.y; const direction = getHorizontalSwipeDirection(dx, dy, event.pointerType === 'mouse' ? 55 : 42, 1.15); if (direction !== 0) changePreview(direction); }} onPointerCancel={() => { previewGesture.current = null; }} onWheel={event => { if (Math.abs(event.deltaX) < Math.abs(event.deltaY) * 1.15 || Math.abs(event.deltaX) < 2) return; event.preventDefault(); if (wheelLocked.current) return; wheelTotal.current += event.deltaX; if (Math.abs(wheelTotal.current) >= 58) { changePreview(wheelTotal.current > 0 ? 1 : -1); wheelTotal.current = 0; wheelLocked.current = true; window.setTimeout(() => { wheelLocked.current = false; }, 520); } }}>
         <div className="ms-preview-dialog-head"><div><span>MAP132 DIGITALS / SHOWCASE PREVIEW</span><h2>{serviceCards[activePreview].title}</h2></div><button type="button" className="ms-preview-close" aria-label="Close video" onClick={closePreview}><X size={22}/></button></div>
         <div className="ms-preview-stage">
-          <video key={activePreview} className="ms-preview-player" src={previewVideos[activePreview].src} controls autoPlay playsInline preload="metadata" onPlay={() => ambientTheme.setPlayback(serviceCards[activePreview].theme as ServiceThemeKey, 'preview-modal')} onPause={() => ambientTheme.clearPlayback('preview-modal')} onEnded={() => ambientTheme.clearPlayback('preview-modal')}>Your browser does not support video playback.</video>
+          <video key={heroDrivePreview?.id || activePreview} className="ms-preview-player" src={heroDrivePreview?.driveFileId ? '/api/portfolio/video/' + encodeURIComponent(heroDrivePreview.driveFileId) : previewVideos[activePreview].src} controls autoPlay playsInline preload="metadata" onPlay={() => ambientTheme.setPlayback(serviceCards[activePreview].theme as ServiceThemeKey, 'preview-modal')} onPause={() => ambientTheme.clearPlayback('preview-modal')} onEnded={() => ambientTheme.clearPlayback('preview-modal')}>Your browser does not support video playback.</video>
           <span className="ms-preview-swipe-hint ms-preview-swipe-left" aria-hidden="true"><ArrowLeft size={25}/></span>
           <span className="ms-preview-swipe-hint ms-preview-swipe-right" aria-hidden="true"><ArrowRight size={25}/></span>
         </div>
         <div className="ms-preview-count">{String(activePreview + 1).padStart(2, '0')} / {String(previewVideos.length).padStart(2, '0')}</div>
-        <p className="ms-preview-disclaimer">{previewVideos[activePreview].note}. Swipe left/right for more videos · Reference footage only — not a commissioned MAP132 client project.</p>
+        <p className="ms-preview-disclaimer">{heroDrivePreview ? heroDrivePreview.title + ' · Published MAP132 portfolio video' : previewVideos[activePreview].note + ' · Reference footage only — not a commissioned MAP132 client project'}. Swipe left/right for more videos.</p>
       </div>
     </div>}
     <div className="ms-controls">
