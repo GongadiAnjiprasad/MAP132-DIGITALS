@@ -96,7 +96,7 @@ test('vertical touch movement does not change the active page', async ({ page })
   await expect(track).toHaveAttribute('style', /translateX\(0%\)/);
 });
 
-test('mobile swipe changes the showcase video in the preview modal', async ({ page }) => {
+test('mobile swipe keeps the selected showcase category when no second video is published', async ({ page }) => {
   await page.goto('/');
   await page.getByRole('button', { name: 'Play Cinematic Films sample video' }).click();
   const dialog = page.locator('.ms-preview-dialog');
@@ -105,7 +105,8 @@ test('mobile swipe changes the showcase video in the preview modal', async ({ pa
 
   await dispatchTouchSwipe(page, '.ms-preview-player', 'left');
 
-  await expect(dialog.locator('h2')).toHaveText('Wedding & Celebrations');
+  await expect(dialog.locator('h2')).toHaveText('Cinematic Films');
+  await expect(dialog.locator('.ms-preview-count')).toHaveText('01 / 01');
 });
 
 test('cinematic enquiry form submits in-page and shows confirmation without opening external links', async ({ page }) => {
