@@ -8,7 +8,7 @@ Publish videos from one dedicated Google Drive folder into MAP132 DIGITALS Selec
 2. Connect Google Drive using the existing OAuth flow.
 3. In Portfolio Manager, use **Create MAP132 Drive folders** to create or reuse `MAP132 Portfolio` and its six category folders in My Drive, or choose an existing folder with Google Picker.
 4. The module recursively scans that folder and nested folders, filters supported video files, maps folder/file names to the existing portfolio categories, and publishes the resulting records.
-5. The selected folder ID and name are stored in the existing MAP132 KV namespace through an Admin-authenticated API. The dashboard scans once when Portfolio Manager opens or a folder is selected; use Sync now for an on-demand refresh. No additional background Cron is installed, avoiding 288 unnecessary scheduled Worker runs per day. The existing festival automation remains on its original daily 18:35 UTC schedule.
+5. The selected folder ID and name are stored in the existing MAP132 KV namespace through an Admin-authenticated API. The dashboard scans when Portfolio Manager opens or a folder is selected; use Sync now for an on-demand refresh. A separate background Cron checks the selected folder every 30 minutes, so new uploads and removals are reflected without opening Admin. The existing festival automation remains on its original daily 18:35 UTC schedule.
 6. Use Sync now to request an immediate refresh.
 
 ## Playback and access boundary
