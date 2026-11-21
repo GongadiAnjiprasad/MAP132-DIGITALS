@@ -196,10 +196,12 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
     nav.scrollTo({ left: Math.max(0, Math.min(targetLeft, maxScroll)), behavior: 'smooth' });
   }, [active]);
   const [activePreview, setActivePreview] = useState<number | null>(null);
-  const heroDrivePreview = activePreview === null ? undefined : content.items.find(item =>
+  const [activePreviewVideoIndex, setActivePreviewVideoIndex] = useState(0);
+  const heroDrivePreviewItems = activePreview === null ? [] : content.items.filter(item =>
     item.kind === 'video' && item.source === 'drive' && Boolean(item.driveFileId) &&
     servicePortfolioPatterns[activePreview].test(item.category + ' ' + item.title + ' ' + item.description)
   );
+  const heroDrivePreview = heroDrivePreviewItems[activePreviewVideoIndex];
   const heroDriveVideos = serviceCards.map((_, index) => content.items.find(item =>
     item.kind === 'video' && item.source === 'drive' && Boolean(item.driveFileId) &&
     servicePortfolioPatterns[index].test(item.category + ' ' + item.title + ' ' + item.description)
@@ -208,8 +210,12 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
   const [enquiryBusy, setEnquiryBusy] = useState(false);
   const [enquiryError, setEnquiryError] = useState('');
   const previewGesture = useRef<{ x: number; y: number; pointerId?: number } | null>(null);
-  const changePreview = (direction: number) => { ambientTheme.clearPlayback('preview-modal'); setActivePreview(current => current === null ? null : (current + direction + previewVideos.length) % previewVideos.length); };
-  const closePreview = () => { ambientTheme.clearPlayback('preview-modal'); setActivePreview(null); };
+  const changePreview = (direction: number) => {
+    if (activePreview === null || heroDrivePreviewItems.length < 2) return;
+    ambientTheme.clearPlayback('preview-modal');
+    setActivePreviewVideoIndex(current => (current + direction + heroDrivePreviewItems.length) % heroDrivePreviewItems.length);
+  };
+  const closePreview = () => { ambientTheme.clearPlayback('preview-modal'); setActivePreview(null); setActivePreviewVideoIndex(0); };
   // Modal unmount can race the media element's pause event; clear playback accent on close too.
   useEffect(() => {
     if (activePreview === null) ambientTheme.clearPlayback('preview-modal');
@@ -375,7 +381,7 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
             <div className="ms-service-bento">
               {serviceCards.map((card, index) => {
                 const driveVideo = heroDriveVideos[index];
-                return <button type="button" key={card.title} data-service-theme={card.theme} aria-label={`Play ${card.title} ${driveVideo ? 'published portfolio' : 'sample'} video`} title={`Play ${card.title} ${driveVideo ? 'published portfolio' : 'sample'} video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={() => { ambientTheme.pin(card.theme); setActivePreview(index); }} >
+                return <button type="button" key={card.title} data-service-theme={card.theme} aria-label={`Play ${card.title} ${driveVideo ? 'published portfolio' : 'sample'} video`} title={`Play ${card.title} ${driveVideo ? 'published portfolio' : 'sample'} video`} className={index === 0 ? 'ms-service-tile ms-service-featured' : 'ms-service-tile'} onPointerEnter={() => ambientTheme.preview(card.theme)} onPointerLeave={ambientTheme.clearPreview} onFocus={() => ambientTheme.preview(card.theme)} onBlur={ambientTheme.clearPreview} onClick={() => { ambientTheme.pin(card.theme); setActivePreviewVideoIndex(0); setActivePreview(index); }} >
                   {driveVideo?.driveFileId ? <video className="ms-service-tile-media" src={'/api/portfolio/video/' + encodeURIComponent(driveVideo.driveFileId)} poster={card.image} muted autoPlay loop playsInline preload="none" aria-hidden="true" tabIndex={-1} /> : <img src={card.image} alt="" aria-hidden="true" loading={index === 0 ? 'eager' : 'lazy'} fetchPriority={index === 0 ? 'high' : 'auto'} decoding="async" />}
                   <span>{card.number}</span><b>{card.title}</b><small>{card.note}</small>
                 </button>;
@@ -491,8 +497,8 @@ export default function HomeSlider({ content, feedbackWidget }: { content: HomeC
           <span className="ms-preview-swipe-hint ms-preview-swipe-left" aria-hidden="true"><ArrowLeft size={25}/></span>
           <span className="ms-preview-swipe-hint ms-preview-swipe-right" aria-hidden="true"><ArrowRight size={25}/></span>
         </div>
-        <div className="ms-preview-count">{String(activePreview + 1).padStart(2, '0')} / {String(previewVideos.length).padStart(2, '0')}</div>
-        <p className="ms-preview-disclaimer">{heroDrivePreview ? heroDrivePreview.title + ' · Published MAP132 portfolio video' : previewVideos[activePreview].note + ' · Reference footage only — not a commissioned MAP132 client project'}. Swipe left/right for more videos.</p>
+        <div className="ms-preview-count">{String(heroDrivePreviewItems.length ? activePreviewVideoIndex + 1 : 1).padStart(2, '0')} / {String(heroDrivePreviewItems.length || 1).padStart(2, '0')}</div>
+        <p className="ms-preview-disclaimer">{heroDrivePreview ? heroDrivePreview.title + ' · Published MAP132 portfolio video' : previewVideos[activePreview].note + ' · Reference footage only — not a commissioned MAP132 client project'}. {heroDrivePreviewItems.length > 1 ? 'Swipe left/right for more videos in this category.' : 'No additional published videos in this category yet.'}</p>
       </div>
     </div>}
     <div className="ms-controls">
