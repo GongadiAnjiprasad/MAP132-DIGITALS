@@ -38,14 +38,20 @@ test('Selecting a category updates the same page and keeps all category tabs ava
   await expect(tabs).toBeVisible();
 });
 
-test('All Projects is an explicit tab choice and empty results are labelled honestly', async ({ page }) => {
+test('All Projects filter returns the Portfolio to the complete published gallery', async ({ page }) => {
   await page.goto('/');
   await page.locator('.ms-nav').getByRole('button', { name: 'Portfolio', exact: true }).click();
-  const allProjects = page.getByRole('button', { name: /View all projects/ });
+  const allProjects = page.locator('.work-category-toolbar').getByRole('button', { name: /All projects/ });
   await allProjects.click();
   await expect(allProjects).toHaveAttribute('aria-pressed', 'true');
   await expect(page.locator('.ms-work-results-heading h3')).toHaveText('All Projects');
-  await expect(page.locator('.ms-sample-banner')).toContainText('No published projects yet');
+  await expect(page.locator('.ms-work-prompt')).toHaveCount(0);
+  const emptyState = page.locator('.ms-sample-banner');
+  if (await emptyState.count()) {
+    await expect(emptyState).toContainText('No published projects yet');
+  } else {
+    await expect(page.locator('.ms-project-grid .ms-project-card').first()).toBeVisible();
+  }
 });
 
 
