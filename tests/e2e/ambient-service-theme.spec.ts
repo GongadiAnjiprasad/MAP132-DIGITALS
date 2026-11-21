@@ -33,7 +33,7 @@ test('service-card click pins its theme and a second click clears it', async ({ 
 });
 
 
-test('showcase video playback temporarily overrides the pinned ambient theme and restores it on pause', async ({ page }) => {
+test('showcase video swipe preserves the selected service theme during playback', async ({ page }) => {
   await page.setViewportSize({ width: 1440, height: 900 });
   await page.goto('/');
   const site = page.locator('.map132-slider-site');
@@ -49,11 +49,11 @@ test('showcase video playback temporarily overrides the pinned ambient theme and
   await page.mouse.down();
   await page.mouse.move(startX - 100, startY);
   await page.mouse.up();
-  await expect(dialog.locator('h2')).toHaveText('Wedding & Celebrations');
+  await expect(dialog.locator('h2')).toHaveText('Cinematic Films');
 
   const player = dialog.locator('video');
   await player.evaluate(video => video.dispatchEvent(new Event('play')));
-  await expect.poll(async () => (await site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-ambient-accent'))).toLowerCase()).toBe('#ffb45b');
+  await expect.poll(async () => (await site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-ambient-accent'))).toLowerCase()).toBe('#ffcb78');
 
   await player.evaluate(video => video.dispatchEvent(new Event('pause')));
   await expect.poll(async () => (await site.evaluate(element => getComputedStyle(element).getPropertyValue('--ms-ambient-accent'))).toLowerCase()).toBe('#ffcb78');
